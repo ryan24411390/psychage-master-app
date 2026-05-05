@@ -20,12 +20,9 @@ Format: *"When X, do Y, because Z."* — one sentence per lesson.
 
 - **2026-05-03 — GitKraken auto-creates `gk/` in every `git init`.** Already in `.gitignore`. If a future fresh init shows `gk/` as untracked, the gitignore is being bypassed somehow — investigate, don't paper over.
 - **2026-05-03 — `~/.git` directories are silent project killers.** Always run `git rev-parse --show-toplevel` before any git command if working in or below `~`. The CLAUDE.md §7 rule exists because of this.
+- **2026-05-03 — Git-push deny rule was too broad (RESOLVED same day).** Original deny `Bash(git push * main *)` blocked legitimate pushes alongside force-pushes. Resolved by narrowing user-settings deny to `Bash(git push --force *)` and `Bash(git push -f *)` — normal pushes work, force-pushes stay blocked. Pattern lesson: deny-list rules should target the dangerous *flag* or *pattern*, not the destination branch, otherwise routine work gets blocked.
 
 ## Patterns that worked
 
 - **2026-05-03 — One file at a time deploy.** Phase 1 succeeded by producing one file, reviewing diff, saving, verifying, then moving to the next. Resist the urge to batch-deploy under foundation work.
 - **2026-05-03 — `mv` instead of `rm`.** When deny rules block `rm`, `mv` to `~/claude-config-backups/` is recoverable defense-in-depth. Used multiple times in Phase 1.
-
-## Tooling friction (revisit in Phase 7)
-
-- **2026-05-03 — `git push origin main` blocked by Claude Code deny rule.** Settings.json deny `Bash(git push * main *)` is too broad; it catches legitimate pushes alongside the force-pushes it was meant to block. Workaround for now: run `git push origin main` manually in terminal. Phase 7 fix: narrow the deny to `Bash(git push --force * main *)` so normal pushes work through Claude Code while force-pushes stay blocked.
