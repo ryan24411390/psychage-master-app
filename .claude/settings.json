@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment_constitution": "All hook patterns derive from constitution.md YAML front-matter. Hook scripts parse it at runtime — never hardcode patterns inside scripts.",
+  "_comment_test_first": "Smoke-test every hook against the fixtures in HOOKS_SMOKE_TEST_FIXTURES.md before merging. A hook that exits 1 instead of 2 silently fails to enforce.",
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sr1_navigator_confidence_cap.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sr2_crisis_bypass_detector.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "prompt",
+            "model": "claude-haiku-4-5",
+            "prompt": "$CLAUDE_PROJECT_DIR/.claude/hooks/sr3_diagnostic_language.sh",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sr4_no_symptom_telemetry.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "_comment": "Belt-and-suspenders: re-run all four Sacred Rule checks at session stop. Catches anything that slipped past PreToolUse (e.g., a multi-edit that touched files in a single tool call).",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sr1_navigator_confidence_cap.sh --mode=stop",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sr2_crisis_bypass_detector.sh --mode=stop",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sr4_no_symptom_telemetry.sh --mode=stop",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+
+    "SessionStart": [
+      {
+        "_comment": "Inject constitution.md location and Sacred Rule status into session context. Helps Claude understand the enforcement layer exists.",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"additionalContext\": \"Constitution.md is the canonical source of Sacred Rules. Four PreToolUse hooks in .claude/hooks/ enforce SR-1 through SR-4 deterministically. Bypass via [bypass] commit tag for trivial changes only (≤20 lines, no behavior change, no Sacred Rule surface).\"}'",
+            "timeout": 2
+          }
+        ]
+      }
+    ]
+  }
+}

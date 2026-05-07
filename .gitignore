@@ -162,3 +162,9 @@ sourcemaps/
 # .cursor/rules/             ← un-ignore selectively if team-shared Cursor rules added
 # learnings.md               ← project learnings (committed when it exists)
 # rules/                     ← project rules (committed when they exist)
+
+# Smoke-test spec folder used during phase deploys; never commit
+.specs/_smoke_test/
+
+# Phase-close staging files (paste-ready content for atomic close commits); local-only
+PHASE_*_STAGING_*.md

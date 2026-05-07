@@ -95,7 +95,7 @@ Today: empty `psychage-mobile/` folder, web is its own repo. Migration path docu
 | 1 | Apply foundation files | ✅ Done | `~/.claude/CLAUDE.md` (universal), `~/.claude/settings.json`, `psychage-master-app/CLAUDE.md` (project), `.gitignore`. Phase 1.6 (this doc + brief + scope) closes Phase 1. |
 | 2 | Repo foundation | ⏭ Next | First commit, GitHub remote (private), branch protection on `main` |
 | 3 | Close decision blockers | ⏭ Pending | `rules/auth.md`, `rules/offline.md`, `ARCHITECTURE.md` (see §5) |
-| 4 | Spec-driven workflow | ⏭ Pending | Six `.claude/skills/spec-*/SKILL.md` deployed |
+| 4 | Spec-driven workflow | ✅ Done | Six `.claude/skills/spec-*/SKILL.md` + `constitution.md` + 4 SR PreToolUse hooks + Stop/SessionStart hooks + `HOOKS_SMOKE_TEST_FIXTURES.md` + `docs/AUDIT_RESPONSE_FINAL.md` |
 | 5 | Worktree infrastructure | ⏭ Pending | Worktree spawn/merge scripts, file-isolation rules in `/spec-tasks` |
 | 6 | Expo scaffold | ⏭ Pending | `bunx create-expo-app`, NativeWind 5, `@/` alias, folder structure |
 | 7 | Quality gates | ⏭ Pending | Biome config, Husky + lint-staged, pre-commit (typecheck + lint + format + test) |
