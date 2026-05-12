@@ -68,3 +68,17 @@ Format: *"When X, do Y, because Z."* — one sentence per lesson.
 ### Added during convergent plan close
 
 - **2026-05-08 — Phase 4 close criteria expanded from 11 to 14.** Original Phase 4 plan §7 listed 11 close criteria. Path B audit response added 3: (a) all hook scripts read patterns from `constitution.md` at runtime (not hardcoded), (b) smoke-test corpus from `HOOKS_SMOKE_TEST_FIXTURES.md` runs cleanly with all required pass thresholds, (c) `learnings.md` includes bypass policy, Phase 5 regulatory pre-req, and constitution.md amendment process entries. **Watch-out:** future phase closes (4.A, 4.B, 5+) should also expand close criteria as the workspace gains complexity — the close criteria are themselves a living artifact, not a static checklist. Each phase commit should include any close-criteria additions in its commit message under a `Close-criteria-additions:` trailer for traceability.
+
+## Decisions locked Day 1 (2026-05-09)
+
+- **Regulatory regime:** FTC + state consumer health laws + GDPR; not HIPAA. Drafted in `rules/regulatory.md` Day 2-3, lawyer-reviewed Day 5.
+- **Security posture:** Posture B — HIPAA-equivalent technical controls without the HIPAA claim. Drafted in `rules/security.md` Day 2-3.
+- **Web track:** paused until mobile V1 launches. Article production, video, social, fiscal sponsorship all on hold.
+- **Design approach:** fully independent — two design systems separately maintained. Cross-surface brand decisions recorded here and applied to both token files in the same commit.
+- **Clay figures:** REQUIRED for V1. Illustrator commission kicked off Day 1. Library delivery target Day 60. Integration in Sprint 7 polish (Days 66-72). Fallback if illustrator slips: 8-10 figure emergency set, full library lands V1.1.
+- **Sensorial signature:** restraint by default. Three signature haptic moments per V1 (check-in confirm, streak earned, crisis acknowledgment). Opt-in "rich mode" in settings. Final defaults confirmed post-Dobson review Day 4.
+- **MFA in V1:** optional with free-month-premium incentive at signup. Mandatory before data export, therapist link change, account deletion, password change. No SMS MFA ever.
+- **Procedure A scope:** four V1 native features only (Daily Check-In, Symptom Navigator, My Therapist + share, Crisis surface).
+- **Procedure B scope:** everything else. Auth and premium upgrade PRs require five-item security checklist in description.
+- **Stack:** SDK 54 for V1 (deliberate stable choice over SDK 55 due to unresolved Android monorepo issue and Hermes V1 native-build cost). SDK 55/56 upgrade evaluated as V1.1 post-launch work.
+- **Parallel-agent infrastructure:** Phase 5 ships Day 11. `maxParallelWorkers: 8` capability, recommended steady state 4. 5-layer enforcement: spec-review intersection, worktree-add fail-closed install, pre-commit hook, CI intersection, pre-merge spec-review re-run.

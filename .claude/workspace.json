@@ -49,20 +49,35 @@
   },
 
   "tooling": {
-    "comment": "Most values null until Phase 6 chooses them. Skills must not assume a tool exists if its field is null. Component library locked early at Phase 4 because /spec-design needs to know what to mirror against. Test runner is candidate-only (recommended, not locked) until Phase 6 confirms against Expo SDK choice.",
-    "packageManager": null,
-    "testRunner": {
-      "candidate": "vitest+rntl+maestro",
-      "candidateComment": "RECOMMENDED but not locked. Vitest for packages/shared (pure TS), React Native Testing Library for component tests, Maestro for E2E (managed-Expo friendly; YAML flows AI-writeable). Phase 6 confirms or overrides at Expo SDK lock.",
-      "locked": false
-    },
-    "linter": null,
-    "formatter": null,
-    "e2eRunner": null,
-    "bundler": null,
-    "componentLibrary": "react-native-reusables",
-    "componentLibraryComment": "Locked at Phase 4. Same shadcn mental model as web app. Copy-paste source ownership; aria-based a11y. Components mirror to apps/mobile/src/components/ui/ once Phase 6 scaffolds the mobile workspace."
+    "comment": "Locked 2026-05-09 to May-2026 stable stack (SDK 54). Most fields previously null; now committed per Day-1 decision in learnings.md.",
+    "expoSdk": 54,
+    "reactNative": "0.81",
+    "newArchitecture": true,
+    "jsEngine": "Hermes",
+    "packageManager": "bun",
+    "bundler": "Metro (Expo default)",
+    "linter": "Biome v2 (security rules enabled)",
+    "formatter": "Biome v2",
+    "testRunner": "Vitest + React Native Testing Library",
+    "e2eRunner": "Maestro",
+    "stateManagement": "Zustand + TanStack Query",
+    "animations": "Reanimated v4",
+    "router": "Expo Router v5",
+    "componentLibrary": "react-native-reusables + NativeWind v5",
+    "componentLibraryComment": "Locked at Phase 4. Same shadcn mental model as web app. Copy-paste source ownership; aria-based a11y. Components mirror to apps/mobile/src/components/ui/ once Phase 6 scaffolds the mobile workspace.",
+    "localStorage": "react-native-mmkv (encrypted)",
+    "auth": "Supabase Auth (TOTP MFA + Passkeys + Apple/Google OAuth)",
+    "secretsStorage": "expo-secure-store",
+    "analytics": "PostHog",
+    "errorTracking": "Sentry",
+    "databaseEncryption": "pgsodium",
+    "biometric": "expo-local-authentication",
+    "breachedPasswordCheck": "HaveIBeenPwned k-anonymity",
+    "jailbreakDetection": "react-native-jail-monkey (warn-only)",
+    "sdkUpgradePath": "SDK 54 for V1; SDK 55 or 56 evaluated for V1.1 post-launch"
   },
+
+  "web_track": "paused",
 
   "hooks": {
     "comment": "Phase 4 ships four PreToolUse hooks + one Stop hook + one SessionStart hook. All Sacred Rule patterns derive from constitution.md YAML front-matter. Hook scripts must NEVER hardcode patterns.",
@@ -109,6 +124,8 @@
   },
 
   "design": {
+    "approach": "fully independent — two design systems separately maintained",
+    "sensorialDefault": "restraint with three signature touchpoints + opt-in rich mode",
     "structure": "platform-independent",
     "structureComment": "Web and mobile have separate, fully-independent visual languages. No shared design layer. The only shared identity carrier is the clay figures (see clayFigures section below).",
     "identityCarriers": ["clay-figures"],
@@ -117,6 +134,7 @@
         "designFile": "design/DESIGN.web.md",
         "designFileExists": false,
         "tokensFile": "tokens/web.tokens.json",
+        "tokensPath": "tokens/web.tokens.json",
         "tokensFileExists": false,
         "extractionApproach": "extract-from-existing",
         "extractionSource": "psychage-v2 tailwind.config.ts + shipping screens + brand identity work",
@@ -128,6 +146,7 @@
         "designFile": "design/DESIGN.mobile.md",
         "designFileExists": false,
         "tokensFile": "tokens/mobile.tokens.json",
+        "tokensPath": "tokens/mobile.tokens.json",
         "tokensFileExists": false,
         "extractionApproach": "creative-work",
         "extractionSource": "Mobbin reference flows + clay figure library + creative direction at Phase 4.B kickoff",
@@ -137,6 +156,14 @@
         "sensorialDimensions": ["haptic", "audio", "motion", "micro-interactions"],
         "sensorialDimensionsComment": "Mobile app is sensorial — engages haptics, subtle audio, motion, and micro-interactions throughout. Each must respect Reduce Motion / Reduce Haptics / Reduce Audio system settings. Sensory restraint over abundance. One signature sensory moment per surface, max."
       }
+    },
+    "clayFigures": {
+      "v1Required": true,
+      "libraryExists": false,
+      "libraryPath": "assets/clay-figures/",
+      "manifestPath": "assets/clay-figures/manifest.json",
+      "commissionStarted": "2026-05-09",
+      "deliveryETA": "2026-07-08"
     }
   },
 
@@ -150,6 +177,23 @@
     "libraryExpectedInPhase": "4.B",
     "libraryDeadline": "before Phase 11 first feature",
     "libraryDeadlineComment": "Hard prerequisite for Phase 11. Phase 4.B close criteria includes commissioning the illustrator and locking the figure manifest. Lead time 2-4 weeks plus iteration."
+  },
+
+  "auth": {
+    "mfaPolicy": "optional with premium-month incentive",
+    "mfaMandatoryFor": [
+      "data export",
+      "therapist link change",
+      "account deletion",
+      "password change"
+    ],
+    "factorTypes": [
+      "TOTP",
+      "biometric (expo-local-authentication)",
+      "passkeys"
+    ],
+    "smsMfa": false,
+    "breachedPasswordCheck": true
   },
 
   "subscriptions": {
@@ -252,38 +296,68 @@
       "CLAUDE.md",
       "AGENTS.md",
       "PROJECT_CONTEXT.md",
-      ".claude/workspace.json"
+      ".claude/workspace.json",
+      "bun.lockb",
+      "supabase/migrations/*.sql",
+      "apps/mobile/app.json"
     ],
     "sequentialOnlyComment": "Tasks touching these files must be marked Parallelizable=false. They are shared-config and cannot be edited concurrently."
   },
 
+  "parallelization": {
+    "enabled": true,
+    "worktreesRoot": "~/Documents/psychage-worktrees",
+    "maxParallelWorkers": 8,
+    "recommendedSteadyStateWorkers": 4,
+    "costCapPerSprintUSD": 250,
+    "branchingModel": "main → develop → sprint-N/T-NNN-slug",
+    "enforcementLayers": [
+      "L1: /spec-review intersection (spec-time)",
+      "L2: worktree-add.sh fail-closed install + attestation",
+      "L3: pre-commit hook (commit-time)",
+      "L4: CI-side intersection on PR",
+      "L5: pre-merge /spec-review re-run"
+    ],
+    "lastUpdated": "2026-05-09"
+  },
+
   "phase5Prerequisites": {
-    "comment": "Phase 5 (worktrees + packages/shared lift) cannot start until ALL of these resolve. Hard gates, not soft promises. Per AUDIT_RESPONSE_FINAL.md §4.1.",
-    "gates": [
-      {
-        "id": "regulatory-architecture-resolved",
-        "source": "rules/regulatory.md",
-        "expectedInPhase": "4.A",
-        "items": [
-          "HIPAA covered-entity status decided",
-          "42 CFR Part 2 default posture decided",
-          "Encryption-at-rest standard decided",
-          "BAA chain audit trail established"
-        ],
-        "rationale": "Phase 5 lifts packages/shared with symptom-data types. Storage shape and RLS posture must be committed BEFORE that code lands. Walking it back after Phase 5 = Supabase RLS rewrite + possible storage flow re-architecting + possible contract renegotiation."
-      },
-      {
-        "id": "hooks-validated",
-        "source": "HOOKS_SMOKE_TEST_FIXTURES.md",
-        "expectedInPhase": "4",
-        "items": [
-          "All four SR hooks pass smoke-test corpus",
-          "SR-3 prompt achieves >=9/10 on test rubric",
-          "Stop hook re-validates SR-1, SR-2, SR-4"
-        ],
-        "rationale": "Phase 5 begins generating real shared-package code that touches Sacred Rule surfaces. Hooks must be proven enforcing before that work begins."
-      }
-    ]
+    "regulatory-architecture-resolved": {
+      "status": "in-progress",
+      "deliverable": "rules/regulatory.md",
+      "ETA": "Day 5"
+    },
+    "security-posture-resolved": {
+      "status": "in-progress",
+      "deliverable": "rules/security.md",
+      "ETA": "Day 5"
+    },
+    "design-web-extracted": {
+      "status": "pending",
+      "deliverable": "DESIGN.web.md + tokens/web.tokens.json",
+      "ETA": "Day 8"
+    },
+    "design-mobile-written": {
+      "status": "pending",
+      "deliverable": "DESIGN.mobile.md + tokens/mobile.tokens.json (incl. clay figure spec)",
+      "ETA": "Day 8"
+    },
+    "hooks-validated": {
+      "status": "complete",
+      "deliverable": "HOOKS_SMOKE_TEST_FIXTURES.md",
+      "commitSHA": "ef6db24"
+    },
+    "parallel-infra-deployed": {
+      "status": "pending",
+      "deliverable": "Phase 5 scripts + rules/parallel.md (5-layer enforcement)",
+      "ETA": "Day 11"
+    },
+    "clay-figure-library": {
+      "status": "in-progress",
+      "deliverable": "assets/clay-figures/ + manifest.json",
+      "ETA": "Day 60",
+      "blocker": "illustrator commission"
+    }
   },
 
   "phaseRoadmap": {

@@ -205,3 +205,20 @@ If you're looking for something here and don't find it, check these instead:
 - **Domain logic (Navigator scoring, PEAF validators, sensitivity filter)** → `packages/shared/` (after Phase 5 lift) or `psychage-v2/src/lib/{navigator,safety,article-framework}/` until then
 
 When you can't find a rule and the absence matters, ask. Don't invent.
+
+## Two procedures for development work
+
+**Procedure A — full spec workflow.** Used for the four V1 native features only: Daily Check-In, Symptom Navigator, My Therapist + share, Crisis surface. Invoke via `/spec-discovery <slug>` and follow the chain through `/spec-implement`.
+
+**Procedure B — direct development.** Used for everything else: scaffolding, configuration, copy fixes, dependency bumps, WebView wrappers, onboarding screens, adaptive home, settings, premium upgrade, auth flows. Open with a brief paragraph stating what's being built, why, and what files will change. Implement. Write tests where applicable. Commit with a message that names the change, the reason, and any cited rule. The four Sacred Rule hooks fire on every edit regardless of procedure.
+
+**Security checklist for Procedure B on auth and premium PRs.** Required in PR description:
+1. TLS verification — all requests use HTTPS; certificate pinning configured for production
+2. Secret handling — no secrets in code or git history; production secrets via EAS Secrets only
+3. Error messages — do not leak account existence (use generic "invalid credentials")
+4. Session token storage — in `expo-secure-store` (Keychain/Keystore), never `AsyncStorage` or `MMKV`
+5. Audit log — `audit_events` row emitted with user_id, event_type, IP, device_id, timestamp, success/failure
+
+## PHASE_*_STAGING_* file convention
+
+Files matching `PHASE_*_STAGING_*.md` at workspace root are gitignored scratch for in-flight phase work. Safe to delete after the phase's atomic commit lands. They are not authoritative. Always treat the committed phase deliverables as canonical.
