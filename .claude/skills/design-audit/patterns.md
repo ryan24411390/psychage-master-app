@@ -414,30 +414,64 @@ Covered by `/mobile-design-audit`. Skipped in this file. Pattern number reserved
 
 ## Pattern 12 — Missing `prefers-reduced-motion`
 
-**What it looks like:** Animation/transition utilities or animation-library usage in a file without any reduced-motion accommodation.
+**What it looks like:** Vestibular-risk motion (longer transitions, opacity fades, multi-property keyframes) in a file without any reduced-motion accommodation.
 
-**Detection rule (context-dependent):** for each file that contains motion code, confirm a reduced-motion path exists.
+**Detection rule (context-dependent):** flag motion when any of the three triggers below is present AND the file has no reduced-motion path. Gesture-bound micro-interactions (`whileTap`, `whileHover`, `whileFocus`) that are single-property AND scale/translate-only AND use default spring OR `transition.duration < 0.2` are **exempt** — they're essential interaction feedback at a scale that doesn't trigger vestibular concerns.
 
-Detect motion usage:
+Three triggers (any one fires the pattern):
+
+**(a) Explicit duration > 200ms.** ripgrep:
 
 ```
-rg -nE 'transition[-:]|animation[-:]|animate-' --type tsx --type css
-rg -n "from ['\"]framer-motion['\"]" --type tsx
+rg -nE 'duration-(3|4|5|6|7|8|9)[0-9]{2,}|duration-1[0-9]{3}' --type tsx
+rg -nE 'transition:[^;]*([0-9]+\.[0-9]+|[0-9]+)s' --type css --type tsx
+rg -nE 'animation:[^;]*([0-9]+\.[0-9]+|[0-9]+)s' --type css --type tsx
+rg -nE 'transition[^A-Za-z]*duration:\s*0\.[3-9][0-9]*|transition[^A-Za-z]*duration:\s*[1-9]' --type tsx
 ```
 
-For each hit file, confirm at least one of:
+Decode: Tailwind `duration-300` and higher = > 200ms; CSS `0.25s+` literal; Framer `transition={{ duration: 0.21+ }}`. Anything `≤ 200ms` (Tailwind `duration-100`/`duration-200`, CSS `≤ 0.2s`, Framer `≤ 0.2`) is under the vestibular threshold and does not fire trigger (a).
+
+**(b) Any opacity transition (regardless of duration).** ripgrep:
+
+```
+rg -nE 'transition.*opacity|animate.*opacity' --type tsx --type css
+rg -nE 'initial=\{\{[^}]*opacity|animate=\{\{[^}]*opacity|exit=\{\{[^}]*opacity' --type tsx
+rg -nE '@keyframes[^{]*\{[^}]*opacity' --type css
+```
+
+Opacity transitions on full-surface elements (modal backdrops, page transitions) are common vestibular triggers regardless of duration. Always fires (b).
+
+**(c) Multi-property keyframe / multi-property motion definition.** Detect `@keyframes` blocks or Framer/JS motion definitions animating two or more properties simultaneously:
+
+```
+rg -nA3 '@keyframes' --type css
+rg -nE 'animate=\{\{[^}]*,[^}]*\}\}' --type tsx
+```
+
+For each hit, the auditor reads the rule body / JS object. If two or more of `{ opacity, transform, scale, translate, rotate, height, width, top, left, right, bottom }` are animated together, trigger (c) fires.
+
+For each fired file, confirm a reduced-motion path exists. At least one of:
 
 - `useReducedMotion` import from `framer-motion` or `@/hooks/useReducedMotion`
-- `@media (prefers-reduced-motion: reduce)` rule (in file or imported stylesheet)
-- File is covered by `src/styles/tokens.css:167-174` global override (applies to all `transition`/`animation` CSS utilities — pure-CSS motion files inherit this)
-- Animation is a Tailwind `transition-*` utility only (the global CSS override at `tokens.css:167-174` already neutralises these — pass)
-- File imports from `src/lib/animations.ts` (canonical motion source already opts into the global override)
+- `@media (prefers-reduced-motion: reduce)` rule (in the file or an imported stylesheet)
+- File is a CSS file already covered by the global override at `src/styles/tokens.css:167-174` (caps `animation-duration` and `transition-duration` to 0.01ms — pure-CSS motion files inherit this and pass automatically)
 
-Flag files using `framer-motion` / `gsap` / `lottie` with no `useReducedMotion` hook and no imported motion-aware util.
+If no reduced-motion path is found, report the hit with the trigger letter.
 
-**Confidence note:** context-dependent — the global CSS override at `tokens.css:167-174` catches CSS-driven motion repo-wide, so the rule focuses on JS-library animations that bypass CSS. Auditor confirms by reading the file.
+**Confidence note:** context-dependent. The global CSS override at `tokens.css:167-174` catches CSS-driven motion repo-wide, so trigger (a) and (c) on `.css` files usually pass via inheritance. The rule mainly catches JS-library motion (framer-motion / gsap / lottie) that bypasses the CSS override. Auditor confirms by reading the file. Gesture-bound exemption is applied first — if `whileTap` / `whileHover` / `whileFocus` props are single-property scale/translate at default spring or `duration < 0.2`, those occurrences are exempt before any trigger is evaluated.
 
-**Passing snippet:**
+**Passing snippet — gesture-bound micro-interaction (exempt):**
+
+```tsx
+// gesture-bound · scale-only · default spring — Pattern 12 exempt
+import { motion } from 'framer-motion';
+
+<motion.button whileTap={{ scale: 0.97 }}>
+  Continue
+</motion.button>
+```
+
+**Passing snippet — non-trivial motion with `useReducedMotion` guard:**
 
 ```tsx
 import { motion, useReducedMotion } from 'framer-motion';
@@ -457,22 +491,49 @@ function Hero() {
 }
 ```
 
-**Failing snippet** — Framer-driven motion with no reduce path:
+**Failing snippet — trigger (a) duration > 200ms, no reduce-motion path:**
 
 ```tsx
 import { motion } from 'framer-motion';
 
-function Hero() {
-  return (
-    <motion.h1
-      initial={{ y: 20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      Welcome
-    </motion.h1>
-  );
-}
+<motion.div
+  initial={{ y: 24 }}
+  animate={{ y: 0 }}
+  transition={{ duration: 0.5 }}
+>
+  <Hero />
+</motion.div>
 ```
 
-**Exception:** files using only Tailwind `transition-*` utilities (covered by the global override) and files importing only from `src/lib/animations.ts` for static easing/duration constants.
+**Failing snippet — trigger (b) opacity transition, no reduce-motion path:**
+
+```tsx
+import { motion, AnimatePresence } from 'framer-motion';
+
+<AnimatePresence>
+  {open && (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      <ModalBackdrop />
+    </motion.div>
+  )}
+</AnimatePresence>
+```
+
+**Failing snippet — trigger (c) multi-property keyframe, no reduce-motion path:**
+
+```css
+@keyframes hero-entry {
+  0%   { opacity: 0; transform: translateY(24px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.hero { animation: hero-entry 0.6s ease-out; }
+```
+
+(CSS-only multi-property keyframes are usually saved by the `tokens.css:167-174` global override — this snippet fires only if isolated from that import chain. JS-driven multi-property motion in `.tsx` always fires.)
+
+**Exception:**
+
+- Gesture-bound micro-interactions (`whileTap` / `whileHover` / `whileFocus`) that are single-property AND scale/translate-only AND use default spring OR `transition.duration < 0.2` — exempt.
+- Files using only Tailwind `transition-*` utilities (covered by the global override) — exempt.
+- Files importing only static easing/duration constants from `src/lib/animations.ts` — exempt.
