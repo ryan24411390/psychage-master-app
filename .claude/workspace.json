@@ -3,8 +3,8 @@
   "schemaVersion": "1.0.0",
   "phase": 4,
   "phaseLabel": "spec-driven-workflow-deploy",
-  "lastUpdated": "2026-05-08",
-  "lastUpdatedBy": "phase-4-close",
+  "lastUpdated": "2026-05-17",
+  "lastUpdatedBy": "phase-4.A-slice-2-web-design-contract",
 
   "monorepo": {
     "structure": "pre-monorepo",
@@ -131,11 +131,11 @@
     "identityCarriers": ["clay-figures"],
     "platforms": {
       "web": {
-        "designFile": "design/DESIGN.web.md",
-        "designFileExists": false,
+        "designFile": "DESIGN.web.md",
+        "designFileExists": true,
         "tokensFile": "tokens/web.tokens.json",
         "tokensPath": "tokens/web.tokens.json",
-        "tokensFileExists": false,
+        "tokensFileExists": true,
         "extractionApproach": "extract-from-existing",
         "extractionSource": "psychage-v2 tailwind.config.ts + shipping screens + brand identity work",
         "definedInPhase": "4.A",
