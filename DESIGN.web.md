@@ -47,6 +47,12 @@ Color groups:
 
 Excluded (dead in code): `urgent.amber`, `watch.blue`, `safe.green`, `--color-background-warm`, `--color-primary-bg`. See `color._excluded` in the JSON.
 
+**Two color systems coexist** (per §7 Q7 resolution):
+- **Themed** (`color.text.*`, `color.background`, `color.surface.*`, `color.border.*`, `color.primary.*`, `color.semantic.*`): paired `{ light, dark }`. For surfaces that must flip with mode.
+- **Non-themed** (`charcoal.*` 11-step neutral scale, `teal.*` sparse brand scale, `crisis.red`, `relevance.*`): single hex. For surfaces that look the same in both modes (dividers, borders, brand chrome, semantic announcement colors). `charcoal.*` is not replaced by `color.text.*` — they serve different jobs.
+
+`color.mood.{1..5}` is a feature-scoped exception (mood feature only, paired L/D with same hex on both sides — see `_dark_origin` note in the JSON and §7 Q10).
+
 ### 1.2 Typography schema
 
 Only `type.family.{sans,display,mono}` is a token. `sans` = Inter, `display` = Plus Jakarta Sans, `mono` = IBM Plex Mono.
@@ -60,6 +66,17 @@ Only `type.family.{sans,display,mono}` is a token. `sans` = Inter, `display` = P
 ### 1.4 Radius schema
 
 5 steps: `sm, md, lg, xl, full`. `radius._canonical.surface = "xl"` — the documented card/surface radius. See §7 Q12.
+
+**Multiple legitimate radii by element type.** `_canonical.surface` is not the universal radius — different element classes have their own established norms. Observed in `src/components/ui/` and confirmed at Q12 close:
+
+| Element class | Radius | Examples |
+|---|---|---|
+| Cards / panels / modals | `xl` (1rem) | `Card`, `Modal`, dashboard surfaces |
+| Inputs / smaller buttons / badges | `lg` (0.75rem) — sometimes `md` (0.5rem) | `Input`, secondary buttons, status badges |
+| Emphasis surfaces / hero blocks | `2xl` (Tailwind default 1rem) — `3xl` (1.5rem) for hero / feature tiles | `PageHeader` icon container, hero callouts |
+| Pills / avatars / icon buttons | `full` (9999px) | `Avatar`, pill badges, circular icon buttons |
+
+Slice 4 does not flatten these to a single value. The token contract names canonical surface (cards = `xl`); other element classes follow the table above as documented practice, not enforced via a separate token.
 
 ### 1.5 Shadow schema
 
@@ -110,7 +127,13 @@ Articles **can only use these 13**. New block types are forbidden — Sacred Rul
 
 `Navigation`, `Footer`, `MobileMenu`, `PageLayout`, `PageHeader`, `NavMenu`, `NavHub`, `NavAssets`, `CrisisBanner`, `CrisisResources`.
 
-**`PageLayout` adoption today is admin-v2-only (28 importers under `src/pages/admin/v2/`).** Public marketing pages each roll their own outer shell. Whether `PageLayout` becomes the canonical wrapper for public pages too is a Slice 4 / product decision (see §7 Q11) — Slice 2 does not mandate it.
+**`PageLayout` adoption today is admin-v2-only (28 importers under `src/pages/admin/v2/`).** Public marketing pages each roll their own outer shell.
+
+**Slice 4 rename** (per §7 Q4 + Q11 resolutions):
+- `PageLayout` → `AdminLayout` — file + symbol rename across 28 importer sites; public pages keep bespoke shells (no rollout).
+- `PageLayout`'s local `wide` prop → `content` prop — to match `maxWidth.content` (80rem) and remove the naming collision with `maxWidth.wide` (100rem).
+
+Both items are codemod-eligible and bundled in drift §7.1 + §7.2. The `tokens/web.tokens.json` `maxWidth.*` keys are unchanged.
 
 ### 2.4 Sidebars
 
@@ -183,14 +206,14 @@ Slice 4 is **not scheduled** at Slice 2 close. Recommendation: defer pending pro
 | Q1 | Primary text token canonical? (`text-text-primary` 248 vs `text-gray-900` 374 vs `text-foreground` 2) | **Auto-resolved** | `color.text.primary` (`text-text-primary`) is canonical. `text-gray-900` is drift. `text-foreground` (shadcn alias layer) is unused and not part of the contract. | Ladder: pattern canonicalization — branded Psychage token wins over Tailwind default regardless of file count. Slice 4 migrates 374 files. |
 | Q2 | Brand teal "with opacity" expression | **Auto-resolved** | Canonical = `rgba(26, 155, 140, *)` = brand `#1A9B8C`. `rgba(13, 148, 136, *)` (= Tailwind default `#0D9488`) is wrong-teal drift; `#15B8A6` (mood-great) is pseudo-brand drift. | Ladder: surfacing rule — brand value wins over Tailwind default. Drift list in `tokens/web.tokens.json` → `color._excluded._note`. |
 | Q3 | Primary L/D split schema shape | **Locked at kickoff** | Option B: paired `{ "light": "...", "dark": "..." }` per themed leaf. | Schema decision locked at Slice 2 start. All themed groups follow this shape. |
-| Q4 | "wide" naming collision (`max-w-wide` 100rem vs `PageLayout` `wide`=80rem) | **Surfaced** | `maxWidth.wide` = 100rem stays canonical (Tailwind extension is the token surface). `PageLayout`'s local `wide` keyword is component-internal, not a token. Naming collision is real — flagged for rename or alignment in Slice 4 / product decision. | Ladder: schema-shape — only `tailwind.config.js` exports are tokens. Component-local maps are component scope. Surfaced because the name collision will confuse contributors. |
+| Q4 | "wide" naming collision (`max-w-wide` 100rem vs `PageLayout` `wide`=80rem) | **Resolved** | `maxWidth.wide` = 100rem stays canonical. `PageLayout`'s local `wide` prop renames to `content` in Slice 4 to match `maxWidth.content` (80rem). Codemod-eligible across ~28 admin-v2 importers. See drift §7.1. | Ladder: schema-shape — token surface is `tailwind.config.js`. Component-local prop keyword realigns to token name; no token change. |
 | Q5 | Three duration systems — which canonical? | **Locked at kickoff** | `src/lib/animations.ts` is canonical. CSS-var `--duration-*` and Tailwind `duration-fast/normal/slow` aliases are dead in components — excluded from contract. | Locked at Slice 2 start. Component motion already imports `animations.ts` exclusively. |
 | Q6 | `urgent.amber`, `watch.blue`, `safe.green` — keep, drop, reserve? | **Auto-resolved** | Excluded from contract. Zero live references in components. Documented in `color._excluded._note`. | Ladder: dead-but-defined exclusion. Reserve-for-future is not a token contract responsibility; if a severity surface ships, define the values at that time. |
-| Q7 | `charcoal.*` Tailwind scale vs `--color-text-*` CSS vars — consolidate or both? | **Surfaced** (provisional: keep both) | Both kept in contract. `color.text.*` is themed text (light/dark pair), `charcoal.*` is non-themed neutral scale for surfaces/borders that don't flip. Product-shaped decision to consolidate is deferred. | Ladder: product-shaped — two parallel neutrals serve different purposes today. Surfaced for Ryan PR review; resolution may be "consolidate to charcoal in Slice 4" or "leave as-is". |
+| Q7 | `charcoal.*` Tailwind scale vs `--color-text-*` CSS vars — consolidate or both? | **Resolved** | Both stay. `color.text.*` (themed L/D) handles text that must flip with mode; `charcoal.*` (non-themed 11-step scale) handles surfaces/borders/dividers that don't flip. Not subject to Slice 4 consolidation. Documented as two coexisting color systems in §1.1. | Ladder: product-shaped — two parallel neutrals serve different purposes; consolidation would force theming on surfaces that don't need it. |
 | Q8 | `clarity-score/` sub-app scope | **Locked at kickoff** | Excluded from `tokens/web.tokens.json`. Parallel design system (different fonts, different teal, different dark bg). Treated as foreign DSL. | Locked at Slice 2 start. See §0. |
 | Q9 | ClarityJournal off-token bg (`#F5F5F7` light / `#0a0a0a` dark) | **Auto-resolved** | Drift. Canonical resolution: `color.background.light` (`#F9F7F3`) and `color.background.dark` (`#0F0F0F`). `#F5F5F7` is not a token; `#0a0a0a` ≠ `#0F0F0F`. Slice 4 migration target. | Ladder: pattern canonicalization — `--color-background` exists for this purpose. |
-| Q10 | Mood palette — tokenize or keep ad-hoc? | **Surfaced** (provisional: don't tokenize V1) | Don't tokenize V1. Palette ownership = onboarding/mood feature, not the global design system. Two duplicated locations (Q duplication is drift), but lifting to `--mood-1..5` tokens is a product decision. Revisit when a 3rd consumer appears. | Ladder: product-shaped. Surfaced for Ryan; current recommendation = stay ad-hoc, dedupe within the mood feature in Slice 4. |
-| Q11 | `PageLayout` adoption — public pages too, or admin-v2-only? | **Surfaced** | Out of Slice 2 scope. Today admin-v2 only (28 importers). Rolling out to public pages = Slice 4 / product decision. Contract does not mandate either way. | Ladder: product-shaped. Bespoke shells per public page are documented in §3 — they remain valid until/unless a product call promotes `PageLayout`. |
-| Q12 | Card / surface default radius | **Auto-resolved (low confidence)** | `radius.xl` (1rem) = `radius._canonical.surface`. `rounded-xl` 523 files beats `rounded-lg` 431 by ~17.6%, just outside the 15% surfacing threshold. Card.tsx already uses `rounded-xl`. | Ladder: pattern canonicalization (count-based). **Low-confidence flag** — margin is thin. Ryan PR review may overturn to `rounded-lg`. |
+| Q10 | Mood palette — tokenize or keep ad-hoc? | **Resolved** | Tokenize. Encoded as `color.mood.{1..5}` (paired L/D, mood-feature-only scope) in `tokens/web.tokens.json`. Slice 4 dedupes the 2 duplicate callsites ([QuickMoodCheckIn.tsx:12-18](../../Desktop/psychage-v2/src/components/dashboard/QuickMoodCheckIn.tsx#L12-L18), [FirstMoodStep.tsx:10-16](../../Desktop/psychage-v2/src/components/onboarding/FirstMoodStep.tsx#L10-L16)) into a single feature module consuming the token. See drift §7.3. | Ladder: product-shaped — duplication confirmed identical across dupes (5 hexes match exactly). Tokenizing under a scoped namespace prevents cross-feature reuse while removing inline drift. |
+| Q11 | `PageLayout` adoption — public pages too, or admin-v2-only? | **Resolved** | Stays admin-only. Slice 4 renames `PageLayout` → `AdminLayout` so the scope is self-documenting (28 importer sites, all under `src/pages/admin/v2/`). Public pages keep bespoke shells. See drift §7.2. | Ladder: product-shaped — name should match scope; rename is cheaper than rolling the primitive out. |
+| Q12 | Card / surface default radius | **Resolved** | `radius.xl` (1rem) confirmed for cards/surfaces. Card.tsx already uses `rounded-xl`. Multiple legitimate radii by element type documented in §1.4 (pills/avatars `full`, inputs `lg`/`md`, emphasis surfaces `2xl`/`3xl`) — `_canonical.surface = xl` applies to cards specifically, not all radii. | Ladder: pattern canonicalization (count-based, low-confidence flag cleared after PR review). Card surfaces lock; other element classes have their own legitimate radii. |
 
-**Summary:** 8 auto-resolved (Q1, Q2, Q6, Q9, Q12) + 3 locked at kickoff (Q3, Q5, Q8) = **8 auto/locked**. 4 surfaced for Ryan PR review (Q4, Q7, Q10, Q11). One auto-resolution (Q12) carries a low-confidence flag.
+**Summary:** All 12 questions resolved at PR-review close. 4 auto-resolved at Slice 2 (Q1, Q2, Q6, Q9) + 3 locked at kickoff (Q3, Q5, Q8) + 5 resolved at PR-review (Q4, Q7, Q10, Q11, Q12). Slice 4 work-list lives at [audits/web-design-drift.md §7](audits/web-design-drift.md#7-slice-4-work-list-decisions-locked-by-7-of-designwebmd).

@@ -124,3 +124,36 @@ Article-prose `clamp()` typography is hardcoded in CSS ([article-prose.css:24-50
   - Slice 2 explicitly excluded the `clarity-score/` sub-app — see [DESIGN.web.md §0](../DESIGN.web.md#0-scope).
   - Slice 2's `tokens.web.json` encodes Option B paired L/D for themed colors; motion canonicalized to `src/lib/animations.ts` only. Both are schema-shape decisions made at kickoff.
   - The "drift" tier of findings (§§4.2, 4.4) was confirmed **larger than the token tier**. Slice 4 (compliance pass) is **not scheduled** at Slice 2 close. Recommendation in PR description: defer.
+
+---
+
+## 7. Slice 4 work-list (decisions locked by §7 of DESIGN.web.md)
+
+Resolved §7 items from `DESIGN.web.md` that translate into Slice 4 (compliance pass) work. Codemod targets and touch-counts noted. Each entry cross-links to its driving §7 row.
+
+### 7.1 `PageLayout` `wide` prop → `content` prop rename — §7 Q4
+
+[src/components/layout/PageLayout.tsx:5-12](../../../Desktop/psychage-v2/src/components/layout/PageLayout.tsx#L5-L12) defines a local `maxWidth` map with a `wide` keyword that resolves to `max-w-7xl` (80rem). This collides semantically with `maxWidth.wide` = 100rem in [tailwind.config.js:121](../../../Desktop/psychage-v2/tailwind.config.js#L121). Slice 4 renames the PageLayout prop keyword from `wide` → `content` so it matches `maxWidth.content` (80rem). No token change.
+
+- **Touch count:** PageLayout.tsx (1 file, ~3 lines — map key + prop type + default) + ~28 admin-v2 importer sites passing `maxWidth="wide"` (grep `maxWidth=\"wide\"` under `src/pages/admin/v2/`).
+- **Codemod eligible:** yes — single string-rename across declared `maxWidth` keyword set.
+- **Bundle with:** §7.2 (same file, same author surface).
+
+### 7.2 `PageLayout` → `AdminLayout` rename — §7 Q11
+
+`PageLayout` is admin-v2-only today (28 importers, all under `src/pages/admin/v2/`). The name suggests universal layout primitive; reality is admin-only. Slice 4 renames the file and component to `AdminLayout` so the scope is self-documenting. Public pages keep bespoke shells — no rollout (Q11 lock).
+
+- **Touch count:** 1 file rename ([src/components/layout/PageLayout.tsx](../../../Desktop/psychage-v2/src/components/layout/PageLayout.tsx) → `AdminLayout.tsx`) + 28 import path + symbol updates under [src/pages/admin/v2/](../../../Desktop/psychage-v2/src/pages/admin/v2/).
+- **Codemod eligible:** yes — find/replace on import path and PascalCase identifier.
+- **Bundle with:** §7.1 (same file, same surface).
+
+### 7.3 Mood palette consolidation — §7 Q10
+
+Mood palette is now tokenized as `color.mood.{1..5}` in [tokens/web.tokens.json](../tokens/web.tokens.json) (paired L/D, mood-feature-only scope). Slice 4 dedupes the two callsites and migrates them to consume the token rather than inline hex.
+
+- **Source dupes** (5 hexes confirmed identical between the two):
+  - [src/components/dashboard/QuickMoodCheckIn.tsx:12-18](../../../Desktop/psychage-v2/src/components/dashboard/QuickMoodCheckIn.tsx#L12-L18) — exports `MOOD_OPTIONS` with `color`, `bgLight`, `bgDark`
+  - [src/components/onboarding/FirstMoodStep.tsx:10-16](../../../Desktop/psychage-v2/src/components/onboarding/FirstMoodStep.tsx#L10-L16) — local `MOOD_OPTIONS` with `color`, `bgClass` (light-only)
+- **Migration shape:** lift palette to a shared mood-feature module (e.g. `src/features/mood/palette.ts` or alongside `services/moodService.ts`) consuming `color.mood.*`. Both consumers import from there. Alpha-shift behavior (`bg-[#HEX]/10` light vs `dark:bg-[#HEX]/15` dark) preserved at consumer site, since Tailwind arbitrary classes cannot reference a JS token directly.
+- **Codemod eligible:** partial — token reference is straightforward, but Tailwind arbitrary `bg-[#HEX]/N` classes need either inline resolved hex via a helper or a CSS-var pattern. Slice 4 picks the path; not a pure find/replace.
+- **Touch count:** 2 source files + 1 new shared module + any external consumer of `MOOD_OPTIONS` (grep across `src/`).
