@@ -177,7 +177,7 @@ The web app is **deliberately less sensorial than the mobile app**. Mobile owns 
 
 ## 5. Anti-slop patterns
 
-*Placeholder for Slice 3.* This section documents the patterns Slice 4 migrations must avoid (e.g., "do not introduce a new card radius", "do not duplicate the mood palette inline", "do not inline-style colors when a token exists"). Written when concrete migration scope is locked.
+Enumerated and detected by [`.claude/skills/design-audit/`](.claude/skills/design-audit/). Web-applicable subset of the 12-pattern master list — 10 patterns (numbers `1, 2, 3, 4, 5, 6, 8, 9, 10, 12`). Patterns 7 (generic 4-tab bottom nav) and 11 (haptics on primary CTAs) are mobile-only and covered by `/mobile-design-audit` at Phase 4.B. See [`.claude/skills/design-audit/patterns.md`](.claude/skills/design-audit/patterns.md) for the full catalog with detection rules, passing snippets, failing snippets, and per-pattern exceptions.
 
 ---
 
