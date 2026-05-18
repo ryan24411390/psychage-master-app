@@ -187,7 +187,7 @@ Slice 2 captures the contract. Existing psychage-v2 code does not fully comply. 
 
 - **`text-gray-900` outnumbers `text-text-primary` (374 vs 248 files).** Pattern canonicalized to `color.text.primary` in this contract; Slice 4 migrates.
 - **Wrong-teal `rgba(13,148,136,*)` (= Tailwind default `#0D9488`) appears in 6+ locations mislabeled as "Primary".** Drift; correct value is `rgba(26,155,140,*)` = brand `#1A9B8C`.
-- **`#15B8A6` pseudo-brand in mood palette** — close to but ≠ brand. Drift unless mood palette is promoted (see §7 Q10).
+- **`#15B8A6` is `color.mood.5` ("Great" anchor)** — tokenized in `color.mood.{1..5}` per §7 Q10 (mood-feature-scoped). Historically close to but ≠ brand teal `#1A9B8C`; the scoped namespace prevents cross-feature reuse.
 - **Two `blob` keyframes** exist (`tokens.css` uses `translate`, `globals.css` uses `translate3d`). Whichever loads later wins.
 - **Three sidebar implementations**, no unified primitive.
 - **Two `home/` directories** (v1 + v2). v2 is current.
