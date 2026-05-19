@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$comment": "Psychage Mobile Design Tokens. Authored Phase 4.B for apps/mobile (Phase 6 scaffold). No source codebase to extract from — values are constructive per locked Phase 4.B decisions. Color values copied verbatim from tokens/web.tokens.json for cross-platform identity coherence (DESIGN.mobile.md §6). Mobile-only families: haptic.*, audio.*, motion.duration.breath. Typography size scale + spacing scale are skeleton stubs, calibrated against first mobile screen in Phase 6.",
+  "_meta": {
+    "platform": "mobile",
+    "stack": "expo-sdk-54 + react-native-0.81 + nativewind-5 + reanimated-4",
+    "definedInPhase": "4.B",
+    "schemaVersion": "1.0.0",
+    "designContractRef": "DESIGN.mobile.md",
+    "webContractRef": "DESIGN.web.md",
+    "webTokensRef": "tokens/web.tokens.json",
+    "citationConvention": "_source-sibling-object per leaf group (matches web schema). For mobile values copied from web, _source cites the web token leaf rather than a source-file path."
+  },
+
+  "color": {
+    "background": {
+      "light": "#F9F7F3",
+      "dark": "#0F0F0F",
+      "_source": {
+        "light": "tokens/web.tokens.json color.background.light",
+        "dark":  "tokens/web.tokens.json color.background.dark"
+      }
+    },
+    "surface": {
+      "default": { "light": "#F9F7F3", "dark": "#171717" },
+      "hover":   { "light": "#f5f5f4", "dark": "#1F1F1F" },
+      "active":  { "light": "#e7e5e4", "dark": "#262626" },
+      "_source": { "_note": "Values verbatim from tokens/web.tokens.json color.surface.* — cross-platform identity (DESIGN.mobile.md §6). 'hover' state has no native-touch analog; consume on long-press / focused states." }
+    },
+    "primary": {
+      "default": { "light": "#1A9B8C", "dark": "#20B8A6" },
+      "hover":   { "light": "#158A7D", "dark": "#1A9B8C" },
+      "light":   { "light": "#20B8A6", "dark": "#2DD4BF" },
+      "_source": { "_note": "Brand teal expression. Values verbatim from tokens/web.tokens.json color.primary.*." }
+    },
+    "text": {
+      "primary":   { "light": "#0a0a0a", "dark": "#fafaf9" },
+      "secondary": { "light": "#57534e", "dark": "#d6d3d1" },
+      "tertiary":  { "light": "#6d6762", "dark": "#a8a29e" },
+      "_source": { "_note": "Values verbatim from tokens/web.tokens.json color.text.*. text.tertiary.light floors at WCAG AA 5.2:1 — do not lighten without re-checking." }
+    },
+    "border": {
+      "default": { "light": "#e7e5e4", "dark": "#3f3f46" },
+      "hover":   { "light": "#d6d3d1", "dark": "#52525b" },
+      "_source": { "_note": "Values verbatim from tokens/web.tokens.json color.border.*." }
+    },
+    "semantic": {
+      "error":   { "light": "#dc2626", "dark": "#f87171" },
+      "success": { "light": "#16a34a", "dark": "#4ade80" },
+      "warning": { "light": "#ca8a04", "dark": "#facc15" },
+      "_source": { "_note": "Values verbatim from tokens/web.tokens.json color.semantic.*." }
+    },
+    "crisis": {
+      "red": "#DC2626",
+      "_source": { "red": "tokens/web.tokens.json color.crisis.red" },
+      "_note": "Non-themed (single value). Crisis surfaces must visually announce regardless of mode."
+    },
+    "relevance": {
+      "high":     "#1A9B8C",
+      "moderate": "#6366F1",
+      "explore":  "#8B5CF6",
+      "_source": { "_note": "Values verbatim from tokens/web.tokens.json color.relevance.*. Symptom-Navigator relevance shading." }
+    },
+    "teal": {
+      "50":  "#F0FDFA",
+      "100": "#E6F5F3",
+      "400": "#2DD4BF",
+      "500": "#20B8A6",
+      "600": "#1A9B8C",
+      "700": "#158A7D",
+      "900": "#0D5C54",
+      "_source": { "_note": "Sparse brand teal scale verbatim from tokens/web.tokens.json color.teal.*. Hardcoded — does not theme with mode." }
+    },
+    "charcoal": {
+      "50":  "#FAFAF9",
+      "100": "#F5F5F4",
+      "200": "#E7E5E4",
+      "300": "#D6D3D1",
+      "400": "#A8A29E",
+      "500": "#78716C",
+      "600": "#57534E",
+      "700": "#44403C",
+      "800": "#292524",
+      "900": "#1C1917",
+      "950": "#0C0A09",
+      "_source": { "_note": "11-step non-themed neutral scale verbatim from tokens/web.tokens.json color.charcoal.*. Coexists with color.text.* (themed) per DESIGN.web.md §7 Q7 — same rule applies on mobile." }
+    },
+    "mood": {
+      "1": { "light": "#8B7FA8", "dark": "#8B7FA8" },
+      "2": { "light": "#D4A060", "dark": "#D4A060" },
+      "3": { "light": "#8FAE8B", "dark": "#8FAE8B" },
+      "4": { "light": "#1A9B8C", "dark": "#1A9B8C" },
+      "5": { "light": "#15B8A6", "dark": "#15B8A6" },
+      "_source": { "_note": "Values verbatim from tokens/web.tokens.json color.mood.*. 5-step ordinal mood palette shared cross-platform for mood-feature consistency. Labels (consumer-side, not token): 1=Awful, 2=Low, 3=Okay, 4=Good, 5=Great." },
+      "_scope": "mood-feature-only — not for general use."
+    }
+  },
+
+  "type": {
+    "family": {
+      "sans":    "Inter",
+      "display": "Plus Jakarta Sans",
+      "mono":    "IBM Plex Mono",
+      "_source": { "_note": "Same families as web (tokens/web.tokens.json type.family.*). On React Native these are font asset names registered via expo-font; on web they're CSS font-family strings — same identity, different consumption shape." }
+    },
+    "_omitted": {
+      "_note": "size/weight/leading/tracking omitted in V1 — psychage-mobile has no shipped screen to calibrate against. Skeleton stubs only. Calibrated against the first mobile screen design in Phase 6. Hardcoding a scale before there is a screen to validate it is invented value (see DESIGN.mobile.md §1.2)."
+    }
+  },
+
+  "spacing": {
+    "_omitted": {
+      "_note": "Omitted in V1 — psychage-mobile has no shipped screen to calibrate against. 8pt grid is the locked baseline per DESIGN.mobile.md §1.3 (iOS HIG / Material default). Specific steps (4, 8, 12, 16, 24, 32, etc.) authored against the first mobile screen design in Phase 6. Hardcoding a scale before there is a screen is invented value."
+    },
+    "_baseline": "8pt grid"
+  },
+
+  "radius": {
+    "lg":   "0.5rem",
+    "xl":   "1rem",
+    "full": "9999px",
+    "_canonical": {
+      "surface": "xl",
+      "input":   "lg",
+      "pill":    "full",
+      "_note": "Mobile uses 3 steps vs web's 5. Mobile drops sm/md (negligible visual delta at typical mobile sizes) and 2xl/3xl emphasis tier (mobile emphasis leans on sensorial dimensions per DESIGN.mobile.md §1.4). Card/surface radius = xl matches web (DESIGN.web.md §1.4)."
+    }
+  },
+
+  "motion": {
+    "duration": {
+      "swift":  150,
+      "base":   300,
+      "calm":   600,
+      "breath": 4000,
+      "_source": { "_note": "ms integers (Reanimated v4 convention). swift=utility tap/toggle/select; base=utility modal/page/reveal; calm=content tool-intros/celebrations; breath=content guided-breath cycle (natural breath ~4s). See DESIGN.mobile.md §3.1." }
+    },
+    "easing": {
+      "out":      "cubic-bezier(0, 0, 0.2, 1)",
+      "in":       "cubic-bezier(0.4, 0, 1, 1)",
+      "standard": "cubic-bezier(0.2, 0, 0, 1)",
+      "breath":   "cubic-bezier(0.45, 0, 0.55, 1)",
+      "_source": { "_note": "Cubic-bezier control-point strings (Reanimated v4 accepts strings; can be parsed to array form if needed). 'breath' is symmetric ease-in-out for breath-cycle parity. 'standard' adapted from Material in-place transitions; differs from web standard [0.4, 0, 0.2, 1] (DESIGN.web.md motion.easing.standard) — mobile in-place lean is sharper. Documented divergence." }
+    },
+    "_reducedMotion": {
+      "nonEssential": "disabled",
+      "essential": {
+        "replaceWith": "crossFade",
+        "durationMs": 200
+      },
+      "breath": {
+        "default": "staticByDefault",
+        "inAppToggle": "available_in_avatar_accessibility_sheet",
+        "_note": "When OS prefers-reduced-motion is on, breath animations are static. Users who want breath motion despite OS setting can enable the in-app toggle. See DESIGN.mobile.md §3.1."
+      },
+      "_note": "Two-tier handling. Non-essential motion (decorative loops, ambient pulsing) fully disabled. Essential motion (modal/tab/feedback) replaces transform/scale with 200ms cross-fade — hierarchy still communicates, vestibular trigger removed. Breath gets its own override with in-app opt-back-in."
+    }
+  },
+
+  "haptic": {
+    "tap": {
+      "_expo": "Haptics.selectionAsync()",
+      "_use": "tab change, toggle, list-item select"
+    },
+    "affirm": {
+      "_expo": "Haptics.impactAsync(ImpactFeedbackStyle.Light)",
+      "_use": "primary CTAs, mood submit, tool start"
+    },
+    "confirm": {
+      "_expo": "Haptics.impactAsync(ImpactFeedbackStyle.Medium)",
+      "_use": "form submit, save, step complete"
+    },
+    "celebrate": {
+      "_expo": "Haptics.notificationAsync(NotificationFeedbackType.Success)",
+      "_use": "milestone, streak day, tool completion"
+    },
+    "alert": {
+      "_expo": "Haptics.notificationAsync(NotificationFeedbackType.Warning)",
+      "_use": "confirmation prompts before destructive actions"
+    },
+    "complete": {
+      "_sequence": [
+        { "event": "Haptics.impactAsync(ImpactFeedbackStyle.Light)",                       "delayMs": 0 },
+        { "event": "Haptics.impactAsync(ImpactFeedbackStyle.Medium)",                      "delayMs": 80 },
+        { "event": "Haptics.notificationAsync(NotificationFeedbackType.Success)",         "delayMs": 80 }
+      ],
+      "_use": "tool/series completion — signature Psychage pattern"
+    },
+    "breath_in": {
+      "_sequence": [
+        { "event": "Haptics.impactAsync(ImpactFeedbackStyle.Light)",  "delayMs": 0 },
+        { "event": "Haptics.impactAsync(ImpactFeedbackStyle.Light)",  "delayMs": 200 },
+        { "event": "Haptics.impactAsync(ImpactFeedbackStyle.Medium)", "delayMs": 200 }
+      ],
+      "_use": "breathing inhale; ~800ms total; loops with motion.duration.breath at 4s/cycle"
+    },
+    "breath_out": {
+      "_sequence": [
+        { "event": "Haptics.impactAsync(ImpactFeedbackStyle.Medium)", "delayMs": 0 },
+        { "event": "Haptics.impactAsync(ImpactFeedbackStyle.Light)",  "delayMs": 200 },
+        { "event": "Haptics.impactAsync(ImpactFeedbackStyle.Light)",  "delayMs": 200 }
+      ],
+      "_use": "breathing exhale; inverse curve of breath_in"
+    },
+    "_OSRespect": {
+      "systemHapticsToggle": "honor",
+      "lowPowerMode": "honor",
+      "inAppToggle": "required",
+      "_note": "iOS System Haptics toggle: expo-haptics no-ops automatically when off; verify in QA. Low Power Mode: expo-haptics no-ops automatically; verify. In-app toggle: REQUIRED in avatar → accessibility sheet — some users want app haptics off without disabling system haptics globally."
+    },
+    "_noHapticZones": [
+      "error states (use warm copy + visual; no haptic.error token exists — would read as punitive against brand voice)",
+      "high-frequency micro-interactions (typing keystrokes, slider drag deltas, scroll velocity) — aggregated end-of-gesture acceptable, per-event not",
+      "background notifications (OS notification haptic owns this surface, not in-app code)"
+    ],
+    "_implementationNote": "Sequenced patterns (complete, breath_in, breath_out) implemented via chained setTimeout(() => Haptics.*(), delayMs). JS-thread timing is approximate (~10–20ms drift). Core Haptics AHAP patterns via a native module would deliver higher fidelity for breath-cycle parity; tracked as V1.1 candidate (DESIGN.mobile.md §8)."
+  },
+
+  "audio": {
+    "_v1": "empty — content audio only, no UI sound effects, no tap sounds, no in-app notification chimes. Content (Dr. Dobson videos, future guided-breathing recordings) brings its own audio.",
+    "_v2Candidates": [
+      "audio.complete — soft milestone chime, default-off in settings",
+      "audio.ambient — breathing-exercise background loops"
+    ],
+    "_v2Gates": [
+      "signature-moment audit confirms content-only restraint failed",
+      "Dr. Dobson clinical sign-off on chime designs (anxious/migraine-overlap audience)",
+      "Reduce Audio system setting honored at firing site"
+    ]
+  }
+}
