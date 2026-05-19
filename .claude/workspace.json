@@ -3,8 +3,8 @@
   "schemaVersion": "1.0.0",
   "phase": 4,
   "phaseLabel": "spec-driven-workflow-deploy",
-  "lastUpdated": "2026-05-18",
-  "lastUpdatedBy": "phase-4.A-close-out",
+  "lastUpdated": "2026-05-19",
+  "lastUpdatedBy": "phase-4.B-close-out",
 
   "monorepo": {
     "structure": "pre-monorepo",
@@ -147,18 +147,31 @@
         "driftMigrationStatusComment": "Slice 4 (drift migration consuming audits/web-design-drift.md) deferred at Phase 4.A close. Audit input preserved for future reactivation."
       },
       "mobile": {
-        "designFile": "design/DESIGN.mobile.md",
-        "designFileExists": false,
+        "designFile": "DESIGN.mobile.md",
+        "designFileExists": true,
         "tokensFile": "tokens/mobile.tokens.json",
         "tokensPath": "tokens/mobile.tokens.json",
-        "tokensFileExists": false,
-        "extractionApproach": "creative-work",
-        "extractionSource": "Mobbin reference flows + clay figure library + creative direction at Phase 4.B kickoff",
+        "tokensFileExists": true,
+        "extractionApproach": "constructive-from-locked-decisions",
+        "extractionSource": "Phase 4.B locked decisions (IA, sensorial, clay-figure tier). No psychage-v2 mobile codebase to extract from. Color tokens copied verbatim from tokens/web.tokens.json for cross-platform identity coherence.",
         "definedInPhase": "4.B",
-        "informationArchitecture": null,
-        "informationArchitectureComment": "Mobile IA is fully independent from web's hub-and-spoke. Could be single-stream daily flow, tabbed, feed-based, or card-stack. Decided at Phase 4.B kickoff.",
+        "informationArchitecture": "bottom-tabs-4-custom-plus-avatar-header",
+        "informationArchitectureComment": "4 bottom tabs (Today, Learn, Compass, Find) + avatar icon in header for account/settings (not a 5th tab). 'Compass' is the orienting metaphor for Symptom Navigator + Clarity Score + mood + breathing. Custom tab labels by definition satisfy /mobile-design-audit Pattern 7 (generic 4-tab nav). See DESIGN.mobile.md §2.",
         "sensorialDimensions": ["haptic", "audio", "motion", "micro-interactions"],
-        "sensorialDimensionsComment": "Mobile app is sensorial — engages haptics, subtle audio, motion, and micro-interactions throughout. Each must respect Reduce Motion / Reduce Haptics / Reduce Audio system settings. Sensory restraint over abundance. One signature sensory moment per surface, max."
+        "sensorialDimensionsComment": "Mobile app is sensorial — engages haptics, subtle audio, motion, and micro-interactions throughout. Each must respect Reduce Motion / Reduce Haptics / Reduce Audio system settings. Sensory restraint over abundance. One signature sensory moment per surface, max.",
+        "sensorialTokenSummary": {
+          "motion": "4 durations (swift 150ms / base 300ms / calm 600ms / breath 4000ms) + 4 easings (out/in/standard/breath) + two-tier reduced-motion (non-essential disabled, essential cross-fade 200ms, breath static-by-default with in-app toggle)",
+          "haptic": "8 tokens — 5 stock (tap/affirm/confirm/celebrate/alert) + 3 sequenced (complete/breath_in/breath_out). Firing rules MUST fire on primary CTAs, nav events, form submits, tool completion, destructive-action prompts, breathing. No-haptic zones: error states, high-frequency micro-interactions, background notifications.",
+          "audio": "V1 empty — content audio only, no UI sound effects. V2 candidates documented (audio.complete soft chime, audio.ambient breathing backgrounds) — gated on signature-moment audit + Dobson clinical sign-off + Reduce Audio honoring."
+        },
+        "clayFigureTier": "tier-3-sensorial-complete",
+        "clayFigureTierComment": "~25–35 illustrations: 5–8 onboarding + 6–10 empty states + 4–6 CTA/tab visuals + 4 tool intros + 3–5 milestone celebrations + 2–3 breathing states. Practical: style-guide-first, phased delivery, vector source + PNG export, full commercial ownership + exclusive-use clause, single character reference sheet for library consistency. See DESIGN.mobile.md §4.",
+        "auditSkillExists": true,
+        "auditSkillPath": ".claude/skills/mobile-design-audit/",
+        "auditSkillPatterns": 12,
+        "auditSkillPatternsComment": "All 12 anti-slop patterns active (the 10 web-applicable patterns adapted to React Native + the 2 mobile-only Pattern 7 generic-tab-nav and Pattern 11 missing-haptics-on-primary-CTAs).",
+        "driftMigrationStatus": "not_applicable_no_codebase_yet",
+        "driftMigrationStatusComment": "Mobile is Phase 6 work. No apps/mobile/ source to migrate. /mobile-design-audit applies once the codebase exists. Pre-Phase-6 the skill still passes Step 0 refusal layers cleanly (contract files exist after Phase 4.B merges)."
       }
     },
     "clayFigures": {
@@ -342,9 +355,9 @@
       "commitSHA": "81998cd"
     },
     "design-mobile-written": {
-      "status": "pending",
-      "deliverable": "DESIGN.mobile.md + tokens/mobile.tokens.json (incl. clay figure spec)",
-      "ETA": "Day 8"
+      "status": "complete",
+      "deliverable": "DESIGN.mobile.md + tokens/mobile.tokens.json + .claude/skills/mobile-design-audit/ (incl. clay figure Tier 3 sensorial-complete scope)",
+      "commitSHA": "078ae3c"
     },
     "hooks-validated": {
       "status": "complete",
@@ -371,7 +384,7 @@
     "3":   { "label": "rules/auth.md, rules/offline.md, ARCHITECTURE.md", "status": "complete" },
     "4":   { "label": "spec-driven workflow skills + workspace.json + constitution.md + 4 SR hooks + smoke-test fixtures", "status": "complete" },
     "4.A": { "label": "DESIGN.web.md + tokens/web.tokens.json + rules/regulatory.md (4 architectural commitments)", "status": "complete", "hardGateForPhase5": true, "closedSHAs": ["81998cd", "2a8a60d"] },
-    "4.B": { "label": "DESIGN.mobile.md + tokens/mobile.tokens.json + mobile IA decision + clay figure library scope + Mobbin Pro subscription + clay-figure SessionStart gate", "status": "pending" },
+    "4.B": { "label": "DESIGN.mobile.md + tokens/mobile.tokens.json + /mobile-design-audit (12 patterns) + mobile IA decision (4 bottom tabs Today/Learn/Compass/Find + avatar-in-header) + clay figure Tier 3 sensorial-complete scope + Mobbin Pro subscription + clay-figure SessionStart gate", "status": "complete", "closedSHAs": ["078ae3c"] },
     "5":   { "label": "worktree scripts + packages/shared lift", "status": "pending", "blockedBy": ["regulatory-architecture-resolved", "hooks-validated"] },
     "6":   { "label": "Expo scaffold + apps/mobile + packages/api + packages/i18n + react-native-reusables + Storybook RN + i18n namespacing + test runner lock + Mood Quick-Check tracer ship-to-device", "status": "pending" },
     "7":   { "label": "biome + husky + lint-staged + Tier 2 hooks (PEAF/sensitivity/etc.) + _shared skill block + DoD field per task + _metrics.jsonl SessionEnd hook + /spec-verify per-PR decision", "status": "pending" },
