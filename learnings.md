@@ -82,3 +82,48 @@ Format: *"When X, do Y, because Z."* — one sentence per lesson.
 - **Procedure B scope:** everything else. Auth and premium upgrade PRs require five-item security checklist in description.
 - **Stack:** SDK 54 for V1 (deliberate stable choice over SDK 55 due to unresolved Android monorepo issue and Hermes V1 native-build cost). SDK 55/56 upgrade evaluated as V1.1 post-launch work.
 - **Parallel-agent infrastructure:** Phase 5 ships Day 11. `maxParallelWorkers: 8` capability, recommended steady state 4. 5-layer enforcement: spec-review intersection, worktree-add fail-closed install, pre-commit hook, CI intersection, pre-merge spec-review re-run.
+
+## Phase 4.A close — web design system + audit skill (2026-05-18)
+
+Three active slices shipped to `main`; Slice 4 deferred. **Zero carry-over open questions** — all 12 §7 audit questions resolved at PR-review close (4 auto-resolved, 3 locked at kickoff, 5 resolved at PR-review).
+
+### What shipped
+
+- **Slice 1 (recon)** — consumed by Slice 2 at PR-review; surviving artifact pruned to `audits/web-design-drift.md` (Slice 4 input).
+- **Slice 2 (contract)** — `DESIGN.web.md` + `tokens/web.tokens.json` + `audits/web-design-drift.md` shipped via PR #3, squashed to `81998cd`. Amendments cited: `bb33624` (§7 carry-over resolutions), `1db2d06` (§6 #15B8A6 canonicalization), `404407c` (§7 Q2 alignment with Q10).
+- **Slice 3 (audit skill)** — `.claude/skills/design-audit/SKILL.md` + `patterns.md` shipped via PR #5 (re-opened from auto-closed PR #4 after stacked-base deletion), squashed to `2a8a60d`. Contains rebased `749e388` (initial skill ship, formerly `eadd37a`) + `55078fc` (Pattern 12 loosen, formerly `0214712`).
+- **Slice 4 (drift migration)** — deferred. `audits/web-design-drift.md` preserved as Slice 4 input; `design.platforms.web.driftMigrationStatus: "deferred"` in `workspace.json`.
+
+### Decisions locked
+
+- **Color schema:** Option B paired `{ light, dark }` per themed leaf (§7 Q3).
+- **Motion canonical source:** `psychage-v2/src/lib/animations.ts` (§7 Q5). CSS-var `--duration-*` and Tailwind `duration-fast/normal/slow` aliases excluded from contract.
+- **Scope exclusion:** `clarity-score/` Next.js sub-app treated as foreign DSL (§7 Q8).
+- **Pattern 12 (`/design-audit`):** loose — gates on duration > 200ms OR opacity transition OR multi-property keyframes; gesture-bound `whileTap`/`whileHover`/`whileFocus` single-property scale/translate exempt (commit `55078fc`).
+- **`/ultrareview`:** disabled. Pass-3 hook preserved in `SKILL.md` for future activation; no behavior in Phase 4.A.
+- **Arbitrary-px scan:** deferred to Slice 4 (Pass 1 info-only mention of `min-h-[44px]` etc.; not a fail signal in Phase 4.A).
+- **Q4 (PageLayout `wide` prop):** rename to `content` in Slice 4 — codemod-eligible across ~28 admin-v2 importers.
+- **Q7 (`charcoal.*` vs `color.text.*`):** both stay; two coexisting neutrals serve different purposes (themed L/D text vs non-themed surfaces). Not subject to Slice 4 consolidation.
+- **Q10 (mood palette):** tokenized as `color.mood.{1..5}`, paired L/D, mood-feature-scoped namespace. `#15B8A6` is canonical `color.mood.5` (NOT pseudo-brand drift). Slice 4 dedupes 2 inline callsites.
+- **Q11 (PageLayout adoption):** stays admin-only. Slice 4 renames `PageLayout` → `AdminLayout` (28 import sites under `src/pages/admin/v2/`).
+- **Q12 (card radius):** `radius.xl` (1rem) confirmed for cards/surfaces. Multiple legitimate radii by element type documented in §1.4 (pills `full`, inputs `lg`/`md`, emphasis `2xl`/`3xl`).
+
+### Deferrals (revisit when conditions change)
+
+- **Slice 4 drift migration** — do/defer/skip TBD; gated on prioritization decision. Inputs preserved in `audits/web-design-drift.md`.
+- **`/mobile-design-audit`** — deferred to Phase 4.B (mobile-only patterns: tab nav, haptics, sensorial Reduce-* fallbacks).
+- **`/ultrareview` activation** — keep disabled, activate, or remove entirely is open. Default: stays disabled until a failure mode demands it.
+- **Arbitrary-px Tailwind scan** — promote from info-only to Pass 1 rule in a v2 of the audit skill (would catch `min-h-[44px]` touch-target arbitraries → eventual `spacing.tap` token).
+
+### Watch-outs
+
+- **Button.tsx Tailwind-exception interaction with hypothetical Slice 4 arb-px scan:** `min-h-[44px]` currently info-only; if Slice 4 promotes the arb-px scan to a fail signal, Button.tsx will need either a `spacing.tap` token or a documented exception. Decide before promotion, not after the regression.
+- **Phase 6+ NativeWind token sync:** Mobile uses NativeWind 5 (per strategy memo §7). Web `tokens/web.tokens.json` and mobile `tokens/mobile.tokens.json` are fully independent (per `workspace.json` design.approach). Any cross-surface brand decision (e.g., brand teal value change) must be applied to both token files in the same commit — do not silently propagate one to the other.
+
+### Carry-over open questions from PR #3 §7
+
+**NONE.** All 12 questions resolved at PR-review close (Q1, Q2, Q6, Q9 auto-resolved; Q3, Q5, Q8 locked at kickoff; Q4, Q7, Q10, Q11, Q12 resolved at PR-review).
+
+### Phase 4.B gate
+
+Remains gated on Mobbin Pro subscription + illustrator commission + Dr. Dobson sensorial review + mobile-IA decision (per Day-1 plan, `workspace.json` design.platforms.mobile + clayFigures + subscriptions.mobbinPro).
