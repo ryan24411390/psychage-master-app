@@ -172,3 +172,7 @@ Single PR shipped to `main` — `feat/phase-4b-mobile-design-contract` (two comm
 
 - Feat commit (DESIGN.mobile.md + tokens/mobile.tokens.json + skill): captured on `feat/phase-4b-mobile-design-contract` branch; appended to closedSHAs post-merge.
 - Chore commit (workspace flips + this learnings entry): same branch, same PR.
+
+### Phase 6 prep — surfaced during transition (2026-05-20)
+
+- **Compass tab icon.** No fitting icon found in `lucide-react-native`. Custom SVG required. Bank into the Tier 3 illustrator commission's tab-icon bucket (4–6 illustrations). Phase 6 blocker if not commissioned before mobile tab-bar implementation begins. Surface to the icon designer alongside the broader compass-as-orienting-metaphor brief from the Phase 4.B watch-outs.

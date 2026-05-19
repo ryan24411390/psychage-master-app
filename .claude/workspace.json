@@ -3,8 +3,8 @@
   "schemaVersion": "1.0.0",
   "phase": 4,
   "phaseLabel": "spec-driven-workflow-deploy",
-  "lastUpdated": "2026-05-19",
-  "lastUpdatedBy": "phase-4.B-close-out",
+  "lastUpdated": "2026-05-20",
+  "lastUpdatedBy": "phase-4b-transition",
 
   "monorepo": {
     "structure": "pre-monorepo",
@@ -384,7 +384,7 @@
     "3":   { "label": "rules/auth.md, rules/offline.md, ARCHITECTURE.md", "status": "complete" },
     "4":   { "label": "spec-driven workflow skills + workspace.json + constitution.md + 4 SR hooks + smoke-test fixtures", "status": "complete" },
     "4.A": { "label": "DESIGN.web.md + tokens/web.tokens.json + rules/regulatory.md (4 architectural commitments)", "status": "complete", "hardGateForPhase5": true, "closedSHAs": ["81998cd", "2a8a60d"] },
-    "4.B": { "label": "DESIGN.mobile.md + tokens/mobile.tokens.json + /mobile-design-audit (12 patterns) + mobile IA decision (4 bottom tabs Today/Learn/Compass/Find + avatar-in-header) + clay figure Tier 3 sensorial-complete scope + Mobbin Pro subscription + clay-figure SessionStart gate", "status": "complete", "closedSHAs": ["078ae3c"] },
+    "4.B": { "label": "DESIGN.mobile.md + tokens/mobile.tokens.json + /mobile-design-audit (12 patterns) + mobile IA decision (4 bottom tabs Today/Learn/Compass/Find + avatar-in-header) + clay figure Tier 3 sensorial-complete scope + Mobbin Pro subscription + clay-figure SessionStart gate", "status": "complete", "closedSHAs": ["078ae3c", "dc7f545"] },
     "5":   { "label": "worktree scripts + packages/shared lift", "status": "pending", "blockedBy": ["regulatory-architecture-resolved", "hooks-validated"] },
     "6":   { "label": "Expo scaffold + apps/mobile + packages/api + packages/i18n + react-native-reusables + Storybook RN + i18n namespacing + test runner lock + Mood Quick-Check tracer ship-to-device", "status": "pending" },
     "7":   { "label": "biome + husky + lint-staged + Tier 2 hooks (PEAF/sensitivity/etc.) + _shared skill block + DoD field per task + _metrics.jsonl SessionEnd hook + /spec-verify per-PR decision", "status": "pending" },
