@@ -3,8 +3,8 @@
   "schemaVersion": "1.0.0",
   "phase": 4,
   "phaseLabel": "spec-driven-workflow-deploy",
-  "lastUpdated": "2026-05-17",
-  "lastUpdatedBy": "phase-4.A-slice-2-web-design-contract",
+  "lastUpdated": "2026-05-18",
+  "lastUpdatedBy": "phase-4.A-close-out",
 
   "monorepo": {
     "structure": "pre-monorepo",
@@ -140,7 +140,11 @@
         "extractionSource": "psychage-v2 tailwind.config.ts + shipping screens + brand identity work",
         "definedInPhase": "4.A",
         "informationArchitecture": "hub-and-spoke",
-        "informationArchitectureComment": "Web app uses hub-and-spoke navigation (existing pattern from psychage-v2). Documented for clarity; no Phase 4.A change."
+        "informationArchitectureComment": "Web app uses hub-and-spoke navigation (existing pattern from psychage-v2). Documented for clarity; no Phase 4.A change.",
+        "auditSkillExists": true,
+        "auditSkillPath": ".claude/skills/design-audit/",
+        "driftMigrationStatus": "deferred",
+        "driftMigrationStatusComment": "Slice 4 (drift migration consuming audits/web-design-drift.md) deferred at Phase 4.A close. Audit input preserved for future reactivation."
       },
       "mobile": {
         "designFile": "design/DESIGN.mobile.md",
@@ -333,9 +337,9 @@
       "ETA": "Day 5"
     },
     "design-web-extracted": {
-      "status": "pending",
+      "status": "complete",
       "deliverable": "DESIGN.web.md + tokens/web.tokens.json",
-      "ETA": "Day 8"
+      "commitSHA": "81998cd"
     },
     "design-mobile-written": {
       "status": "pending",
@@ -366,7 +370,7 @@
     "2":   { "label": "PROJECT_CONTEXT, PRODUCT_BRIEF, V1_FEATURE_SCOPE, learnings.md", "status": "complete" },
     "3":   { "label": "rules/auth.md, rules/offline.md, ARCHITECTURE.md", "status": "complete" },
     "4":   { "label": "spec-driven workflow skills + workspace.json + constitution.md + 4 SR hooks + smoke-test fixtures", "status": "complete" },
-    "4.A": { "label": "DESIGN.web.md + tokens/web.tokens.json + rules/regulatory.md (4 architectural commitments)", "status": "pending", "hardGateForPhase5": true },
+    "4.A": { "label": "DESIGN.web.md + tokens/web.tokens.json + rules/regulatory.md (4 architectural commitments)", "status": "complete", "hardGateForPhase5": true, "closedSHAs": ["81998cd", "2a8a60d"] },
     "4.B": { "label": "DESIGN.mobile.md + tokens/mobile.tokens.json + mobile IA decision + clay figure library scope + Mobbin Pro subscription + clay-figure SessionStart gate", "status": "pending" },
     "5":   { "label": "worktree scripts + packages/shared lift", "status": "pending", "blockedBy": ["regulatory-architecture-resolved", "hooks-validated"] },
     "6":   { "label": "Expo scaffold + apps/mobile + packages/api + packages/i18n + react-native-reusables + Storybook RN + i18n namespacing + test runner lock + Mood Quick-Check tracer ship-to-device", "status": "pending" },
