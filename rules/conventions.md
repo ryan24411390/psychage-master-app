@@ -47,3 +47,26 @@ export function someLiftedFunction(
 **Surfaced:** Phase 5 Slice 2 (PR #11). Applied to `packages/shared/navigator/featureFlags.ts`'s `isTierEnabled` predicate (consumed transitively by `engine.ts` via `filterByFeatureFlags`).
 
 **Enforcement:** Code-review check during future lifts.
+
+## 4. `.phase` semantics
+
+`.claude/workspace.json.phase` tracks the **currently-active (in-flight) phase**. It flips at kickoff — i.e., at the start of that phase's first slice — not at the close of the prior phase. `phaseRoadmap[N].status` (`"pending"` / `"in-progress"` / `"complete"`) is the per-phase lifecycle truth.
+
+**Sequence at Phase N kickoff:**
+
+- `.phase = N`
+- `phaseRoadmap[N].status = "in-progress"`
+- `.phaseLabel` updated to a short slug reflecting phase N (mirrors prior precedent; the verbose roadmap label remains in `phaseRoadmap[N].label`)
+
+**Sequence at Phase N close:**
+
+- `phaseRoadmap[N].status = "complete"` only
+- `.phase` does NOT change; it bumps at the next phase's kickoff
+
+**Sub-phases (N.A, N.B):** do not bump `.phase`. The parent phase remains active across sub-phases.
+
+**Rationale:** Phases 4.A, 4.B, and 5 all closed without bumping `.phase` or `.phaseLabel`, leaving the field stale relative to `phaseRoadmap`. Recon Slice 1 of Phase 6 (§5.2) surfaced three resolution options; option (a) chosen because it matches human-language intuition ("we're in phase 6") and is future-proof against tooling that may consume `.phase` (status-line scripts, SessionStart hooks).
+
+**Surfaced:** Phase 6 Slice 1 recon (PR #14). Applied retroactively in Phase 6 Slice 2.
+
+**Enforcement:** Convention. No CI rule; PR-review check at phase-kickoff and phase-close commits.
