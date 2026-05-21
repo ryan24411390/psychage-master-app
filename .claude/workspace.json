@@ -4,7 +4,7 @@
   "phase": 4,
   "phaseLabel": "spec-driven-workflow-deploy",
   "lastUpdated": "2026-05-20",
-  "lastUpdatedBy": "phase-4b-transition",
+  "lastUpdatedBy": "posture-housekeeping",
 
   "monorepo": {
     "structure": "pre-monorepo",
@@ -338,16 +338,64 @@
     "lastUpdated": "2026-05-09"
   },
 
+  "openSecurityQuestions": {
+    "comment": "Open questions surfaced in rules/security.md. Each item has a target phase or trigger gate. Resolved questions move out (commitSHA captured at resolution); this block is not a historical log.",
+    "source": "rules/security.md",
+    "sourceCommitSHA": "abb262c",
+    "questions": {
+      "cert-pinning-library": {
+        "question": "Cert pinning library choice (TrustKit / NS App Transport Security / react-native-ssl-pinning)",
+        "targetPhase": 8,
+        "targetPhaseLabel": "GitHub Actions + EAS + CODEOWNERS",
+        "sourceSection": "rules/security.md §2.2 + §6"
+      },
+      "audit-events-schema": {
+        "question": "audit_events table schema",
+        "targetPhase": 6,
+        "targetPhaseLabel": "Expo scaffold + apps/mobile",
+        "sourceSection": "rules/security.md §2.5 + §6"
+      },
+      "severity-classification-scheme": {
+        "question": "Sev0-Sev3 severity classification scheme",
+        "targetPhase": 9,
+        "targetPhaseLabel": "Sentry RN + analytics + kill-switch infra",
+        "sourceSection": "rules/security.md §2.7"
+      },
+      "incident-coordination-channel": {
+        "question": "Out-of-band incident coordination channel",
+        "targetPhase": 9,
+        "targetPhaseLabel": "Sentry RN + analytics + kill-switch infra",
+        "sourceSection": "rules/security.md §2.7"
+      },
+      "post-mortem-template": {
+        "question": "Post-mortem template (public for Sev0/Sev1 user-data impact)",
+        "targetPhase": 9,
+        "targetPhaseLabel": "Sentry RN + analytics + kill-switch infra",
+        "sourceSection": "rules/security.md §2.7"
+      },
+      "state-law-breach-windows": {
+        "question": "State-law breach notification exact windows (WA MHMDA, CT DPA, etc.)",
+        "targetGate": "day-5-counsel-review",
+        "sourceSection": "rules/security.md §2.7 + rules/regulatory.md §6"
+      },
+      "pre-v1-threat-model-and-pen-test": {
+        "question": "Threat model + pen-test scope",
+        "targetGate": "pre-v1-launch-security-review",
+        "sourceSection": "rules/security.md §3 + §6 + rules/auth.md (deliberate omissions)"
+      }
+    }
+  },
+
   "phase5Prerequisites": {
     "regulatory-architecture-resolved": {
-      "status": "in-progress",
+      "status": "complete",
       "deliverable": "rules/regulatory.md",
-      "ETA": "Day 5"
+      "commitSHA": "7fda85c"
     },
     "security-posture-resolved": {
-      "status": "in-progress",
+      "status": "complete",
       "deliverable": "rules/security.md",
-      "ETA": "Day 5"
+      "commitSHA": "abb262c"
     },
     "design-web-extracted": {
       "status": "complete",
