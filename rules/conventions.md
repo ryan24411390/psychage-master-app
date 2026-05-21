@@ -27,3 +27,23 @@ When color tokens are edited on one platform, the equivalent edits must land on 
 - In a follow-up housekeeping commit when ordering doesn't allow (e.g., a chore close-out commit that ships in the same PR as a feat commit will need to be appended by a follow-up, since the chore SHA doesn't exist until the feat lands).
 
 **Rationale:** Surfaced in Phase 4.B (PR #7). The schema previously didn't clarify whether feat-only or all commits — this convention closes the ambiguity.
+
+## 3. Cross-repo lift — dependency-injection seam
+
+When code is lifted from psychage-v2 (or any app-side repo) into `packages/shared/`, and the lifted code depends on an app-side adapter (feature flags, storage, analytics, config), break the dependency by **injecting the adapter behavior as a parameter** rather than importing the adapter directly.
+
+**Pattern:**
+
+```typescript
+// In packages/shared/<module>/
+export function someLiftedFunction(
+  args: SomeArgs,
+  isTierEnabled: (tier: string) => boolean = () => true,
+) { ... }
+```
+
+**Rationale:** Lifted code cannot import app-side adapters without coupling `packages/shared` back to app-specific paths. Injecting adapter behavior as a parameter with a sensible default (typically `() => true` or `noop`) preserves both the lifted code's autonomy and the app's ability to plug in the real adapter.
+
+**Surfaced:** Phase 5 Slice 2 (PR #11). Applied to `packages/shared/navigator/featureFlags.ts`'s `isTierEnabled` predicate (consumed transitively by `engine.ts` via `filterByFeatureFlags`).
+
+**Enforcement:** Code-review check during future lifts.

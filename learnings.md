@@ -176,3 +176,49 @@ Single PR shipped to `main` — `feat/phase-4b-mobile-design-contract` (two comm
 ### Phase 6 prep — surfaced during transition (2026-05-20)
 
 - **Compass tab icon.** No fitting icon found in `lucide-react-native`. Custom SVG required. Bank into the Tier 3 illustrator commission's tab-icon bucket (4–6 illustrations). Phase 6 blocker if not commissioned before mobile tab-bar implementation begins. Surface to the icon designer alongside the broader compass-as-orienting-metaphor brief from the Phase 4.B watch-outs.
+
+## Phase 5 close — packages/shared lift + worktree scripts (2026-05-21)
+
+Three slices shipped to `main` across PRs #9, #10, #11, and this close-out PR. Phase 5 closes on this PR's merge; Phase 6 (Expo scaffold + apps/mobile) becomes the next unlock.
+
+### What shipped
+
+- **Slice 1 (posture-housekeeping, PR #9, 2da548e)** — flipped Phase 5 posture flags (regulatory-architecture-resolved, security-posture-resolved, hooks-validated, etc.), harvested 7 open security questions from `rules/security.md` into `workspace.json.openSecurityQuestions`, added `workspace.json.parallelization` block documenting the 5-layer enforcement decided Day 1.
+- **Slice 1.5 (recon audit, PR #10, 80efd4a)** — `audits/phase5-shared-lift-recon.md` documenting psychage-v2 at SHA `528a8d5`. Recon claimed 31 sensitivity terms; actual code count is 30 (overcount preserved as historical artifact, flagged in watch-outs).
+- **Slice 2 (packages/shared lift, PR #11 squash, 4a94878)** — `packages/shared/` with Navigator (scoring + engine + safety + utils + types + stepConfig + providerQuestions + constants + defaults + featureFlags), PEAF (quality-gate + readability + constants + types + content-architecture + content-standards-data), sensitivity (30-term person-first filter), 181 vitest tests passing, structural cap-floor enforcement, `CONFIDENCE_CAP` dedupe from `psychage-v2` (with one second-source-of-truth still in `psychage-v2/src/admin/constants.ts:67` pending the migration slice), `featureFlags.ts` predicate-injection refactor.
+- **Slice 3 (this PR, 6615bff + chore)** — worktree scripts (`scripts/worktree-{create,list,remove}.sh` + `scripts/README.md`), DI-seam codified as `rules/conventions.md` §3, `workspace.json` Phase 5 flips, this learnings entry.
+
+### Decisions locked
+
+- **DI-seam pattern → `rules/conventions.md` §3.** Lifted code that previously depended on app-side adapters (feature flags, storage, analytics, config) now accepts the adapter behavior as a parameter with a sensible default (typically `() => true` or `noop`). Applied first to `packages/shared/navigator/featureFlags.ts`'s `isTierEnabled` predicate (consumed by `engine.ts` via `filterByFeatureFlags`). Convention is enforced at code-review time during future lifts.
+- **Inline package over submodule for V1.** `PROJECT_CONTEXT.md` §6 originally proposed git submodules. Slice 2 shipped `packages/shared/` directly inside this repo with its own `package.json` + `tsconfig.json` + `vitest.config.ts` — no submodule wiring. Rationale: psychage-v2 will consume via path or future submodule when that codebase migrates; the mobile codebase will consume via Bun workspace once Phase 6 scaffolds the monorepo. Submodule wiring defers to Phase 6 if/when mobile starts importing.
+- **30 sensitivity terms (not recon's 31).** Source-of-truth = `packages/shared/sensitivity/terms.ts` count. Recon document's 31 claim is a known overcount; left in `audits/phase5-shared-lift-recon.md` as a historical artifact rather than amended (the audit is on main; amending would distort the recon snapshot).
+- **`citation-mapper.ts` stayed app-side.** Considered for lift; decided web-specific (depends on Sanity/Supabase content shape that mobile won't touch in V1). Lift candidate if a future native feature needs citation rendering.
+- **`featureFlags.ts` predicate-injection refactor.** Lift-time refactor (not a behavior change on psychage-v2 since web still passes the same predicate). The default `() => true` makes `packages/shared` usable without app configuration; mobile + web each plug in their real predicate.
+- **`npm` as `packages/shared` package manager.** `packages/shared/package-lock.json` (npm) shipped, not bun. Workspace-root manager is Bun per stack lock, but the inner package uses npm because `packages/shared` is currently standalone (no Bun workspace root yet — that's Phase 6). When Phase 6 introduces the workspace root, evaluate consolidating to Bun.
+
+### Deferrals (revisit when conditions change)
+
+- **PII sanitizer.** Not lifted in Slice 2. The `packages/shared/peaf/quality-gate.ts` quality checks don't include a PII strip pass yet — that's downstream surface (e.g., Sentry `beforeSend`, analytics wrappers). Schedule: Phase 5.B if any pre-V1 spec needs symptom-text scrubbing in shared code; otherwise Phase 9 (Sentry + analytics + kill-switch) prereq.
+- **`psychage-v2/src/admin/constants.ts:67` second-source-of-truth CONFIDENCE_CAP.** Slice 2 deduped the lib-side `CONFIDENCE_CAP` to `packages/shared/navigator/constants.ts`, but psychage-v2's admin panel keeps a second copy. Defers to the psychage-v2 migration slice (web consumes `packages/shared` directly, removing the admin copy). Until then, any web-side amendment must be applied to both files in the same commit — same convention #1 cross-platform pattern, applied here to a cross-repo duplicate.
+- **Submodule wiring.** Per `PROJECT_CONTEXT.md` §6 lift plan, submodules were the V1 mechanism. Inline-in-this-repo replaces it for now. Submodule wiring defers to Phase 6 if mobile imports cross-repo (likely won't — Bun workspace will resolve `@psychage/shared` from `packages/shared/` directly).
+- **`rules/parallel.md` standalone file.** `workspace.json.phase5Prerequisites["parallel-infra-deployed"].deliverable` says "scripts + rules/parallel.md". Scripts shipped; standalone rules file did not. The 5-layer enforcement is documented in `workspace.json.parallelization`. Defer the standalone surface to Phase 7 if a single source-of-truth document is needed.
+
+### Carry-overs
+
+**NONE.** No open spec decisions deferred forward.
+
+### Watch-outs
+
+- **psychage-v2's `src/admin/constants.ts:67` will drift from `packages/shared/navigator/constants.ts` canonical** until reconciled in the psychage-v2 migration slice. Any teal-style cross-repo sync convention should be extended to this constant. Surfaced as a Phase 5 close watch-out, not a learnings entry, because the migration slice will resolve it; if migration slips past V1, promote to a learnings entry.
+- **Worktree scripts assume sibling-directory layout.** `<parent>/<repo>-<branch>/`. A preference for `.worktrees/` subdir would require rewriting all three scripts plus the README. The layout decision is captured in `scripts/README.md`; revisit only if a concrete pain point surfaces.
+- **`packages/shared` has no published version.** Consumers pull via filesystem path / future submodule / future Bun workspace. Semver discipline starts when the mobile codebase begins consuming (Phase 6) — until then, `packages/shared/package.json` carries `0.1.0` informally and breaking changes inside the package are free.
+- **Recon audit overcount.** `audits/phase5-shared-lift-recon.md` §2.2 claims 31 sensitivity terms; actual code count in `packages/shared/sensitivity/terms.ts` is 30. Audit is on main as the canonical Slice 1.5 deliverable; amending it would distort the recon snapshot. Decision: leave as-is, flag here, source-of-truth for the count is the code file going forward. Consider a follow-up "audit amendment" commit if anyone consults the recon doc without reading this entry first.
+- **`workspace.json.monorepo.packages.shared.exists` still reads `false`** post-Slice-2. Slice 3 plan strictly limited workspace.json edits to four named fields; this stale boolean is out of scope. Flip in a small follow-up commit or in Phase 6's monorepo migration. Same pattern as the Phase 4.B precedent (`closedSHAs` fields filled by transition commits, not the feature commit).
+- **Phase 5 close-out PR's chore SHA and squash-merge SHA need post-merge append to `phaseRoadmap."5".closedSHAs`** per `rules/conventions.md` §2 ("In a follow-up housekeeping commit when ordering doesn't allow"). The chore commit being authored here cannot reference its own SHA, and the squash SHA only exists after PR merge.
+
+### Commit SHAs
+
+- Feat commit (worktree scripts + README + executable bits): `6615bff` on branch `feat/phase-5-slice-3-close-out`.
+- Chore commit (workspace flips + conventions.md §3 + this learnings entry): same branch, same PR — SHA appended to `closedSHAs` post-merge.
+- Phase 5 PR refs: PR #9 (`2da548e`), PR #10 (`80efd4a`), PR #11 squash (`4a94878`), Slice 3 (this PR).

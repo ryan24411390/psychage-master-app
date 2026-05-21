@@ -3,8 +3,8 @@
   "schemaVersion": "1.0.0",
   "phase": 4,
   "phaseLabel": "spec-driven-workflow-deploy",
-  "lastUpdated": "2026-05-20",
-  "lastUpdatedBy": "posture-housekeeping",
+  "lastUpdated": "2026-05-21",
+  "lastUpdatedBy": "phase-5-close-out",
 
   "monorepo": {
     "structure": "pre-monorepo",
@@ -413,9 +413,10 @@
       "commitSHA": "ef6db24"
     },
     "parallel-infra-deployed": {
-      "status": "pending",
+      "status": "complete",
       "deliverable": "Phase 5 scripts + rules/parallel.md (5-layer enforcement)",
-      "ETA": "Day 11"
+      "deliverableComment": "Worktree scripts shipped (scripts/worktree-{create,list,remove}.sh + scripts/README.md). The 5-layer enforcement is documented in workspace.json `parallelization` block (added in PR #9); a standalone rules/parallel.md was not written — defer to Phase 7 if a single source-of-truth surface is needed.",
+      "commitSHA": "6615bff"
     },
     "clay-figure-library": {
       "status": "in-progress",
@@ -433,7 +434,7 @@
     "4":   { "label": "spec-driven workflow skills + workspace.json + constitution.md + 4 SR hooks + smoke-test fixtures", "status": "complete" },
     "4.A": { "label": "DESIGN.web.md + tokens/web.tokens.json + rules/regulatory.md (4 architectural commitments)", "status": "complete", "hardGateForPhase5": true, "closedSHAs": ["81998cd", "2a8a60d"] },
     "4.B": { "label": "DESIGN.mobile.md + tokens/mobile.tokens.json + /mobile-design-audit (12 patterns) + mobile IA decision (4 bottom tabs Today/Learn/Compass/Find + avatar-in-header) + clay figure Tier 3 sensorial-complete scope + Mobbin Pro subscription + clay-figure SessionStart gate", "status": "complete", "closedSHAs": ["078ae3c", "dc7f545"] },
-    "5":   { "label": "worktree scripts + packages/shared lift", "status": "pending", "blockedBy": ["regulatory-architecture-resolved", "hooks-validated"] },
+    "5":   { "label": "worktree scripts + packages/shared lift", "status": "complete", "closedSHAs": ["2da548e", "80efd4a", "4a94878", "6615bff"], "closedSHAsComment": "Chronological: PR #9 posture (2da548e), PR #10 recon (80efd4a), PR #11 packages/shared squash (4a94878), Slice 3 feat (6615bff). Slice 3 chore SHA + squash-merge SHA append post-merge per rules/conventions.md §2." },
     "6":   { "label": "Expo scaffold + apps/mobile + packages/api + packages/i18n + react-native-reusables + Storybook RN + i18n namespacing + test runner lock + Mood Quick-Check tracer ship-to-device", "status": "pending" },
     "7":   { "label": "biome + husky + lint-staged + Tier 2 hooks (PEAF/sensitivity/etc.) + _shared skill block + DoD field per task + _metrics.jsonl SessionEnd hook + /spec-verify per-PR decision", "status": "pending" },
     "8":   { "label": "GitHub Actions, EAS preview/prod, CODEOWNERS, EAS Update for crisis flow", "status": "pending" },
