@@ -136,7 +136,7 @@ Three pure modules from web get lifted into `packages/shared/` and consumed by b
 | Module | From (psychage-v2) | Why |
 |---|---|---|
 | Navigator scoring engine | `src/lib/navigator/{scoring.ts, engine.ts, utils.ts, safety.ts}` | 8-step algorithm, geometric mean, coverage factor, count cap, threshold gating. Pure functions. |
-| Sensitivity filter | `src/lib/safety/` (specific files TBC during lift) | 26-term person-first language filter |
+| Sensitivity filter | `src/lib/article-framework/{constants.ts:217, quality-gate.ts:268}` → `packages/shared/sensitivity/{terms.ts, filter.ts}` | 30-term person-first language scanner. Psychage-v2 source files remain in place until that app migrates to consume the shared package. |
 | PEAF validators | `src/lib/article-framework/{quality-gate.ts, readability.ts, constants.ts, types.ts}` | 11 quality checks, source tier validation, FK readability |
 
 ### Lift method

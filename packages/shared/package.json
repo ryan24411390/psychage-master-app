@@ -1,0 +1,17 @@
+{
+  "name": "@psychage/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Psychage shared logic — Symptom Navigator scoring, PEAF validators, person-first sensitivity filter.",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "typescript": "^5.5.3",
+    "vitest": "^4.0.15"
+  }
+}
