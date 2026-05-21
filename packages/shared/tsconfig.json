@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "paths": {
+      "@/lib/navigator/*": ["./navigator/*"],
+      "@/lib/article-framework/*": ["./peaf/*"],
+      "@/data/mock_knowledge_base": ["./navigator/__tests__/mock_knowledge_base"]
+    },
+    "baseUrl": "."
+  },
+  "include": ["navigator", "peaf", "sensitivity"],
+  "exclude": ["node_modules", "dist", "coverage", "**/__tests__/**", "**/*.test.ts"]
+}

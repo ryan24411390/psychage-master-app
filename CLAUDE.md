@@ -98,7 +98,7 @@ Non-negotiable invariants. Every session honors all of these.
 2. **No diagnostic language.** Forbidden: "you have", "diagnosis confirmed", "you are", "diagnosed with". Use educational framing: "people experiencing X often describe...", "what's commonly called...". Applies to article copy, UI strings, push notifications, error messages — everything.
 3. **Crisis detection cannot be disabled.** CRISIS-tagged symptoms halt the Navigator at *any* severity. No flag, env var, or config toggle may turn this off.
 4. **Symptom Navigator state is client-side only.** Lives in MMKV. Never serialized to Supabase. Never sent to analytics. Never logged to Sentry.
-5. **Person-first language everywhere.** 26-term sensitivity filter applies to all generated text. "Person experiencing anxiety" not "anxious person". "Person with depression" not "depressed person". The filter lives in `packages/shared/sensitivity/` after Phase 5 lift; until then, hand-check all copy.
+5. **Person-first language everywhere.** 30-term sensitivity filter applies to all generated text. "Person experiencing anxiety" not "anxious person". "Person with depression" not "depressed person". The filter lives in `packages/shared/sensitivity/` (lifted from psychage-v2 in Phase 5 Slice 2; recon §2.2 said 26/31, both stale — actual code count is 30).
 
 ### Data architecture
 
