@@ -168,3 +168,6 @@ sourcemaps/
 
 # Phase-close staging files (paste-ready content for atomic close commits); local-only
 PHASE_*_STAGING_*.md
+
+# Session implementation reports (Claude Code artifacts at root); local-only
+IMPLEMENTATION_REPORT_*.md
