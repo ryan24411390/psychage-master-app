@@ -175,7 +175,7 @@ Single PR shipped to `main` — `feat/phase-4b-mobile-design-contract` (two comm
 
 ### Phase 6 prep — surfaced during transition (2026-05-20)
 
-- **Compass tab icon.** No fitting icon found in `lucide-react-native`. Custom SVG required. Bank into the Tier 3 illustrator commission's tab-icon bucket (4–6 illustrations). Phase 6 blocker if not commissioned before mobile tab-bar implementation begins. Surface to the icon designer alongside the broader compass-as-orienting-metaphor brief from the Phase 4.B watch-outs.
+- **2026-05-21 — Compass-icon claim correction.** Prior learnings entry (Phase 6 prep, 2026-05-20) stated `lucide-react-native` lacks a Compass icon, requiring custom SVG. **Wrong.** Verified during Phase 6 Slice 1 recon: `Compass` exists in `lucide-react-native` v1.16.0 (https://lucide.dev/icons/compass). Tier 3 illustrator-commissioned compass-rose remains a deferred enhancement, not a Slice 4 blocker. Watch-out: when verifying icon-set claims against `lucide-react-native`, check `lucide.dev` canonical, not memory — the icon catalog has expanded materially since project start.
 
 ## Phase 5 close — packages/shared lift + worktree scripts (2026-05-21)
 
@@ -222,3 +222,29 @@ Three slices shipped to `main` across PRs #9, #10, #11, and this close-out PR. P
 - Feat commit (worktree scripts + README + executable bits): `6615bff` on branch `feat/phase-5-slice-3-close-out`.
 - Chore commit (workspace flips + conventions.md §3 + this learnings entry): same branch, same PR — SHA appended to `closedSHAs` post-merge.
 - Phase 5 PR refs: PR #9 (`2da548e`), PR #10 (`80efd4a`), PR #11 squash (`4a94878`), Slice 3 (this PR).
+
+## Phase 6 kickoff — mobile scaffold (2026-05-21)
+
+Slice 1 recon shipped clean (PR #14, commit `619dd4a`). [`audits/phase6-mobile-scaffold-recon.md`](audits/phase6-mobile-scaffold-recon.md) is the canonical recon artifact. Slice 2 (this PR) applies the must-resolve decisions surfaced by Slice 1.
+
+### Decisions applied
+
+- **`.phase` semantics codified as convention #4** in `rules/conventions.md` (kickoff flip per recon §5.2 option (a)). `.phase` tracks the currently-active phase; it flips at kickoff, not at prior-phase close. Sub-phases (N.A, N.B) do not bump `.phase`.
+- **`.phase` flipped `4` → `6` retroactively.** `phaseRoadmap["6"].status` `"pending"` → `"in-progress"`. `phaseLabel` `"spec-driven-workflow-deploy"` → `"mobile-scaffold"`.
+- **Package manager: bun → pnpm.** SDK 54 first-class pnpm support per Step 3 research; verified-monorepo reference setups documented. `packages/shared/package-lock.json` (npm artifact from Phase 5 lift) deleted in this PR; workspace-root `pnpm-lock.yaml` generated at Slice 3.
+- **NativeWind v5 → v4 + Tailwind 3.4** for V1 stability. NativeWind v5 still preview channel per official docs through March 2026; revisited V1.1. Recorded as both `tooling.componentLibrary` string AND new explicit `tooling.nativewindVersion` + `tooling.tailwindVersion` keys for grep-discoverability.
+
+### Carry-overs (resolves at Slice 6)
+
+- **`packages/shared/navigator/engine.ts:74` — `runSymptomNavigator` does not thread `isTierEnabled` predicate.** The DI seam exists at `filterByFeatureFlags` but is unreachable through the public entry point; web (`psychage-v2`) inherits the same gap (falls open via default `() => true`). Mobile accepts the default in V1 to match web; resolves at Slice 6 (mobile consumption) by patching `engine.ts` signature to accept and thread an optional predicate. Recorded in `workspace.json.phaseRoadmap.6.carryOversIn` (new field per schema convention surfaced this slice).
+
+### Watch-outs for Slice 3
+
+- **Reanimated 4 babel plugin renamed.** `react-native-reanimated/plugin` → `react-native-worklets/plugin`. Easy to miss; would break first build silently. `babel.config.js` in Slice 3 must reference the new path.
+- **`pnpm.overrides` for react / react-native singleton pinning required at workspace root.** Per Tamagui Discussion #3860 precedent verified SDK 54: pnpm.overrides only applies from workspace root, never workspace member. Add to root `package.json` in Slice 3.
+- **`workspace.json.monorepo.packages.shared.exists` still reads `false`** post-Slice-2. Out of scope this slice (hygiene only). Slice 3 monorepo wiring flips.
+- **Compass icon: use `lucide-react-native` `Compass`** (per L178 correction above). Tag with `TODO(tier-3-illustrator)` for swap when commissioned figure lands (ETA 2026-07-08).
+
+### Commit SHAs
+
+- Chore commit (workspace flips + conventions.md §4 + learnings L178 correction + this entry + `packages/shared/package-lock.json` deletion): single commit on `chore/phase-6-slice-2-hygiene`. Squash-merge SHA appended to `phaseRoadmap."6"` post-merge per `rules/conventions.md` §2 ("In a follow-up housekeeping commit when ordering doesn't allow"). Slice 2 has no `closedSHAs` to populate yet — Phase 6 close-out commit appends.
