@@ -1,6 +1,8 @@
 import { User } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 
+import { colors } from '@/lib/colors';
+
 export function HeaderAvatar() {
   return (
     <Pressable
@@ -13,8 +15,8 @@ export function HeaderAvatar() {
       hitSlop={8}
       className="mr-4"
     >
-      <View className="h-8 w-8 items-center justify-center rounded-full border border-neutral-300 bg-white">
-        <User size={18} color="#57534E" strokeWidth={1.75} />
+      <View className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface dark:border-border-dark dark:bg-surface-dark">
+        <User size={18} color={colors.charcoal[600]} strokeWidth={1.75} />
       </View>
     </Pressable>
   );
