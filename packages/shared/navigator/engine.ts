@@ -21,7 +21,7 @@ import type {
   SafetyResult,
   UserSymptomInput,
 } from './types';
-import { filterByFeatureFlags } from './featureFlags';
+import { filterByFeatureFlags, type IsTierEnabledFn } from './featureFlags';
 import { screenRedFlags } from './safety';
 import { rankAndDiversify, scoreAllConditions } from './scoring';
 import {
@@ -39,12 +39,17 @@ import { CONFIDENCE_CAP } from './constants';
  * @param userInputs - Array of symptoms the user selected with optional severity/duration/frequency
  * @param knowledgeBase - Complete knowledge base from the API
  * @param userRegion - Optional region code for crisis resource localization
+ * @param isTierEnabled - Optional consumer-supplied tier predicate (conventions.md #3 DI seam).
+ *   Default `() => true` keeps web-parity behavior (all tiered conditions enabled).
+ *   Mobile (Expo) injects an `expo-constants`-backed predicate; web injects an
+ *   `import.meta.env`-backed predicate.
  * @returns Complete navigator results including safety screening and condition matches
  */
 export function runSymptomNavigator(
   userInputs: UserSymptomInput[],
   knowledgeBase: KnowledgeBase,
-  userRegion?: string
+  userRegion?: string,
+  isTierEnabled: IsTierEnabledFn = () => true
 ): NavigatorResults {
   const rawConfig = knowledgeBase.matchingConfig ?? DEFAULT_MATCHING_CONFIG;
   // Critical Finding #1 floor: never let an API-supplied confidence_cap rise
@@ -71,7 +76,7 @@ export function runSymptomNavigator(
   }
 
   // Step 3: Filter conditions by feature flags (phased rollout)
-  const enabledConditions = filterByFeatureFlags(knowledgeBase.conditions);
+  const enabledConditions = filterByFeatureFlags(knowledgeBase.conditions, isTierEnabled);
 
   // Step 4: Score each condition
   const rawScores = scoreAllConditions(normalized, enabledConditions, {

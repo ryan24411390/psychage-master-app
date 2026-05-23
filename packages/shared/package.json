@@ -1,9 +1,24 @@
 {
   "name": "@psychage/shared",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Psychage shared logic — Symptom Navigator scoring, PEAF validators, person-first sensitivity filter.",
+  "exports": {
+    "./navigator": {
+      "types": "./navigator/index.ts",
+      "default": "./navigator/index.ts"
+    },
+    "./peaf": {
+      "types": "./peaf/index.ts",
+      "default": "./peaf/index.ts"
+    },
+    "./sensitivity": {
+      "types": "./sensitivity/index.ts",
+      "default": "./sensitivity/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
