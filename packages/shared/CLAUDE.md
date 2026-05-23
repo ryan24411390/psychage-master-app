@@ -32,6 +32,10 @@ Current seam: `runSymptomNavigator(..., isTierEnabled: IsTierEnabledFn = () => t
 
 `CONFIDENCE_CAP = 0.75` is the absolute ceiling. Declared once in `navigator/constants.ts`. Enforced at three call sites (`navigator/engine.ts`, `navigator/scoring.ts`, `navigator/utils.ts`). **Never** raise the constant. **Never** bypass `Math.min(config.confidence_cap, CONFIDENCE_CAP)`. Confidence cap floor tests live in `navigator/__tests__/cap-floor.test.ts`.
 
+### Cap-safe barrel surface
+
+`runSymptomNavigator` is the cap-safe entry point — `NavigatorResultItem.relevance_score` equals `capped_score` (enforced twice in `calculateConditionScore`). The lower-level scoring primitives (`calculateConditionScore`, `rankAndDiversify`, `scoreAllConditions`) and the `ConditionScore` / `MatchedSymptomDetail` / `ScoringConfig` types are **intentionally not exported from the barrel** — `ConditionScore` carries pre-cap diagnostic fields (`raw_score`, `normalized_score`) that can exceed 0.75 and would be a Sacred Rule #1 foot-gun for a naive consumer. If a future caller proves a need, re-adding them is a non-breaking subset addition; the trade-off (and a wrapper that strips pre-cap fields) must be surfaced first.
+
 ## No runtime dependencies
 
 `devDependencies` only (TypeScript, vitest, `@types/node`). Adding a runtime dep means every consumer pays the bundle cost — surface the trade-off first.

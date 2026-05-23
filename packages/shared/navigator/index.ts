@@ -25,12 +25,12 @@ export {
 // Safety screening
 export { screenRedFlags } from './safety';
 
-// Scoring primitives (lower-level access for tooling / future consumers)
-export {
-  calculateConditionScore,
-  rankAndDiversify,
-  scoreAllConditions,
-} from './scoring';
+// Scoring primitives are intentionally NOT exported from the public surface.
+// Their returned ConditionScore objects carry pre-cap diagnostic fields
+// (raw_score, normalized_score) that can exceed CONFIDENCE_CAP (0.75) —
+// a Sacred Rule #1 foot-gun for naive consumers. runSymptomNavigator
+// returns NavigatorResultItem.relevance_score (= capped_score, cap-safe).
+// Re-adding scoring primitives later is a non-breaking subset addition.
 
 // Utilities + display helpers
 export {
@@ -76,13 +76,14 @@ export { DURATION_TO_DAYS } from './types';
 
 // Types
 export type {
+  // ConditionScore is intentionally not re-exported — its raw_score and
+  // normalized_score fields are pre-cap diagnostics (Sacred Rule #1).
   AnalyticsEvent,
   AnalyticsEventType,
   Condition,
   ConditionCategory,
   ConditionProfile,
   ConditionRedFlag,
-  ConditionScore,
   ConditionSymptomMapping,
   ConditionWithMappings,
   CrisisResource,
@@ -91,7 +92,6 @@ export type {
   DurationModifiers,
   FrequencyModifiers,
   KnowledgeBase,
-  MatchedSymptomDetail,
   MatchingConfig,
   NavigatorResultItem,
   NavigatorResults,
@@ -106,7 +106,6 @@ export type {
   SavedResult,
   SaveResultsRequest,
   SavedResultsResponse,
-  ScoringConfig,
   SeverityModifiers,
   Symptom,
   SymptomCategory,
