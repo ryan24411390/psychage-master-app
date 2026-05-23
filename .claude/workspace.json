@@ -3,25 +3,25 @@
   "schemaVersion": "1.0.0",
   "phase": 6,
   "phaseLabel": "mobile-scaffold",
-  "lastUpdated": "2026-05-21",
-  "lastUpdatedBy": "phase-6-slice-2-hygiene",
+  "lastUpdated": "2026-05-22",
+  "lastUpdatedBy": "phase-6-slice-3-monorepo-expo",
 
   "monorepo": {
     "structure": "pre-monorepo",
     "comment": "Pre-monorepo state: workspace contains docs only. Phase 5 lifts packages/shared. Phase 6 scaffolds apps/mobile.",
     "apps": {
       "mobile": {
-        "exists": false,
+        "exists": true,
         "path": "apps/mobile",
         "expectedInPhase": 6,
         "stack": "expo + react-native + nativewind",
         "claudeMdPath": "apps/mobile/CLAUDE.md",
-        "claudeMdExists": false
+        "claudeMdExists": true
       }
     },
     "packages": {
       "shared": {
-        "exists": false,
+        "exists": true,
         "path": "packages/shared",
         "expectedInPhase": 5,
         "stack": "pure-typescript",
