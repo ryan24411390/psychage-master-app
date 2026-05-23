@@ -1,5 +1,3 @@
-@AGENTS.md
-
 # apps/mobile/CLAUDE.md
 
 Scope-specific rules for the React Native + Expo mobile app.
