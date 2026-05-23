@@ -5,6 +5,7 @@ import { BookOpen, Compass, MapPin, Sun } from 'lucide-react-native';
 // (workspace.json clayFigures ETA).
 
 import { HeaderAvatar } from '@/components/HeaderAvatar';
+import { colors } from '@/lib/colors';
 import { useHaptics } from '@/lib/haptic-context';
 
 export default function TabsLayout() {
@@ -14,7 +15,9 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerRight: () => <HeaderAvatar />,
-        tabBarActiveTintColor: '#1A9B8C',
+        // Static light-mode value — see lib/colors.ts caveat re: useColorScheme
+        // reactivity landing in Slice 6+ with the settings dark-mode toggle.
+        tabBarActiveTintColor: colors.primary.default.light,
       }}
       screenListeners={{
         tabPress: () => fireHaptic('tab'),
