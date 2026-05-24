@@ -173,7 +173,7 @@
   "type": {
     "family": {
       "sans":    "Inter, system-ui, -apple-system, sans-serif",
-      "display": "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
+      "display": "Inter, system-ui, -apple-system, sans-serif",
       "mono":    "'IBM Plex Mono', monospace",
       "_source": {
         "sans":    "src/styles/tokens.css:3",
