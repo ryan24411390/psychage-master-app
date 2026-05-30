@@ -15,7 +15,7 @@ Scope-specific rules for the React Native + Expo mobile app.
 - Audit: `/mobile-design-audit` skill before commit. Pass 1 is stub-aware until first-screen calibration (Slice 8).
 
 ## Shared package consumption
-`@psychage/shared` consumed via workspace:* protocol. DI seam adapters (storage, featureFlags, config, analytics) wire in Slice 6 — do not invoke shared functions that require the seam (per convention #3) until then.
+`@psychage/shared` consumed via workspace:* protocol. DI seam adapters (storage, featureFlags, config, analytics) wire in Slice 7 at `apps/mobile/lib/adapters/`. Slice 6 shipped the shared barrel only; mobile-side adapters carry-over into Slice 7. Do not invoke shared functions that require the seam (per convention #3) without passing the adapter parameter.
 
 ## Conventions
 - Read root `CLAUDE.md` first.
