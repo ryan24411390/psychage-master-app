@@ -4,11 +4,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import '../global.css';
 
-// Side-effect import: runs the SR-13 versioned migrator at launch so any
-// `isTierEnabled` read (transitively via featureFlags) sees a stamped v1
-// TierFlags envelope. Transitively imported via `@/lib/haptic-context` →
-// `@/lib/haptics` chain anyway; restated here for explicit ordering.
-import '@/lib/persistence/tier-flags';
+// Side-effect import: loading featureFlags.ts executes loadTierFlags(storage)
+// at module init, which runs the SR-13 migrator before any consumer reads isTierEnabled.
+import '@/lib/adapters/featureFlags';
 
 import { HapticProvider } from '@/lib/haptic-context';
 import { IBMPlexMono_400Regular } from '@expo-google-fonts/ibm-plex-mono';
