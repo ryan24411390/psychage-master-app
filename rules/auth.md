@@ -160,6 +160,8 @@ psychage-account     mirror of account data, synced from Supabase (V1 read-only,
 
 When an anonymous user creates an account, data migrates from `psychage-anonymous` to Supabase, then `psychage-account` is populated from Supabase on next sync.
 
+`psychage-anonymous` is plaintext for tier-flag-class data (non-PII device preferences). Any data containing PII or symptom payloads MUST use an encrypted instance (`psychage-account`, encryption key from auth slice).
+
 ---
 
 ## 6. Session management
