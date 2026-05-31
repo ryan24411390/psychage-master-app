@@ -98,10 +98,10 @@
 
   "type": {
     "family": {
-      "sans":    "Inter",
-      "display": "Plus Jakarta Sans",
+      "sans":    "Satoshi",
+      "display": "Satoshi",
       "mono":    "IBM Plex Mono",
-      "_source": { "_note": "Same families as web (tokens/web.tokens.json type.family.*). On React Native these are font asset names registered via expo-font; on web they're CSS font-family strings — same identity, different consumption shape." }
+      "_source": { "_note": "Satoshi covers both sans and display (single brand-wide typeface). Self-hosted via static OTF cuts (Regular/Medium/Bold) under apps/mobile/assets/fonts/, registered through expo-font in apps/mobile/app/_layout.tsx. License: Indian Type Foundry Free Font License (apps/mobile/assets/fonts/FFL.txt). IBM Plex Mono remains via @expo-google-fonts/ibm-plex-mono. Cross-platform note: web typography (tokens/web.tokens.json type.family.*) is a separate move — this token is mobile-only as of the Satoshi swap." }
     },
     "_omitted": {
       "_note": "size/weight/leading/tracking omitted in V1 — psychage-mobile has no shipped screen to calibrate against. Skeleton stubs only. Calibrated against the first mobile screen design in Phase 6. Hardcoding a scale before there is a screen to validate it is invented value (see DESIGN.mobile.md §1.2)."

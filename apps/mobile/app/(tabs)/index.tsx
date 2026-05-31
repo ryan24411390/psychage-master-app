@@ -1,5 +1,6 @@
 import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { Link } from 'expo-router';
 
 import { Button } from '@/components/ui/Button';
 import { ScreenShell } from '@/components/ui/ScreenShell';
@@ -24,6 +25,13 @@ export default function TodayScreen() {
           <Button variant="primary" onPress={() => {}}>
             Tap to test affirm haptic
           </Button>
+          {/* DEV-only Slice 9 verification entrypoint. __DEV__ is false in
+              production bundles → link is omitted from V1 ship. */}
+          {__DEV__ && (
+            <Link href="/dev-navigator" className="text-primary underline mt-4">
+              Open dev verify screen →
+            </Link>
+          )}
         </View>
       </Animated.View>
     </ScreenShell>

@@ -18,7 +18,7 @@ const variantClasses: Record<TextVariant, string> = {
   bodySm: 'font-sans text-sm text-text-primary dark:text-text-primary-dark',
   caption: 'font-sans text-xs text-text-secondary dark:text-text-secondary-dark',
   heading: 'font-display text-xl text-text-primary dark:text-text-primary-dark',
-  headingLg: 'font-display text-2xl font-semibold text-text-primary dark:text-text-primary-dark',
+  headingLg: 'font-display text-2xl font-bold text-text-primary dark:text-text-primary-dark',
 };
 
 export function Text({ variant = 'body', className, ...props }: TextProps) {
