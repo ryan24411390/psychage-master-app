@@ -258,3 +258,23 @@ Three environmental issues surfaced during Slice 7–9 device verification. Code
 - **Node 25 hangs Expo CLI silently.** Metro never binds port 8081 on Node v25.x; process sample shows libuv `FileHandle::ClosePromise` cold-abort path. Use Node 22 LTS only. Repo now pins via `.nvmrc` + `engines.node: ">=22 <23"`.
 - **Package manager is pnpm, not Bun.** Despite earlier stack-table claims, the live tooling is `pnpm@10.25.0` (root `package.json`) with `pnpm-lock.yaml` as the lockfile. Use `pnpm` / `pnpm dlx`, not `bun` / `bunx` / `npx`. Root `CLAUDE.md` stack table and command examples reconciled in this PR.
 - **Agent background bash cannot host TTY dev servers.** Expo CLI, Metro, and `expo prebuild` require a real Terminal TTY. Background harnesses (nohup, CI=1, `script(1)`) silently hang. Future agent sessions: run these from a user terminal only; report blockage rather than retry-loop.
+
+## Phase 6 close-out (2026-06-02)
+
+Two findings recorded as the phase moved from `in-progress` → `complete`. PR #26 (android.package align) merged as `990749e`. Close-out branch: `chore/phase-6-close`.
+
+### SR-3 hook was misconfigured since Phase 4 ship — false-blocked Write/Edit on unrelated paths
+
+The Phase 4 SR-3 entry in `.claude/settings.json` used `type: "prompt"` with `prompt: "$CLAUDE_PROJECT_DIR/.claude/hooks/sr3_diagnostic_language.sh"`. Claude Code's prompt-type hooks accept only a literal prompt string in the `prompt` field — there is no script-as-prompt-generator pattern. Haiku received the path as its literal prompt, hallucinated objections referencing the path, and false-blocked unrelated Write/Edit calls. The hook script itself was correctly authored to *emit* a prompt to stdout, but no plumbing ever invoked it that way; the script effectively never ran.
+
+Phase 6 close-out converted the entry to `type: "command"` and rewrote the script as a deterministic case-insensitive seed-phrase scan against `constitution.md.SR-3.forbidden_phrase_seeds`, matching SR-1/2/4 shape (exit 0 allow, exit 2 block). All 6 smoke-test cases green (2 block, 4 allow including non-glob file, test fixture, comment-only).
+
+Known gap: Haiku paraphrase coverage is OFF. Re-enable with an inline `ANTHROPIC_API_KEY` call inside the script once a secret-distribution mechanism exists. Track when SR-5 (Phase 11) adds string-level enforcement — natural moment to bundle paraphrase-detection restoration.
+
+### Mood Quick-Check tracer reassigned from Phase 6 → Phase 9 / 11
+
+The Phase 6 label ended with `... + Mood Quick-Check tracer ship-to-device`, sourced from [docs/AUDIT_RESPONSE_FINAL.md:60](docs/AUDIT_RESPONSE_FINAL.md#L60) ("must ship to TestFlight/internal Android, used on real device for ≥48 hours"). It was never built as a slice. Phase 0 close-out recon confirmed: no Mood Quick-Check screen exists; the Today tab is a placeholder Button with `onPress={() => {}}`; the `analytics` adapter in `apps/mobile/lib/adapters/analytics.ts` is a no-op stub; the PostHog vs Amplitude vendor decision is a blocked open scope per project CLAUDE.md §5.
+
+Decision: drop the tracer bullet from `phaseRoadmap["6"].label` and reassign to Phase 9 (analytics vendor + Sentry RN) where a real vendor lands, or Phase 11 (first spec-workflow feature: Daily Check-In) where the mood-input surface naturally arrives. The "TestFlight + 48h real-device use" bar from the audit response cannot be met without a vendor — no off-device observability point, no 48h trace to inspect.
+
+The on-device verification surface that *did* ship in Phase 6 is the Navigator parity check (`apps/mobile/app/dev-navigator.tsx`, Phase 6 Slice 9): fonts + MMKV persistence + `runSymptomNavigator` web-parity. Not a tracer; not a Mood Quick-Check. Two distinct concerns conflated in the original Phase 6 label.
