@@ -316,7 +316,7 @@
       "AGENTS.md",
       "PROJECT_CONTEXT.md",
       ".claude/workspace.json",
-      "bun.lockb",
+      "pnpm-lock.yaml",
       "supabase/migrations/*.sql",
       "apps/mobile/app.json"
     ],

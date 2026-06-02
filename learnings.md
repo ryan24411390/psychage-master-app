@@ -250,3 +250,11 @@ Slice 1 recon shipped clean (PR #14, commit `619dd4a`). [`audits/phase6-mobile-s
 ### Commit SHAs
 
 - Chore commit (workspace flips + conventions.md §4 + learnings L178 correction + this entry + `packages/shared/package-lock.json` deletion): single commit on `chore/phase-6-slice-2-hygiene`. Squash-merge SHA appended to `phaseRoadmap."6"` post-merge per `rules/conventions.md` §2 ("In a follow-up housekeeping commit when ordering doesn't allow"). Slice 2 has no `closedSHAs` to populate yet — Phase 6 close-out commit appends.
+
+## Phase 6 device-verification bookmarks (2026-06-02)
+
+Three environmental issues surfaced during Slice 7–9 device verification. Code is unaffected; recording so future sessions inherit the fixes.
+
+- **Node 25 hangs Expo CLI silently.** Metro never binds port 8081 on Node v25.x; process sample shows libuv `FileHandle::ClosePromise` cold-abort path. Use Node 22 LTS only. Repo now pins via `.nvmrc` + `engines.node: ">=22 <23"`.
+- **Package manager is pnpm, not Bun.** Despite earlier stack-table claims, the live tooling is `pnpm@10.25.0` (root `package.json`) with `pnpm-lock.yaml` as the lockfile. Use `pnpm` / `pnpm dlx`, not `bun` / `bunx` / `npx`. Root `CLAUDE.md` stack table and command examples reconciled in this PR.
+- **Agent background bash cannot host TTY dev servers.** Expo CLI, Metro, and `expo prebuild` require a real Terminal TTY. Background harnesses (nohup, CI=1, `script(1)`) silently hang. Future agent sessions: run these from a user terminal only; report blockage rather than retry-loop.

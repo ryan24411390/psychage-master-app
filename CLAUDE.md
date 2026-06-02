@@ -80,8 +80,8 @@ The migration **has not happened yet.** When you reference paths, use today's la
 | Errors | Sentry RN | with strict `beforeSend` PII filter |
 | Build | EAS Build + EAS Update | latest |
 | Testing | Vitest + RNTL + Maestro | latest |
-| Package manager | Bun | 1.3+ |
-| Monorepo | Turborepo + Bun workspaces | 2 / latest |
+| Package manager | pnpm | 10.25.0 |
+| Monorepo | Turborepo + pnpm workspaces | 2 / latest |
 | Lint/format | Biome (replaces ESLint + Prettier) | latest |
 
 No Redux, no Sanity, no Next.js, no styled-components, no Zustand for server state, no `useState` for server data.
@@ -166,18 +166,18 @@ These don't work yet — `psychage-mobile/` is empty. Listed for reference; will
 
 ```bash
 # Mobile app (from workspace root, after monorepo migration)
-bun run -F mobile start          # Expo dev server
-bun run -F mobile ios            # iOS simulator
-bun run -F mobile android        # Android emulator
-bun run -F mobile typecheck      # tsc --noEmit
-bun run -F mobile lint           # Biome check
-bun run -F mobile test           # Vitest
+pnpm --filter mobile start       # Expo dev server
+pnpm --filter mobile ios         # iOS simulator
+pnpm --filter mobile android     # Android emulator
+pnpm --filter mobile typecheck   # tsc --noEmit
+pnpm --filter mobile lint        # Biome check
+pnpm --filter mobile test        # Vitest
 
 # Workspace-wide
-bun install                      # Install all workspace deps
-bun run typecheck                # All apps + packages
-bun run lint                     # All apps + packages
-bun run build                    # Production bundle (EAS)
+pnpm install                     # Install all workspace deps
+pnpm typecheck                   # All apps + packages
+pnpm lint                        # All apps + packages
+pnpm build                       # Production bundle (EAS)
 ```
 
 Until `package.json` exists at root, these are aspirational. Real commands appear after Phase 6.
