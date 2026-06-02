@@ -97,7 +97,7 @@ Today: empty `psychage-mobile/` folder, web is its own repo. Migration path docu
 | 3 | Close decision blockers | ✅ Done (commit 9c362d7, 2026-05-05) | `rules/auth.md`, `rules/offline.md`, `ARCHITECTURE.md` (see §5) |
 | 4 | Spec-driven workflow | ✅ Done (commit ef6db24, 2026-05-08) | Six `.claude/skills/spec-*/SKILL.md` + `constitution.md` + 4 SR PreToolUse hooks + Stop/SessionStart hooks + `HOOKS_SMOKE_TEST_FIXTURES.md` + `docs/AUDIT_RESPONSE_FINAL.md` |
 | 5 | Worktree infrastructure | ⏭ Pending | Worktree spawn/merge scripts, file-isolation rules in `/spec-tasks` |
-| 6 | Expo scaffold | ⏭ Pending | `bunx create-expo-app`, NativeWind 5, `@/` alias, folder structure |
+| 6 | Expo scaffold | ⏭ Pending | `pnpm dlx create-expo-app`, NativeWind 5, `@/` alias, folder structure |
 | 7 | Quality gates | ⏭ Pending | Biome config, Husky + lint-staged, pre-commit (typecheck + lint + format + test) |
 | 8 | CI/CD | ⏭ Pending | GitHub Actions for CI + EAS preview + EAS production, CODEOWNERS |
 | 9 | Observability | ⏭ Pending | Sentry RN with PII-stripping `beforeSend`, analytics wrapper (after PostHog vs Amplitude decision) |
