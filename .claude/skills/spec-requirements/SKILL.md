@@ -22,6 +22,8 @@ These four rules become non-negotiable acceptance criteria in every requirements
 
 If the feature you're working on has surface against any of these four, the `## Sacred Rules → Acceptance criteria` section in requirements.md must contain the corresponding ACs verbatim — not paraphrased.
 
+Canonical reference for the four rules above: `../_shared/sacred-rules.md` (human-readable companion to `constitution.md`).
+
 For all other rules (PEAF blocks, person-first 26-term filter, `@/` alias, Tailwind-only, `ArticleRecord` shape), see `CLAUDE.md`.
 
 ## Step 0 — Refuse to run on a deferred brief

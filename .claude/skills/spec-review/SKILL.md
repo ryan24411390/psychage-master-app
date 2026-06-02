@@ -26,6 +26,8 @@ The audit subagent reads constitution.md to verify Sacred Rule compliance eviden
 3. **SR-3 — No diagnostic language.** All user-facing copy in design.md must use educational framing.
 4. **SR-4 — Symptom data on device.** Telemetry section in design.md must list "MUST NOT FIRE" events with symptom data.
 
+Canonical reference: `../_shared/sacred-rules.md` (human-readable companion to `constitution.md`).
+
 ## Step 0 — Determine review mode
 
 This runs before everything else. Do not skip.

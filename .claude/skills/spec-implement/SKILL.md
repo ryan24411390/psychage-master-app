@@ -20,6 +20,8 @@ These rules are deterministically enforced by `.claude/hooks/sr*.sh` on every Ed
 3. **SR-3 — No diagnostic language.** Hook enforces (prompt-type via Haiku).
 4. **SR-4 — Symptom data on device.** Hook enforces.
 
+Canonical reference: `../_shared/sacred-rules.md` (human-readable companion to `constitution.md`).
+
 If a hook blocks during implementation, **read the hook's error message carefully**. The hook is correct; your code or test is wrong. Fix the violation; do not work around the hook.
 
 ## Step 0 — Refusal cascade

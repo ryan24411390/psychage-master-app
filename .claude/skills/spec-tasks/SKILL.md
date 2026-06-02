@@ -22,6 +22,8 @@ These constrain DoD criteria for tasks that touch their surfaces. Source: `const
 3. **SR-3 — No diagnostic language.** Tasks producing user-facing copy get: "All strings reviewed against sensitivity filter; sr3 hook passes."
 4. **SR-4 — Symptom data on device.** Tasks producing telemetry code get: "No symptom-data identifiers in any telemetry call; sr4 hook passes."
 
+Canonical reference: `../_shared/sacred-rules.md` (human-readable companion to `constitution.md`).
+
 For all other rules, see `CLAUDE.md`.
 
 ## Step 0 — Refuse on missing or deferred design.md

@@ -172,6 +172,9 @@ PHASE_*_STAGING_*.md
 # Session implementation reports (Claude Code artifacts at root); local-only
 IMPLEMENTATION_REPORT_*.md
 
+# Phase 7 SessionEnd hook output (observability JSONL); local-only
+_metrics.jsonl
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Phase 6 — Expo / pnpm additions (most Expo paths already covered above)
 # ─────────────────────────────────────────────────────────────────────────────

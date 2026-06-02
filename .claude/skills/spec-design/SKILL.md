@@ -20,6 +20,8 @@ These four rules constrain every screen, every component reference, every animat
 3. **SR-3 — No diagnostic language.** All copy in design.md mockups, ASCII layouts, and i18n key examples uses educational framing.
 4. **SR-4 — Symptom data on device.** Telemetry section in design.md must explicitly list "MUST NOT FIRE" events containing symptom data.
 
+Canonical reference: `../_shared/sacred-rules.md` (human-readable companion to `constitution.md`).
+
 For all other rules (PEAF blocks, person-first 26-term filter, `@/` alias, Tailwind-only), see `CLAUDE.md`.
 
 ## Step 0 — Three refusal layers (run before everything else)

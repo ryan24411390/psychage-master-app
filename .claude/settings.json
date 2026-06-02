@@ -78,6 +78,18 @@
           }
         ]
       }
+    ],
+    "SessionEnd": [
+      {
+        "_comment": "Append one observability line to _metrics.jsonl at workspace root. Fail-open by design (never blocks session end). _metrics.jsonl is gitignored. See .claude/hooks/session_end_metrics.sh for schema.",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session_end_metrics.sh",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   }
 }

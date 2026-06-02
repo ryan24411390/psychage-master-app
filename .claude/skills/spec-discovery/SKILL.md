@@ -32,6 +32,8 @@ These four rules constrain every spec, including the brief you're about to write
 
 If the feature you're discovering has surface against any of these four, name them in the brief's `## Sacred Rules in play` section. If you don't, `/spec-review` will catch it later — but better to catch it now.
 
+Canonical reference for the four rules above: `../_shared/sacred-rules.md` (human-readable companion to `constitution.md`).
+
 For all other rules (PEAF blocks, person-first 26-term filter, `@/` alias, Tailwind-only, `ArticleRecord` shape, Sanity-dormant), see `CLAUDE.md`.
 
 ## Before you start
