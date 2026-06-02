@@ -2,7 +2,6 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "_comment_constitution": "All hook patterns derive from constitution.md YAML front-matter. Hook scripts parse it at runtime — never hardcode patterns inside scripts.",
   "_comment_test_first": "Smoke-test every hook against the fixtures in HOOKS_SMOKE_TEST_FIXTURES.md before merging. A hook that exits 1 instead of 2 silently fails to enforce.",
-
   "hooks": {
     "PreToolUse": [
       {
@@ -29,10 +28,9 @@
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
-            "type": "prompt",
-            "model": "claude-haiku-4-5",
-            "prompt": "$CLAUDE_PROJECT_DIR/.claude/hooks/sr3_diagnostic_language.sh",
-            "timeout": 15
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sr3_diagnostic_language.sh",
+            "timeout": 5
           }
         ]
       },
@@ -47,7 +45,6 @@
         ]
       }
     ],
-
     "Stop": [
       {
         "_comment": "Belt-and-suspenders: re-run all four Sacred Rule checks at session stop. Catches anything that slipped past PreToolUse (e.g., a multi-edit that touched files in a single tool call).",
@@ -70,7 +67,6 @@
         ]
       }
     ],
-
     "SessionStart": [
       {
         "_comment": "Inject constitution.md location and Sacred Rule status into session context. Helps Claude understand the enforcement layer exists.",
