@@ -20,10 +20,16 @@ if [[ ! -f "$CONSTITUTION" ]]; then
   exit 2
 fi
 
+# Optional --base-ref=<ref> switches Stop mode to scan branch diff
+# (<ref>...HEAD, added lines only) instead of staged diff.
 MODE="pretool"
-if [[ "${1:-}" == "--mode=stop" ]]; then
-  MODE="stop"
-fi
+BASE_REF=""
+for arg in "$@"; do
+  case "$arg" in
+    --mode=stop) MODE="stop" ;;
+    --base-ref=*) BASE_REF="${arg#--base-ref=}" ;;
+  esac
+done
 
 # ---- Determine target ----
 if [[ "$MODE" == "pretool" ]]; then
@@ -42,8 +48,20 @@ print(tool_input.get('content') or tool_input.get('new_string') or '')
 " 2>/dev/null || echo "")
   [[ -z "$TARGET_FILE" ]] && exit 0
 elif [[ "$MODE" == "stop" ]]; then
-  TARGET_FILE="<all-staged-files>"
-  TARGET_CONTENT=$(git diff --cached 2>/dev/null || git diff 2>/dev/null || echo "")
+  if [[ -n "$BASE_REF" ]]; then
+    if ! git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
+      echo "BLOCKED ($RULE_ID): base ref '$BASE_REF' not found" >&2
+      exit 2
+    fi
+    TARGET_FILE="<branch-diff:${BASE_REF}...HEAD>"
+    TARGET_CONTENT=$(git diff --unified=0 "${BASE_REF}...HEAD" 2>/dev/null \
+      | { grep '^+' || true; } \
+      | { grep -v '^+++' || true; } \
+      | sed 's/^+//')
+  else
+    TARGET_FILE="<all-staged-files>"
+    TARGET_CONTENT=$(git diff --cached 2>/dev/null || git diff 2>/dev/null || echo "")
+  fi
 fi
 
 # ---- File-glob check ----

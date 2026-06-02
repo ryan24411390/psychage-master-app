@@ -247,6 +247,253 @@ git branch -D smoke-test-stop
 
 ---
 
+## Branch-diff mode (--base-ref) — Phase 8 / Slice 1a
+
+The four SR hooks accept an optional `--base-ref=<ref>` flag that switches `--mode=stop` from scanning the staged diff (`git diff --cached`) to scanning the branch diff (`<ref>...HEAD`, **added lines only**). Husky keeps calling `sr*.sh --mode=stop` with no flag; CI will call `sr*.sh --mode=stop --base-ref=origin/main` (Slice 1b).
+
+**Fixture setup notes:**
+
+- These fixtures execute the hook directly (no pre-commit chain). The main repo's husky hooks block any commit that contains a violation, which makes setting up a baseline-with-violation in the main repo impossible. To avoid that, each fixture builds a fresh scratch git repo in `/tmp` and runs the SR hook there. `CLAUDE_PROJECT_DIR` is pointed at the main repo so the hook still loads `constitution.md`.
+- BLOCK fixtures use the same runtime-assembled trigger pattern as the Phase 7 git pre-commit section (so this `.md` file itself does not contain literal SR triggers).
+- The critical proof case is **ALLOW after removal**: commit a violation, then commit its removal — the branch diff contains only `-` lines, which `^+` filtering must exclude.
+
+### Shared helpers
+
+```bash
+# Path to main repo for CLAUDE_PROJECT_DIR (constitution.md) and hook scripts.
+MAIN_REPO="$(pwd)"
+
+# Builds a fresh scratch repo at $SCRATCH with one empty commit on `base`.
+scratch_init() {
+  SCRATCH="$(mktemp -d)"
+  cd "$SCRATCH"
+  git init -q
+  git config user.email "smoke@test"
+  git config user.name "Smoke Test"
+  git checkout -q -b base
+  echo "// baseline" > seed.ts
+  git add seed.ts
+  git commit -q -m "baseline"
+  git checkout -q -b feature
+}
+
+scratch_clean() {
+  cd "$MAIN_REPO"
+  rm -rf "$SCRATCH"
+}
+```
+
+### SR-1 — branch-diff BLOCK (violation added on branch)
+
+```bash
+scratch_init
+PROP="conf""idence"  # assembled so this .md doesn't trip SR-1
+HIGH=0.92
+echo "export const r = { ${PROP}: ${HIGH} };" > violation.ts
+git add violation.ts
+git commit -q -m "add SR-1 violation"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr1_navigator_confidence_cap.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 2
+
+scratch_clean
+```
+
+### SR-1 — branch-diff ALLOW (violation REMOVED on branch — critical proof)
+
+```bash
+scratch_init
+PROP="conf""idence"
+HIGH=0.99
+
+# Baseline commit on `base` contains the violation. Move to base, add it,
+# then return to `feature` so the removal happens on the feature branch.
+git checkout -q base
+echo "export const r = { ${PROP}: ${HIGH} };" > legacy.ts
+git add legacy.ts
+git commit -q -m "legacy code with violation (baseline)"
+git checkout -q feature
+git merge -q base
+
+# On feature: remove the violating file.
+git rm -q legacy.ts
+git commit -q -m "remove legacy violation"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr1_navigator_confidence_cap.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 0 — `-` lines must not trigger; ^+ filter excludes removals
+
+scratch_clean
+```
+
+### SR-2 — branch-diff BLOCK
+
+```bash
+scratch_init
+NAME="dis""able_""crisis"
+echo "export function ${NAME}(): void {}" > violation.ts
+git add violation.ts
+git commit -q -m "add SR-2 violation"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr2_crisis_bypass_detector.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 2
+
+scratch_clean
+```
+
+### SR-2 — branch-diff ALLOW (violation REMOVED on branch)
+
+```bash
+scratch_init
+NAME="dis""able_""crisis"
+
+git checkout -q base
+echo "export function ${NAME}(): void {}" > legacy.ts
+git add legacy.ts
+git commit -q -m "legacy SR-2 violation (baseline)"
+git checkout -q feature
+git merge -q base
+
+git rm -q legacy.ts
+git commit -q -m "remove legacy"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr2_crisis_bypass_detector.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 0
+
+scratch_clean
+```
+
+### SR-3 — branch-diff BLOCK
+
+```bash
+scratch_init
+W1="y""ou"; W2="ha""ve"  # assembled SR-3 seed
+cat > violation.tsx <<EOF
+export const Copy = () => <p>${W1} ${W2} depression.</p>;
+EOF
+git add violation.tsx
+git commit -q -m "add SR-3 violation"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr3_diagnostic_language.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 2
+
+scratch_clean
+```
+
+### SR-3 — branch-diff ALLOW (violation REMOVED on branch)
+
+```bash
+scratch_init
+W1="y""ou"; W2="ha""ve"
+
+git checkout -q base
+cat > legacy.tsx <<EOF
+export const Copy = () => <p>${W1} ${W2} depression.</p>;
+EOF
+git add legacy.tsx
+git commit -q -m "legacy SR-3 violation (baseline)"
+git checkout -q feature
+git merge -q base
+
+git rm -q legacy.tsx
+git commit -q -m "remove legacy"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr3_diagnostic_language.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 0
+
+scratch_clean
+```
+
+### SR-4 — branch-diff BLOCK
+
+```bash
+scratch_init
+CALL="ana""lytics.track"
+KEY="sym""ptom"
+cat > violation.ts <<EOF
+${CALL}("navigator_completed", { ${KEY}: "anxiety" });
+EOF
+git add violation.ts
+git commit -q -m "add SR-4 violation"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr4_no_symptom_telemetry.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 2
+
+scratch_clean
+```
+
+### SR-4 — branch-diff ALLOW (violation REMOVED on branch)
+
+```bash
+scratch_init
+CALL="ana""lytics.track"
+KEY="sym""ptom"
+
+git checkout -q base
+cat > legacy.ts <<EOF
+${CALL}("navigator_completed", { ${KEY}: "anxiety" });
+EOF
+git add legacy.ts
+git commit -q -m "legacy SR-4 violation (baseline)"
+git checkout -q feature
+git merge -q base
+
+git rm -q legacy.ts
+git commit -q -m "remove legacy"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr4_no_symptom_telemetry.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 0
+
+scratch_clean
+```
+
+### Edge case — invalid base-ref MUST fail closed
+
+```bash
+scratch_init
+echo "export const x = 1;" > safe.ts
+git add safe.ts
+git commit -q -m "safe change"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr1_navigator_confidence_cap.sh" \
+  --mode=stop --base-ref=does/not/exist
+echo "Exit: $?"  # MUST be 2 with "BLOCKED (SR-1): base ref 'does/not/exist' not found"
+
+scratch_clean
+```
+
+### Edge case — empty diff (HEAD == base-ref) MUST allow
+
+```bash
+scratch_init
+# No new commits on `feature` beyond `base`.
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr1_navigator_confidence_cap.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 0 — empty diff is not a violation
+
+scratch_clean
+```
+
+---
+
 ## Pass criteria for the Phase 4 close commit
 
 All cases above except SR-3 must produce the expected exit code. SR-3 must produce ≥9/10 correct decisions on its 10-case rubric.

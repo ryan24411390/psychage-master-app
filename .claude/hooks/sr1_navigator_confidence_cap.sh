@@ -25,10 +25,17 @@ if [[ ! -f "$CONSTITUTION" ]]; then
 fi
 
 # ---- Mode selection: PreToolUse (default) or Stop ----
+# Optional --base-ref=<ref> switches Stop mode to scan branch diff
+# (<ref>...HEAD, added lines only) instead of staged diff. Husky calls
+# --mode=stop with no flag; CI adds --base-ref=origin/main.
 MODE="pretool"
-if [[ "${1:-}" == "--mode=stop" ]]; then
-  MODE="stop"
-fi
+BASE_REF=""
+for arg in "$@"; do
+  case "$arg" in
+    --mode=stop) MODE="stop" ;;
+    --base-ref=*) BASE_REF="${arg#--base-ref=}" ;;
+  esac
+done
 
 # ---- Determine which file(s) to scan ----
 if [[ "$MODE" == "pretool" ]]; then
@@ -57,9 +64,25 @@ print(content)
     exit 0
   fi
 elif [[ "$MODE" == "stop" ]]; then
-  # Stop: scan the entire diff against HEAD
-  TARGET_FILE="<all-staged-files>"
-  TARGET_CONTENT=$(git diff --cached 2>/dev/null || git diff 2>/dev/null || echo "")
+  if [[ -n "$BASE_REF" ]]; then
+    # Branch-diff mode: validate ref exists — fail closed if not.
+    if ! git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
+      echo "BLOCKED ($RULE_ID): base ref '$BASE_REF' not found" >&2
+      exit 2
+    fi
+    TARGET_FILE="<branch-diff:${BASE_REF}...HEAD>"
+    # Added lines only: --unified=0 trims context; ^+ keeps additions;
+    # ^+++ excludes file headers; sed strips leading +.
+    # `|| true` on grep stages so empty matches don't trip pipefail.
+    TARGET_CONTENT=$(git diff --unified=0 "${BASE_REF}...HEAD" 2>/dev/null \
+      | { grep '^+' || true; } \
+      | { grep -v '^+++' || true; } \
+      | sed 's/^+//')
+  else
+    # Stop: scan the entire diff against HEAD
+    TARGET_FILE="<all-staged-files>"
+    TARGET_CONTENT=$(git diff --cached 2>/dev/null || git diff 2>/dev/null || echo "")
+  fi
 fi
 
 # ---- File-glob check: skip test fixtures, skip non-code files ----
