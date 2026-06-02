@@ -19,7 +19,7 @@ import type {
   RedFlagLevel,
   SafetyResult,
   Symptom,
-} from './types';
+} from "./types";
 
 /**
  * Screen all normalized symptoms for red flags.
@@ -34,7 +34,7 @@ export function screenRedFlags(
   symptoms: NormalizedSymptom[],
   allSymptoms: Symptom[],
   crisisResources: CrisisResourcesByRegion,
-  userRegion?: string
+  userRegion?: string,
 ): SafetyResult {
   const flags: RedFlag[] = [];
 
@@ -47,7 +47,7 @@ export function screenRedFlags(
         symptom_id: symptom.id,
         symptom_name: symptom.name,
         level: symptom.red_flag_level,
-        trigger: 'inherent',
+        trigger: "inherent",
         message: buildRedFlagMessage(symptom.name, symptom.red_flag_level),
       });
     }
@@ -60,34 +60,34 @@ export function screenRedFlags(
     ) {
       // Don't duplicate if already flagged as inherent
       const alreadyFlagged = flags.some(
-        (f) => f.symptom_id === symptom.id && f.trigger === 'inherent'
+        (f) => f.symptom_id === symptom.id && f.trigger === "inherent",
       );
       if (!alreadyFlagged) {
         flags.push({
           symptom_id: symptom.id,
           symptom_name: symptom.name,
           level: symptom.severity_red_flag_level,
-          trigger: 'severity_threshold',
+          trigger: "severity_threshold",
           message: buildSeverityFlagMessage(
             symptom.name,
             normalized.severity,
-            symptom.severity_red_flag_level
+            symptom.severity_red_flag_level,
           ),
         });
       }
     }
   }
 
-  const has_crisis = flags.some((f) => f.level === 'CRISIS');
-  const has_urgent = flags.some((f) => f.level === 'URGENT');
-  const has_watch = flags.some((f) => f.level === 'WATCH');
+  const has_crisis = flags.some((f) => f.level === "CRISIS");
+  const has_urgent = flags.some((f) => f.level === "URGENT");
+  const has_watch = flags.some((f) => f.level === "WATCH");
 
   const highest_level: RedFlagLevel | null = has_crisis
-    ? 'CRISIS'
+    ? "CRISIS"
     : has_urgent
-      ? 'URGENT'
+      ? "URGENT"
       : has_watch
-        ? 'WATCH'
+        ? "WATCH"
         : null;
 
   // Resolve crisis resources for the user's region
@@ -110,12 +110,12 @@ export function screenRedFlags(
  */
 function resolveCrisisResources(
   resources: CrisisResourcesByRegion,
-  region?: string
+  region?: string,
 ): CrisisResource[] {
   if (region && resources[region]) {
     return resources[region];
   }
-  return resources['DEFAULT'] ?? [];
+  return resources["DEFAULT"] ?? [];
 }
 
 /**
@@ -123,21 +123,21 @@ function resolveCrisisResources(
  */
 function buildRedFlagMessage(symptomName: string, level: RedFlagLevel): string {
   switch (level) {
-    case 'CRISIS':
+    case "CRISIS":
       return (
         `The experience you described ("${symptomName}") suggests you may benefit ` +
-        'from immediate support. Please reach out to a crisis resource below — ' +
-        'trained counselors are available 24/7 and want to help.'
+        "from immediate support. Please reach out to a crisis resource below — " +
+        "trained counselors are available 24/7 and want to help."
       );
-    case 'URGENT':
+    case "URGENT":
       return (
         `The experience you described ("${symptomName}") is something a healthcare ` +
-        'professional should evaluate. We recommend scheduling an appointment soon.'
+        "professional should evaluate. We recommend scheduling an appointment soon."
       );
-    case 'WATCH':
+    case "WATCH":
       return (
         `The experience you described ("${symptomName}") is worth monitoring. ` +
-        'Consider discussing this with a healthcare provider at your next visit.'
+        "Consider discussing this with a healthcare provider at your next visit."
       );
     default: {
       const _exhaustive: never = level;
@@ -152,23 +152,23 @@ function buildRedFlagMessage(symptomName: string, level: RedFlagLevel): string {
 function buildSeverityFlagMessage(
   symptomName: string,
   severity: number,
-  level: RedFlagLevel
+  level: RedFlagLevel,
 ): string {
   switch (level) {
-    case 'CRISIS':
+    case "CRISIS":
       return (
         `You rated "${symptomName}" at a high intensity (${severity}/10). ` +
-        'Please reach out to a crisis resource below for immediate support.'
+        "Please reach out to a crisis resource below for immediate support."
       );
-    case 'URGENT':
+    case "URGENT":
       return (
         `You rated "${symptomName}" at a high intensity (${severity}/10). ` +
-        'We recommend consulting with a healthcare professional soon.'
+        "We recommend consulting with a healthcare professional soon."
       );
-    case 'WATCH':
+    case "WATCH":
       return (
         `You rated "${symptomName}" at an elevated intensity (${severity}/10). ` +
-        'Consider discussing this with a healthcare provider.'
+        "Consider discussing this with a healthcare provider."
       );
     default: {
       const _exhaustive: never = level;

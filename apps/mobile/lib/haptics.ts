@@ -1,14 +1,14 @@
-import * as Haptics from 'expo-haptics';
+import * as Haptics from "expo-haptics";
 
 export type HapticEvent =
-  | 'tab'
-  | 'affirm'
-  | 'confirm'
-  | 'celebrate'
-  | 'alert'
-  | 'complete'
-  | 'breathIn'
-  | 'breathOut';
+  | "tab"
+  | "affirm"
+  | "confirm"
+  | "celebrate"
+  | "alert"
+  | "complete"
+  | "breathIn"
+  | "breathOut";
 
 type SequenceStep = { run: () => void; delayMs: number };
 
@@ -16,19 +16,19 @@ type SequenceStep = { run: () => void; delayMs: number };
 // Token leaves are documentation strings (e.g. "Haptics.impactAsync(...)"), not
 // machine-consumable data — see Phase 6 design item: propose data-shaped haptic
 // tokens + dispatcher (likely Slice 6 when toggle persistence + DI seam land).
-const sequences: Record<'complete' | 'breathIn' | 'breathOut', SequenceStep[]> = {
+const sequences: Record<"complete" | "breathIn" | "breathOut", SequenceStep[]> = {
   complete: [
-    { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), delayMs: 0 },        // → haptic.complete._sequence[0]
-    { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), delayMs: 80 },       // → haptic.complete._sequence[1]
+    { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), delayMs: 0 }, // → haptic.complete._sequence[0]
+    { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), delayMs: 80 }, // → haptic.complete._sequence[1]
     { run: () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), delayMs: 80 }, // → haptic.complete._sequence[2]
   ],
   breathIn: [
-    { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), delayMs: 0 },   // → haptic.breath_in._sequence[0]
+    { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), delayMs: 0 }, // → haptic.breath_in._sequence[0]
     { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), delayMs: 200 }, // → haptic.breath_in._sequence[1]
-    { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), delayMs: 200 },// → haptic.breath_in._sequence[2]
+    { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), delayMs: 200 }, // → haptic.breath_in._sequence[2]
   ],
   breathOut: [
-    { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), delayMs: 0 },  // → haptic.breath_out._sequence[0]
+    { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), delayMs: 0 }, // → haptic.breath_out._sequence[0]
     { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), delayMs: 200 }, // → haptic.breath_out._sequence[1]
     { run: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), delayMs: 200 }, // → haptic.breath_out._sequence[2]
   ],
@@ -54,24 +54,24 @@ export function fireHaptic(event: HapticEvent, isEnabled: () => boolean): void {
   if (!isEnabled()) return;
 
   switch (event) {
-    case 'tab':
+    case "tab":
       Haptics.selectionAsync(); // → haptic.tap._expo
       return;
-    case 'affirm':
+    case "affirm":
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); // → haptic.affirm._expo
       return;
-    case 'confirm':
+    case "confirm":
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); // → haptic.confirm._expo
       return;
-    case 'celebrate':
+    case "celebrate":
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); // → haptic.celebrate._expo
       return;
-    case 'alert':
+    case "alert":
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning); // → haptic.alert._expo
       return;
-    case 'complete':
-    case 'breathIn':
-    case 'breathOut':
+    case "complete":
+    case "breathIn":
+    case "breathOut":
       runSequence(sequences[event], isEnabled);
       return;
   }

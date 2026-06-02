@@ -10,53 +10,53 @@
 
 // ─── Domain & Category Enums ─────────────────────────────────────────────────
 
-export type SymptomDomain = 'physical' | 'emotional' | 'cognitive' | 'behavioral';
+export type SymptomDomain = "physical" | "emotional" | "cognitive" | "behavioral";
 
 export type SymptomCategory =
-  | 'mood'
-  | 'anxiety_fear'
-  | 'emotional_regulation'
-  | 'body_sensations'
-  | 'sleep'
-  | 'appetite_weight'
-  | 'energy'
-  | 'cognition'
-  | 'perception'
-  | 'social'
-  | 'coping'
-  | 'activity_level'
-  | 'identity_self_image'
-  | 'somatic_health';
+  | "mood"
+  | "anxiety_fear"
+  | "emotional_regulation"
+  | "body_sensations"
+  | "sleep"
+  | "appetite_weight"
+  | "energy"
+  | "cognition"
+  | "perception"
+  | "social"
+  | "coping"
+  | "activity_level"
+  | "identity_self_image"
+  | "somatic_health";
 
 export type ConditionCategory =
-  | 'mood'
-  | 'anxiety'
-  | 'trauma'
-  | 'obsessive_compulsive'
-  | 'neurodevelopmental'
-  | 'stress'
-  | 'sleep'
-  | 'eating'
-  | 'substance'
-  | 'personality'
-  | 'psychotic'
-  | 'dissociative'
-  | 'somatic';
+  | "mood"
+  | "anxiety"
+  | "trauma"
+  | "obsessive_compulsive"
+  | "neurodevelopmental"
+  | "stress"
+  | "sleep"
+  | "eating"
+  | "substance"
+  | "personality"
+  | "psychotic"
+  | "dissociative"
+  | "somatic";
 
-export type RedFlagLevel = 'CRISIS' | 'URGENT' | 'WATCH';
+export type RedFlagLevel = "CRISIS" | "URGENT" | "WATCH";
 
-export type SymptomRole = 'core' | 'common' | 'associated';
+export type SymptomRole = "core" | "common" | "associated";
 
-export type RelevanceLevel = 'high' | 'moderate' | 'low' | 'minimal';
+export type RelevanceLevel = "high" | "moderate" | "low" | "minimal";
 
-export type CrisisResourceType = 'hotline' | 'text' | 'directory';
+export type CrisisResourceType = "hotline" | "text" | "directory";
 
 export type AnalyticsEventType =
-  | 'started'
-  | 'completed'
-  | 'crisis_triggered'
-  | 'result_clicked'
-  | 'provider_clicked';
+  | "started"
+  | "completed"
+  | "crisis_triggered"
+  | "result_clicked"
+  | "provider_clicked";
 
 // ─── Symptom Types ───────────────────────────────────────────────────────────
 
@@ -156,11 +156,11 @@ export type CrisisResourcesByRegion = Record<string, CrisisResource[]>;
 // ─── Matching Config ─────────────────────────────────────────────────────────
 
 export interface SeverityModifiers {
-  '1': number;
-  '2-3': number;
-  '4-5': number;
-  '6-7': number;
-  '8-10': number;
+  "1": number;
+  "2-3": number;
+  "4-5": number;
+  "6-7": number;
+  "8-10": number;
 }
 
 export interface FrequencyModifiers {
@@ -199,11 +199,11 @@ export interface MatchingConfig {
 
 export type ScoringConfig = Pick<
   MatchingConfig,
-  | 'confidence_cap'
-  | 'below_minimum_penalty'
-  | 'severity_modifiers'
-  | 'frequency_modifiers'
-  | 'duration_modifiers'
+  | "confidence_cap"
+  | "below_minimum_penalty"
+  | "severity_modifiers"
+  | "frequency_modifiers"
+  | "duration_modifiers"
 >;
 
 export type SafetyConfig = {
@@ -212,25 +212,25 @@ export type SafetyConfig = {
 
 export type ResultsConfig = Pick<
   MatchingConfig,
-  | 'min_relevance_threshold'
-  | 'max_results'
-  | 'min_results'
-  | 'max_per_family'
-  | 'relevance_display_tiers'
+  | "min_relevance_threshold"
+  | "max_results"
+  | "min_results"
+  | "max_per_family"
+  | "relevance_display_tiers"
 >;
 
 // ─── User Input Types ────────────────────────────────────────────────────────
 
 export type UserDuration =
-  | 'less_than_1_week'
-  | '1_to_2_weeks'
-  | '2_to_4_weeks'
-  | '1_to_3_months'
-  | '3_to_6_months'
-  | '6_months_to_1_year'
-  | 'more_than_1_year';
+  | "less_than_1_week"
+  | "1_to_2_weeks"
+  | "2_to_4_weeks"
+  | "1_to_3_months"
+  | "3_to_6_months"
+  | "6_months_to_1_year"
+  | "more_than_1_year";
 
-export type UserFrequency = 'rarely' | 'sometimes' | 'often' | 'always';
+export type UserFrequency = "rarely" | "sometimes" | "often" | "always";
 
 export interface UserSymptomInput {
   symptom_id: string;
@@ -253,7 +253,7 @@ export interface RedFlag {
   symptom_id: string;
   symptom_name: string;
   level: RedFlagLevel;
-  trigger: 'inherent' | 'severity_threshold';
+  trigger: "inherent" | "severity_threshold";
   message: string;
 }
 
@@ -366,18 +366,18 @@ export interface SavedResultsResponse {
 /** Maps duration strings to approximate days for comparison */
 export const DURATION_TO_DAYS: Record<string, number> = {
   less_than_1_week: 4,
-  '1_to_2_weeks': 10,
-  '2_to_4_weeks': 21,
-  '1_to_3_months': 60,
-  '3_to_6_months': 135,
-  '6_months_to_1_year': 270,
+  "1_to_2_weeks": 10,
+  "2_to_4_weeks": 21,
+  "1_to_3_months": 60,
+  "3_to_6_months": 135,
+  "6_months_to_1_year": 270,
   more_than_1_year: 500,
   // Condition minimum durations
-  '1_week': 7,
-  '2_weeks': 14,
-  '1_month': 30,
-  '3_months': 90,
-  '6_months': 180,
-  '1_year': 365,
-  '2_years': 730,
+  "1_week": 7,
+  "2_weeks": 14,
+  "1_month": 30,
+  "3_months": 90,
+  "6_months": 180,
+  "1_year": 365,
+  "2_years": 730,
 };

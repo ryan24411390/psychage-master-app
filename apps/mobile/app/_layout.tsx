@@ -1,15 +1,15 @@
-import { Stack } from 'expo-router';
-import { useFonts } from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import '../global.css';
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+import "../global.css";
 
 // Side-effect import: loading featureFlags.ts executes loadTierFlags(storage)
 // at module init, which runs the SR-13 migrator before any consumer reads isTierEnabled.
-import '@/lib/adapters/featureFlags';
+import "@/lib/adapters/featureFlags";
 
-import { HapticProvider } from '@/lib/haptic-context';
-import { IBMPlexMono_400Regular } from '@expo-google-fonts/ibm-plex-mono';
+import { IBMPlexMono_400Regular } from "@expo-google-fonts/ibm-plex-mono";
+import { HapticProvider } from "@/lib/haptic-context";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -19,10 +19,10 @@ export default function RootLayout() {
   // resolve, and RN's `fontWeight` style selects the right cut. IBM Plex Mono
   // unchanged. Italic / Light / Black cuts not loaded (unused in V1).
   const [fontsLoaded] = useFonts({
-    Satoshi: require('../assets/fonts/Satoshi-Regular.otf'),
-    'Satoshi-Medium': require('../assets/fonts/Satoshi-Medium.otf'),
-    'Satoshi-Bold': require('../assets/fonts/Satoshi-Bold.otf'),
-    'IBM Plex Mono': IBMPlexMono_400Regular,
+    Satoshi: require("../assets/fonts/Satoshi-Regular.otf"),
+    "Satoshi-Medium": require("../assets/fonts/Satoshi-Medium.otf"),
+    "Satoshi-Bold": require("../assets/fonts/Satoshi-Bold.otf"),
+    "IBM Plex Mono": IBMPlexMono_400Regular,
   });
 
   useEffect(() => {

@@ -5,33 +5,32 @@
 // Runs the same canned KB + inputs as `__tests__/navigator-seam.test.ts` so
 // device output is byte-comparable to the node test (web parity check).
 
-import { useState } from 'react';
-import { Pressable, ScrollView, Text as RNText, View } from 'react-native';
-import { Stack } from 'expo-router';
-
-import { ScreenShell } from '@/components/ui/ScreenShell';
-import { Text } from '@/components/ui/Text';
-import { isTierEnabled, storage } from '@/lib/adapters';
-import { loadTierFlags, SCHEMA_VERSION, STORAGE_KEY } from '@/lib/persistence/tier-flags';
 import {
-  DEFAULT_MATCHING_CONFIG,
-  runSymptomNavigator,
   type ConditionCategory,
   type ConditionWithMappings,
+  DEFAULT_MATCHING_CONFIG,
   type KnowledgeBase,
+  runSymptomNavigator,
   type Symptom,
   type UserSymptomInput,
-} from '@psychage/shared/navigator';
+} from "@psychage/shared/navigator";
+import { Stack } from "expo-router";
+import { useState } from "react";
+import { Pressable, Text as RNText, ScrollView, View } from "react-native";
+import { ScreenShell } from "@/components/ui/ScreenShell";
+import { Text } from "@/components/ui/Text";
+import { isTierEnabled, storage } from "@/lib/adapters";
+import { loadTierFlags, SCHEMA_VERSION, STORAGE_KEY } from "@/lib/persistence/tier-flags";
 
-const SYMPTOM_IDS = ['s1', 's2', 's3', 's4', 's5', 's6'] as const;
+const SYMPTOM_IDS = ["s1", "s2", "s3", "s4", "s5", "s6"] as const;
 
 function makeSymptom(id: string): Symptom {
   return {
     id,
-    domain: 'emotional',
-    category: 'mood',
+    domain: "emotional",
+    category: "mood",
     name: id,
-    description: '',
+    description: "",
     synonyms: [],
     ask_duration: true,
     ask_severity: true,
@@ -42,7 +41,7 @@ function makeSymptom(id: string): Symptom {
     severity_red_flag_level: null,
     display_order: 0,
     is_active: true,
-    version: '1.0.0',
+    version: "1.0.0",
   };
 }
 
@@ -52,30 +51,30 @@ function makeCondition(id: string, category: ConditionCategory): ConditionWithMa
     name: id,
     full_name: id,
     category,
-    description_for_user: '',
-    minimum_duration: '2_weeks',
-    minimum_duration_display: '',
+    description_for_user: "",
+    minimum_duration: "2_weeks",
+    minimum_duration_display: "",
     minimum_symptoms_for_relevance: 2,
     always_recommend_professional: false,
-    guide_path: '',
-    coping_path: '',
+    guide_path: "",
+    coping_path: "",
     provider_questions: [],
-    clinical_notes: '',
+    clinical_notes: "",
     is_active: true,
-    version: '1.0.0',
+    version: "1.0.0",
     symptom_mappings: SYMPTOM_IDS.map((sid) => ({
       symptom_id: sid,
       weight: 3 as const,
-      role: 'core' as const,
+      role: "core" as const,
     })),
     red_flags: [],
   };
 }
 
 const kb: KnowledgeBase = {
-  version: '1.0.0',
+  version: "1.0.0",
   symptoms: SYMPTOM_IDS.map(makeSymptom),
-  conditions: [makeCondition('SCZ', 'psychotic'), makeCondition('NPD', 'personality')],
+  conditions: [makeCondition("SCZ", "psychotic"), makeCondition("NPD", "personality")],
   matchingConfig: DEFAULT_MATCHING_CONFIG,
   crisisResources: {},
 };
@@ -83,8 +82,8 @@ const kb: KnowledgeBase = {
 const userInputs: UserSymptomInput[] = SYMPTOM_IDS.map((sid) => ({
   symptom_id: sid,
   severity: 7,
-  duration: 'more_than_1_year',
-  frequency: 'often',
+  duration: "more_than_1_year",
+  frequency: "often",
 }));
 
 export default function DevNavigatorScreen() {
@@ -106,18 +105,18 @@ export default function DevNavigatorScreen() {
 
   return (
     <ScreenShell>
-      <Stack.Screen options={{ headerShown: true, title: 'Dev — Verify' }} />
+      <Stack.Screen options={{ headerShown: true, title: "Dev — Verify" }} />
       <ScrollView contentContainerClassName="gap-6 py-4">
         {/* Font sample — verifies 3 families load (not system fallback). */}
         <View className="gap-2">
           <Text variant="caption">FONTS (expect distinct typefaces, not system fallback)</Text>
-          <RNText style={{ fontFamily: 'Satoshi', fontSize: 22 }}>
+          <RNText style={{ fontFamily: "Satoshi", fontSize: 22 }}>
             Satoshi — sans · the quick brown fox 0123456789
           </RNText>
-          <RNText style={{ fontFamily: 'Satoshi', fontSize: 22 }}>
+          <RNText style={{ fontFamily: "Satoshi", fontSize: 22 }}>
             Satoshi — display · the quick brown fox
           </RNText>
-          <RNText style={{ fontFamily: 'IBM Plex Mono', fontSize: 18 }}>
+          <RNText style={{ fontFamily: "IBM Plex Mono", fontSize: 18 }}>
             IBM Plex Mono — mono · const x = 42;
           </RNText>
           <RNText style={{ fontSize: 18 }}>System fallback (no fontFamily) · same string</RNText>
@@ -128,15 +127,15 @@ export default function DevNavigatorScreen() {
           <Text variant="caption">MMKV TIER-FLAGS (toggle, force-quit, relaunch, verify)</Text>
           <Text variant="body">
             {Object.entries(tierFlags)
-              .map(([t, on]) => `T${t}:${on ? 'on' : 'off'}`)
-              .join(' · ')}
+              .map(([t, on]) => `T${t}:${on ? "on" : "off"}`)
+              .join(" · ")}
           </Text>
           <Pressable
             onPress={toggleTier4}
             className="bg-primary dark:bg-primary-dark rounded-lg p-3"
           >
             <Text variant="body" className="text-white text-center">
-              Toggle Tier 4 ({tierFlags[4] ? 'on→off' : 'off→on'})
+              Toggle Tier 4 ({tierFlags[4] ? "on→off" : "off→on"})
             </Text>
           </Pressable>
           <Pressable
@@ -153,7 +152,7 @@ export default function DevNavigatorScreen() {
         <View className="gap-2">
           <Text variant="caption">runSymptomNavigator (web-parity: contains SCZ + NPD)</Text>
           <Text variant="body">
-            Results: {result.results.length} · Cap ≤ 0.75: {capHolds ? 'PASS' : 'FAIL'}
+            Results: {result.results.length} · Cap ≤ 0.75: {capHolds ? "PASS" : "FAIL"}
           </Text>
           {result.results.map((r) => (
             <View

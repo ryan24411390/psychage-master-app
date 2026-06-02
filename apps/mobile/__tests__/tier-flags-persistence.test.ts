@@ -9,14 +9,10 @@
 //   3. v0 blob  → transform expands legacy `{ enabled: false }` into
 //      per-tier `{ 1..6: false }` and stamps version 1.
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from "vitest";
 
-import type { Storage } from '@/lib/adapters/storage';
-import {
-  SCHEMA_VERSION,
-  STORAGE_KEY,
-  loadTierFlags,
-} from '@/lib/persistence/tier-flags';
+import type { Storage } from "@/lib/adapters/storage";
+import { loadTierFlags, SCHEMA_VERSION, STORAGE_KEY } from "@/lib/persistence/tier-flags";
 
 function makeStorage(seed?: Record<string, string>): Storage {
   const store = new Map<string, string>(seed ? Object.entries(seed) : []);
@@ -31,8 +27,8 @@ function makeStorage(seed?: Record<string, string>): Storage {
   };
 }
 
-describe('tier-flags persistence — SR-13 versioned migrator', () => {
-  it('no data → default-seeds { 1..6: true } at SCHEMA_VERSION', () => {
+describe("tier-flags persistence — SR-13 versioned migrator", () => {
+  it("no data → default-seeds { 1..6: true } at SCHEMA_VERSION", () => {
     const storage = makeStorage();
 
     const flags = loadTierFlags(storage);
@@ -47,7 +43,7 @@ describe('tier-flags persistence — SR-13 versioned migrator', () => {
     });
   });
 
-  it('v1 envelope → returned unchanged; version stamp preserved', () => {
+  it("v1 envelope → returned unchanged; version stamp preserved", () => {
     const original = {
       version: 1,
       data: { 1: true, 2: false, 3: true, 4: false, 5: true, 6: true },
@@ -62,7 +58,7 @@ describe('tier-flags persistence — SR-13 versioned migrator', () => {
     expect(JSON.parse(stamped as string)).toEqual(original);
   });
 
-  it('v0 blob ({ enabled: false }) → transforms to per-tier { 1..6: false } and stamps v1', () => {
+  it("v0 blob ({ enabled: false }) → transforms to per-tier { 1..6: false } and stamps v1", () => {
     const legacy = { version: 0, data: { enabled: false } };
     const storage = makeStorage({ [STORAGE_KEY]: JSON.stringify(legacy) });
 

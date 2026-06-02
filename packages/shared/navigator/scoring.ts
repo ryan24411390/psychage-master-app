@@ -8,6 +8,7 @@
  * This is enforced at multiple levels to prevent diagnostic appearance.
  */
 
+import { CONFIDENCE_CAP } from "./constants";
 import type {
   ConditionScore,
   ConditionWithMappings,
@@ -16,15 +17,14 @@ import type {
   NormalizedSymptom,
   RelevanceLevel,
   ScoringConfig,
-} from './types';
+} from "./types";
 import {
   combinedModifier,
   getDurationModifier,
   getFrequencyModifier,
   getRelevanceLevel,
   getSeverityModifier,
-} from './utils';
-import { CONFIDENCE_CAP } from './constants';
+} from "./utils";
 
 /**
  * Score a single condition against the user's symptoms.
@@ -46,7 +46,7 @@ import { CONFIDENCE_CAP } from './constants';
 export function calculateConditionScore(
   userSymptoms: NormalizedSymptom[],
   condition: ConditionWithMappings,
-  config: ScoringConfig
+  config: ScoringConfig,
 ): ConditionScore {
   const userSymptomMap = new Map<string, NormalizedSymptom>();
   for (const s of userSymptoms) {
@@ -61,8 +61,8 @@ export function calculateConditionScore(
     // Calculate max possible score for normalization
     const maxModifier = combinedModifier(
       config.duration_modifiers.meets_or_exceeds,
-      config.severity_modifiers['8-10'],
-      config.frequency_modifiers.always
+      config.severity_modifiers["8-10"],
+      config.frequency_modifiers.always,
     );
     maxPossibleScore += mapping.weight * maxModifier;
 
@@ -74,18 +74,12 @@ export function calculateConditionScore(
     const durationMod = getDurationModifier(
       userSymptom.duration,
       condition.minimum_duration,
-      config.duration_modifiers
+      config.duration_modifiers,
     );
 
-    const severityMod = getSeverityModifier(
-      userSymptom.severity,
-      config.severity_modifiers
-    );
+    const severityMod = getSeverityModifier(userSymptom.severity, config.severity_modifiers);
 
-    const frequencyMod = getFrequencyModifier(
-      userSymptom.frequency,
-      config.frequency_modifiers
-    );
+    const frequencyMod = getFrequencyModifier(userSymptom.frequency, config.frequency_modifiers);
 
     const combined = combinedModifier(durationMod, severityMod, frequencyMod);
     const symptomScore = baseScore * combined;
@@ -113,9 +107,10 @@ export function calculateConditionScore(
   // this correction). Apply a log-scaled dampening factor for conditions
   // below the reference mapping count.
   const COVERAGE_REFERENCE = 20;
-  const coverageFactor = totalMapped >= COVERAGE_REFERENCE
-    ? 1.0
-    : Math.log2(totalMapped + 1) / Math.log2(COVERAGE_REFERENCE + 1);
+  const coverageFactor =
+    totalMapped >= COVERAGE_REFERENCE
+      ? 1.0
+      : Math.log2(totalMapped + 1) / Math.log2(COVERAGE_REFERENCE + 1);
   const adjustedNormalized = normalized * coverageFactor;
 
   // Count cap: prevents high scores from just 1 symptom.
@@ -148,7 +143,7 @@ export function calculateConditionScore(
     total_mapped: totalMapped,
     matched_symptoms: matchedSymptoms,
     meets_minimum: meetsMinimum,
-    relevance_level: 'minimal' as RelevanceLevel, // Set during ranking
+    relevance_level: "minimal" as RelevanceLevel, // Set during ranking
   };
 }
 
@@ -163,15 +158,13 @@ export function calculateConditionScore(
  */
 export function rankAndDiversify(
   scores: ConditionScore[],
-  config: MatchingConfig
+  config: MatchingConfig,
 ): ConditionScore[] {
   // Sort by capped score descending
   const sorted = [...scores].sort((a, b) => b.capped_score - a.capped_score);
 
   // Filter by minimum relevance
-  const relevant = sorted.filter(
-    (s) => s.capped_score >= config.min_relevance_threshold
-  );
+  const relevant = sorted.filter((s) => s.capped_score >= config.min_relevance_threshold);
 
   // Apply category diversity
   const categoryCounts = new Map<string, number>();
@@ -187,10 +180,7 @@ export function rankAndDiversify(
     categoryCounts.set(category, count + 1);
 
     // Assign relevance level
-    const relevanceLevel = getRelevanceLevel(
-      score.capped_score,
-      config.relevance_display_tiers
-    );
+    const relevanceLevel = getRelevanceLevel(score.capped_score, config.relevance_display_tiers);
 
     diversified.push({
       ...score,
@@ -209,10 +199,7 @@ export function rankAndDiversify(
       if (score.matched_count === 0) continue; // skip conditions with zero matches
       if (diversified.length >= config.min_results) break;
 
-      const relevanceLevel = getRelevanceLevel(
-        score.capped_score,
-        config.relevance_display_tiers
-      );
+      const relevanceLevel = getRelevanceLevel(score.capped_score, config.relevance_display_tiers);
 
       diversified.push({
         ...score,
@@ -231,7 +218,7 @@ export function rankAndDiversify(
 export function scoreAllConditions(
   userSymptoms: NormalizedSymptom[],
   conditions: ConditionWithMappings[],
-  config: ScoringConfig
+  config: ScoringConfig,
 ): ConditionScore[] {
   return conditions
     .filter((c) => c.is_active)

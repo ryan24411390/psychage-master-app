@@ -6,6 +6,14 @@
 // for each check, an overall score, and blocking status.
 // ============================================================================
 
+import {
+  ARTICLE_TEMPLATES,
+  BLOCKED_SOURCE_DOMAINS,
+  QUALITY_GATE,
+  SENSITIVITY_TERMS,
+  SOURCE_TYPE_TO_TIER,
+} from "./constants";
+import { analyzeReadability } from "./readability";
 import type {
   ArticleTemplate,
   EnhancedCitation,
@@ -14,15 +22,7 @@ import type {
   QualityGateResult,
   SensitivityFlag,
   SourceTier,
-} from './types';
-import {
-  ARTICLE_TEMPLATES,
-  BLOCKED_SOURCE_DOMAINS,
-  QUALITY_GATE,
-  SENSITIVITY_TERMS,
-  SOURCE_TYPE_TO_TIER,
-} from './constants';
-import { analyzeReadability } from './readability';
+} from "./types";
 
 // ---------------------------------------------------------------------------
 // Individual Check Functions
@@ -33,9 +33,9 @@ function checkWordCount(content: string, template: ArticleTemplate): QualityChec
   const passed = wordCount >= template.minWordCount;
 
   return {
-    id: 'word_count',
-    label: 'Word Count',
-    status: passed ? 'pass' : 'fail',
+    id: "word_count",
+    label: "Word Count",
+    status: passed ? "pass" : "fail",
     message: passed
       ? `${wordCount} words (minimum: ${template.minWordCount})`
       : `${wordCount} words — needs at least ${template.minWordCount} for ${template.label}`,
@@ -45,14 +45,17 @@ function checkWordCount(content: string, template: ArticleTemplate): QualityChec
   };
 }
 
-function checkCitationCount(citations: EnhancedCitation[], template: ArticleTemplate): QualityCheck {
+function checkCitationCount(
+  citations: EnhancedCitation[],
+  template: ArticleTemplate,
+): QualityCheck {
   const count = citations.length;
   const passed = count >= template.minCitations;
 
   return {
-    id: 'citation_count',
-    label: 'Citation Count',
-    status: passed ? 'pass' : 'fail',
+    id: "citation_count",
+    label: "Citation Count",
+    status: passed ? "pass" : "fail",
     message: passed
       ? `${count} citations (minimum: ${template.minCitations})`
       : `${count} citations — needs at least ${template.minCitations} for ${template.label}`,
@@ -65,10 +68,10 @@ function checkCitationCount(citations: EnhancedCitation[], template: ArticleTemp
 function checkSourceTierCompliance(citations: EnhancedCitation[]): QualityCheck {
   if (citations.length === 0) {
     return {
-      id: 'source_tier',
-      label: 'Source Tier Compliance',
-      status: 'fail',
-      message: 'No citations to evaluate',
+      id: "source_tier",
+      label: "Source Tier Compliance",
+      status: "fail",
+      message: "No citations to evaluate",
       blocking: true,
     };
   }
@@ -98,12 +101,12 @@ function checkSourceTierCompliance(citations: EnhancedCitation[]): QualityCheck 
   const passed = issues.length === 0;
 
   return {
-    id: 'source_tier',
-    label: 'Source Tier Compliance',
-    status: passed ? 'pass' : 'fail',
+    id: "source_tier",
+    label: "Source Tier Compliance",
+    status: passed ? "pass" : "fail",
     message: passed
       ? `Tier 1: ${Math.round(tier1Pct)}% | Tier 1+2: ${Math.round(tier12Pct)}% | Tier 5: ${Math.round(tier5Pct)}%`
-      : issues.join('; '),
+      : issues.join("; "),
     blocking: true,
     value: Math.round(tier12Pct),
     target: QUALITY_GATE.MIN_TIER1_2_PCT,
@@ -116,10 +119,10 @@ function checkCitationRecency(citations: EnhancedCitation[]): QualityCheck {
 
   if (citationsWithYear.length === 0) {
     return {
-      id: 'citation_recency',
-      label: 'Citation Recency',
-      status: 'warning',
-      message: 'No citations have a publication year set',
+      id: "citation_recency",
+      label: "Citation Recency",
+      status: "warning",
+      message: "No citations have a publication year set",
       blocking: false,
     };
   }
@@ -131,9 +134,9 @@ function checkCitationRecency(citations: EnhancedCitation[]): QualityCheck {
   const passed = recentPct >= QUALITY_GATE.MIN_RECENT_PCT;
 
   return {
-    id: 'citation_recency',
-    label: 'Citation Recency',
-    status: passed ? 'pass' : 'warning',
+    id: "citation_recency",
+    label: "Citation Recency",
+    status: passed ? "pass" : "warning",
     message: passed
       ? `${Math.round(recentPct)}% of citations within last ${QUALITY_GATE.RECENCY_YEARS} years`
       : `Only ${Math.round(recentPct)}% of citations are within last ${QUALITY_GATE.RECENCY_YEARS} years (target: ${QUALITY_GATE.MIN_RECENT_PCT}%)`,
@@ -147,10 +150,10 @@ function checkRequiredSections(content: string, template: ArticleTemplate): Qual
   // Look for h2-level headings in plain text (## or bold lines or uppercase)
   const headingPatterns = template.requiredSections.map((section) => {
     // Create a flexible regex that matches the section name in headings
-    const escaped = section.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escaped = section.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     return {
       section,
-      pattern: new RegExp(`(^|\\n)#{1,3}\\s*${escaped}|\\b${escaped}\\b`, 'i'),
+      pattern: new RegExp(`(^|\\n)#{1,3}\\s*${escaped}|\\b${escaped}\\b`, "i"),
     };
   });
 
@@ -161,12 +164,12 @@ function checkRequiredSections(content: string, template: ArticleTemplate): Qual
   const passed = missing.length === 0;
 
   return {
-    id: 'required_sections',
-    label: 'Required Sections',
-    status: passed ? 'pass' : 'fail',
+    id: "required_sections",
+    label: "Required Sections",
+    status: passed ? "pass" : "fail",
     message: passed
       ? `All ${template.requiredSections.length} required sections present`
-      : `Missing sections: ${missing.join(', ')}`,
+      : `Missing sections: ${missing.join(", ")}`,
     blocking: true,
     value: template.requiredSections.length - missing.length,
     target: template.requiredSections.length,
@@ -177,21 +180,21 @@ function checkReadability(content: string): QualityCheck {
   const result = analyzeReadability(content);
   const grade = result.fleschKincaidGrade;
 
-  let status: QualityCheck['status'];
+  let status: QualityCheck["status"];
   if (grade <= QUALITY_GATE.MAX_FK_GRADE) {
-    status = 'pass';
+    status = "pass";
   } else if (grade <= QUALITY_GATE.HARD_FAIL_FK_GRADE) {
-    status = 'warning';
+    status = "warning";
   } else {
-    status = 'fail';
+    status = "fail";
   }
 
   return {
-    id: 'readability',
-    label: 'Readability (Flesch-Kincaid)',
+    id: "readability",
+    label: "Readability (Flesch-Kincaid)",
     status,
     message:
-      status === 'pass'
+      status === "pass"
         ? `Grade level ${grade} (target: ≤ ${QUALITY_GATE.MAX_FK_GRADE})`
         : `Grade level ${grade} — target is ≤ ${QUALITY_GATE.MAX_FK_GRADE} (6th–8th grade)`,
     blocking: false,
@@ -204,26 +207,26 @@ function checkDisclaimer(hasDisclaimer: boolean, template: ArticleTemplate): Qua
   // Condition deep-dives, treatment guides, and crisis articles need disclaimers
   const requiresDisclaimer =
     template.requiresCrisisDisclaimer ||
-    template.type === 'condition_deep_dive' ||
-    template.type === 'treatment_guide';
+    template.type === "condition_deep_dive" ||
+    template.type === "treatment_guide";
 
   if (!requiresDisclaimer) {
     return {
-      id: 'disclaimer',
-      label: 'Medical Disclaimer',
-      status: 'pass',
-      message: 'Not required for this article type',
+      id: "disclaimer",
+      label: "Medical Disclaimer",
+      status: "pass",
+      message: "Not required for this article type",
       blocking: false,
     };
   }
 
   return {
-    id: 'disclaimer',
-    label: 'Medical Disclaimer',
-    status: hasDisclaimer ? 'pass' : 'fail',
+    id: "disclaimer",
+    label: "Medical Disclaimer",
+    status: hasDisclaimer ? "pass" : "fail",
     message: hasDisclaimer
-      ? 'Medical disclaimer present'
-      : 'Medical disclaimer required for this article type',
+      ? "Medical disclaimer present"
+      : "Medical disclaimer required for this article type",
     blocking: true,
   };
 }
@@ -232,34 +235,37 @@ function checkAuthor(authorName: string | null): QualityCheck {
   const hasAuthor = authorName != null && authorName.trim().length > 0;
 
   return {
-    id: 'author',
-    label: 'Author Assigned',
-    status: hasAuthor ? 'pass' : 'fail',
-    message: hasAuthor ? `Author: ${authorName}` : 'No author assigned',
+    id: "author",
+    label: "Author Assigned",
+    status: hasAuthor ? "pass" : "fail",
+    message: hasAuthor ? `Author: ${authorName}` : "No author assigned",
     blocking: true,
   };
 }
 
-function checkLinkedConditions(linkedConditionIds: string[], template: ArticleTemplate): QualityCheck {
-  const requiresLink = template.linkedResourceTypes.includes('condition');
+function checkLinkedConditions(
+  linkedConditionIds: string[],
+  template: ArticleTemplate,
+): QualityCheck {
+  const requiresLink = template.linkedResourceTypes.includes("condition");
   if (!requiresLink) {
     return {
-      id: 'linked_conditions',
-      label: 'Linked Conditions',
-      status: 'pass',
-      message: 'Not required for this article type',
+      id: "linked_conditions",
+      label: "Linked Conditions",
+      status: "pass",
+      message: "Not required for this article type",
       blocking: false,
     };
   }
 
   const hasLinks = linkedConditionIds.length > 0;
   return {
-    id: 'linked_conditions',
-    label: 'Linked Conditions',
-    status: hasLinks ? 'pass' : 'warning',
+    id: "linked_conditions",
+    label: "Linked Conditions",
+    status: hasLinks ? "pass" : "warning",
     message: hasLinks
       ? `${linkedConditionIds.length} condition(s) linked`
-      : 'No conditions linked — consider connecting to symptom navigator',
+      : "No conditions linked — consider connecting to symptom navigator",
     blocking: false,
     value: linkedConditionIds.length,
   };
@@ -285,13 +291,13 @@ function checkSensitivity(content: string): QualityCheck {
   }
 
   return {
-    id: 'sensitivity',
-    label: 'Sensitivity Language',
-    status: flags.length === 0 ? 'pass' : 'warning',
+    id: "sensitivity",
+    label: "Sensitivity Language",
+    status: flags.length === 0 ? "pass" : "warning",
     message:
       flags.length === 0
-        ? 'No flagged terms found'
-        : `${flags.length} flagged term(s): ${[...new Set(flags.map((f) => `"${f.term}"`))].join(', ')}`,
+        ? "No flagged terms found"
+        : `${flags.length} flagged term(s): ${[...new Set(flags.map((f) => `"${f.term}"`))].join(", ")}`,
     blocking: false,
     value: flags.length,
   };
@@ -303,7 +309,7 @@ function checkBlockedSources(citations: EnhancedCitation[]): QualityCheck {
   for (const c of citations) {
     if (!c.url) continue;
     try {
-      const hostname = new URL(c.url).hostname.replace(/^www\./, '');
+      const hostname = new URL(c.url).hostname.replace(/^www\./, "");
       if (BLOCKED_SOURCE_DOMAINS.some((d) => hostname === d || hostname.endsWith(`.${d}`))) {
         blocked.push(`"${c.title}" (${hostname})`);
       }
@@ -313,13 +319,13 @@ function checkBlockedSources(citations: EnhancedCitation[]): QualityCheck {
   }
 
   return {
-    id: 'blocked_sources',
-    label: 'Blocked Source Domains',
-    status: blocked.length === 0 ? 'pass' : 'fail',
+    id: "blocked_sources",
+    label: "Blocked Source Domains",
+    status: blocked.length === 0 ? "pass" : "fail",
     message:
       blocked.length === 0
-        ? 'No blocked source domains found'
-        : `${blocked.length} citation(s) from blocked domains: ${blocked.join('; ')}`,
+        ? "No blocked source domains found"
+        : `${blocked.length} citation(s) from blocked domains: ${blocked.join("; ")}`,
     blocking: true,
     value: blocked.length,
   };
@@ -366,9 +372,9 @@ function calculateScore(checks: QualityCheck[]): number {
     const weight = CHECK_WEIGHTS[check.id] ?? 5;
     possible += weight;
 
-    if (check.status === 'pass') {
+    if (check.status === "pass") {
       earned += weight;
-    } else if (check.status === 'warning') {
+    } else if (check.status === "warning") {
       earned += weight * 0.5;
     }
     // fail = 0 points
@@ -403,8 +409,8 @@ export function runQualityGate(input: QualityGateInput): QualityGateResult {
     checkBlockedSources(input.citations),
   ];
 
-  const blockingFailures = checks.filter((c) => c.blocking && c.status === 'fail').length;
-  const warnings = checks.filter((c) => c.status === 'warning').length;
+  const blockingFailures = checks.filter((c) => c.blocking && c.status === "fail").length;
+  const warnings = checks.filter((c) => c.status === "warning").length;
   const score = calculateScore(checks);
 
   return {

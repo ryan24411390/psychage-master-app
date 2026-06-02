@@ -272,3 +272,208 @@ When adding a new Sacred Rule (e.g., SR-5 in Phase 11):
 5. Run the full corpus before merging.
 
 Patterns drift. The fixtures here are the canary.
+
+---
+
+## Git pre-commit path — block + allow per SR (Phase 7)
+
+These fixtures exercise the same four Sacred Rule hooks **through `git commit`**, not via the Claude harness (PreToolUse/Stop). They prove SR-1..SR-4 block commits authored by any agent (Cursor, raw CLI, non-Claude tooling) — closing the Design B escape hatch.
+
+Each rule has one BLOCK case and one ALLOW case. The pre-commit chain (`.husky/pre-commit`) runs:
+
+```text
+1. lint-staged → biome check (staged files only)
+2. pnpm -r typecheck
+3. pnpm -r test
+4. SR-1 navigator confidence cap     (--mode=stop)
+5. SR-2 crisis bypass detector       (--mode=stop)
+6. SR-3 diagnostic language          (--mode=stop)
+7. SR-4 no symptom telemetry         (--mode=stop)
+```
+
+`set -euo pipefail` — first non-zero exit kills the chain. No `|| true`. No `--no-verify` exemption.
+
+### Phase 7 setup
+
+```bash
+git checkout -b smoke-precommit
+mkdir -p _smoke
+```
+
+All BLOCK cases below MUST produce a non-zero `git commit` exit. All ALLOW cases MUST produce exit 0 (assuming biome/typecheck/test would otherwise pass on a clean repo).
+
+**Important — fixture authoring constraint:** SR hooks in `--mode=stop` scan the full `git diff --cached` text indiscriminately (no file-extension filter). If this document committed literal trigger strings, modifying it would trip the very rules it documents. Each BLOCK fixture below therefore assembles the trigger at shell-evaluation time from non-trigger fragments (string concatenation, variable interpolation). The generated `_smoke/*` fixture file contains the real trigger and trips the SR rule when staged; this `.md` source does not. See seeds in [`constitution.md`](./constitution.md) front-matter (`sacred_rules.SR-{1,2,3,4}.patterns`).
+
+### SR-1 — Navigator confidence cap (>0.75)
+
+**BLOCK** — generates a fixture with a confidence value above the cap. Patterns from `constitution.md`: `confidence\s*[:=]\s*(0\.[8-9]\d*|1\.0+|1\b)`.
+
+```bash
+PROP="conf""idence"   # assembled at runtime so this .md doesn't trip SR-1
+HIGH=0.92             # > 0.75
+cat > _smoke/sr1_block.ts <<EOF
+export const result = { ${PROP}: ${HIGH}, label: "anxiety" };
+EOF
+git add _smoke/sr1_block.ts
+git commit -m "smoke: SR-1 block"
+echo "Exit: $?"  # MUST be non-zero — step 4/7 emits "BLOCKED (SR-1)"
+git restore --staged _smoke/sr1_block.ts && rm _smoke/sr1_block.ts
+```
+
+**ALLOW** — confidence at 0.74 (below the cap) is acceptable. Literal in this doc is safe because the regex requires `0.[8-9]\d*`.
+
+```bash
+cat > _smoke/sr1_allow.ts <<'EOF'
+export const result = { confidence: 0.74, label: "education-resource" };
+EOF
+git add _smoke/sr1_allow.ts
+git commit -m "smoke: SR-1 allow"
+echo "Exit: $?"  # MUST be 0
+git reset --hard HEAD~1 && rm -f _smoke/sr1_allow.ts
+```
+
+### SR-2 — Crisis bypass detector
+
+**BLOCK** — generates a function name matching `disable[_.]?crisis`.
+
+```bash
+NAME="dis""able_""crisis"   # assembled at runtime so this .md doesn't trip SR-2
+cat > _smoke/sr2_block.ts <<EOF
+export function ${NAME}(): void { /* SR-2 trigger */ }
+EOF
+git add _smoke/sr2_block.ts
+git commit -m "smoke: SR-2 block"
+echo "Exit: $?"  # MUST be non-zero — "BLOCKED (SR-2)"
+git restore --staged _smoke/sr2_block.ts && rm _smoke/sr2_block.ts
+```
+
+**ALLOW** — a benign logging function. No SR-2 pattern present.
+
+```bash
+cat > _smoke/sr2_allow.ts <<'EOF'
+export function logResourceView(slug: string): void {
+  console.log("viewed", slug);
+}
+EOF
+git add _smoke/sr2_allow.ts
+git commit -m "smoke: SR-2 allow"
+echo "Exit: $?"  # MUST be 0
+git reset --hard HEAD~1 && rm -f _smoke/sr2_allow.ts
+```
+
+### SR-3 — Diagnostic language
+
+**BLOCK** — generates copy containing the seed phrase from constitution.md.
+
+```bash
+W1="y""ou"
+W2="ha""ve"   # ${W1} + space + ${W2} = an SR-3 seed at runtime
+cat > _smoke/sr3_block.md <<EOF
+# Results
+Based on your answers, ${W1} ${W2} depression.
+EOF
+git add _smoke/sr3_block.md
+git commit -m "smoke: SR-3 block"
+echo "Exit: $?"  # MUST be non-zero — "BLOCKED (SR-3)"
+git restore --staged _smoke/sr3_block.md && rm _smoke/sr3_block.md
+```
+
+**ALLOW** — person-first, educational. No diagnostic seeds.
+
+```bash
+cat > _smoke/sr3_allow.md <<'EOF'
+# Educational resource
+
+People experiencing low mood often describe a loss of interest in activities they once enjoyed.
+EOF
+git add _smoke/sr3_allow.md
+git commit -m "smoke: SR-3 allow"
+echo "Exit: $?"  # MUST be 0
+git reset --hard HEAD~1 && rm -f _smoke/sr3_allow.md
+```
+
+### SR-4 — No symptom telemetry
+
+**BLOCK** — generates a telemetry call site with a symptom identifier in proximity.
+
+```bash
+CALL="ana""lytics.track"   # constitution.md telemetry_call_sites
+KEY="sym""ptom"            # constitution.md symptom_identifier_seeds
+cat > _smoke/sr4_block.ts <<EOF
+${CALL}("navigator_completed", { ${KEY}: "anxiety", severity: "high" });
+EOF
+git add _smoke/sr4_block.ts
+git commit -m "smoke: SR-4 block"
+echo "Exit: $?"  # MUST be non-zero — "BLOCKED (SR-4)"
+git restore --staged _smoke/sr4_block.ts && rm _smoke/sr4_block.ts
+```
+
+**ALLOW** — telemetry call with non-symptom keys is allowed.
+
+```bash
+cat > _smoke/sr4_allow.ts <<'EOF'
+analytics.track("screen_view", { screen: "learn-index" });
+EOF
+git add _smoke/sr4_allow.ts
+git commit -m "smoke: SR-4 allow"
+echo "Exit: $?"  # MUST be 0
+git reset --hard HEAD~1 && rm -f _smoke/sr4_allow.ts
+```
+
+### Fail-closed: unreadable SR script
+
+The defense-in-depth load-bearing test. If any SR script is missing, unreadable, or non-executable, the hook chain MUST block (not skip). Implementation depends on `set -euo pipefail` + shebang failure surfacing as non-zero exit.
+
+```bash
+chmod -x .claude/hooks/sr3_diagnostic_language.sh
+cat > _smoke/safe.ts <<'EOF'
+export const x = 1;
+EOF
+git add _smoke/safe.ts
+git commit -m "smoke: fail-closed on chmod -x"
+echo "Exit: $?"  # MUST be non-zero — SR-3 step exec/shebang failure
+chmod +x .claude/hooks/sr3_diagnostic_language.sh
+git restore --staged _smoke/safe.ts && rm _smoke/safe.ts
+```
+
+### Biome root-level scan proof
+
+Pre-Phase-7 `pnpm -r lint` was a silent no-op (no workspace had a `lint` script). The new root-level `biome check .` (via lint-staged at step 1) must catch violations in workspace files where `pnpm -r lint` would not have.
+
+```bash
+cat > _smoke/biome_block.ts <<'EOF'
+var x=1;debugger;
+EOF
+git add _smoke/biome_block.ts
+git commit -m "smoke: biome block"
+echo "Exit: $?"  # MUST be non-zero at step 1 (never reaches typecheck/test/SR)
+git restore --staged _smoke/biome_block.ts && rm _smoke/biome_block.ts
+```
+
+### `[bypass]` is NOT an exemption from Sacred Rules
+
+`[bypass]` policy (`learnings.md`) covers spec-workflow ceremony only. A commit message prefixed `[bypass]` that triggers an SR pattern **still blocks**.
+
+```bash
+PROP="conf""idence"
+HIGH=0.99
+cat > _smoke/bypass_block.ts <<EOF
+export const result = { ${PROP}: ${HIGH} };
+EOF
+git add _smoke/bypass_block.ts
+git commit -m "[bypass] smoke: SR-1 still wins"
+echo "Exit: $?"  # MUST be non-zero — SR-1 blocks regardless of [bypass]
+git restore --staged _smoke/bypass_block.ts && rm _smoke/bypass_block.ts
+```
+
+### Cleanup
+
+```bash
+rm -rf _smoke
+git checkout main
+git branch -D smoke-precommit
+```
+
+### Pass criteria
+
+All BLOCK cases produce non-zero exit. All ALLOW cases produce exit 0. The fail-closed and bypass cases also block. If any case diverges, **do not bypass** — surface the divergence and treat the hook chain as the source of truth.

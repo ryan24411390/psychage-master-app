@@ -6,7 +6,7 @@
 // that is accurate enough for health content quality gating.
 // ============================================================================
 
-import type { ReadabilityResult } from './types';
+import type { ReadabilityResult } from "./types";
 
 // ---------------------------------------------------------------------------
 // Syllable Counting
@@ -21,23 +21,46 @@ import type { ReadabilityResult } from './types';
  *   - Minimum 1 syllable per word
  */
 function countSyllables(word: string): number {
-  const w = word.toLowerCase().replace(/[^a-z]/g, '');
+  const w = word.toLowerCase().replace(/[^a-z]/g, "");
   if (w.length <= 2) return 1;
 
   // Common exceptions
   const exceptions: Record<string, number> = {
-    area: 3, idea: 3, real: 2, being: 2, doing: 2,
-    going: 2, having: 2, create: 2, every: 3, different: 3,
-    science: 2, people: 2, schizophrenia: 5, anxiety: 4,
-    depression: 3, bipolar: 3, diagnosis: 4, cognitive: 3,
-    behavioral: 4, therapeutic: 4, psychiatric: 4, psychological: 5,
-    dissociative: 5, obsessive: 3, compulsive: 3, medication: 4,
-    treatment: 2, evidence: 3, experience: 4, disorder: 3,
+    area: 3,
+    idea: 3,
+    real: 2,
+    being: 2,
+    doing: 2,
+    going: 2,
+    having: 2,
+    create: 2,
+    every: 3,
+    different: 3,
+    science: 2,
+    people: 2,
+    schizophrenia: 5,
+    anxiety: 4,
+    depression: 3,
+    bipolar: 3,
+    diagnosis: 4,
+    cognitive: 3,
+    behavioral: 4,
+    therapeutic: 4,
+    psychiatric: 4,
+    psychological: 5,
+    dissociative: 5,
+    obsessive: 3,
+    compulsive: 3,
+    medication: 4,
+    treatment: 2,
+    evidence: 3,
+    experience: 4,
+    disorder: 3,
   };
   if (exceptions[w] !== undefined) return exceptions[w];
 
   let count = 0;
-  const vowels = 'aeiouy';
+  const vowels = "aeiouy";
   let prevVowel = false;
 
   for (let i = 0; i < w.length; i++) {
@@ -49,17 +72,24 @@ function countSyllables(word: string): number {
   }
 
   // Silent e at end (but not -le)
-  if (w.endsWith('e') && !w.endsWith('le') && count > 1) {
+  if (w.endsWith("e") && !w.endsWith("le") && count > 1) {
     count--;
   }
 
   // -ed endings that don't add a syllable (e.g., "worked" but not "created")
-  if (w.endsWith('ed') && !w.endsWith('ted') && !w.endsWith('ded') && count > 1) {
+  if (w.endsWith("ed") && !w.endsWith("ted") && !w.endsWith("ded") && count > 1) {
     count--;
   }
 
   // -es endings that don't add a syllable
-  if (w.endsWith('es') && !w.endsWith('ses') && !w.endsWith('zes') && !w.endsWith('ces') && !w.endsWith('xes') && count > 1) {
+  if (
+    w.endsWith("es") &&
+    !w.endsWith("ses") &&
+    !w.endsWith("zes") &&
+    !w.endsWith("ces") &&
+    !w.endsWith("xes") &&
+    count > 1
+  ) {
     count--;
   }
 
@@ -73,9 +103,9 @@ function countSyllables(word: string): number {
 /** Splits text into words, filtering out empty strings and pure punctuation */
 function getWords(text: string): string[] {
   return text
-    .replace(/[—–]/g, ' ') // em/en dashes to spaces
+    .replace(/[—–]/g, " ") // em/en dashes to spaces
     .split(/\s+/)
-    .map((w) => w.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, '')) // strip leading/trailing punctuation
+    .map((w) => w.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "")) // strip leading/trailing punctuation
     .filter((w) => w.length > 0 && /[a-zA-Z]/.test(w));
 }
 
@@ -83,12 +113,12 @@ function getWords(text: string): string[] {
 function getSentences(text: string): string[] {
   // Split on sentence-ending punctuation followed by space or end-of-string
   const sentences = text
-    .replace(/\n{2,}/g, '. ') // paragraph breaks count as sentence breaks
+    .replace(/\n{2,}/g, ". ") // paragraph breaks count as sentence breaks
     .split(/[.!?]+(?:\s|$)/)
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
 
-  return sentences.length > 0 ? sentences : [''];
+  return sentences.length > 0 ? sentences : [""];
 }
 
 // ---------------------------------------------------------------------------

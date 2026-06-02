@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# ============================================================
+# Pre-commit enforcement spine — Phase 7 (1 of 2)
+# ============================================================
+# Fail-closed at every step. No || true. No warn-only. No skip-on-error.
+# Order: fast deterministic checks first, harm-rule greps last.
+#
+#   1. lint-staged → biome check (format + lint, --write, staged files only)
+#   2. pnpm -r typecheck
+#   3. pnpm -r test
+#   4. SR-1 navigator confidence cap     (--mode=stop, self-sources git diff --cached)
+#   5. SR-2 crisis bypass detector       (--mode=stop)
+#   6. SR-3 diagnostic language          (--mode=stop)
+#   7. SR-4 no symptom telemetry         (--mode=stop)
+#
+# Any non-zero exit blocks the commit. Missing / unreadable SR scripts
+# fail closed via set -e + shebang failure.
+# ============================================================
+
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+export CLAUDE_PROJECT_DIR="$REPO_ROOT"
+
+echo "▶ [1/7] biome check (lint-staged)"
+pnpm exec lint-staged
+
+echo "▶ [2/7] pnpm -r typecheck"
+pnpm -r typecheck
+
+echo "▶ [3/7] pnpm -r test"
+pnpm -r test
+
+echo "▶ [4/7] SR-1 navigator confidence cap"
+"$REPO_ROOT/.claude/hooks/sr1_navigator_confidence_cap.sh" --mode=stop
+
+echo "▶ [5/7] SR-2 crisis bypass detector"
+"$REPO_ROOT/.claude/hooks/sr2_crisis_bypass_detector.sh" --mode=stop
+
+echo "▶ [6/7] SR-3 diagnostic language"
+"$REPO_ROOT/.claude/hooks/sr3_diagnostic_language.sh" --mode=stop
+
+echo "▶ [7/7] SR-4 no symptom telemetry"
+"$REPO_ROOT/.claude/hooks/sr4_no_symptom_telemetry.sh" --mode=stop
+
+echo "✓ pre-commit chain passed (7/7)"

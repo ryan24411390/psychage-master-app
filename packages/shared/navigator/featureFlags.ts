@@ -16,7 +16,7 @@
  * shared.
  */
 
-import type { ConditionWithMappings } from './types';
+import type { ConditionWithMappings } from "./types";
 
 type Tier = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -70,7 +70,7 @@ export type IsTierEnabledFn = (tier: Tier) => boolean;
  */
 export function filterByFeatureFlags(
   conditions: ConditionWithMappings[],
-  isTierEnabled?: IsTierEnabledFn
+  isTierEnabled?: IsTierEnabledFn,
 ): ConditionWithMappings[] {
   return conditions.filter((c) => {
     const tier = TIER_MAP[c.id];

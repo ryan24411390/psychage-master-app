@@ -1,2 +1,2 @@
-export { SENSITIVITY_TERMS, type SensitivityTerm } from './terms';
-export { scanForSensitivity, type SensitivityFlag } from './filter';
+export { type SensitivityFlag, scanForSensitivity } from "./filter";
+export { SENSITIVITY_TERMS, type SensitivityTerm } from "./terms";

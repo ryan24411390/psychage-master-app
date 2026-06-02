@@ -13,11 +13,11 @@
 // reference is then frozen for the process lifetime — future toggle UI
 // (out of scope this slice) will need to invalidate + re-read.
 
-import type { IsTierEnabledFn } from '@psychage/shared/navigator';
+import type { IsTierEnabledFn } from "@psychage/shared/navigator";
 
-import { loadTierFlags, type Tier } from '@/lib/persistence/tier-flags';
+import { loadTierFlags, type Tier } from "@/lib/persistence/tier-flags";
 
-import { storage } from './storage';
+import { storage } from "./storage";
 
 export type { IsTierEnabledFn };
 

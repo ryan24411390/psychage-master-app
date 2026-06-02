@@ -25,11 +25,11 @@
 // existing plaintext data — the auth slice will need to handle re-encryption
 // of any pre-existing `psychage-anonymous` data on first run.
 
-import { createMMKV } from 'react-native-mmkv';
+import { createMMKV } from "react-native-mmkv";
 
-import type { Storage } from './storage';
+import type { Storage } from "./storage";
 
-const mmkv = createMMKV({ id: 'psychage-anonymous' });
+const mmkv = createMMKV({ id: "psychage-anonymous" });
 
 export const storage: Storage = {
   get(key) {

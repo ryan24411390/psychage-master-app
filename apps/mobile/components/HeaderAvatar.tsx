@@ -1,7 +1,7 @@
-import { User } from 'lucide-react-native';
-import { Pressable, View } from 'react-native';
+import { User } from "lucide-react-native";
+import { Pressable, View } from "react-native";
 
-import { colors } from '@/lib/colors';
+import { colors } from "@/lib/colors";
 
 export function HeaderAvatar() {
   return (

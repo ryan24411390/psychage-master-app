@@ -20,65 +20,65 @@
     },
     "surface": {
       "default": { "light": "#F9F7F3", "dark": "#171717" },
-      "hover":   { "light": "#f5f5f4", "dark": "#1F1F1F" },
-      "active":  { "light": "#e7e5e4", "dark": "#262626" },
+      "hover": { "light": "#f5f5f4", "dark": "#1F1F1F" },
+      "active": { "light": "#e7e5e4", "dark": "#262626" },
       "_source": {
         "default.light": "src/styles/tokens.css:55",
-        "default.dark":  "src/styles/tokens.css:114",
-        "hover.light":   "src/styles/tokens.css:56",
-        "hover.dark":    "src/styles/tokens.css:115",
-        "active.light":  "src/styles/tokens.css:57",
-        "active.dark":   "src/styles/tokens.css:116"
+        "default.dark": "src/styles/tokens.css:114",
+        "hover.light": "src/styles/tokens.css:56",
+        "hover.dark": "src/styles/tokens.css:115",
+        "active.light": "src/styles/tokens.css:57",
+        "active.dark": "src/styles/tokens.css:116"
       }
     },
     "primary": {
       "default": { "light": "#1A9B8C", "dark": "#20B8A6" },
-      "hover":   { "light": "#158A7D", "dark": "#1A9B8C" },
-      "light":   { "light": "#20B8A6", "dark": "#2DD4BF" },
+      "hover": { "light": "#158A7D", "dark": "#1A9B8C" },
+      "light": { "light": "#20B8A6", "dark": "#2DD4BF" },
       "_source": {
         "default.light": "src/styles/tokens.css:59",
-        "default.dark":  "src/styles/tokens.css:118",
-        "hover.light":   "src/styles/tokens.css:61",
-        "hover.dark":    "src/styles/tokens.css:120",
-        "light.light":   "src/styles/tokens.css:63",
-        "light.dark":    "src/styles/tokens.css:122"
+        "default.dark": "src/styles/tokens.css:118",
+        "hover.light": "src/styles/tokens.css:61",
+        "hover.dark": "src/styles/tokens.css:120",
+        "light.light": "src/styles/tokens.css:63",
+        "light.dark": "src/styles/tokens.css:122"
       }
     },
     "text": {
-      "primary":   { "light": "#0a0a0a", "dark": "#fafaf9" },
+      "primary": { "light": "#0a0a0a", "dark": "#fafaf9" },
       "secondary": { "light": "#57534e", "dark": "#d6d3d1" },
-      "tertiary":  { "light": "#6d6762", "dark": "#a8a29e" },
+      "tertiary": { "light": "#6d6762", "dark": "#a8a29e" },
       "_source": {
-        "primary.light":   "src/styles/tokens.css:66",
-        "primary.dark":    "src/styles/tokens.css:125",
+        "primary.light": "src/styles/tokens.css:66",
+        "primary.dark": "src/styles/tokens.css:125",
         "secondary.light": "src/styles/tokens.css:68",
-        "secondary.dark":  "src/styles/tokens.css:127",
-        "tertiary.light":  "src/styles/tokens.css:70",
-        "tertiary.dark":   "src/styles/tokens.css:129"
+        "secondary.dark": "src/styles/tokens.css:127",
+        "tertiary.light": "src/styles/tokens.css:70",
+        "tertiary.dark": "src/styles/tokens.css:129"
       },
       "_note": "text.tertiary.light is Stone-500 darkened to 5.2:1 WCAG AA contrast on background.light per src/styles/tokens.css:71. Slice 4 must not lighten without re-checking AA."
     },
     "border": {
       "default": { "light": "#e7e5e4", "dark": "#3f3f46" },
-      "hover":   { "light": "#d6d3d1", "dark": "#52525b" },
+      "hover": { "light": "#d6d3d1", "dark": "#52525b" },
       "_source": {
         "default.light": "src/styles/tokens.css:73",
-        "default.dark":  "src/styles/tokens.css:132",
-        "hover.light":   "src/styles/tokens.css:75",
-        "hover.dark":    "src/styles/tokens.css:134"
+        "default.dark": "src/styles/tokens.css:132",
+        "hover.light": "src/styles/tokens.css:75",
+        "hover.dark": "src/styles/tokens.css:134"
       }
     },
     "semantic": {
-      "error":   { "light": "#dc2626", "dark": "#f87171" },
+      "error": { "light": "#dc2626", "dark": "#f87171" },
       "success": { "light": "#16a34a", "dark": "#4ade80" },
       "warning": { "light": "#ca8a04", "dark": "#facc15" },
       "_source": {
-        "error.light":   "src/styles/tokens.css:78",
-        "error.dark":    "src/styles/tokens.css:137",
+        "error.light": "src/styles/tokens.css:78",
+        "error.dark": "src/styles/tokens.css:137",
         "success.light": "src/styles/tokens.css:79",
-        "success.dark":  "src/styles/tokens.css:139",
+        "success.dark": "src/styles/tokens.css:139",
         "warning.light": "src/styles/tokens.css:80",
-        "warning.dark":  "src/styles/tokens.css:141"
+        "warning.dark": "src/styles/tokens.css:141"
       }
     },
     "crisis": {
@@ -87,18 +87,18 @@
       "_note": "Non-themed (single value). Used 41× across code per audit §4.1. Crisis surfaces must visually announce regardless of mode."
     },
     "relevance": {
-      "high":     "#1A9B8C",
+      "high": "#1A9B8C",
       "moderate": "#6366F1",
-      "explore":  "#8B5CF6",
+      "explore": "#8B5CF6",
       "_source": {
-        "high":     "tailwind.config.js:79",
+        "high": "tailwind.config.js:79",
         "moderate": "tailwind.config.js:80",
-        "explore":  "tailwind.config.js:81"
+        "explore": "tailwind.config.js:81"
       },
       "_note": "Non-themed. Symptom-Navigator relevance shading. high == primary.light brand teal."
     },
     "teal": {
-      "50":  "#F0FDFA",
+      "50": "#F0FDFA",
       "100": "#E6F5F3",
       "400": "#2DD4BF",
       "500": "#20B8A6",
@@ -106,7 +106,7 @@
       "700": "#158A7D",
       "900": "#0D5C54",
       "_source": {
-        "50":  "tailwind.config.js:45",
+        "50": "tailwind.config.js:45",
         "100": "tailwind.config.js:46",
         "400": "tailwind.config.js:47",
         "500": "tailwind.config.js:48",
@@ -117,7 +117,7 @@
       "_note": "Sparse brand teal scale (no 200/300/800). Hardcoded — does not theme with mode. teal.600 == primary.default.light. teal.500 == primary.light.light."
     },
     "charcoal": {
-      "50":  "#FAFAF9",
+      "50": "#FAFAF9",
       "100": "#F5F5F4",
       "200": "#E7E5E4",
       "300": "#D6D3D1",
@@ -129,7 +129,7 @@
       "900": "#1C1917",
       "950": "#0C0A09",
       "_source": {
-        "50":  "tailwind.config.js:54",
+        "50": "tailwind.config.js:54",
         "100": "tailwind.config.js:55",
         "200": "tailwind.config.js:56",
         "300": "tailwind.config.js:57",
@@ -151,15 +151,15 @@
       "5": { "light": "#15B8A6", "dark": "#15B8A6" },
       "_source": {
         "1.light": "src/components/dashboard/QuickMoodCheckIn.tsx:13",
-        "1.dark":  "src/components/dashboard/QuickMoodCheckIn.tsx:13",
+        "1.dark": "src/components/dashboard/QuickMoodCheckIn.tsx:13",
         "2.light": "src/components/dashboard/QuickMoodCheckIn.tsx:14",
-        "2.dark":  "src/components/dashboard/QuickMoodCheckIn.tsx:14",
+        "2.dark": "src/components/dashboard/QuickMoodCheckIn.tsx:14",
         "3.light": "src/components/dashboard/QuickMoodCheckIn.tsx:15",
-        "3.dark":  "src/components/dashboard/QuickMoodCheckIn.tsx:15",
+        "3.dark": "src/components/dashboard/QuickMoodCheckIn.tsx:15",
         "4.light": "src/components/dashboard/QuickMoodCheckIn.tsx:16",
-        "4.dark":  "src/components/dashboard/QuickMoodCheckIn.tsx:16",
+        "4.dark": "src/components/dashboard/QuickMoodCheckIn.tsx:16",
         "5.light": "src/components/dashboard/QuickMoodCheckIn.tsx:17",
-        "5.dark":  "src/components/dashboard/QuickMoodCheckIn.tsx:17"
+        "5.dark": "src/components/dashboard/QuickMoodCheckIn.tsx:17"
       },
       "_scope": "mood-feature-only — not for general use. Promoted to token per §7 Q10 resolution. Existing consumers: src/components/dashboard/QuickMoodCheckIn.tsx:12-18 (defines MOOD_OPTIONS with bgLight+bgDark alpha classes), src/components/onboarding/FirstMoodStep.tsx:10-16 (local MOOD_OPTIONS, light-only). Slice 4 dedupes both into a shared feature module consuming color.mood.*.",
       "_dark_origin": "Source defines no separate dark hex — same base hex used in both modes; only surface alpha varies in usage (bg-[#HEX]/10 light vs dark:bg-[#HEX]/15 in QuickMoodCheckIn.tsx). Paired L/D encoded with identical hex to honor Option B schema convention; alpha-shift behavior remains at consumer site.",
@@ -172,13 +172,13 @@
 
   "type": {
     "family": {
-      "sans":    "Inter, system-ui, -apple-system, sans-serif",
+      "sans": "Inter, system-ui, -apple-system, sans-serif",
       "display": "Inter, system-ui, -apple-system, sans-serif",
-      "mono":    "'IBM Plex Mono', monospace",
+      "mono": "'IBM Plex Mono', monospace",
       "_source": {
-        "sans":    "src/styles/tokens.css:3",
+        "sans": "src/styles/tokens.css:3",
         "display": "src/styles/tokens.css:4",
-        "mono":    "tailwind.config.js:87"
+        "mono": "tailwind.config.js:87"
       },
       "_note": "Drop-cap-only Georgia serif at src/styles/article-prose.css:67 is article-context, not a global family. Excluded."
     },
@@ -188,21 +188,21 @@
   },
 
   "spacing": {
-    "1":  "0.25rem",
-    "2":  "0.5rem",
-    "3":  "0.75rem",
-    "4":  "1rem",
-    "6":  "1.5rem",
-    "8":  "2rem",
+    "1": "0.25rem",
+    "2": "0.5rem",
+    "3": "0.75rem",
+    "4": "1rem",
+    "6": "1.5rem",
+    "8": "2rem",
     "12": "3rem",
     "16": "4rem",
     "_source": {
-      "1":  "src/styles/tokens.css:7",
-      "2":  "src/styles/tokens.css:9",
-      "3":  "src/styles/tokens.css:11",
-      "4":  "src/styles/tokens.css:13",
-      "6":  "src/styles/tokens.css:15",
-      "8":  "src/styles/tokens.css:17",
+      "1": "src/styles/tokens.css:7",
+      "2": "src/styles/tokens.css:9",
+      "3": "src/styles/tokens.css:11",
+      "4": "src/styles/tokens.css:13",
+      "6": "src/styles/tokens.css:15",
+      "8": "src/styles/tokens.css:17",
       "12": "src/styles/tokens.css:19",
       "16": "src/styles/tokens.css:21"
     },
@@ -210,16 +210,16 @@
   },
 
   "radius": {
-    "sm":   "0.25rem",
-    "md":   "0.5rem",
-    "lg":   "0.75rem",
-    "xl":   "1rem",
+    "sm": "0.25rem",
+    "md": "0.5rem",
+    "lg": "0.75rem",
+    "xl": "1rem",
     "full": "9999px",
     "_source": {
-      "sm":   "src/styles/tokens.css:25",
-      "md":   "src/styles/tokens.css:26",
-      "lg":   "src/styles/tokens.css:27",
-      "xl":   "src/styles/tokens.css:28",
+      "sm": "src/styles/tokens.css:25",
+      "md": "src/styles/tokens.css:26",
+      "lg": "src/styles/tokens.css:27",
+      "xl": "src/styles/tokens.css:28",
       "full": "src/styles/tokens.css:29"
     },
     "_canonical": {
@@ -231,59 +231,59 @@
   "shadow": {
     "sm": {
       "light": "0 1px 2px 0 rgb(0 0 0 / 0.04)",
-      "dark":  "0 1px 2px 0 rgb(0 0 0 / 0.3)"
+      "dark": "0 1px 2px 0 rgb(0 0 0 / 0.3)"
     },
     "md": {
       "light": "0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06)",
-      "dark":  "0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3)"
+      "dark": "0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3)"
     },
     "lg": {
       "light": "0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.06)",
-      "dark":  "0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4)"
+      "dark": "0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4)"
     },
     "glow": {
       "light": "0 0 20px rgba(26, 155, 140, 0.12)",
-      "dark":  "0 0 30px rgba(26, 155, 140, 0.3)"
+      "dark": "0 0 30px rgba(26, 155, 140, 0.3)"
     },
     "_source": {
-      "sm.light":   "src/styles/tokens.css:92",
-      "sm.dark":    "src/styles/tokens.css:145",
-      "md.light":   "src/styles/tokens.css:93",
-      "md.dark":    "src/styles/tokens.css:146",
-      "lg.light":   "src/styles/tokens.css:94",
-      "lg.dark":    "src/styles/tokens.css:147",
+      "sm.light": "src/styles/tokens.css:92",
+      "sm.dark": "src/styles/tokens.css:145",
+      "md.light": "src/styles/tokens.css:93",
+      "md.dark": "src/styles/tokens.css:146",
+      "lg.light": "src/styles/tokens.css:94",
+      "lg.dark": "src/styles/tokens.css:147",
       "glow.light": "src/styles/tokens.css:95",
-      "glow.dark":  "src/styles/tokens.css:148"
+      "glow.dark": "src/styles/tokens.css:148"
     },
     "_note": "shadow.glow uses rgba(26,155,140,*) = brand teal #1A9B8C (correct). Drift teal rgba(13,148,136,*) does not appear here."
   },
 
   "motion": {
     "duration": {
-      "micro":  "0.15s",
-      "small":  "0.2s",
+      "micro": "0.15s",
+      "small": "0.2s",
       "medium": "0.3s",
-      "large":  "0.5s",
-      "xl":     "0.7s",
+      "large": "0.5s",
+      "xl": "0.7s",
       "_source": {
-        "micro":  "src/lib/animations.ts:11",
-        "small":  "src/lib/animations.ts:12",
+        "micro": "src/lib/animations.ts:11",
+        "small": "src/lib/animations.ts:12",
         "medium": "src/lib/animations.ts:13",
-        "large":  "src/lib/animations.ts:14",
-        "xl":     "src/lib/animations.ts:15"
+        "large": "src/lib/animations.ts:14",
+        "xl": "src/lib/animations.ts:15"
       },
       "_note": "Canonical motion source = src/lib/animations.ts (per Slice 2 lock). JS literals stored in seconds (Framer Motion convention). Equivalent CSS-var system at src/styles/tokens.css:36-41 (--duration-*) and Tailwind aliases at tailwind.config.js:112-116 are DEAD (zero references in components) and excluded."
     },
     "easing": {
-      "standard":   [0.4, 0, 0.2, 1],
+      "standard": [0.4, 0, 0.2, 1],
       "decelerate": [0, 0, 0.2, 1],
       "accelerate": [0.4, 0, 1, 1],
-      "spring":     [0.34, 1.56, 0.64, 1],
+      "spring": [0.34, 1.56, 0.64, 1],
       "_source": {
-        "standard":   "src/lib/animations.ts:19",
+        "standard": "src/lib/animations.ts:19",
         "decelerate": "src/lib/animations.ts:20",
         "accelerate": "src/lib/animations.ts:21",
-        "spring":     "src/lib/animations.ts:22"
+        "spring": "src/lib/animations.ts:22"
       },
       "_note": "Cubic-bezier control points as 4-element arrays (Framer Motion native form). spring is the Spark moment; use sparingly."
     },
@@ -293,15 +293,15 @@
   },
 
   "maxWidth": {
-    "content":   "80rem",
+    "content": "80rem",
     "dashboard": "75rem",
-    "admin":     "87.5rem",
-    "wide":      "100rem",
+    "admin": "87.5rem",
+    "wide": "100rem",
     "_source": {
-      "content":   "tailwind.config.js:118",
+      "content": "tailwind.config.js:118",
       "dashboard": "tailwind.config.js:119",
-      "admin":     "tailwind.config.js:120",
-      "wide":      "tailwind.config.js:121"
+      "admin": "tailwind.config.js:120",
+      "wide": "tailwind.config.js:121"
     },
     "_note": "wide = 100rem per tailwind.config.js. PageLayout (src/components/layout/PageLayout.tsx:11) defines a local 'wide' keyword that maps to max-w-7xl (80rem); that mapping is component-local and is NOT a token. Naming collision surfaced as §7 Q4."
   },

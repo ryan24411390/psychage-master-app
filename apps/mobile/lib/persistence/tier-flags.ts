@@ -11,13 +11,13 @@
 // Forward-only. There is no down-migration; a future-versioned blob (a
 // downgraded app reading newer persisted state) falls back to a default seed.
 
-import type { Storage } from '@/lib/adapters/storage';
+import type { Storage } from "@/lib/adapters/storage";
 
 export type Tier = 1 | 2 | 3 | 4 | 5 | 6;
 export type TierFlags = Record<Tier, boolean>;
 
 export const SCHEMA_VERSION = 1 as const;
-export const STORAGE_KEY = 'mobile:tier-flags';
+export const STORAGE_KEY = "mobile:tier-flags";
 
 const DEFAULT_TIER_FLAGS: TierFlags = {
   1: true,
@@ -60,7 +60,7 @@ const TRANSFORMS: readonly Transform[] = [
     // semantics map directly onto Slice 7's `() => true` / `() => false`
     // surface so an in-flight upgrade preserves user intent.
     transform: (raw) => {
-      if (typeof raw !== 'object' || raw === null) return { ...DEFAULT_TIER_FLAGS };
+      if (typeof raw !== "object" || raw === null) return { ...DEFAULT_TIER_FLAGS };
       const enabled = (raw as { enabled?: unknown }).enabled === true;
       return enabled ? { ...DEFAULT_TIER_FLAGS } : { ...ALL_DISABLED };
     },
@@ -68,10 +68,10 @@ const TRANSFORMS: readonly Transform[] = [
 ];
 
 function isTierFlagsShape(value: unknown): value is TierFlags {
-  if (typeof value !== 'object' || value === null) return false;
+  if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
   for (let tier = 1; tier <= 6; tier++) {
-    if (typeof v[String(tier)] !== 'boolean') return false;
+    if (typeof v[String(tier)] !== "boolean") return false;
   }
   return true;
 }
@@ -97,12 +97,12 @@ export function migrate(rawJson: string | null): Persisted {
     return { version: SCHEMA_VERSION, data: { ...DEFAULT_TIER_FLAGS } };
   }
 
-  if (typeof parsed !== 'object' || parsed === null) {
+  if (typeof parsed !== "object" || parsed === null) {
     return { version: SCHEMA_VERSION, data: { ...DEFAULT_TIER_FLAGS } };
   }
 
   const envelope = parsed as { version?: unknown; data?: unknown };
-  const version = typeof envelope.version === 'number' ? envelope.version : null;
+  const version = typeof envelope.version === "number" ? envelope.version : null;
   if (version === null) {
     return { version: SCHEMA_VERSION, data: { ...DEFAULT_TIER_FLAGS } };
   }

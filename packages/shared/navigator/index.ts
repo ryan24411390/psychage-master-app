@@ -13,17 +13,17 @@
 // the consuming app, not here. See rules/conventions.md #3.
 
 // Engine entry point
-export { runSymptomNavigator } from './engine';
+export { runSymptomNavigator } from "./engine";
 
 // Feature-flag DI seam
 export {
   filterByFeatureFlags,
   getEnabledTiers,
   type IsTierEnabledFn,
-} from './featureFlags';
+} from "./featureFlags";
 
 // Safety screening
-export { screenRedFlags } from './safety';
+export { screenRedFlags } from "./safety";
 
 // Scoring primitives are intentionally NOT exported from the public surface.
 // Their returned ConditionScore objects carry pre-cap diagnostic fields
@@ -32,48 +32,27 @@ export { screenRedFlags } from './safety';
 // returns NavigatorResultItem.relevance_score (= capped_score, cap-safe).
 // Re-adding scoring primitives later is a non-breaking subset addition.
 
-// Utilities + display helpers
-export {
-  DEFAULT_MATCHING_CONFIG,
-  NAVIGATOR_DISCLAIMER,
-  PROHIBITED_PHRASES,
-  combinedModifier,
-  getDurationModifier,
-  getFrequencyModifier,
-  getRelevanceColor,
-  getRelevanceLabel,
-  getRelevanceLevel,
-  getSeverityModifier,
-  normalizeSymptoms,
-} from './utils';
-
 // Constants (Sacred Rule #1)
-export { CONFIDENCE_CAP } from './constants';
-
+export { CONFIDENCE_CAP } from "./constants";
 // Defaults
 export {
   SYMPTOM_DEFAULTS,
   SYMPTOM_DETAIL_UX_THRESHOLD,
-} from './defaults';
+} from "./defaults";
+// Provider question generator
+export { generateProviderQuestions } from "./providerQuestions";
 
 // Step config (UI orchestration)
 export {
-  STEP_CONFIGS,
   getStepConfig,
   getStepNumber,
   getTotalSteps,
   isStepBefore,
-  wouldJumpInvalidateData,
   type NavigatorStep,
+  STEP_CONFIGS,
   type StepConfig,
-} from './stepConfig';
-
-// Provider question generator
-export { generateProviderQuestions } from './providerQuestions';
-
-// Duration map (value re-export)
-export { DURATION_TO_DAYS } from './types';
-
+  wouldJumpInvalidateData,
+} from "./stepConfig";
 // Types
 export type {
   // ConditionScore is intentionally not re-exported — its raw_score and
@@ -87,8 +66,8 @@ export type {
   ConditionSymptomMapping,
   ConditionWithMappings,
   CrisisResource,
-  CrisisResourceType,
   CrisisResourcesByRegion,
+  CrisisResourceType,
   DurationModifiers,
   FrequencyModifiers,
   KnowledgeBase,
@@ -104,8 +83,8 @@ export type {
   SafetyConfig,
   SafetyResult,
   SavedResult,
-  SaveResultsRequest,
   SavedResultsResponse,
+  SaveResultsRequest,
   SeverityModifiers,
   Symptom,
   SymptomCategory,
@@ -114,4 +93,21 @@ export type {
   UserDuration,
   UserFrequency,
   UserSymptomInput,
-} from './types';
+} from "./types";
+
+// Duration map (value re-export)
+export { DURATION_TO_DAYS } from "./types";
+// Utilities + display helpers
+export {
+  combinedModifier,
+  DEFAULT_MATCHING_CONFIG,
+  getDurationModifier,
+  getFrequencyModifier,
+  getRelevanceColor,
+  getRelevanceLabel,
+  getRelevanceLevel,
+  getSeverityModifier,
+  NAVIGATOR_DISCLAIMER,
+  normalizeSymptoms,
+  PROHIBITED_PHRASES,
+} from "./utils";

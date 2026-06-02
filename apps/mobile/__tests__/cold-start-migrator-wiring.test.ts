@@ -14,20 +14,20 @@
 // covered by `featureFlags.ts`'s module-init contract, which Slice 8's
 // composition test exercises.
 
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from "vitest";
 
-const layoutPath = join(__dirname, '..', 'app', '_layout.tsx');
-const source = readFileSync(layoutPath, 'utf8');
+const layoutPath = join(__dirname, "..", "app", "_layout.tsx");
+const source = readFileSync(layoutPath, "utf8");
 
-describe('cold-start migrator wiring — _layout.tsx side-effect import target', () => {
-  it('imports @/lib/adapters/featureFlags as a side effect (fires loadTierFlags at module init)', () => {
+describe("cold-start migrator wiring — _layout.tsx side-effect import target", () => {
+  it("imports @/lib/adapters/featureFlags as a side effect (fires loadTierFlags at module init)", () => {
     expect(source).toMatch(/import\s+['"]@\/lib\/adapters\/featureFlags['"];/);
   });
 
-  it('does NOT import @/lib/persistence/tier-flags as a side effect (that module is declarations-only — zero top-level execution)', () => {
+  it("does NOT import @/lib/persistence/tier-flags as a side effect (that module is declarations-only — zero top-level execution)", () => {
     expect(source).not.toMatch(/import\s+['"]@\/lib\/persistence\/tier-flags['"];/);
   });
 });

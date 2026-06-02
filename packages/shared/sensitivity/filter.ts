@@ -10,7 +10,7 @@
  * status as 'warning' (never 'fail').
  */
 
-import { SENSITIVITY_TERMS } from './terms';
+import { SENSITIVITY_TERMS } from "./terms";
 
 export interface SensitivityFlag {
   term: string;

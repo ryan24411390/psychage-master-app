@@ -12,29 +12,28 @@
 // internal test-helpers are not on the exports map (deep imports do not
 // resolve through the barrel).
 
-import { describe, it, expect } from 'vitest';
-
 import {
-  DEFAULT_MATCHING_CONFIG,
-  runSymptomNavigator,
   type ConditionCategory,
   type ConditionWithMappings,
+  DEFAULT_MATCHING_CONFIG,
   type KnowledgeBase,
+  runSymptomNavigator,
   type Symptom,
   type UserSymptomInput,
-} from '@psychage/shared/navigator';
+} from "@psychage/shared/navigator";
+import { describe, expect, it } from "vitest";
 
-import { isTierEnabled, type IsTierEnabledFn } from '@/lib/adapters';
+import { type IsTierEnabledFn, isTierEnabled } from "@/lib/adapters";
 
-const SYMPTOM_IDS = ['s1', 's2', 's3', 's4', 's5', 's6'] as const;
+const SYMPTOM_IDS = ["s1", "s2", "s3", "s4", "s5", "s6"] as const;
 
 function makeSymptom(id: string): Symptom {
   return {
     id,
-    domain: 'emotional',
-    category: 'mood',
+    domain: "emotional",
+    category: "mood",
     name: id,
-    description: '',
+    description: "",
     synonyms: [],
     ask_duration: true,
     ask_severity: true,
@@ -45,7 +44,7 @@ function makeSymptom(id: string): Symptom {
     severity_red_flag_level: null,
     display_order: 0,
     is_active: true,
-    version: '1.0.0',
+    version: "1.0.0",
   };
 }
 
@@ -55,21 +54,21 @@ function makeCondition(id: string, category: ConditionCategory): ConditionWithMa
     name: id,
     full_name: id,
     category,
-    description_for_user: '',
-    minimum_duration: '2_weeks',
-    minimum_duration_display: '',
+    description_for_user: "",
+    minimum_duration: "2_weeks",
+    minimum_duration_display: "",
     minimum_symptoms_for_relevance: 2,
     always_recommend_professional: false,
-    guide_path: '',
-    coping_path: '',
+    guide_path: "",
+    coping_path: "",
     provider_questions: [],
-    clinical_notes: '',
+    clinical_notes: "",
     is_active: true,
-    version: '1.0.0',
+    version: "1.0.0",
     symptom_mappings: SYMPTOM_IDS.map((sid) => ({
       symptom_id: sid,
       weight: 3 as const,
-      role: 'core' as const,
+      role: "core" as const,
     })),
     red_flags: [],
   };
@@ -79,9 +78,9 @@ function makeCondition(id: string, category: ConditionCategory): ConditionWithMa
 // TIER_MAP). Different categories so rankAndDiversify's max_per_family cap
 // does not drop either.
 const kb: KnowledgeBase = {
-  version: '1.0.0',
+  version: "1.0.0",
   symptoms: SYMPTOM_IDS.map(makeSymptom),
-  conditions: [makeCondition('SCZ', 'psychotic'), makeCondition('NPD', 'personality')],
+  conditions: [makeCondition("SCZ", "psychotic"), makeCondition("NPD", "personality")],
   matchingConfig: DEFAULT_MATCHING_CONFIG,
   crisisResources: {},
 };
@@ -89,30 +88,30 @@ const kb: KnowledgeBase = {
 const userInputs: UserSymptomInput[] = SYMPTOM_IDS.map((sid) => ({
   symptom_id: sid,
   severity: 7,
-  duration: 'more_than_1_year',
-  frequency: 'often',
+  duration: "more_than_1_year",
+  frequency: "often",
 }));
 
-describe('mobile DI seam — runSymptomNavigator + featureFlags adapter', () => {
-  it('default predicate via adapter: Tier-4 condition surfaces (web parity); every relevance_score ≤ 0.75', () => {
+describe("mobile DI seam — runSymptomNavigator + featureFlags adapter", () => {
+  it("default predicate via adapter: Tier-4 condition surfaces (web parity); every relevance_score ≤ 0.75", () => {
     const result = runSymptomNavigator(userInputs, kb, undefined, isTierEnabled);
 
     const ids = result.results.map((r) => r.condition_id);
-    expect(ids).toContain('NPD');
-    expect(ids).toContain('SCZ');
+    expect(ids).toContain("NPD");
+    expect(ids).toContain("SCZ");
     for (const r of result.results) {
       expect(r.relevance_score).toBeLessThanOrEqual(0.75);
     }
   });
 
-  it('restrictive predicate (tier < 4): Tier-4 filtered out; lower-tier results remain; every relevance_score ≤ 0.75', () => {
+  it("restrictive predicate (tier < 4): Tier-4 filtered out; lower-tier results remain; every relevance_score ≤ 0.75", () => {
     const restrictive: IsTierEnabledFn = (tier) => tier < 4;
 
     const result = runSymptomNavigator(userInputs, kb, undefined, restrictive);
 
     const ids = result.results.map((r) => r.condition_id);
-    expect(ids).not.toContain('NPD');
-    expect(ids).toContain('SCZ');
+    expect(ids).not.toContain("NPD");
+    expect(ids).toContain("SCZ");
     expect(result.results.length).toBeGreaterThan(0);
     for (const r of result.results) {
       expect(r.relevance_score).toBeLessThanOrEqual(0.75);

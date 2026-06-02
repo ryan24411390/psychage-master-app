@@ -1,13 +1,13 @@
-import { UserDuration, UserFrequency } from './types';
+import type { UserDuration, UserFrequency } from "./types";
 
 /**
  * Default values for symptom details when user skips or applies defaults.
  * These represent moderate/typical values to avoid skewing results.
  */
 export const SYMPTOM_DEFAULTS = {
-    severity: 5, // Moderate on 1-10 scale
-    duration: '2_to_4_weeks' as UserDuration, // Weeks timeframe
-    frequency: 'sometimes' as UserFrequency // Moderate frequency
+  severity: 5, // Moderate on 1-10 scale
+  duration: "2_to_4_weeks" as UserDuration, // Weeks timeframe
+  frequency: "sometimes" as UserFrequency, // Moderate frequency
 } as const;
 
 /**

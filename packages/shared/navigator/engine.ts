@@ -13,6 +13,10 @@
  * transmitted to any server in the default (anonymous) flow.
  */
 
+import { CONFIDENCE_CAP } from "./constants";
+import { filterByFeatureFlags, type IsTierEnabledFn } from "./featureFlags";
+import { screenRedFlags } from "./safety";
+import { rankAndDiversify, scoreAllConditions } from "./scoring";
 import type {
   KnowledgeBase,
   NavigatorResultItem,
@@ -20,18 +24,14 @@ import type {
   NormalizedSymptom,
   SafetyResult,
   UserSymptomInput,
-} from './types';
-import { filterByFeatureFlags, type IsTierEnabledFn } from './featureFlags';
-import { screenRedFlags } from './safety';
-import { rankAndDiversify, scoreAllConditions } from './scoring';
+} from "./types";
 import {
   DEFAULT_MATCHING_CONFIG,
   getRelevanceColor,
   getRelevanceLabel,
   NAVIGATOR_DISCLAIMER,
   normalizeSymptoms,
-} from './utils';
-import { CONFIDENCE_CAP } from './constants';
+} from "./utils";
 
 /**
  * Main entry point for the Symptom Navigator engine.
@@ -49,7 +49,7 @@ export function runSymptomNavigator(
   userInputs: UserSymptomInput[],
   knowledgeBase: KnowledgeBase,
   userRegion?: string,
-  isTierEnabled: IsTierEnabledFn = () => true
+  isTierEnabled: IsTierEnabledFn = () => true,
 ): NavigatorResults {
   const rawConfig = knowledgeBase.matchingConfig ?? DEFAULT_MATCHING_CONFIG;
   // Critical Finding #1 floor: never let an API-supplied confidence_cap rise
@@ -67,7 +67,7 @@ export function runSymptomNavigator(
     normalized,
     knowledgeBase.symptoms,
     knowledgeBase.crisisResources,
-    userRegion
+    userRegion,
   );
 
   // If CRISIS detected, return immediately with safety info only
@@ -105,7 +105,7 @@ function generateSafeResults(
   rankedConditions: ReturnType<typeof rankAndDiversify>,
   userSymptoms: NormalizedSymptom[],
   safetyResult: SafetyResult,
-  config: KnowledgeBase['matchingConfig']
+  config: KnowledgeBase["matchingConfig"],
 ): NavigatorResults {
   const results: NavigatorResultItem[] = rankedConditions.map((score) => ({
     condition_id: score.condition_id,
@@ -114,14 +114,8 @@ function generateSafeResults(
     description_for_user: score.condition.description_for_user,
     relevance_score: score.capped_score,
     relevance_level: score.relevance_level,
-    relevance_label: getRelevanceLabel(
-      score.relevance_level,
-      config.relevance_display_tiers
-    ),
-    relevance_color: getRelevanceColor(
-      score.relevance_level,
-      config.relevance_display_tiers
-    ),
+    relevance_label: getRelevanceLabel(score.relevance_level, config.relevance_display_tiers),
+    relevance_color: getRelevanceColor(score.relevance_level, config.relevance_display_tiers),
     matched_symptoms: score.matched_symptoms.map((ms) => ({
       name: ms.symptom_name,
       role: ms.role,
@@ -132,11 +126,7 @@ function generateSafeResults(
     always_recommend_professional: score.condition.always_recommend_professional,
   }));
 
-  const recommendations = buildGeneralRecommendations(
-    userSymptoms,
-    safetyResult,
-    results
-  );
+  const recommendations = buildGeneralRecommendations(userSymptoms, safetyResult, results);
 
   return {
     safety: safetyResult,
@@ -155,23 +145,23 @@ function generateSafeResults(
 function buildGeneralRecommendations(
   symptoms: NormalizedSymptom[],
   safety: SafetyResult,
-  results: NavigatorResultItem[]
+  results: NavigatorResultItem[],
 ): string[] {
   const recommendations: string[] = [];
 
   // Always recommend professional consultation
   if (results.length > 0) {
     const hasStrongMatches = results.some(
-      (r) => r.relevance_level === 'high' || r.relevance_level === 'moderate'
+      (r) => r.relevance_level === "high" || r.relevance_level === "moderate",
     );
     if (hasStrongMatches) {
       recommendations.push(
-        'Consider sharing these results with a healthcare provider who can offer personalized guidance.'
+        "Consider sharing these results with a healthcare provider who can offer personalized guidance.",
       );
     } else {
       recommendations.push(
-        'The patterns identified are exploratory starting points. A healthcare provider can help determine ' +
-          'whether these areas are relevant to your experience and guide next steps.'
+        "The patterns identified are exploratory starting points. A healthcare provider can help determine " +
+          "whether these areas are relevant to your experience and guide next steps.",
       );
     }
   }
@@ -179,16 +169,16 @@ function buildGeneralRecommendations(
   // If no results matched, provide general wellness
   if (results.length === 0 && !safety.should_halt) {
     recommendations.push(
-      'Your selected experiences did not strongly match specific patterns in our knowledge base. ' +
-        'This does not mean your concerns are not valid — many experiences are unique to the individual.'
+      "Your selected experiences did not strongly match specific patterns in our knowledge base. " +
+        "This does not mean your concerns are not valid — many experiences are unique to the individual.",
     );
     recommendations.push(
-      'General wellness strategies like regular exercise, quality sleep, balanced nutrition, ' +
-        'and social connection can benefit mental wellbeing for everyone.'
+      "General wellness strategies like regular exercise, quality sleep, balanced nutrition, " +
+        "and social connection can benefit mental wellbeing for everyone.",
     );
     recommendations.push(
-      'If your experiences are causing distress, speaking with a healthcare provider can help. ' +
-        'You might also try selecting additional symptoms or providing more detailed severity and duration information.'
+      "If your experiences are causing distress, speaking with a healthcare provider can help. " +
+        "You might also try selecting additional symptoms or providing more detailed severity and duration information.",
     );
   }
 
@@ -196,35 +186,34 @@ function buildGeneralRecommendations(
   const highSeverity = symptoms.filter((s) => s.severity >= 7);
   if (highSeverity.length > 0 && !safety.has_crisis) {
     recommendations.push(
-      'Some of the experiences you described are rated at a higher intensity. ' +
-        'A mental health professional can help you develop strategies to manage them.'
+      "Some of the experiences you described are rated at a higher intensity. " +
+        "A mental health professional can help you develop strategies to manage them.",
     );
   }
 
   // Long duration symptoms
   const longDuration = symptoms.filter(
-    (s) =>
-      s.duration === 'more_than_1_year' || s.duration === '6_months_to_1_year'
+    (s) => s.duration === "more_than_1_year" || s.duration === "6_months_to_1_year",
   );
   if (longDuration.length > 0) {
     recommendations.push(
-      'Some experiences you described have been present for an extended period. ' +
-        'Professional support can be especially helpful for persistent concerns.'
+      "Some experiences you described have been present for an extended period. " +
+        "Professional support can be especially helpful for persistent concerns.",
     );
   }
 
   // Safety-related recommendations
   if (safety.has_watch) {
     recommendations.push(
-      'Some of your responses suggest experiences worth monitoring. Consider keeping a journal ' +
-        'to track patterns and share with a healthcare provider.'
+      "Some of your responses suggest experiences worth monitoring. Consider keeping a journal " +
+        "to track patterns and share with a healthcare provider.",
     );
   }
 
   if (safety.has_urgent) {
     recommendations.push(
-      'Based on some of your responses, we recommend scheduling an appointment with a healthcare ' +
-        'provider in the near future for a thorough evaluation.'
+      "Based on some of your responses, we recommend scheduling an appointment with a healthcare " +
+        "provider in the near future for a thorough evaluation.",
     );
   }
 
@@ -232,8 +221,8 @@ function buildGeneralRecommendations(
   const needsProfessional = results.some((r) => r.always_recommend_professional);
   if (needsProfessional) {
     recommendations.push(
-      'The areas identified often benefit significantly from professional evaluation and guidance. ' +
-        'A qualified provider can help determine the best path forward for you.'
+      "The areas identified often benefit significantly from professional evaluation and guidance. " +
+        "A qualified provider can help determine the best path forward for you.",
     );
   }
 

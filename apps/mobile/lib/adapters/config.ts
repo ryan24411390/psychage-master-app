@@ -6,10 +6,10 @@
 
 export interface AppConfig {
   readonly appVersion: string;
-  readonly env: 'dev' | 'prod';
+  readonly env: "dev" | "prod";
 }
 
 export const config: AppConfig = {
-  appVersion: '0.0.0',
-  env: 'dev',
+  appVersion: "0.0.0",
+  env: "dev",
 };

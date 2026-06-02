@@ -1,19 +1,19 @@
-import { Pressable, type PressableProps } from 'react-native';
-import { type ReactNode } from 'react';
+import type { ReactNode } from "react";
+import { Pressable, type PressableProps } from "react-native";
 
-import { useHaptics } from '@/lib/haptic-context';
+import { useHaptics } from "@/lib/haptic-context";
 
-import { Text } from './Text';
+import { Text } from "./Text";
 
 // Primary action primitive. DESIGN.mobile.md §3.3 firing-rule: every primary
 // CTA fires haptic.affirm. Pressed state = opacity dim only (no scale/transform
 // — contract favors sensorial restraint; no press motion is specified).
 // Size `default` meets 44pt iOS HIG touch-target floor (DESIGN.mobile.md §7).
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
-export type ButtonSize = 'default' | 'sm';
+export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonSize = "default" | "sm";
 
-type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
+type ButtonProps = Omit<PressableProps, "children" | "style"> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
   children: ReactNode;
@@ -21,25 +21,25 @@ type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
 };
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-primary dark:bg-primary-dark',
-  secondary: 'bg-transparent border border-border dark:border-border-dark',
-  ghost: 'bg-transparent',
+  primary: "bg-primary dark:bg-primary-dark",
+  secondary: "bg-transparent border border-border dark:border-border-dark",
+  ghost: "bg-transparent",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  default: 'min-h-[44px] px-5 py-3 rounded-lg',
-  sm: 'min-h-[36px] px-3 py-2 rounded-lg',
+  default: "min-h-[44px] px-5 py-3 rounded-lg",
+  sm: "min-h-[36px] px-3 py-2 rounded-lg",
 };
 
 const textVariantClasses: Record<ButtonVariant, string> = {
-  primary: 'text-white',
-  secondary: 'text-text-primary dark:text-text-primary-dark',
-  ghost: 'text-primary dark:text-primary-dark',
+  primary: "text-white",
+  secondary: "text-text-primary dark:text-text-primary-dark",
+  ghost: "text-primary dark:text-primary-dark",
 };
 
 export function Button({
-  variant = 'primary',
-  size = 'default',
+  variant = "primary",
+  size = "default",
   children,
   className,
   onPress,
@@ -48,16 +48,16 @@ export function Button({
 }: ButtonProps) {
   const { fireHaptic } = useHaptics();
 
-  const handlePress: PressableProps['onPress'] = (event) => {
+  const handlePress: PressableProps["onPress"] = (event) => {
     if (disabled) return;
-    fireHaptic('affirm');
+    fireHaptic("affirm");
     onPress?.(event);
   };
 
-  const base = 'items-center justify-center';
+  const base = "items-center justify-center";
   const composed = [base, variantClasses[variant], sizeClasses[size], className]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   return (
     <Pressable
@@ -69,7 +69,7 @@ export function Button({
       style={({ pressed }) => ({ opacity: disabled ? 0.5 : pressed ? 0.7 : 1 })}
       {...props}
     >
-      {typeof children === 'string' ? (
+      {typeof children === "string" ? (
         <Text className={textVariantClasses[variant]}>{children}</Text>
       ) : (
         children

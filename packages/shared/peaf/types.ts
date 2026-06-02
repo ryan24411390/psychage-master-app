@@ -12,29 +12,29 @@ export type SourceTier = 1 | 2 | 3 | 4 | 5;
 /** Expanded source type covering all acceptable citation origins */
 export type ExpandedSourceType =
   // Tier 1 — Peer-Reviewed Research
-  | 'peer_reviewed_journal'
-  | 'meta_analysis'
-  | 'systematic_review'
+  | "peer_reviewed_journal"
+  | "meta_analysis"
+  | "systematic_review"
   // Tier 2 — Government / Institutional
-  | 'nimh'
-  | 'nih'
-  | 'who'
-  | 'cdc'
-  | 'samhsa'
+  | "nimh"
+  | "nih"
+  | "who"
+  | "cdc"
+  | "samhsa"
   // Tier 3 — Professional Organizations
-  | 'apa_psychiatric'
-  | 'apa_psychological'
-  | 'nami'
-  | 'mha'
+  | "apa_psychiatric"
+  | "apa_psychological"
+  | "nami"
+  | "mha"
   // Tier 4 — Clinical Guidelines & Reviews
-  | 'dsm'
-  | 'icd'
-  | 'cochrane'
-  | 'clinical_guideline'
+  | "dsm"
+  | "icd"
+  | "cochrane"
+  | "clinical_guideline"
   // Tier 5 — Educational / Reference
-  | 'mayo_clinic'
-  | 'textbook'
-  | 'reference';
+  | "mayo_clinic"
+  | "textbook"
+  | "reference";
 
 // ---------------------------------------------------------------------------
 // Article Template System
@@ -42,11 +42,11 @@ export type ExpandedSourceType =
 
 /** The 5 canonical article types in Psychage */
 export type ArticleType =
-  | 'condition_deep_dive'
-  | 'treatment_guide'
-  | 'research_digest'
-  | 'self_help'
-  | 'crisis_safety';
+  | "condition_deep_dive"
+  | "treatment_guide"
+  | "research_digest"
+  | "self_help"
+  | "crisis_safety";
 
 /** Defines the structural requirements for one article type */
 export interface ArticleTemplate {
@@ -58,7 +58,7 @@ export interface ArticleTemplate {
   minWordCount: number;
   requiresCrisisDisclaimer: boolean;
   requiresClinicalReview: boolean;
-  linkedResourceTypes: ('condition' | 'crisis' | 'provider' | 'tool')[];
+  linkedResourceTypes: ("condition" | "crisis" | "provider" | "tool")[];
 }
 
 // ---------------------------------------------------------------------------
@@ -101,7 +101,7 @@ export interface QualityGateResult {
 export interface QualityCheck {
   id: string;
   label: string;
-  status: 'pass' | 'fail' | 'warning';
+  status: "pass" | "fail" | "warning";
   message: string;
   blocking: boolean;
   /** Optional numeric detail (e.g. actual word count, readability grade) */

@@ -1,6 +1,14 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-import { fireHaptic, type HapticEvent } from './haptics';
+import { fireHaptic, type HapticEvent } from "./haptics";
 
 type HapticContextValue = {
   enabled: boolean;
@@ -36,7 +44,7 @@ export function HapticProvider({ children }: { children: ReactNode }) {
 export function useHaptics(): HapticContextValue {
   const value = useContext(HapticContext);
   if (!value) {
-    throw new Error('useHaptics must be used within a HapticProvider');
+    throw new Error("useHaptics must be used within a HapticProvider");
   }
   return value;
 }

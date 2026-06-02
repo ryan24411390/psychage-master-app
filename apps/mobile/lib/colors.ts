@@ -13,7 +13,7 @@
 // will introduce `useColorScheme()` reactivity at the call sites when the
 // settings toggle + MMKV persistence land.
 
-import tokens from '../../../tokens/mobile.tokens.json';
+import tokens from "../../../tokens/mobile.tokens.json";
 
 const c = tokens.color;
 
@@ -33,26 +33,26 @@ export const colors = {
     tertiary: { light: c.text.tertiary.light, dark: c.text.tertiary.dark },
   },
   charcoal: {
-    50: c.charcoal['50'],
-    100: c.charcoal['100'],
-    200: c.charcoal['200'],
-    300: c.charcoal['300'],
-    400: c.charcoal['400'],
-    500: c.charcoal['500'],
-    600: c.charcoal['600'],
-    700: c.charcoal['700'],
-    800: c.charcoal['800'],
-    900: c.charcoal['900'],
-    950: c.charcoal['950'],
+    50: c.charcoal["50"],
+    100: c.charcoal["100"],
+    200: c.charcoal["200"],
+    300: c.charcoal["300"],
+    400: c.charcoal["400"],
+    500: c.charcoal["500"],
+    600: c.charcoal["600"],
+    700: c.charcoal["700"],
+    800: c.charcoal["800"],
+    900: c.charcoal["900"],
+    950: c.charcoal["950"],
   },
   teal: {
-    50: c.teal['50'],
-    100: c.teal['100'],
-    400: c.teal['400'],
-    500: c.teal['500'],
-    600: c.teal['600'],
-    700: c.teal['700'],
-    900: c.teal['900'],
+    50: c.teal["50"],
+    100: c.teal["100"],
+    400: c.teal["400"],
+    500: c.teal["500"],
+    600: c.teal["600"],
+    700: c.teal["700"],
+    900: c.teal["900"],
   },
   crisis: c.crisis.red,
 } as const;

@@ -9,12 +9,24 @@
   "scripts": {
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "lint": "pnpm -r lint"
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,jsonc,md}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
   },
   "pnpm": {
     "overrides": {
       "react": "19.1.0",
       "react-dom": "19.1.0"
     }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.7"
   }
 }
