@@ -43,7 +43,7 @@ sacred_rules:
         - 'disable[_.]?crisis'
         - 'skip[_.]?crisis'
         - 'crisis[_.]?disabled\s*[:=]\s*true'
-        - 'feature[_.]?flag.*crisis.*=\s*false'
+        - 'feature[_.]?flag.*crisis.*[:=]\s*false'
         - 'if\s*\(\s*!?\s*[A-Z_]*CRISIS[A-Z_]*\s*\)' # any conditional that gates crisis flow
       file_globs:
         - "**/*.ts"

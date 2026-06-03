@@ -247,6 +247,253 @@ git branch -D smoke-test-stop
 
 ---
 
+## Branch-diff mode (--base-ref) — Phase 8 / Slice 1a
+
+The four SR hooks accept an optional `--base-ref=<ref>` flag that switches `--mode=stop` from scanning the staged diff (`git diff --cached`) to scanning the branch diff (`<ref>...HEAD`, **added lines only**). Husky keeps calling `sr*.sh --mode=stop` with no flag; CI will call `sr*.sh --mode=stop --base-ref=origin/main` (Slice 1b).
+
+**Fixture setup notes:**
+
+- These fixtures execute the hook directly (no pre-commit chain). The main repo's husky hooks block any commit that contains a violation, which makes setting up a baseline-with-violation in the main repo impossible. To avoid that, each fixture builds a fresh scratch git repo in `/tmp` and runs the SR hook there. `CLAUDE_PROJECT_DIR` is pointed at the main repo so the hook still loads `constitution.md`.
+- BLOCK fixtures use the same runtime-assembled trigger pattern as the Phase 7 git pre-commit section (so this `.md` file itself does not contain literal SR triggers).
+- The critical proof case is **ALLOW after removal**: commit a violation, then commit its removal — the branch diff contains only `-` lines, which `^+` filtering must exclude.
+
+### Shared helpers
+
+```bash
+# Path to main repo for CLAUDE_PROJECT_DIR (constitution.md) and hook scripts.
+MAIN_REPO="$(pwd)"
+
+# Builds a fresh scratch repo at $SCRATCH with one empty commit on `base`.
+scratch_init() {
+  SCRATCH="$(mktemp -d)"
+  cd "$SCRATCH"
+  git init -q
+  git config user.email "smoke@test"
+  git config user.name "Smoke Test"
+  git checkout -q -b base
+  echo "// baseline" > seed.ts
+  git add seed.ts
+  git commit -q -m "baseline"
+  git checkout -q -b feature
+}
+
+scratch_clean() {
+  cd "$MAIN_REPO"
+  rm -rf "$SCRATCH"
+}
+```
+
+### SR-1 — branch-diff BLOCK (violation added on branch)
+
+```bash
+scratch_init
+PROP="conf""idence"  # assembled so this .md doesn't trip SR-1
+HIGH=0.92
+echo "export const r = { ${PROP}: ${HIGH} };" > violation.ts
+git add violation.ts
+git commit -q -m "add SR-1 violation"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr1_navigator_confidence_cap.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 2
+
+scratch_clean
+```
+
+### SR-1 — branch-diff ALLOW (violation REMOVED on branch — critical proof)
+
+```bash
+scratch_init
+PROP="conf""idence"
+HIGH=0.99
+
+# Baseline commit on `base` contains the violation. Move to base, add it,
+# then return to `feature` so the removal happens on the feature branch.
+git checkout -q base
+echo "export const r = { ${PROP}: ${HIGH} };" > legacy.ts
+git add legacy.ts
+git commit -q -m "legacy code with violation (baseline)"
+git checkout -q feature
+git merge -q base
+
+# On feature: remove the violating file.
+git rm -q legacy.ts
+git commit -q -m "remove legacy violation"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr1_navigator_confidence_cap.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 0 — `-` lines must not trigger; ^+ filter excludes removals
+
+scratch_clean
+```
+
+### SR-2 — branch-diff BLOCK
+
+```bash
+scratch_init
+NAME="dis""able_""crisis"
+echo "export function ${NAME}(): void {}" > violation.ts
+git add violation.ts
+git commit -q -m "add SR-2 violation"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr2_crisis_bypass_detector.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 2
+
+scratch_clean
+```
+
+### SR-2 — branch-diff ALLOW (violation REMOVED on branch)
+
+```bash
+scratch_init
+NAME="dis""able_""crisis"
+
+git checkout -q base
+echo "export function ${NAME}(): void {}" > legacy.ts
+git add legacy.ts
+git commit -q -m "legacy SR-2 violation (baseline)"
+git checkout -q feature
+git merge -q base
+
+git rm -q legacy.ts
+git commit -q -m "remove legacy"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr2_crisis_bypass_detector.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 0
+
+scratch_clean
+```
+
+### SR-3 — branch-diff BLOCK
+
+```bash
+scratch_init
+W1="y""ou"; W2="ha""ve"  # assembled SR-3 seed
+cat > violation.tsx <<EOF
+export const Copy = () => <p>${W1} ${W2} depression.</p>;
+EOF
+git add violation.tsx
+git commit -q -m "add SR-3 violation"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr3_diagnostic_language.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 2
+
+scratch_clean
+```
+
+### SR-3 — branch-diff ALLOW (violation REMOVED on branch)
+
+```bash
+scratch_init
+W1="y""ou"; W2="ha""ve"
+
+git checkout -q base
+cat > legacy.tsx <<EOF
+export const Copy = () => <p>${W1} ${W2} depression.</p>;
+EOF
+git add legacy.tsx
+git commit -q -m "legacy SR-3 violation (baseline)"
+git checkout -q feature
+git merge -q base
+
+git rm -q legacy.tsx
+git commit -q -m "remove legacy"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr3_diagnostic_language.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 0
+
+scratch_clean
+```
+
+### SR-4 — branch-diff BLOCK
+
+```bash
+scratch_init
+CALL="ana""lytics.track"
+KEY="sym""ptom"
+cat > violation.ts <<EOF
+${CALL}("navigator_completed", { ${KEY}: "anxiety" });
+EOF
+git add violation.ts
+git commit -q -m "add SR-4 violation"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr4_no_symptom_telemetry.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 2
+
+scratch_clean
+```
+
+### SR-4 — branch-diff ALLOW (violation REMOVED on branch)
+
+```bash
+scratch_init
+CALL="ana""lytics.track"
+KEY="sym""ptom"
+
+git checkout -q base
+cat > legacy.ts <<EOF
+${CALL}("navigator_completed", { ${KEY}: "anxiety" });
+EOF
+git add legacy.ts
+git commit -q -m "legacy SR-4 violation (baseline)"
+git checkout -q feature
+git merge -q base
+
+git rm -q legacy.ts
+git commit -q -m "remove legacy"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr4_no_symptom_telemetry.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 0
+
+scratch_clean
+```
+
+### Edge case — invalid base-ref MUST fail closed
+
+```bash
+scratch_init
+echo "export const x = 1;" > safe.ts
+git add safe.ts
+git commit -q -m "safe change"
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr1_navigator_confidence_cap.sh" \
+  --mode=stop --base-ref=does/not/exist
+echo "Exit: $?"  # MUST be 2 with "BLOCKED (SR-1): base ref 'does/not/exist' not found"
+
+scratch_clean
+```
+
+### Edge case — empty diff (HEAD == base-ref) MUST allow
+
+```bash
+scratch_init
+# No new commits on `feature` beyond `base`.
+
+CLAUDE_PROJECT_DIR="$MAIN_REPO" \
+  bash "$MAIN_REPO/.claude/hooks/sr1_navigator_confidence_cap.sh" \
+  --mode=stop --base-ref=base
+echo "Exit: $?"  # MUST be 0 — empty diff is not a violation
+
+scratch_clean
+```
+
+---
+
 ## Pass criteria for the Phase 4 close commit
 
 All cases above except SR-3 must produce the expected exit code. SR-3 must produce ≥9/10 correct decisions on its 10-case rubric.
@@ -272,3 +519,298 @@ When adding a new Sacred Rule (e.g., SR-5 in Phase 11):
 5. Run the full corpus before merging.
 
 Patterns drift. The fixtures here are the canary.
+
+---
+
+## Git pre-commit path — block + allow per SR (Phase 7)
+
+These fixtures exercise the same four Sacred Rule hooks **through `git commit`**, not via the Claude harness (PreToolUse/Stop). They prove SR-1..SR-4 block commits authored by any agent (Cursor, raw CLI, non-Claude tooling) — closing the Design B escape hatch.
+
+Each rule has one BLOCK case and one ALLOW case. The pre-commit chain (`.husky/pre-commit`) runs:
+
+```text
+1. lint-staged → biome check (staged files only)
+2. pnpm -r typecheck
+3. pnpm -r test
+4. SR-1 navigator confidence cap     (--mode=stop)
+5. SR-2 crisis bypass detector       (--mode=stop)
+6. SR-3 diagnostic language          (--mode=stop)
+7. SR-4 no symptom telemetry         (--mode=stop)
+```
+
+`set -euo pipefail` — first non-zero exit kills the chain. No `|| true`. No `--no-verify` exemption.
+
+### Phase 7 setup
+
+```bash
+git checkout -b smoke-precommit
+mkdir -p _smoke
+```
+
+All BLOCK cases below MUST produce a non-zero `git commit` exit. All ALLOW cases MUST produce exit 0 (assuming biome/typecheck/test would otherwise pass on a clean repo).
+
+**Important — fixture authoring constraint:** SR hooks in `--mode=stop` scan the full `git diff --cached` text indiscriminately (no file-extension filter). If this document committed literal trigger strings, modifying it would trip the very rules it documents. Each BLOCK fixture below therefore assembles the trigger at shell-evaluation time from non-trigger fragments (string concatenation, variable interpolation). The generated `_smoke/*` fixture file contains the real trigger and trips the SR rule when staged; this `.md` source does not. See seeds in [`constitution.md`](./constitution.md) front-matter (`sacred_rules.SR-{1,2,3,4}.patterns`).
+
+### SR-1 — Navigator confidence cap (>0.75)
+
+**BLOCK** — generates a fixture with a confidence value above the cap. Patterns from `constitution.md`: `confidence\s*[:=]\s*(0\.[8-9]\d*|1\.0+|1\b)`.
+
+```bash
+PROP="conf""idence"   # assembled at runtime so this .md doesn't trip SR-1
+HIGH=0.92             # > 0.75
+cat > _smoke/sr1_block.ts <<EOF
+export const result = { ${PROP}: ${HIGH}, label: "anxiety" };
+EOF
+git add _smoke/sr1_block.ts
+git commit -m "smoke: SR-1 block"
+echo "Exit: $?"  # MUST be non-zero — step 4/7 emits "BLOCKED (SR-1)"
+git restore --staged _smoke/sr1_block.ts && rm _smoke/sr1_block.ts
+```
+
+**ALLOW** — confidence at 0.74 (below the cap) is acceptable. Literal in this doc is safe because the regex requires `0.[8-9]\d*`.
+
+```bash
+cat > _smoke/sr1_allow.ts <<'EOF'
+export const result = { confidence: 0.74, label: "education-resource" };
+EOF
+git add _smoke/sr1_allow.ts
+git commit -m "smoke: SR-1 allow"
+echo "Exit: $?"  # MUST be 0
+git reset --hard HEAD~1 && rm -f _smoke/sr1_allow.ts
+```
+
+### SR-2 — Crisis bypass detector
+
+**BLOCK** — generates a function name matching `disable[_.]?crisis`.
+
+```bash
+NAME="dis""able_""crisis"   # assembled at runtime so this .md doesn't trip SR-2
+cat > _smoke/sr2_block.ts <<EOF
+export function ${NAME}(): void { /* SR-2 trigger */ }
+EOF
+git add _smoke/sr2_block.ts
+git commit -m "smoke: SR-2 block"
+echo "Exit: $?"  # MUST be non-zero — "BLOCKED (SR-2)"
+git restore --staged _smoke/sr2_block.ts && rm _smoke/sr2_block.ts
+```
+
+**ALLOW** — a benign logging function. No SR-2 pattern present.
+
+```bash
+cat > _smoke/sr2_allow.ts <<'EOF'
+export function logResourceView(slug: string): void {
+  console.log("viewed", slug);
+}
+EOF
+git add _smoke/sr2_allow.ts
+git commit -m "smoke: SR-2 allow"
+echo "Exit: $?"  # MUST be 0
+git reset --hard HEAD~1 && rm -f _smoke/sr2_allow.ts
+```
+
+### SR-3 — Diagnostic language
+
+**BLOCK** — generates copy containing the seed phrase from constitution.md.
+
+```bash
+W1="y""ou"
+W2="ha""ve"   # ${W1} + space + ${W2} = an SR-3 seed at runtime
+cat > _smoke/sr3_block.md <<EOF
+# Results
+Based on your answers, ${W1} ${W2} depression.
+EOF
+git add _smoke/sr3_block.md
+git commit -m "smoke: SR-3 block"
+echo "Exit: $?"  # MUST be non-zero — "BLOCKED (SR-3)"
+git restore --staged _smoke/sr3_block.md && rm _smoke/sr3_block.md
+```
+
+**ALLOW** — person-first, educational. No diagnostic seeds.
+
+```bash
+cat > _smoke/sr3_allow.md <<'EOF'
+# Educational resource
+
+People experiencing low mood often describe a loss of interest in activities they once enjoyed.
+EOF
+git add _smoke/sr3_allow.md
+git commit -m "smoke: SR-3 allow"
+echo "Exit: $?"  # MUST be 0
+git reset --hard HEAD~1 && rm -f _smoke/sr3_allow.md
+```
+
+### SR-4 — No symptom telemetry
+
+**BLOCK** — generates a telemetry call site with a symptom identifier in proximity.
+
+```bash
+CALL="ana""lytics.track"   # constitution.md telemetry_call_sites
+KEY="sym""ptom"            # constitution.md symptom_identifier_seeds
+cat > _smoke/sr4_block.ts <<EOF
+${CALL}("navigator_completed", { ${KEY}: "anxiety", severity: "high" });
+EOF
+git add _smoke/sr4_block.ts
+git commit -m "smoke: SR-4 block"
+echo "Exit: $?"  # MUST be non-zero — "BLOCKED (SR-4)"
+git restore --staged _smoke/sr4_block.ts && rm _smoke/sr4_block.ts
+```
+
+**ALLOW** — telemetry call with non-symptom keys is allowed.
+
+```bash
+cat > _smoke/sr4_allow.ts <<'EOF'
+analytics.track("screen_view", { screen: "learn-index" });
+EOF
+git add _smoke/sr4_allow.ts
+git commit -m "smoke: SR-4 allow"
+echo "Exit: $?"  # MUST be 0
+git reset --hard HEAD~1 && rm -f _smoke/sr4_allow.ts
+```
+
+### Fail-closed: unreadable SR script
+
+The defense-in-depth load-bearing test. If any SR script is missing, unreadable, or non-executable, the hook chain MUST block (not skip). Implementation depends on `set -euo pipefail` + shebang failure surfacing as non-zero exit.
+
+```bash
+chmod -x .claude/hooks/sr3_diagnostic_language.sh
+cat > _smoke/safe.ts <<'EOF'
+export const x = 1;
+EOF
+git add _smoke/safe.ts
+git commit -m "smoke: fail-closed on chmod -x"
+echo "Exit: $?"  # MUST be non-zero — SR-3 step exec/shebang failure
+chmod +x .claude/hooks/sr3_diagnostic_language.sh
+git restore --staged _smoke/safe.ts && rm _smoke/safe.ts
+```
+
+### Biome root-level scan proof
+
+Pre-Phase-7 `pnpm -r lint` was a silent no-op (no workspace had a `lint` script). The new root-level `biome check .` (via lint-staged at step 1) must catch violations in workspace files where `pnpm -r lint` would not have.
+
+```bash
+cat > _smoke/biome_block.ts <<'EOF'
+var x=1;debugger;
+EOF
+git add _smoke/biome_block.ts
+git commit -m "smoke: biome block"
+echo "Exit: $?"  # MUST be non-zero at step 1 (never reaches typecheck/test/SR)
+git restore --staged _smoke/biome_block.ts && rm _smoke/biome_block.ts
+```
+
+### `[bypass]` is NOT an exemption from Sacred Rules
+
+`[bypass]` policy (`learnings.md`) covers spec-workflow ceremony only. A commit message prefixed `[bypass]` that triggers an SR pattern **still blocks**.
+
+```bash
+PROP="conf""idence"
+HIGH=0.99
+cat > _smoke/bypass_block.ts <<EOF
+export const result = { ${PROP}: ${HIGH} };
+EOF
+git add _smoke/bypass_block.ts
+git commit -m "[bypass] smoke: SR-1 still wins"
+echo "Exit: $?"  # MUST be non-zero — SR-1 blocks regardless of [bypass]
+git restore --staged _smoke/bypass_block.ts && rm _smoke/bypass_block.ts
+```
+
+### Cleanup
+
+```bash
+rm -rf _smoke
+git checkout main
+git branch -D smoke-precommit
+```
+
+### Pass criteria
+
+All BLOCK cases produce non-zero exit. All ALLOW cases produce exit 0. The fail-closed and bypass cases also block. If any case diverges, **do not bypass** — surface the divergence and treat the hook chain as the source of truth.
+
+---
+
+## Large-payload regression — SIGPIPE fail-open (Phase 8)
+
+These fixtures guard against a SIGPIPE race that masked itself for the entire Phase 7 lifetime. With `set -euo pipefail` and the shape `if echo "$X" | grep -E -q -- "$pat"; then`, a large `$X` lets `grep -q` match early and `_exit(0)` while `echo` still has unflushed bytes. `echo` then takes SIGPIPE, the pipeline reports failure under `pipefail`, the `if` reads it as no-match, and the rule **falls into the allow branch on a real violation** (exit 0, fail OPEN).
+
+The bug is payload-size-sensitive: passes at ≤8 KB, fires at ≥64 KB (one pipe buffer on macOS/Linux). Branch-diff mode against a large feature branch hits the race deterministically; pretool with a single small content field never did. The fix is here-strings (`grep -E -q -- "$pat" <<< "$X"`) — no upstream writer, no pipe, no race.
+
+SR-4 is awk-based and was never susceptible; its large-payload fixture below is a regression guard for the stop-mode TARGET_CONTENT narrowing change that shipped alongside the SIGPIPE fix.
+
+**Reproducing pre-fix at this payload size:** check out the parent commit of the SIGPIPE fix, point `CLAUDE_PROJECT_DIR` at the workspace, and re-run each BLOCK fixture below. Pre-fix scripts exit 0. Post-fix scripts exit 2.
+
+Each fixture builds a violating seed line at runtime (so this `.md` doesn't trip the scanners), prepends it to ≥128 KB of filler, JSON-wraps the payload as a Write tool call, and pipes it to the hook.
+
+### SR-LP.1 — SR-1 should BLOCK on 128 KB payload with confidence violation
+
+```bash
+export CLAUDE_PROJECT_DIR="$(pwd)"
+PROP="conf""idence"
+HIGH="0.92"
+PAYLOAD=$(python3 -c '
+import json, sys
+seed = f"const r = {{ {sys.argv[1]}: {sys.argv[2]} }};"
+content = seed + "\n" + ("x" * 131072)
+print(json.dumps({"tool_name":"Write","tool_input":{"file_path":"src/navigator/scoring.ts","content":content}}))
+' "$PROP" "$HIGH")
+printf '%s\n' "$PAYLOAD" | .claude/hooks/sr1_navigator_confidence_cap.sh
+echo "Exit: $?"  # MUST be 2 — pre-fix exits 0 (fail OPEN); post-fix blocks
+```
+
+### SR-LP.2 — SR-2 should BLOCK on 128 KB payload with crisis-bypass
+
+```bash
+export CLAUDE_PROJECT_DIR="$(pwd)"
+NAME="dis""able_""crisis"
+PAYLOAD=$(python3 -c '
+import json, sys
+seed = f"export function {sys.argv[1]}(): void {{}}"
+content = seed + "\n" + ("x" * 131072)
+print(json.dumps({"tool_name":"Write","tool_input":{"file_path":"src/crisis/handler.ts","content":content}}))
+' "$NAME")
+printf '%s\n' "$PAYLOAD" | .claude/hooks/sr2_crisis_bypass_detector.sh
+echo "Exit: $?"  # MUST be 2
+```
+
+### SR-LP.3 — SR-3 should BLOCK on 128 KB payload with diagnostic seed
+
+```bash
+export CLAUDE_PROJECT_DIR="$(pwd)"
+W1="y""ou"; W2="ha""ve"
+PAYLOAD=$(python3 -c '
+import json, sys
+seed = f"<p>{sys.argv[1]} {sys.argv[2]} depression.</p>"
+content = seed + "\n" + ("x" * 131072)
+print(json.dumps({"tool_name":"Write","tool_input":{"file_path":"src/i18n/en.tsx","content":content}}))
+' "$W1" "$W2")
+printf '%s\n' "$PAYLOAD" | .claude/hooks/sr3_diagnostic_language.sh
+echo "Exit: $?"  # MUST be 2
+```
+
+### SR-LP.4 — SR-4 should BLOCK on 128 KB payload with telemetry + symptom
+
+```bash
+export CLAUDE_PROJECT_DIR="$(pwd)"
+CALL="ana""lytics.track"
+KEY="sym""ptom"
+PAYLOAD=$(python3 -c '
+import json, sys
+seed = f"{sys.argv[1]}(\"x\", {{ {sys.argv[2]}: \"anxiety\" }});"
+content = seed + "\n" + ("x" * 131072)
+print(json.dumps({"tool_name":"Write","tool_input":{"file_path":"src/telemetry.ts","content":content}}))
+' "$CALL" "$KEY")
+printf '%s\n' "$PAYLOAD" | .claude/hooks/sr4_no_symptom_telemetry.sh
+echo "Exit: $?"  # MUST be 2 — guards the stop-mode narrowing change (SIGPIPE-immune already)
+```
+
+### Why 128 KB
+
+The race fires when `grep -q` finishes before `echo` drains. macOS and Linux default pipe buffers are 64 KB; below the buffer, the writer completes without blocking and never sees SIGPIPE. Empirically:
+
+|Payload|Pre-fix outcome|
+|---|---|
+|1 KB|Match (no race)|
+|8 KB|Match (no race)|
+|64 KB|**Fail OPEN**|
+|128 KB|**Fail OPEN**|
+|512 KB|**Fail OPEN**|
+
+128 KB is well past the threshold and small enough to keep fixture run-time negligible. Do not lower it without re-measuring against the current host's pipe buffer size.
