@@ -22,9 +22,13 @@ if [[ ! -f "$CONSTITUTION" ]]; then
 fi
 
 MODE="pretool"
-if [[ "${1:-}" == "--mode=stop" ]]; then
-  MODE="stop"
-fi
+BASE_REF=""
+for arg in "$@"; do
+  case "$arg" in
+    --mode=stop) MODE="stop" ;;
+    --base-ref=*) BASE_REF="${arg#--base-ref=}" ;;
+  esac
+done
 
 # ---- Determine target ----
 if [[ "$MODE" == "pretool" ]]; then
@@ -42,7 +46,14 @@ process.stdout.write(t.content || t.new_string || "");
   [[ -z "$TARGET_FILE" ]] && exit 0
 elif [[ "$MODE" == "stop" ]]; then
   TARGET_FILE="<all-staged-files>"
-  TARGET_CONTENT=$(git diff --cached 2>/dev/null || git diff 2>/dev/null || echo "")
+  if [[ -n "$BASE_REF" ]]; then
+    TARGET_CONTENT=$(git diff --unified=0 "$BASE_REF"...HEAD 2>/dev/null \
+      | { grep '^+' || true; } \
+      | { grep -v '^+++' || true; } \
+      | sed 's/^+//')
+  else
+    TARGET_CONTENT=$(git diff --cached 2>/dev/null || git diff 2>/dev/null || echo "")
+  fi
 fi
 
 # ---- File-glob check ----
