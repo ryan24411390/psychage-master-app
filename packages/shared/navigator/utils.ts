@@ -5,6 +5,7 @@
  * No side effects, no external dependencies beyond types.
  */
 
+import prohibitedPhrasesData from "./prohibited-phrases.json";
 import type {
   DurationModifiers,
   FrequencyModifiers,
@@ -210,36 +211,9 @@ export const NAVIGATOR_DISCLAIMER =
 /**
  * Phrases that must NEVER appear in any user-facing string.
  * Used by the build-time validation script.
+ *
+ * Seed entries live in `./prohibited-phrases.json` so the literal list does
+ * not appear in any `.ts` source — SR-3 scans `*.ts`/`*.tsx` for these
+ * exact phrases and would otherwise flag its own rule infrastructure.
  */
-export const PROHIBITED_PHRASES = [
-  'you have',
-  'you are diagnosed',
-  'diagnosis:',
-  'you suffer from',
-  'you are suffering from',
-  'your condition is',
-  'this confirms',
-  'this proves',
-  'you definitely have',
-  'clinical diagnosis',
-  'we can confirm',
-  'test results show you have',
-  'based on your results, you have',
-  'you meet the criteria for',
-  'positive for',
-  'negative for',
-  'diagnostic result',
-  'your diagnosis',
-  'diagnosed with',
-  'prescription',
-  'prescribe',
-  'take this medication',
-  'you need medication',
-  'guaranteed',
-  '100% accurate',
-  'certainty',
-  'with certainty',
-  'conclusive',
-  'definitive diagnosis',
-  'confirmed diagnosis',
-];
+export const PROHIBITED_PHRASES: string[] = prohibitedPhrasesData;
