@@ -29,18 +29,16 @@ fi
 # ---- Determine target ----
 if [[ "$MODE" == "pretool" ]]; then
   INPUT_JSON=$(cat)
-  TARGET_FILE=$(echo "$INPUT_JSON" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-tool_input = data.get('tool_input', {})
-print(tool_input.get('file_path') or tool_input.get('path') or '')
-" 2>/dev/null || echo "")
-  TARGET_CONTENT=$(echo "$INPUT_JSON" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-tool_input = data.get('tool_input', {})
-print(tool_input.get('content') or tool_input.get('new_string') or '')
-" 2>/dev/null || echo "")
+  TARGET_FILE=$(printf '%s' "$INPUT_JSON" | node -e '
+const j = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const t = j.tool_input || {};
+process.stdout.write(t.file_path || t.path || "");
+' 2>/dev/null || echo "")
+  TARGET_CONTENT=$(printf '%s' "$INPUT_JSON" | node -e '
+const j = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const t = j.tool_input || {};
+process.stdout.write(t.content || t.new_string || "");
+' 2>/dev/null || echo "")
   [[ -z "$TARGET_FILE" ]] && exit 0
 elif [[ "$MODE" == "stop" ]]; then
   TARGET_FILE="<all-staged-files>"
@@ -67,27 +65,10 @@ if [[ "$MODE" == "pretool" ]] && ! should_check_file "$TARGET_FILE"; then
 fi
 
 # ---- Extract symptom identifier seeds + telemetry call sites ----
-SYMPTOM_NAMES=$(python3 <<EOF
-import re, yaml
-text = open("$CONSTITUTION").read()
-match = re.match(r'^---\n(.*?)\n---', text, re.DOTALL)
-if not match: exit(1)
-yml = yaml.safe_load(match.group(1))
-for s in yml['sacred_rules']['$RULE_ID']['patterns']['symptom_identifier_seeds']:
-    print(s)
-EOF
-)
-
-TELEMETRY_PATTERNS=$(python3 <<EOF
-import re, yaml
-text = open("$CONSTITUTION").read()
-match = re.match(r'^---\n(.*?)\n---', text, re.DOTALL)
-if not match: exit(1)
-yml = yaml.safe_load(match.group(1))
-for p in yml['sacred_rules']['$RULE_ID']['patterns']['telemetry_call_sites']:
-    print(p)
-EOF
-)
+# shellcheck source=./_parse-constitution.sh
+. "$(dirname "$0")/_parse-constitution.sh"
+SYMPTOM_NAMES=$(extract_constitution_list "$CONSTITUTION" "$RULE_ID" "symptom_identifier_seeds")
+TELEMETRY_PATTERNS=$(extract_constitution_list "$CONSTITUTION" "$RULE_ID" "telemetry_call_sites")
 
 if [[ -z "$SYMPTOM_NAMES" ]] || [[ -z "$TELEMETRY_PATTERNS" ]]; then
   echo "BLOCKED ($RULE_ID): could not parse SR-4 patterns from constitution.md" >&2

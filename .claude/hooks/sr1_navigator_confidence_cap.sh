@@ -32,25 +32,20 @@ fi
 
 # ---- Determine which file(s) to scan ----
 if [[ "$MODE" == "pretool" ]]; then
-  # PreToolUse: read JSON from stdin, extract file path
+  # PreToolUse: read JSON from stdin, extract file path + content via node
+  # (node is already a husky prereq; no extra runtime dependency).
   INPUT_JSON=$(cat)
-  TARGET_FILE=$(echo "$INPUT_JSON" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-# Different tool inputs have file path under different keys
-tool_input = data.get('tool_input', {})
-file_path = tool_input.get('file_path') or tool_input.get('path') or ''
-print(file_path)
-" 2>/dev/null || echo "")
+  TARGET_FILE=$(printf '%s' "$INPUT_JSON" | node -e '
+const j = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const t = j.tool_input || {};
+process.stdout.write(t.file_path || t.path || "");
+' 2>/dev/null || echo "")
 
-  # Determine the content being written/edited
-  TARGET_CONTENT=$(echo "$INPUT_JSON" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-tool_input = data.get('tool_input', {})
-content = tool_input.get('content') or tool_input.get('new_string') or ''
-print(content)
-" 2>/dev/null || echo "")
+  TARGET_CONTENT=$(printf '%s' "$INPUT_JSON" | node -e '
+const j = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const t = j.tool_input || {};
+process.stdout.write(t.content || t.new_string || "");
+' 2>/dev/null || echo "")
 
   if [[ -z "$TARGET_FILE" ]]; then
     # No file path = nothing to check (e.g., a Read or Bash call that matched the regex)
@@ -84,18 +79,9 @@ if [[ "$MODE" == "pretool" ]] && ! should_check_file "$TARGET_FILE"; then
 fi
 
 # ---- Extract forbidden patterns from constitution.md YAML front-matter ----
-PATTERNS=$(python3 <<EOF
-import re, yaml
-text = open("$CONSTITUTION").read()
-match = re.match(r'^---\n(.*?)\n---', text, re.DOTALL)
-if not match:
-    exit(1)
-yml = yaml.safe_load(match.group(1))
-patterns = yml['sacred_rules']['$RULE_ID']['patterns']['forbidden_regex']
-for p in patterns:
-    print(p)
-EOF
-)
+# shellcheck source=./_parse-constitution.sh
+. "$(dirname "$0")/_parse-constitution.sh"
+PATTERNS=$(extract_constitution_list "$CONSTITUTION" "$RULE_ID" "forbidden_regex")
 
 if [[ -z "$PATTERNS" ]]; then
   echo "BLOCKED ($RULE_ID): could not parse forbidden patterns from constitution.md" >&2
