@@ -43,19 +43,17 @@ done
 # ---- Determine which file(s) to scan ----
 if [[ "$MODE" == "pretool" ]]; then
   INPUT_JSON=$(cat)
-  TARGET_FILE=$(echo "$INPUT_JSON" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-tool_input = data.get('tool_input', {})
-print(tool_input.get('file_path') or tool_input.get('path') or '')
-" 2>/dev/null || echo "")
+  TARGET_FILE=$(printf '%s' "$INPUT_JSON" | node -e '
+const j = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const t = j.tool_input || {};
+process.stdout.write(t.file_path || t.path || "");
+' 2>/dev/null || echo "")
 
-  TARGET_CONTENT=$(echo "$INPUT_JSON" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-tool_input = data.get('tool_input', {})
-print(tool_input.get('content') or tool_input.get('new_string') or '')
-" 2>/dev/null || echo "")
+  TARGET_CONTENT=$(printf '%s' "$INPUT_JSON" | node -e '
+const j = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const t = j.tool_input || {};
+process.stdout.write(t.content || t.new_string || "");
+' 2>/dev/null || echo "")
 
   if [[ -z "$TARGET_FILE" ]]; then
     exit 0
@@ -116,17 +114,9 @@ if [[ "$MODE" == "stop" ]]; then
 fi
 
 # ---- Pull seed phrases from constitution.md YAML front-matter ----
-SEEDS=$(python3 <<EOF
-import re, yaml
-text = open("$CONSTITUTION").read()
-match = re.match(r'^---\n(.*?)\n---', text, re.DOTALL)
-if not match: exit(1)
-yml = yaml.safe_load(match.group(1))
-seeds = yml['sacred_rules']['$RULE_ID']['forbidden_phrase_seeds']
-for s in seeds:
-    print(s)
-EOF
-)
+# shellcheck source=./_parse-constitution.sh
+. "$(dirname "$0")/_parse-constitution.sh"
+SEEDS=$(extract_constitution_list "$CONSTITUTION" "$RULE_ID" "forbidden_phrase_seeds")
 
 if [[ -z "$SEEDS" ]]; then
   echo "BLOCKED ($RULE_ID): could not parse forbidden_phrase_seeds from constitution.md" >&2
