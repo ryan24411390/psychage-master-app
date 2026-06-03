@@ -96,6 +96,25 @@ if [[ "$MODE" == "pretool" ]] && ! should_check_file "$TARGET_FILE"; then
   exit 0
 fi
 
+# ---- Stop mode: narrow TARGET_CONTENT to files matching this rule's globs ----
+if [[ "$MODE" == "stop" ]]; then
+  if [[ -n "$BASE_REF" ]]; then
+    DIFF_RANGE=("${BASE_REF}...HEAD")
+  else
+    DIFF_RANGE=(--cached)
+  fi
+  FILTERED=""
+  while IFS= read -r f; do
+    [[ -z "$f" ]] && continue
+    if should_check_file "$f"; then
+      added=$(git diff --unified=0 "${DIFF_RANGE[@]}" -- "$f" 2>/dev/null \
+        | { grep '^+' || true; } | { grep -v '^+++' || true; } | sed 's/^+//')
+      FILTERED+="$added"$'\n'
+    fi
+  done <<< "$(git diff --name-only "${DIFF_RANGE[@]}" 2>/dev/null)"
+  TARGET_CONTENT="$FILTERED"
+fi
+
 # ---- Pull seed phrases from constitution.md YAML front-matter ----
 SEEDS=$(python3 <<EOF
 import re, yaml
@@ -124,9 +143,9 @@ VIOLATION_DETAILS=""
 while IFS= read -r seed; do
   [[ -z "$seed" ]] && continue
   # Escape regex metacharacters in the seed for fixed-string grep
-  if echo "$CLEANED" | grep -F -i -q -- "$seed"; then
+  if grep -F -i -q -- "$seed" <<< "$CLEANED"; then
     VIOLATION_FOUND=1
-    MATCH=$(echo "$CLEANED" | grep -F -i -- "$seed" | head -3)
+    MATCH=$(grep -F -i -- "$seed" <<< "$CLEANED" | head -3)
     VIOLATION_DETAILS+="Seed: \"$seed\"\nMatched lines:\n$MATCH\n---\n"
   fi
 done <<< "$SEEDS"

@@ -724,3 +724,93 @@ git branch -D smoke-precommit
 ### Pass criteria
 
 All BLOCK cases produce non-zero exit. All ALLOW cases produce exit 0. The fail-closed and bypass cases also block. If any case diverges, **do not bypass** — surface the divergence and treat the hook chain as the source of truth.
+
+---
+
+## Large-payload regression — SIGPIPE fail-open (Phase 8)
+
+These fixtures guard against a SIGPIPE race that masked itself for the entire Phase 7 lifetime. With `set -euo pipefail` and the shape `if echo "$X" | grep -E -q -- "$pat"; then`, a large `$X` lets `grep -q` match early and `_exit(0)` while `echo` still has unflushed bytes. `echo` then takes SIGPIPE, the pipeline reports failure under `pipefail`, the `if` reads it as no-match, and the rule **falls into the allow branch on a real violation** (exit 0, fail OPEN).
+
+The bug is payload-size-sensitive: passes at ≤8 KB, fires at ≥64 KB (one pipe buffer on macOS/Linux). Branch-diff mode against a large feature branch hits the race deterministically; pretool with a single small content field never did. The fix is here-strings (`grep -E -q -- "$pat" <<< "$X"`) — no upstream writer, no pipe, no race.
+
+SR-4 is awk-based and was never susceptible; its large-payload fixture below is a regression guard for the stop-mode TARGET_CONTENT narrowing change that shipped alongside the SIGPIPE fix.
+
+**Reproducing pre-fix at this payload size:** check out the parent commit of the SIGPIPE fix, point `CLAUDE_PROJECT_DIR` at the workspace, and re-run each BLOCK fixture below. Pre-fix scripts exit 0. Post-fix scripts exit 2.
+
+Each fixture builds a violating seed line at runtime (so this `.md` doesn't trip the scanners), prepends it to ≥128 KB of filler, JSON-wraps the payload as a Write tool call, and pipes it to the hook.
+
+### SR-LP.1 — SR-1 should BLOCK on 128 KB payload with confidence violation
+
+```bash
+export CLAUDE_PROJECT_DIR="$(pwd)"
+PROP="conf""idence"
+HIGH="0.92"
+PAYLOAD=$(python3 -c '
+import json, sys
+seed = f"const r = {{ {sys.argv[1]}: {sys.argv[2]} }};"
+content = seed + "\n" + ("x" * 131072)
+print(json.dumps({"tool_name":"Write","tool_input":{"file_path":"src/navigator/scoring.ts","content":content}}))
+' "$PROP" "$HIGH")
+printf '%s\n' "$PAYLOAD" | .claude/hooks/sr1_navigator_confidence_cap.sh
+echo "Exit: $?"  # MUST be 2 — pre-fix exits 0 (fail OPEN); post-fix blocks
+```
+
+### SR-LP.2 — SR-2 should BLOCK on 128 KB payload with crisis-bypass
+
+```bash
+export CLAUDE_PROJECT_DIR="$(pwd)"
+NAME="dis""able_""crisis"
+PAYLOAD=$(python3 -c '
+import json, sys
+seed = f"export function {sys.argv[1]}(): void {{}}"
+content = seed + "\n" + ("x" * 131072)
+print(json.dumps({"tool_name":"Write","tool_input":{"file_path":"src/crisis/handler.ts","content":content}}))
+' "$NAME")
+printf '%s\n' "$PAYLOAD" | .claude/hooks/sr2_crisis_bypass_detector.sh
+echo "Exit: $?"  # MUST be 2
+```
+
+### SR-LP.3 — SR-3 should BLOCK on 128 KB payload with diagnostic seed
+
+```bash
+export CLAUDE_PROJECT_DIR="$(pwd)"
+W1="y""ou"; W2="ha""ve"
+PAYLOAD=$(python3 -c '
+import json, sys
+seed = f"<p>{sys.argv[1]} {sys.argv[2]} depression.</p>"
+content = seed + "\n" + ("x" * 131072)
+print(json.dumps({"tool_name":"Write","tool_input":{"file_path":"src/i18n/en.tsx","content":content}}))
+' "$W1" "$W2")
+printf '%s\n' "$PAYLOAD" | .claude/hooks/sr3_diagnostic_language.sh
+echo "Exit: $?"  # MUST be 2
+```
+
+### SR-LP.4 — SR-4 should BLOCK on 128 KB payload with telemetry + symptom
+
+```bash
+export CLAUDE_PROJECT_DIR="$(pwd)"
+CALL="ana""lytics.track"
+KEY="sym""ptom"
+PAYLOAD=$(python3 -c '
+import json, sys
+seed = f"{sys.argv[1]}(\"x\", {{ {sys.argv[2]}: \"anxiety\" }});"
+content = seed + "\n" + ("x" * 131072)
+print(json.dumps({"tool_name":"Write","tool_input":{"file_path":"src/telemetry.ts","content":content}}))
+' "$CALL" "$KEY")
+printf '%s\n' "$PAYLOAD" | .claude/hooks/sr4_no_symptom_telemetry.sh
+echo "Exit: $?"  # MUST be 2 — guards the stop-mode narrowing change (SIGPIPE-immune already)
+```
+
+### Why 128 KB
+
+The race fires when `grep -q` finishes before `echo` drains. macOS and Linux default pipe buffers are 64 KB; below the buffer, the writer completes without blocking and never sees SIGPIPE. Empirically:
+
+|Payload|Pre-fix outcome|
+|---|---|
+|1 KB|Match (no race)|
+|8 KB|Match (no race)|
+|64 KB|**Fail OPEN**|
+|128 KB|**Fail OPEN**|
+|512 KB|**Fail OPEN**|
+
+128 KB is well past the threshold and small enough to keep fixture run-time negligible. Do not lower it without re-measuring against the current host's pipe buffer size.

@@ -106,6 +106,27 @@ if [[ "$MODE" == "pretool" ]] && ! should_check_file "$TARGET_FILE"; then
   exit 0  # Not a file we check; allow.
 fi
 
+# ---- Stop mode: narrow TARGET_CONTENT to files matching this rule's globs ----
+# Without this, stop-mode would scan added lines from ALL changed files
+# (including .md docs, configs, fixtures), bypassing file_globs_exclude.
+if [[ "$MODE" == "stop" ]]; then
+  if [[ -n "$BASE_REF" ]]; then
+    DIFF_RANGE=("${BASE_REF}...HEAD")
+  else
+    DIFF_RANGE=(--cached)
+  fi
+  FILTERED=""
+  while IFS= read -r f; do
+    [[ -z "$f" ]] && continue
+    if should_check_file "$f"; then
+      added=$(git diff --unified=0 "${DIFF_RANGE[@]}" -- "$f" 2>/dev/null \
+        | { grep '^+' || true; } | { grep -v '^+++' || true; } | sed 's/^+//')
+      FILTERED+="$added"$'\n'
+    fi
+  done <<< "$(git diff --name-only "${DIFF_RANGE[@]}" 2>/dev/null)"
+  TARGET_CONTENT="$FILTERED"
+fi
+
 # ---- Extract forbidden patterns from constitution.md YAML front-matter ----
 PATTERNS=$(python3 <<EOF
 import re, yaml
@@ -133,9 +154,9 @@ while IFS= read -r pattern; do
   [[ -z "$pattern" ]] && continue
   # Strip comments from content first (avoid false positives in commented code)
   CLEANED=$(echo "$TARGET_CONTENT" | sed -E 's|//.*$||g; s|/\*.*\*/||g')
-  if echo "$CLEANED" | grep -E -q -- "$pattern"; then
+  if grep -E -q -- "$pattern" <<< "$CLEANED"; then
     VIOLATION_FOUND=1
-    MATCH=$(echo "$CLEANED" | grep -E -- "$pattern" | head -3)
+    MATCH=$(grep -E -- "$pattern" <<< "$CLEANED" | head -3)
     VIOLATION_DETAILS+="Pattern: $pattern\nMatched lines:\n$MATCH\n---\n"
   fi
 done <<< "$PATTERNS"

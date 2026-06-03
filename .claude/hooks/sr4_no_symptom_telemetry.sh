@@ -84,6 +84,25 @@ if [[ "$MODE" == "pretool" ]] && ! should_check_file "$TARGET_FILE"; then
   exit 0
 fi
 
+# ---- Stop mode: narrow TARGET_CONTENT to files matching this rule's globs ----
+if [[ "$MODE" == "stop" ]]; then
+  if [[ -n "$BASE_REF" ]]; then
+    DIFF_RANGE=("${BASE_REF}...HEAD")
+  else
+    DIFF_RANGE=(--cached)
+  fi
+  FILTERED=""
+  while IFS= read -r f; do
+    [[ -z "$f" ]] && continue
+    if should_check_file "$f"; then
+      added=$(git diff --unified=0 "${DIFF_RANGE[@]}" -- "$f" 2>/dev/null \
+        | { grep '^+' || true; } | { grep -v '^+++' || true; } | sed 's/^+//')
+      FILTERED+="$added"$'\n'
+    fi
+  done <<< "$(git diff --name-only "${DIFF_RANGE[@]}" 2>/dev/null)"
+  TARGET_CONTENT="$FILTERED"
+fi
+
 # ---- Extract symptom identifier seeds + telemetry call sites ----
 SYMPTOM_NAMES=$(python3 <<EOF
 import re, yaml
