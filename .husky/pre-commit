@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+# ============================================================
+# Pre-commit enforcement — Phase 9 (fast spine, recover)
+# ============================================================
+# Local fail-closed gate: Sacred Rules + staged-file lint pass.
+# CI (.github/workflows/pr-checks.yml) carries typecheck + test;
+# this hook stays sub-second so commits do not stall.
+#
+#   1. SR-1 navigator confidence cap   --mode=stop
+#   2. SR-2 crisis bypass detector     --mode=stop
+#   3. SR-3 diagnostic language        --mode=stop
+#   4. SR-4 no symptom telemetry       --mode=stop
+#   5. pnpm exec lint-staged
+#
+# SR scripts read `git diff --cached` when --base-ref is absent.
+# husky v9 invokes this script via `sh -e`, so any non-zero exit
+# aborts the commit. `set -e` here is belt-and-suspenders.
+# ============================================================
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+export CLAUDE_PROJECT_DIR="$REPO_ROOT"
+
+"$REPO_ROOT/.claude/hooks/sr1_navigator_confidence_cap.sh" --mode=stop
+"$REPO_ROOT/.claude/hooks/sr2_crisis_bypass_detector.sh" --mode=stop
+"$REPO_ROOT/.claude/hooks/sr3_diagnostic_language.sh" --mode=stop
+"$REPO_ROOT/.claude/hooks/sr4_no_symptom_telemetry.sh" --mode=stop
+
+pnpm exec lint-staged
