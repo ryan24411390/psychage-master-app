@@ -65,8 +65,8 @@ The migration **has not happened yet.** When you reference paths, use today's la
 |---|---|---|
 | Runtime | Expo + React Native + React | SDK 54 / 0.81+ / 19 |
 | Language | TypeScript strict (no `any`, no `@ts-ignore` without an explaining comment) | 5.7+ |
-| Routing | Expo Router | v4 |
-| Styling | NativeWind + Tailwind | 5 / v4 |
+| Routing | Expo Router | v6 (6.0.23) |
+| Styling | NativeWind + Tailwind | v4 (4.2.4) / 3.4.17 |
 | Animation | Reanimated + Moti | 4 / latest |
 | State | Zustand (UI/local) + TanStack Query (server) | 5 / 6 |
 | Forms | react-hook-form + zod | latest |

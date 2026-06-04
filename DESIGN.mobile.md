@@ -47,7 +47,9 @@ Inherits from [DESIGN.web.md §1.1](DESIGN.web.md) two-system architecture:
 
 ### 1.2 Typography schema
 
-Only `type.family.{sans,display,mono}` is a token. Same families as web: `sans` = Inter, `display` = Plus Jakarta Sans, `mono` = IBM Plex Mono.
+Only `type.family.{sans,display,mono}` is a token. Locked families: `sans` = Satoshi (body), `display` = Fraunces (display), `mono` = IBM Plex Mono.
+
+> **Asset status (2026-06-04):** Satoshi is present (Regular/Medium/Bold `.otf` in `apps/mobile/assets/fonts/`) and wired via `useFonts` in `apps/mobile/app/_layout.tsx`. IBM Plex Mono is present and wired. **Fraunces is the locked display family but its assets are not yet in the tree** — `font-display` currently falls back to Satoshi as a placeholder until Fraunces is added.
 
 `size/weight/leading/tracking` are **not** mobile tokens in this contract. The token file ships skeleton stubs with a `_note` indicating values are calibrated against the first mobile screen design. Hardcoding a type scale without a screen to validate against would be invented value — better honest stubs.
 
@@ -276,7 +278,7 @@ Web and mobile maintain **fully independent** design systems per `.claude/worksp
 - **Color tokens** — every value in `color.background`, `color.surface.*`, `color.primary.*`, `color.text.*`, `color.border.*`, `color.semantic.*`, `color.crisis.red`, `color.relevance.*`, `color.teal.*`, `color.charcoal.*`, `color.mood.{1..5}`. Copied verbatim from `tokens/web.tokens.json` at this contract's authoring. Any future amendment is applied to both files in the same commit.
 - **Mood palette** — `color.mood.{1..5}` values identical across platforms (mood-feature-scoped, but the hex set is shared identity).
 - **Clay figures** — see §4. Single library, same set of figures consumed by both platforms.
-- **Type family triplet** — Inter + Plus Jakarta Sans + IBM Plex Mono. Same families on both platforms.
+- **Type family triplet** — Satoshi (body) + Fraunces (display) + IBM Plex Mono. Only `mono` (IBM Plex Mono) is shared with web; mobile's body/display families (Satoshi/Fraunces) are mobile-specific and differ from web's Inter/Plus Jakarta Sans.
 
 **Mobile-only tokens with no web equivalent:**
 - `motion.duration.breath` (4000ms) — web has no comparable breath-cycle duration.

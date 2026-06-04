@@ -3,7 +3,7 @@
   "$comment": "Psychage Mobile Design Tokens. Authored Phase 4.B for apps/mobile (Phase 6 scaffold). No source codebase to extract from — values are constructive per locked Phase 4.B decisions. Color values copied verbatim from tokens/web.tokens.json for cross-platform identity coherence (DESIGN.mobile.md §6). Mobile-only families: haptic.*, audio.*, motion.duration.breath. Typography size scale + spacing scale are skeleton stubs, calibrated against first mobile screen in Phase 6.",
   "_meta": {
     "platform": "mobile",
-    "stack": "expo-sdk-54 + react-native-0.81 + nativewind-5 + reanimated-4",
+    "stack": "expo-sdk-54 + react-native-0.81 + nativewind-4 + reanimated-4",
     "definedInPhase": "4.B",
     "schemaVersion": "1.0.0",
     "designContractRef": "DESIGN.mobile.md",
