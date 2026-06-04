@@ -100,8 +100,8 @@
     "family": {
       "sans":    "Satoshi",
       "display": "Satoshi",
-      "mono":    "IBM Plex Mono",
-      "_source": { "_note": "Satoshi covers both sans and display (single brand-wide typeface). Self-hosted via static OTF cuts (Regular/Medium/Bold) under apps/mobile/assets/fonts/, registered through expo-font in apps/mobile/app/_layout.tsx. License: Indian Type Foundry Free Font License (apps/mobile/assets/fonts/FFL.txt). IBM Plex Mono remains via @expo-google-fonts/ibm-plex-mono. Cross-platform note: web typography (tokens/web.tokens.json type.family.*) is a separate move — this token is mobile-only as of the Satoshi swap." }
+      "mono":    "Satoshi",
+      "_source": { "_note": "Satoshi covers sans, display, and mono (single brand-wide typeface); the mono slot renders via the Satoshi fallback. Self-hosted via static OTF cuts (Regular/Medium/Bold) under apps/mobile/assets/fonts/, registered through expo-font in apps/mobile/app/_layout.tsx. License: Indian Type Foundry Free Font License (apps/mobile/assets/fonts/FFL.txt). IBM Plex Mono dropped 2026-06-05 (@expo-google-fonts/ibm-plex-mono removed). Cross-platform note: web typography (tokens/web.tokens.json type.family.*) is independent — web keeps IBM Plex Mono for its mono slot; this divergence is intentional, not drift." }
     },
     "_omitted": {
       "_note": "size/weight/leading/tracking omitted in V1 — psychage-mobile has no shipped screen to calibrate against. Skeleton stubs only. Calibrated against the first mobile screen design in Phase 6. Hardcoding a scale before there is a screen to validate it is invented value (see DESIGN.mobile.md §1.2)."

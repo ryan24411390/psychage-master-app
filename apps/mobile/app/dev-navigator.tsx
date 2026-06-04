@@ -108,17 +108,17 @@ export default function DevNavigatorScreen() {
     <ScreenShell>
       <Stack.Screen options={{ headerShown: true, title: 'Dev — Verify' }} />
       <ScrollView contentContainerClassName="gap-6 py-4">
-        {/* Font sample — verifies 3 families load (not system fallback). */}
+        {/* Font sample — verifies Satoshi loads across sans/display/mono slots (not system fallback). */}
         <View className="gap-2">
-          <Text variant="caption">FONTS (expect distinct typefaces, not system fallback)</Text>
+          <Text variant="caption">FONTS (expect Satoshi, not system fallback)</Text>
           <RNText style={{ fontFamily: 'Satoshi', fontSize: 22 }}>
             Satoshi — sans · the quick brown fox 0123456789
           </RNText>
           <RNText style={{ fontFamily: 'Satoshi', fontSize: 22 }}>
             Satoshi — display · the quick brown fox
           </RNText>
-          <RNText style={{ fontFamily: 'IBM Plex Mono', fontSize: 18 }}>
-            IBM Plex Mono — mono · const x = 42;
+          <RNText style={{ fontFamily: 'Satoshi', fontSize: 18 }}>
+            Satoshi — mono slot · const x = 42;
           </RNText>
           <RNText style={{ fontSize: 18 }}>System fallback (no fontFamily) · same string</RNText>
         </View>
