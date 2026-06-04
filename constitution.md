@@ -60,10 +60,12 @@ sacred_rules:
     name: diagnostic_language
     summary: "User-facing copy must not contain diagnostic phrasing"
     enforced_by: .claude/hooks/sr3_diagnostic_language.sh
-    type: prompt
-    model: claude-haiku-4-5
-    # The hook sends user-facing string literals + the forbidden-phrase list
-    # to Haiku for semantic judgment (paraphrases also caught).
+    type: command
+    # Deterministic case-insensitive seed-phrase scan over forbidden_phrase_seeds
+    # (same command-hook model as SR-1/SR-2/SR-4 — runs outside the LLM).
+    # NOT-IMPLEMENTED: the semantic/Haiku paraphrase layer is planned only and has
+    # never run. A paraphrase that avoids every seed below passes silently.
+    # See docs/SR-3-paraphrase-coverage-DEFERRED.md.
     forbidden_phrase_seeds:
       - "you have"
       - "you are diagnosed with"
@@ -188,7 +190,9 @@ Enforcement: pattern-grep PreToolUse hook, plus Stop hook re-validation. See `.c
 
 User-facing strings must use educational framing. Forbidden patterns include "you have," "diagnosis confirmed," "this means you're," "you suffer from," and any paraphrase of these that asserts a clinical status. The replacement pattern is invitational: "you might want to read about," "people experiencing similar things often find," "this is sometimes associated with."
 
-Because diagnostic phrasing can be paraphrased into novel forms a regex can't catch, this rule is enforced via a `prompt`-type hook that uses Claude Haiku to make a semantic judgment on every diff containing user-facing strings. See `.claude/hooks/sr3_diagnostic_language.sh`.
+This rule is enforced via a `command`-type hook that runs a deterministic, case-insensitive seed-phrase scan over the `forbidden_phrase_seeds` list against every diff containing user-facing strings — the same outside-the-LLM enforcement model as SR-1/SR-2/SR-4. See `.claude/hooks/sr3_diagnostic_language.sh`.
+
+**Not implemented:** the semantic/Haiku paraphrase layer (which would catch novel paraphrases a seed list can't) is planned only and has never run. A clinical assertion paraphrased around every seed passes silently. Tracked in `docs/SR-3-paraphrase-coverage-DEFERRED.md`; close-by Phase 11 alongside SR-5.
 
 ### SR-4 — Symptom data stays on device
 
@@ -202,7 +206,7 @@ These are creative judgments, not pattern-matchable rules. They are checked at e
 
 1. **Clay figures only for universal humanity.** Faceless, genderless, raceless matte-white figures. The figure library is finite and illustrator-produced (never generated at code time). When a feature needs a figure that doesn't exist in the library, the spec defers until the library is expanded. No ad-hoc generation.
 
-2. **Person-first language throughout.** "A person experiencing depression," not "a depressed person." Twenty-six-term sensitivity filter applies to every user-facing string. The filter list is in `rules/sensitivity.md` (lifted from psychage-v2).
+2. **Person-first language throughout.** "A person experiencing depression," not "a depressed person." Thirty-term sensitivity filter applies to every user-facing string. The filter list is in `rules/sensitivity.md` (lifted from psychage-v2).
 
 3. **Sage archetype in voice.** Calm, knowing, warm. Never clinical, never bureaucratic, never performatively friendly. The voice of someone who has thought about this a long time and chooses words carefully.
 

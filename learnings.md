@@ -278,3 +278,35 @@ The Phase 6 label ended with `... + Mood Quick-Check tracer ship-to-device`, sou
 Decision: drop the tracer bullet from `phaseRoadmap["6"].label` and reassign to Phase 9 (analytics vendor + Sentry RN) where a real vendor lands, or Phase 11 (first spec-workflow feature: Daily Check-In) where the mood-input surface naturally arrives. The "TestFlight + 48h real-device use" bar from the audit response cannot be met without a vendor — no off-device observability point, no 48h trace to inspect.
 
 The on-device verification surface that *did* ship in Phase 6 is the Navigator parity check (`apps/mobile/app/dev-navigator.tsx`, Phase 6 Slice 9): fonts + MMKV persistence + `runSymptomNavigator` web-parity. Not a tracer; not a Mood Quick-Check. Two distinct concerns conflated in the original Phase 6 label.
+
+## Phase 10 close-out (2026-06-04)
+
+Two findings recorded as the phase moved from `in-progress` → `complete`. Branch: `feat/phase-10-test-harness` stacked on `feat/phase-9-precommit-recover` (Phase 9 unmerged). No PR, no merge — stop on branch.
+
+### Slice 1 — cap-floor.test.ts ratified as canonical Sacred Rule #1 guard (no new code)
+
+`packages/shared/navigator/__tests__/cap-floor.test.ts` was lifted in Phase 5 (PR #11) and already covers the three angles Phase 10 Slice 1 requested: `CONFIDENCE_CAP === 0.75`, `runSymptomNavigator` floors a hostile config cap (0.99 in fixture), `calculateConditionScore` floors hostile cap when invoked directly. `packages/shared/CLAUDE.md` already names this file as the canonical cap-floor location. Slice 1 is a ratification, not a code change.
+
+Deliberate-break proof at close: `sed -i.bak 's/CONFIDENCE_CAP = 0.75/CONFIDENCE_CAP = 0.99/'` (Edit tool correctly blocked by SR-1 PreToolUse hook — second defensive layer) → `pnpm --filter @psychage/shared test` → 6 cap-floor assertions RED with `expected 0.99 to be less than or equal to 0.75` across robustness.test.ts (1), scoring.test.ts (2), expansion-phase4.test.ts (1), cap-floor.test.ts (2) → restore from `.bak` → re-run → 191/191 GREEN. The deliberate break also confirmed SR-1's Edit-tool hook (`.claude/hooks/sr1_navigator_confidence_cap.sh`) blocks the constants.ts mutation — defense-in-depth between hook layer and test layer.
+
+### Slice 2 — apps/mobile Vitest + RN render smoke DEFERRED to Phase 11
+
+Render-smoke test for `apps/mobile/components/ui/Text.tsx` was attempted per the plan's `react-native` → `react-native-web` alias strategy. Three failure modes observed; all root-caused; none resolved within Phase 10 scope:
+
+1. **`@testing-library/react-native` bypasses Vite's resolve.alias.** `build/helpers/accessibility.js:22` does `var _reactNative = require("react-native")` through node's CJS native loader. Vite's `resolve.alias` only applies inside Vite's transformer chain, not inside node's `require`. Node hits the real `react-native/index.js` and chokes on Flow syntax (`SyntaxError: Unexpected token 'typeof'`).
+2. **Vitest hangs >124s on the RN-web import graph even with `@testing-library/react` fallback + alias.** vite-node transforms the entire react-native-web dependency tree (postcss-value-parser, normalize-css-color, etc.) before failing with `ECANCELED: operation canceled, read` at `postcss-value-parser/lib/index.js:2`. `optimizeDeps.include` + `server.deps.inline` for `react-native-web` did not change the outcome.
+3. **`vi.mock('react-native', ...)` variants also hang.** Both static-import and dynamic-import patterns deadlock — vite-node attempts to resolve the real module before applying the mock factory.
+
+Owed by Phase 11 (pick one): (a) **jest-expo** as a second test runner alongside Vitest — canonical RN render test path (Expo Router team uses it), or (b) **Maestro** flow exercising the same screen surface end-to-end on a real simulator. Either replaces the deferred render smoke. Do NOT add a hand-rolled RN test renderer adapter — that path is hostile to Reanimated/Skia/MMKV native modules.
+
+Mobile floor for Phase 10 is the 4 existing logic tests (`navigator-seam`, `tier-flags-composition`, `tier-flags-persistence`, `cold-start-migrator-wiring` — 10 tests / 4 files) already passing in `apps/mobile/__tests__/`. The original recon agent missed them, suggesting "zero apps/mobile tests" — corrected mid-phase. Honors "floor-is-ceiling" because the floor is what is real, not what the spec presumed empty.
+
+### New rule (consolidated)
+
+When standing up Vitest + RN component tests, **do not alias `react-native` → `react-native-web`** as the render path — vite-node spends 100s+ transforming RN-web's import graph and then ECANCELs at `postcss-value-parser`. The canonical RN render test path on Expo SDK 54 is `jest-expo` (Jest), not Vitest. Use Vitest for pure-TypeScript logic tests (navigator engine, scoring, sensitivity filter, migrators, adapter seams) and jest-expo OR Maestro for anything that mounts a React Native component. The two runners coexist; do not collapse them.
+
+### Recon corrections (carry-forward — do not re-litigate)
+
+- Vitest is ALREADY installed in both `packages/shared` and `apps/mobile` (Phase 6 + 9). `.github/workflows/pr-checks.yml:39-40` already runs `pnpm -r test`. No CI change needed at Phase 10.
+- `cap-floor.test.ts` is excluded by SR-1's `*.test.*` glob — no runtime-assembled-trigger trick needed for the literal `0.75` in test assertions.
+- Slice 3 close-out commit SHA appended in Phase 11 kickoff per Phase 7/8/9 precedent (a chore commit cannot self-reference its own SHA).

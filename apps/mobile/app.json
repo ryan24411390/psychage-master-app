@@ -4,6 +4,10 @@
     "slug": "mobile",
     "scheme": "psychage",
     "version": "1.0.0",
+    "owner": "OWNER_PLACEHOLDER",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
