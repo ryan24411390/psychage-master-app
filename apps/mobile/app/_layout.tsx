@@ -9,20 +9,19 @@ import '../global.css';
 import '@/lib/adapters/featureFlags';
 
 import { HapticProvider } from '@/lib/haptic-context';
-import { IBMPlexMono_400Regular } from '@expo-google-fonts/ibm-plex-mono';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   // Satoshi cuts registered under one family name so NativeWind's `font-sans` /
-  // `font-display` (both → tokens/mobile.tokens.json type.family → "Satoshi")
-  // resolve, and RN's `fontWeight` style selects the right cut. IBM Plex Mono
-  // unchanged. Italic / Light / Black cuts not loaded (unused in V1).
+  // `font-display` / `font-mono` (all → tokens/mobile.tokens.json type.family →
+  // "Satoshi") resolve, and RN's `fontWeight` style selects the right cut. Mono
+  // renders via the Satoshi fallback (IBM Plex Mono dropped). Italic / Light /
+  // Black cuts not loaded (unused in V1).
   const [fontsLoaded] = useFonts({
     Satoshi: require('../assets/fonts/Satoshi-Regular.otf'),
     'Satoshi-Medium': require('../assets/fonts/Satoshi-Medium.otf'),
     'Satoshi-Bold': require('../assets/fonts/Satoshi-Bold.otf'),
-    'IBM Plex Mono': IBMPlexMono_400Regular,
   });
 
   useEffect(() => {

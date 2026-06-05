@@ -12,6 +12,8 @@ Icon?
 ._*
 .Spotlight-V100
 .Trashes
+# Finder/iCloud byte-identical dup of .github/CODEOWNERS — keeps reappearing
+.github/CODEOWNERS 2
 
 # ─────────────────────────────────────────────────────────────────────────────
 # GitKraken metadata (auto-created on every git init via global template)

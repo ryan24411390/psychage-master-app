@@ -70,3 +70,19 @@ export function someLiftedFunction(
 **Surfaced:** Phase 6 Slice 1 recon (PR #14). Applied retroactively in Phase 6 Slice 2.
 
 **Enforcement:** Convention. No CI rule; PR-review check at phase-kickoff and phase-close commits.
+
+## 5. Spec-workflow commit format
+
+Commits produced by a spec-workflow phase (`/spec-discovery` → `/spec-implement`) use the `docs(spec)` type and tag the phase:
+
+```text
+docs(spec): <feature-slug> <artifact> [phase-N]
+```
+
+**Example:** `docs(spec): daily-check-in discovery brief [phase-11]` (commit `05b30c6`).
+
+**Rationale:** The `[phase-N]` tag makes spec-artifact commits scannable against `phaseRoadmap`, and the `docs(spec)` type distinguishes specification artifacts (brief, requirements, design, tasks) from the `feat`/`chore` commits that implement them.
+
+**Surfaced:** Phase 11 daily-check-in discovery.
+
+**Enforcement:** Convention. PR-review check on spec-artifact commits.
