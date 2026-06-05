@@ -106,6 +106,7 @@ overall D7 goal of 25%.
    auth + the actual hook permit syncing the user's own consented check-ins. Resolve via an ADR
    with Dr. Dobson clinical sign-off + security review (SR-4 amendment friction per constitution
    §amendment) *before* any code writes `check_ins` to Supabase. — *resolver:* Ryan + Dr. Dobson.
+   — see docs/adr/001-sr4-checkin-persistence.md (Proposed).
 2. **Cross-repo migration coordination.** The `check_ins` migration is authored in **psychage-v2's
    `supabase/migrations/`** (web repo owns schema historically, ARCHITECTURE.md §9) but the table
    is **runtime-written by mobile**. Who authors/applies it, and how is it sequenced against the
