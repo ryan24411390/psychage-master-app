@@ -142,7 +142,7 @@ For each target file:
 
 2. **rgb/rgba/hsl literals.** ripgrep `rgba?\([^)]+\)|hsla?\([^)]+\)`. For each hit, compare against allowed-value set (normalise whitespace). Brand rgba (`rgba(26, 155, 140, *)`) is a token expression — pass. Wrong-teal `rgba(13, 148, 136, *)` is drift — fail with note "drift teal — use brand `rgba(26, 155, 140, α)` or `teal-600` utility".
 
-3. **Raw font-family declarations.** ripgrep `fontFamily:\s*["'][^"']+["']` and `style=\{\{[^}]*fontFamily`. Pass if the value matches one of `type.family.{sans,display,mono}` (mobile: all three resolve to `"Satoshi"` — Fraunces display assets pending, IBM Plex Mono dropped 2026-06-05). Fail otherwise.
+3. **Raw font-family declarations.** ripgrep `fontFamily:\s*["'][^"']+["']` and `style=\{\{[^}]*fontFamily`. Pass if the value matches one of `type.family.{sans,display}` (mobile: `sans` resolves to IBM Plex Sans, `display` to Fraunces; the `mono` token was dropped 2026-06-10 per DD-001 — no monospace family). Fail otherwise.
 
 4. **Raw motion durations / easings.** ripgrep `duration:\s*\d+`, `withTiming\([^,]+,\s*\{[^}]*duration`, `Animated\.timing\([^,]+,\s*\{[^}]*duration`. Pass if value matches `motion.duration.*` (150/300/600/4000) or is sourced from a `@/lib/motion` / `@/design/motion` import (file imports `duration` from a tokens-shim module). Fail otherwise.
 

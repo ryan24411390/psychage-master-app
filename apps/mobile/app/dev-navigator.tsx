@@ -6,7 +6,7 @@
 // device output is byte-comparable to the node test (web parity check).
 
 import { useState } from 'react';
-import { Pressable, ScrollView, Text as RNText, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Text as RNText, View } from 'react-native';
 import { Stack } from 'expo-router';
 
 import { ScreenShell } from '@/components/ui/ScreenShell';
@@ -108,17 +108,22 @@ export default function DevNavigatorScreen() {
     <ScreenShell>
       <Stack.Screen options={{ headerShown: true, title: 'Dev — Verify' }} />
       <ScrollView contentContainerClassName="gap-6 py-4">
-        {/* Font sample — verifies Satoshi loads across sans/display/mono slots (not system fallback). */}
+        {/* Font sample — verifies IBM Plex Sans + Fraunces load (not system fallback). */}
         <View className="gap-2">
-          <Text variant="caption">FONTS (expect Satoshi, not system fallback)</Text>
-          <RNText style={{ fontFamily: 'Satoshi', fontSize: 22 }}>
-            Satoshi — sans · the quick brown fox 0123456789
+          <Text variant="caption">FONTS (expect IBM Plex Sans + Fraunces, not system fallback)</Text>
+          <RNText style={{ fontFamily: 'IBMPlexSans_400Regular', fontSize: 22 }}>
+            IBM Plex Sans — sans · the quick brown fox 0123456789
           </RNText>
-          <RNText style={{ fontFamily: 'Satoshi', fontSize: 22 }}>
-            Satoshi — display · the quick brown fox
+          <RNText style={{ fontFamily: 'Fraunces_600SemiBold', fontSize: 22 }}>
+            Fraunces — display · the quick brown fox
           </RNText>
-          <RNText style={{ fontFamily: 'Satoshi', fontSize: 18 }}>
-            Satoshi — mono slot · const x = 42;
+          <RNText
+            style={{
+              fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
+              fontSize: 18,
+            }}
+          >
+            platform mono (no app mono font) · const x = 42;
           </RNText>
           <RNText style={{ fontSize: 18 }}>System fallback (no fontFamily) · same string</RNText>
         </View>
