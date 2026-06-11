@@ -1,0 +1,42 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!**/.expo",
+      "!**/.turbo",
+      "!**/coverage",
+      "!**/ios",
+      "!**/android"
+    ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        // TODO(lint-debt): noUnknownAtRules — 3 errors on apps/mobile/global.css
+        // (@tailwind base/components/utilities). These are valid Tailwind/NativeWind
+        // directives Biome's CSS linter does not recognize; downgraded error->warn so
+        // the gate stays green. Revisit in A-9: set off for CSS or scope-exclude.
+        "noUnknownAtRules": "warn"
+      }
+    }
+  },
+  // Formatter adoption is explicitly out of scope (A-1 is lint-only). Do not enable.
+  "formatter": {
+    "enabled": false
+  },
+  // Assist (organize-imports etc.) off — would reorder imports = source churn.
+  "assist": {
+    "enabled": false
+  }
+}
