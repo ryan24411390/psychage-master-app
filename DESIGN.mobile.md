@@ -47,9 +47,9 @@ Inherits from [DESIGN.web.md §1.1](DESIGN.web.md) two-system architecture:
 
 ### 1.2 Typography schema
 
-Only `type.family.{sans,display,mono}` is a token. Locked families: `sans` = Satoshi (body), `display` = Fraunces (display), `mono` = Satoshi (mono slot renders via the Satoshi fallback).
+Only `type.family.{sans,display}` is a token. Locked families: `sans` = IBM Plex Sans (body/UI), `display` = Fraunces (display). The `mono` family token was dropped — see the lock note below.
 
-> **Asset status (2026-06-05):** Satoshi is present (Regular/Medium/Bold `.otf` in `apps/mobile/assets/fonts/`) and wired via `useFonts` in `apps/mobile/app/_layout.tsx`; it serves the sans, display, and mono slots. **IBM Plex Mono was dropped 2026-06-05** (`@expo-google-fonts/ibm-plex-mono` removed) — mono now falls back to Satoshi. **Fraunces is the locked display family but its assets are not yet in the tree** — `font-display` currently falls back to Satoshi as a placeholder until Fraunces is added.
+> **Typography lock (DD-001, 2026-06-10):** `sans`/body/UI = **IBM Plex Sans** (SIL OFL); `display`/headlines = **Fraunces** (SIL OFL, static weight cuts). Both bundle via `@expo-google-fonts/ibm-plex-sans` (weights 400/500/700) + `@expo-google-fonts/fraunces` (weight 600) and load through `useFonts` in `apps/mobile/app/_layout.tsx`; token family strings are the packages' export names (`IBMPlexSans_400Regular`, `Fraunces_600SemiBold`). **Satoshi is forbidden in the mobile bundle** — its Indian Type Foundry / Fontshare EULA (the former `FFL.txt`) does not clearly cover embedding the font binary in a distributed app. The `mono` token was dropped (no production use; only the dev-navigator verification screen referenced it, now pointing at the platform default monospace). Satoshi remains legitimate on web (`tokens/web.tokens.json`).
 
 `size/weight/leading/tracking` are **not** mobile tokens in this contract. The token file ships skeleton stubs with a `_note` indicating values are calibrated against the first mobile screen design. Hardcoding a type scale without a screen to validate against would be invented value — better honest stubs.
 
@@ -278,7 +278,7 @@ Web and mobile maintain **fully independent** design systems per `.claude/worksp
 - **Color tokens** — every value in `color.background`, `color.surface.*`, `color.primary.*`, `color.text.*`, `color.border.*`, `color.semantic.*`, `color.crisis.red`, `color.relevance.*`, `color.teal.*`, `color.charcoal.*`, `color.mood.{1..5}`. Copied verbatim from `tokens/web.tokens.json` at this contract's authoring. Any future amendment is applied to both files in the same commit.
 - **Mood palette** — `color.mood.{1..5}` values identical across platforms (mood-feature-scoped, but the hex set is shared identity).
 - **Clay figures** — see §4. Single library, same set of figures consumed by both platforms.
-- **Type families** — Satoshi (body) + Fraunces (display) + Satoshi (mono slot). All mobile-specific; none shared with web. Web's families (Inter / Plus Jakarta Sans / IBM Plex Mono) are independent — mobile dropped IBM Plex Mono 2026-06-05, so even the mono slot now diverges (Satoshi on mobile, IBM Plex Mono on web). The divergence is intentional, not drift.
+- **Type families** — IBM Plex Sans (body/UI) + Fraunces (display), per the DD-001 lock (§1.2). All mobile-specific; none shared with web. Web's families (Inter / Plus Jakarta Sans / IBM Plex Mono) are independent. The mobile `mono` token was dropped (no production use) — mobile carries no monospace family. The divergence is intentional, not drift.
 
 **Mobile-only tokens with no web equivalent:**
 - `motion.duration.breath` (4000ms) — web has no comparable breath-cycle duration.
