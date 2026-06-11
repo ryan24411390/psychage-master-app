@@ -10,7 +10,7 @@
 #   2. SR-2 crisis bypass detector     --mode=stop
 #   3. SR-3 diagnostic language        --mode=stop
 #   4. SR-4 no symptom telemetry       --mode=stop
-#   5. pnpm exec lint-staged
+#   5. pnpm exec lint-staged  (Biome lint over staged files, check-only)
 #
 # SR scripts read `git diff --cached` when --base-ref is absent.
 # husky v9 invokes this script via `sh -e`, so any non-zero exit
