@@ -8,7 +8,7 @@ Format: *"When X, do Y, because Z."* — one sentence per lesson.
 
 ## Deferred decisions (revisit when conditions change)
 
-- **2026-05-03 — Branch protection deferred.** Server-side branch protection on `main` is not active because the GitHub account is on the Free tier (HTTP 403 on `gh api PUT .../branches/main/protection`). Local protection lives in Phase 7 Husky hooks (blocks force-push, blocks `--no-verify` bypasses). Revisit and upgrade to GitHub Pro ($4/mo) when any of: (a) a `--no-verify` bypass attempt happens, (b) Phase 8 CI lands and Action minutes pressure increases, (c) project earns its first dollar of revenue.
+- **2026-05-03 — Branch protection deferred (corrected 2026-06-10, A-2/F-2).** Server-side branch protection on `main` is not active because the GitHub account is on the Free tier (HTTP 403 on `gh api PUT .../branches/main/protection`). Local Sacred-Rule enforcement runs in two Husky hooks — `.husky/pre-commit` and `.husky/pre-push` — both invoking SR-1..SR-4 `--mode=stop` against the change set. **`--no-verify` still bypasses any local hook** (git limitation), so local enforcement is a gate, not a guarantee. CI `sacred-rules` (`.github/workflows/pr-checks.yml`) now runs the same four gates on **both PRs and pushes to `main`**; on a direct push it cannot *prevent* the commit landing (no server-side protection on Free tier) but fails **red** so the violation is caught. Server-side protection remains the real fix. Revisit and upgrade to GitHub Pro ($4/mo) when any of: (a) a `--no-verify` bypass attempt happens, (b) Phase 8 CI lands and Action minutes pressure increases, (c) project earns its first dollar of revenue.
 
 ## Repository hygiene
 

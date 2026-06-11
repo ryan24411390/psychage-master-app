@@ -42,32 +42,43 @@ jobs:
   sacred-rules:
     name: sacred rules (branch diff)
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Fetch base ref
-        run: git fetch origin ${{ github.base_ref }}
+      - name: Resolve diff base
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}"
+            echo "SR_BASE=origin/${{ github.base_ref }}" >> "$GITHUB_ENV"
+          else
+            BEFORE="${{ github.event.before }}"
+            if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              echo "First push (no parent SHA) — diffing the head commit alone."
+              echo "SR_BASE=HEAD^" >> "$GITHUB_ENV"
+            else
+              echo "SR_BASE=$BEFORE" >> "$GITHUB_ENV"
+            fi
+          fi
 
       - name: SR-1 navigator confidence cap
         env:
           CLAUDE_PROJECT_DIR: ${{ github.workspace }}
-        run: .claude/hooks/sr1_navigator_confidence_cap.sh --mode=stop --base-ref=origin/${{ github.base_ref }}
+        run: .claude/hooks/sr1_navigator_confidence_cap.sh --mode=stop --base-ref="$SR_BASE"
 
       - name: SR-2 crisis bypass detector
         env:
           CLAUDE_PROJECT_DIR: ${{ github.workspace }}
-        run: .claude/hooks/sr2_crisis_bypass_detector.sh --mode=stop --base-ref=origin/${{ github.base_ref }}
+        run: .claude/hooks/sr2_crisis_bypass_detector.sh --mode=stop --base-ref="$SR_BASE"
 
       - name: SR-3 diagnostic language
         env:
           CLAUDE_PROJECT_DIR: ${{ github.workspace }}
-        run: .claude/hooks/sr3_diagnostic_language.sh --mode=stop --base-ref=origin/${{ github.base_ref }}
+        run: .claude/hooks/sr3_diagnostic_language.sh --mode=stop --base-ref="$SR_BASE"
 
       - name: SR-4 no symptom telemetry
         env:
           CLAUDE_PROJECT_DIR: ${{ github.workspace }}
-        run: .claude/hooks/sr4_no_symptom_telemetry.sh --mode=stop --base-ref=origin/${{ github.base_ref }}
+        run: .claude/hooks/sr4_no_symptom_telemetry.sh --mode=stop --base-ref="$SR_BASE"

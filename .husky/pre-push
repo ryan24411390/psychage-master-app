@@ -1,0 +1,38 @@
+#!/usr/bin/env sh
+# ============================================================
+# Pre-push enforcement — A-2 (close the --no-verify push hole)
+# ============================================================
+# Runs the four Sacred Rule hooks against the OUTGOING commits
+# (origin/main...HEAD) before any push leaves the machine.
+# Mirrors .husky/pre-commit's invocation + CI's --base-ref pattern.
+#
+#   1. SR-1 navigator confidence cap   --mode=stop --base-ref=origin/main
+#   2. SR-2 crisis bypass detector     --mode=stop --base-ref=origin/main
+#   3. SR-3 diagnostic language        --mode=stop --base-ref=origin/main
+#   4. SR-4 no symptom telemetry       --mode=stop --base-ref=origin/main
+#
+# Diff base = origin/main, refreshed best-effort. FAIL CLOSED if it
+# cannot be resolved — never silently pass. The ref data git pipes on
+# stdin is intentionally ignored (stop-mode scripts don't read it).
+#
+# `--no-verify` still bypasses this hook (git limitation); the CI
+# sacred-rules job is the backstop for that path.
+# ============================================================
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+export CLAUDE_PROJECT_DIR="$REPO_ROOT"
+
+# Refresh origin/main (best-effort), then fail closed if unresolvable.
+git fetch origin main --quiet 2>/dev/null || true
+if ! git rev-parse --verify --quiet origin/main >/dev/null 2>&1; then
+  echo "BLOCKED (pre-push): origin/main is unreachable — cannot compute the Sacred Rule diff base." >&2
+  echo "Push aborted (fail-closed). Restore network/remote access and retry." >&2
+  exit 1
+fi
+
+"$REPO_ROOT/.claude/hooks/sr1_navigator_confidence_cap.sh" --mode=stop --base-ref=origin/main
+"$REPO_ROOT/.claude/hooks/sr2_crisis_bypass_detector.sh"    --mode=stop --base-ref=origin/main
+"$REPO_ROOT/.claude/hooks/sr3_diagnostic_language.sh"       --mode=stop --base-ref=origin/main
+"$REPO_ROOT/.claude/hooks/sr4_no_symptom_telemetry.sh"      --mode=stop --base-ref=origin/main
