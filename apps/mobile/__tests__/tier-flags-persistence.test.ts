@@ -77,3 +77,77 @@ describe('tier-flags persistence — SR-13 versioned migrator', () => {
     });
   });
 });
+
+// Anomaly recovery — reseed-on-anomaly policy (derived data; never throws).
+// Each case asserts the recovered state is BOTH returned AND persisted, so the
+// next launch reads a clean v1 envelope. This is the reference pattern; copy the
+// structure, not the policy (user-data migrators must quarantine, not reseed).
+describe('tier-flags persistence — anomaly recovery (reseed/normalize)', () => {
+  const ALL_TRUE = { 1: true, 2: true, 3: true, 4: true, 5: true, 6: true };
+
+  it('corrupt JSON → reseeds defaults, does not throw, persists v1', () => {
+    const storage = makeStorage({ [STORAGE_KEY]: '{not json' });
+
+    let flags: ReturnType<typeof loadTierFlags> | undefined;
+    expect(() => {
+      flags = loadTierFlags(storage);
+    }).not.toThrow();
+
+    expect(flags).toEqual(ALL_TRUE);
+    expect(JSON.parse(storage.get(STORAGE_KEY) as string)).toEqual({
+      version: SCHEMA_VERSION,
+      data: ALL_TRUE,
+    });
+  });
+
+  it('future version (v2) → reseeds defaults, does not throw, persists v1', () => {
+    const future = {
+      version: 2,
+      data: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
+    };
+    const storage = makeStorage({ [STORAGE_KEY]: JSON.stringify(future) });
+
+    let flags: ReturnType<typeof loadTierFlags> | undefined;
+    expect(() => {
+      flags = loadTierFlags(storage);
+    }).not.toThrow();
+
+    expect(flags).toEqual(ALL_TRUE);
+    expect(JSON.parse(storage.get(STORAGE_KEY) as string)).toEqual({
+      version: SCHEMA_VERSION,
+      data: ALL_TRUE,
+    });
+  });
+
+  it('v1 with a missing key → fills missing from default, preserves present keys, persists normalized', () => {
+    // tier 3 absent; the rest are valid and must survive (not a full reset).
+    const partial = { version: 1, data: { 1: false, 2: true, 4: false, 5: true, 6: false } };
+    const storage = makeStorage({ [STORAGE_KEY]: JSON.stringify(partial) });
+
+    const flags = loadTierFlags(storage);
+
+    const normalized = { 1: false, 2: true, 3: true, 4: false, 5: true, 6: false };
+    expect(flags).toEqual(normalized);
+    expect(JSON.parse(storage.get(STORAGE_KEY) as string)).toEqual({
+      version: SCHEMA_VERSION,
+      data: normalized,
+    });
+  });
+
+  it('v1 with an extra key → drops the unknown key, persists a clean shape', () => {
+    const extra = {
+      version: 1,
+      data: { 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true },
+    };
+    const storage = makeStorage({ [STORAGE_KEY]: JSON.stringify(extra) });
+
+    const flags = loadTierFlags(storage);
+
+    expect(flags).toEqual(ALL_TRUE);
+    expect(flags).not.toHaveProperty('7');
+    expect(JSON.parse(storage.get(STORAGE_KEY) as string)).toEqual({
+      version: SCHEMA_VERSION,
+      data: ALL_TRUE,
+    });
+  });
+});
