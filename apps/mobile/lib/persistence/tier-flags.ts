@@ -10,6 +10,15 @@
 //
 // Forward-only. There is no down-migration; a future-versioned blob (a
 // downgraded app reading newer persisted state) falls back to a default seed.
+//
+// RESEED-ON-ANOMALY POLICY (applies to THIS file only). Tier flags are derived,
+// non-user data — corrupt JSON, an unknown/future version, or a malformed v1
+// shape all recover by reseeding/normalizing to defaults, never throwing.
+// Losing them costs nothing. This is CORRECT FOR DERIVED DATA ONLY.
+// User-data migrators (e.g. check-in entries) must NOT silently reseed: on
+// anomaly they must preserve the raw blob under a quarantine key and surface
+// the failure, so nothing the user wrote is lost. When copying this migrator as
+// the reference pattern, copy the test STRUCTURE, not the reseed policy.
 
 import type { Storage } from '@/lib/adapters/storage';
 
@@ -76,6 +85,20 @@ function isTierFlagsShape(value: unknown): value is TierFlags {
   return true;
 }
 
+// Shape-normalize an untrusted v1 payload onto the canonical TierFlags shape:
+// fill any missing tier from defaults, keep present booleans, drop unknown keys
+// (only 1..6 are copied). Reseed-on-anomaly for derived data — never throws.
+function normalizeTierFlags(value: unknown): TierFlags {
+  const out: TierFlags = { ...DEFAULT_TIER_FLAGS };
+  if (typeof value !== 'object' || value === null) return out;
+  const v = value as Record<string, unknown>;
+  for (let tier = 1; tier <= 6; tier++) {
+    const flag = v[String(tier)];
+    if (typeof flag === 'boolean') out[tier as Tier] = flag;
+  }
+  return out;
+}
+
 /**
  * Parse + migrate raw persisted JSON into the current schema version.
  *
@@ -108,9 +131,9 @@ export function migrate(rawJson: string | null): Persisted {
   }
 
   if (version === SCHEMA_VERSION) {
-    return isTierFlagsShape(envelope.data)
-      ? { version: SCHEMA_VERSION, data: envelope.data }
-      : { version: SCHEMA_VERSION, data: { ...DEFAULT_TIER_FLAGS } };
+    // Shape-normalize rather than all-or-nothing: a v1 blob with a missing key
+    // keeps its valid tiers (missing filled from defaults); extra keys drop.
+    return { version: SCHEMA_VERSION, data: normalizeTierFlags(envelope.data) };
   }
 
   if (version > SCHEMA_VERSION) {
