@@ -11,18 +11,23 @@ type ScreenShellProps = {
   children: ReactNode;
   edges?: readonly Edge[];
   className?: string;
+  // Optional passthrough — lets render tests target the shell to assert the
+  // themed background, and seeds future Maestro flows (A-5). Off by default; no
+  // testID is emitted unless a caller opts in.
+  testID?: string;
 };
 
 export function ScreenShell({
   children,
   edges = ['top', 'bottom'],
   className,
+  testID,
 }: ScreenShellProps) {
   const composed = ['flex-1 bg-background dark:bg-background-dark px-4', className]
     .filter(Boolean)
     .join(' ');
   return (
-    <SafeAreaView edges={edges} className={composed}>
+    <SafeAreaView edges={edges} className={composed} testID={testID}>
       {children}
     </SafeAreaView>
   );
