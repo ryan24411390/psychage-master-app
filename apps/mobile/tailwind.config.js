@@ -106,6 +106,8 @@ module.exports = {
       },
       fontFamily: {
         sans: [tokens.type.family.sans],
+        'sans-medium': [tokens.type.family.sansMedium],
+        'sans-bold': [tokens.type.family.sansBold],
         display: [tokens.type.family.display],
       },
     },

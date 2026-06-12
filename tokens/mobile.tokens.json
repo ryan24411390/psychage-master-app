@@ -98,8 +98,10 @@
 
   "type": {
     "family": {
-      "sans":    "IBMPlexSans_400Regular",
-      "display": "Fraunces_600SemiBold",
+      "sans":       "IBMPlexSans_400Regular",
+      "sansMedium": "IBMPlexSans_500Medium",
+      "sansBold":   "IBMPlexSans_700Bold",
+      "display":    "Fraunces_600SemiBold",
       "_source": { "_note": "DD-001 typography lock (2026-06-10): sans/body/UI = IBM Plex Sans (SIL OFL), display/headlines = Fraunces (SIL OFL). Both bundled as static cuts via @expo-google-fonts/ibm-plex-sans (400/500/700) + @expo-google-fonts/fraunces (600), registered through expo-font useFonts in apps/mobile/app/_layout.tsx. Family strings are the expo-google-fonts export names; NativeWind font-sans/font-display resolve through these values (apps/mobile/tailwind.config.js). The mono family token was dropped (no production use — only the dev-navigator verification screen referenced it, now points at the platform default monospace). The previously bundled brand typeface was removed and is forbidden in the mobile bundle — its Indian Type Foundry / Fontshare EULA does not clearly cover embedding the font binary in a distributed app (see DD-001 / DESIGN.mobile.md §1.2). Cross-platform note: web typography (tokens/web.tokens.json type.family.*) is independent — web keeps Inter / Plus Jakarta Sans / IBM Plex Mono; this divergence is intentional, not drift." }
     },
     "_omitted": {
