@@ -42,20 +42,22 @@ Diagnose. Treat. Replace therapy. Function as a closed wellness garden. Use diag
 | Public routes | 60+ |
 | Admin routes | 40+ |
 
-### Mobile app (this repo, pre-scaffold)
+### Mobile app (this repo)
+
+> The 2026-05-03 snapshot below is superseded on scaffold/remote status — the monorepo is live (`apps/mobile` + `packages/shared`) and `main` has a private GitHub remote with branch protection (Phase 2 done).
 
 | Fact | Value |
 |---|---|
 | Repo | `/Users/raiyanabdullah/Documents/psychage-master-app/` |
-| Git | Initialized 2026-05-03, branch `main`, no remote yet (Phase 2 creates GitHub remote) |
-| Mobile folder | `psychage-mobile/` — empty. Expo scaffold pending. |
+| Git | Initialized 2026-05-03, branch `main`, private GitHub remote with branch protection (Phase 2) |
+| Mobile app | `apps/mobile/` — Expo SDK 54, scaffolded and live (Phase 6 complete). |
 | `.claude/` | Project-shared `settings.json` will be added when needed; CLAUDE.md at root |
 | `.gitignore` | Yes, 162 lines |
 | Other tracked | CLAUDE.md, this file, PRODUCT_BRIEF.md, V1_FEATURE_SCOPE.md (when committed in Phase 2) |
 
 ### Foundation state
 
-Phases 1.1–1.5 complete. Universal Claude Code rules at user level. Project rules at root CLAUDE.md. Backups in `~/claude-config-backups/`. See §4 below for full foundation roadmap.
+Foundation phases 0–8 and 10 complete and on `main`; Phase 9 (observability) partial; Phase 11 (Daily Check-In) active, gated by the SR-4 ADR cooling-off (until 2026-06-20). Universal Claude Code rules at user level. Project rules at root CLAUDE.md. Backups in `~/claude-config-backups/`. See §4 below for full foundation roadmap.
 
 ---
 
@@ -83,7 +85,7 @@ psychage-master-app/
     migrations/
 ```
 
-Today: empty `psychage-mobile/` folder, web is its own repo. Migration path documented in §6 lift plan.
+Migration complete: `apps/mobile/` (Expo SDK 54) and `packages/shared/` are live; web remains its own repo. Lift plan in §6.
 
 ---
 
@@ -96,15 +98,15 @@ Today: empty `psychage-mobile/` folder, web is its own repo. Migration path docu
 | 2 | Repo foundation | ✅ Done (commit b89ae51, 2026-05-03) | First commit, GitHub remote (private), branch protection on `main` |
 | 3 | Close decision blockers | ✅ Done (commit 9c362d7, 2026-05-05) | `rules/auth.md`, `rules/offline.md`, `ARCHITECTURE.md` (see §5) |
 | 4 | Spec-driven workflow | ✅ Done (commit ef6db24, 2026-05-08) | Six `.claude/skills/spec-*/SKILL.md` + `constitution.md` + 4 SR PreToolUse hooks + Stop/SessionStart hooks + `HOOKS_SMOKE_TEST_FIXTURES.md` + `docs/AUDIT_RESPONSE_FINAL.md` |
-| 5 | Worktree infrastructure | ⏭ Pending | Worktree spawn/merge scripts, file-isolation rules in `/spec-tasks` |
-| 6 | Expo scaffold | ⏭ Pending | `pnpm dlx create-expo-app`, NativeWind 5, `@/` alias, folder structure |
-| 7 | Quality gates | ⏭ Pending | Biome config, Husky + lint-staged, pre-commit (typecheck + lint + format + test) |
-| 8 | CI/CD | ⏭ Pending | GitHub Actions for CI + EAS preview + EAS production, CODEOWNERS |
-| 9 | Observability | ⏭ Pending | Sentry RN with PII-stripping `beforeSend`, analytics wrapper (after PostHog vs Amplitude decision) |
-| 10 | Test harness | ⏭ Pending | Vitest, RNTL, Maestro, one example test per layer |
-| 11 | First feature shipped | ⏭ Pending | Walk through `/spec-discovery` → `/spec-implement`, ship Daily Check-In |
+| 5 | Worktree infrastructure | ✅ Done (on main) | `scripts/worktree-{create,list,remove}.sh`, file-isolation rules in `/spec-tasks` |
+| 6 | Expo scaffold | ✅ Done (on main) | `apps/mobile` (Expo SDK 54), NativeWind 4, `@/` alias, folder structure |
+| 7 | Quality gates | ✅ Done (on main) | `biome.jsonc`, Husky + lint-staged, pre-commit (typecheck + lint + test) |
+| 8 | CI/CD | ✅ Done (on main) | GitHub Actions (`.github/workflows/pr-checks.yml`, `eas-build.yml`), `CODEOWNERS` |
+| 9 | Observability | ⏭ Partial | Sentry RN with PII-stripping `beforeSend` NOT yet wired; analytics wrapper gated on the PostHog-vs-Amplitude decision (§10) |
+| 10 | Test harness | ✅ Done (on main) | Vitest + RNTL + Jest + Maestro; example tests per layer (218 Vitest + Jest component suites green) |
+| 11 | First feature shipped | 🔄 Active — blocked | Daily Check-In on `feat/phase-11-daily-checkin`; blocked by SR-4 ADR cooling-off (`docs/adr/001-sr4-checkin-persistence.md`, active until 2026-06-20) |
 
-Phases 1–7 are the base. 8–10 are full-featured. 11 is the proof. After 11, V1 build (sprint 1-8 in V1_FEATURE_SCOPE) begins in earnest.
+Foundation phases 0–8 and 10 are complete and on `main`. Phase 9 (observability) is partially pending — Sentry RN is not yet wired and the analytics wrapper is gated on the PostHog-vs-Amplitude decision (§10). Phase 11 (Daily Check-In) is the active feature, currently gated by the SR-4 ADR cooling-off (expires 2026-06-20). After 11, V1 build (sprint 1-8 in V1_FEATURE_SCOPE) begins in earnest.
 
 ---
 
@@ -183,14 +185,18 @@ Notable cruft to clean up later (NOT V1 work): `src/lib/highlightText 2.ts`, `sr
 
 ```
 psychage-master-app/
-├── .claude/
-│   └── settings.json   (currently empty — populated when needed)
-├── .gitignore          162 lines
-├── CLAUDE.md           project-specific rules (~207 lines)
+├── .claude/            tooling config (skills, hooks, settings)
+├── apps/
+│   └── mobile/         Expo SDK 54 app — scaffolded and live
+├── packages/
+│   └── shared/         Navigator/sensitivity/PEAF (lifted from web)
+├── tokens/             design tokens (web + mobile)
+├── docs/ rules/ .specs/   architecture docs, path-scoped rules, feature specs
+├── pnpm-workspace.yaml workspace manifest (apps/*, packages/*)
+├── CLAUDE.md           project-specific rules
 ├── PROJECT_CONTEXT.md  this file
 ├── PRODUCT_BRIEF.md    product vision
-├── V1_FEATURE_SCOPE.md V1 features and prioritization
-└── psychage-mobile/    EMPTY — Expo scaffold pending Phase 6
+└── V1_FEATURE_SCOPE.md V1 features and prioritization
 ```
 
 ### Mobile — planned (after Phase 6 Expo scaffold + Phase 5 monorepo migration)
@@ -216,7 +222,7 @@ psychage-master-app/
 │   └── ui-tokens/             Design tokens
 ├── supabase/                  shared with web (or symlink)
 ├── package.json               workspace root
-├── turbo.json                 Turborepo config
+├── pnpm-workspace.yaml         pnpm workspaces (apps/*, packages/*) — no Turborepo
 ├── CLAUDE.md
 ├── PROJECT_CONTEXT.md
 ├── PRODUCT_BRIEF.md
