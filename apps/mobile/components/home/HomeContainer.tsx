@@ -175,9 +175,9 @@ export function HomeContainer({
   }, [reflectionGate, navigateToReflection]);
 
   const handleSave = useCallback(
-    (state: CheckInState) => {
+    (state: CheckInState, note?: string) => {
       const firstSaveToday = store.getToday() === undefined;
-      store.saveToday(state);
+      store.saveToday(state, note);
       fireHaptic('confirm');
       // Imprint (ring + scale) fires ONLY on the first save of today; a same-day
       // re-save overwrites without replaying it. The haptic fires either way.
