@@ -1,4 +1,5 @@
 import type { CheckInState } from '@psychage/shared/check-in';
+import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -129,9 +130,13 @@ function buildLiveModel(store: HomeStore, now: Date): HomeViewModel {
 export function HomeContainer({
   store,
   reflectionGate = storageReflectionGate,
+  navigateToReflection = () => router.push('/reflection'),
 }: {
   store: HomeStore;
   reflectionGate?: ReflectionGate;
+  // Navigation seam (mirrors reflectionGate): the default pushes S9; render tests
+  // inject a spy so they never touch the real router (which throws without a root).
+  navigateToReflection?: () => void;
 }) {
   const { fireHaptic } = useHaptics();
   const [devMode, setDevMode] = useState<DevMode>('live');
@@ -154,10 +159,10 @@ export function HomeContainer({
   const handleReflectionOpen = useCallback(() => {
     reflectionGate.markOpened();
     setReflectionOpened(true);
-    // S9 STUB: the weekly reflection screen is a later A2 wave — opening the row is
-    // the one-time dismissal this slice delivers; the destination is out of scope.
-    // TODO(A2/S9): navigate to the reflection screen when it lands.
-  }, [reflectionGate]);
+    // A2/PR-D: S9 now exists — navigate to it (via the injected seam). The one-time
+    // dismissal above still fires on tap (kept).
+    navigateToReflection();
+  }, [reflectionGate, navigateToReflection]);
 
   const handleSave = useCallback(
     (state: CheckInState) => {

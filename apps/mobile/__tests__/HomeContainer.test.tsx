@@ -99,15 +99,22 @@ describe('HomeContainer — reflection-ready row (Flow 12, one-time)', () => {
         opened = true;
       },
     };
-    renderWithProviders(<HomeContainer store={makeAvailableStore()} reflectionGate={gate} />, {
-      haptics: true,
-    });
+    const navSpy = jest.fn(); // A2/PR-D: nav seam — never touch the real router in a render test
+    renderWithProviders(
+      <HomeContainer
+        store={makeAvailableStore()}
+        reflectionGate={gate}
+        navigateToReflection={navSpy}
+      />,
+      { haptics: true },
+    );
 
     expect(screen.getByText(REFLECTION_COPY)).toBeTruthy();
 
     fireEvent.press(screen.getByRole('button', { name: REFLECTION_COPY }));
 
     expect(opened).toBe(true); // dismissal persisted via the gate
+    expect(navSpy).toHaveBeenCalledTimes(1); // A2/PR-D: and navigates to S9
     expect(screen.queryByText(REFLECTION_COPY)).toBeNull(); // and gone, in place
   });
 
