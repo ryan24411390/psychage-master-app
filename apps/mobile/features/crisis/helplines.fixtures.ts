@@ -1,102 +1,60 @@
-// ⚠️ CT3 FIXTURE DATA — NOT SHIPPABLE. ⚠️
+// The bundled crisis dataset S11/S12/S17 consume — DERIVED from the CT3 verified seed.
 //
-// Every helpline NAME, DESCRIPTION, and NUMBER below is DUMMY placeholder content,
-// invented to exercise the frozen `helplineRow` schema and the S11/S12 UI. They are
-// NOT real services and MUST NOT ship. The CT3 workstream owns the verified,
-// region-correct helpline dataset (and the full country roster). Replace this whole
-// module wholesale when CT3 lands.
+// `CRISIS_DATASET` is computed from `helplines.seed.ts` at module load:
+//   - emergencyByRegion ← every seeded country's emergency number.
+//   - regions          ← every seeded country (code + name), sorted by name for S12.
+//   - helplinesByRegion ← ONLY `verified` helplines, grouped by country, ordered by the
+//                          seed's displayOrder. `needs_verification` and `do_not_publish`
+//                          rows are filtered OUT here and never reach the UI — this is the
+//                          single gating boundary the seed's notes require.
+// A country with no verified rows is simply absent from `helplinesByRegion` → the S11
+// dataset-gap state (its `hasVerifiedHelplines` flag is false). Descriptions are DRAFT →
+// CT4. 112 is the GSM-standard last-resort default.
 //
-// The ONLY real values here are the emergency numbers (999/911/112) — the order
-// explicitly permits the well-known ones as OBVIOUS placeholders. CT3 still verifies
-// the per-region map.
-//
-// The region roster is a deliberately SMALL subset (≤20) so S12 stays on core
-// FlatList; the full ISO-3166 list (>20) + FlashList virtualization is CT3/infra.
+// SR-4: reference data only; nothing user-specific.
 
-import type { CrisisDataset, HelplineRow } from './helpline-schema';
+import type { CrisisDataset, HelplineRow, RegionOption } from './helpline-schema';
+import { CRISIS_SEED, type SeedHelpline } from './helplines.seed';
 
-// --- FIXTURE helpline rows (dummy names/numbers → CT3) -----------------------------
-const US_FIXTURES: readonly HelplineRow[] = [
-  {
-    name: 'Sample Support Line',
-    fiveWordDesc: 'Free confidential support, all hours',
-    callNumber: '0-000-000-0001',
-    textCapable: true,
-    region: 'US',
-  },
-  {
-    name: 'Sample Warmline',
-    fiveWordDesc: 'Non-crisis listening and gentle company',
-    callNumber: '0-000-000-0002',
-    textCapable: false,
-    region: 'US',
-  },
-];
+/** Project a verified seed helpline onto the shipped five-field row. */
+function toHelplineRow(h: SeedHelpline): HelplineRow {
+  return {
+    name: h.name,
+    fiveWordDesc: h.description,
+    callNumber: h.callNumber,
+    // textCapable is now derived from a real text number; a row is text-capable only
+    // when both the flag is set AND a number exists to text.
+    textNumber: h.textCapable ? h.textNumber : null,
+    region: h.countryIso2,
+  };
+}
 
-const GB_FIXTURES: readonly HelplineRow[] = [
-  {
-    name: 'Sample Helpline UK',
-    fiveWordDesc: 'Someone to talk to, anytime',
-    callNumber: '0-000-000-0003',
-    textCapable: true,
-    region: 'GB',
-  },
-];
+const emergencyByRegion: Record<string, string> = {};
+for (const country of CRISIS_SEED.countries) {
+  emergencyByRegion[country.iso2] = country.emergencyNumber;
+}
 
-const BD_FIXTURES: readonly HelplineRow[] = [
-  {
-    name: 'Sample Helpline BD',
-    fiveWordDesc: 'Free emotional support, every day',
-    callNumber: '0-000-000-0004',
-    textCapable: false,
-    region: 'BD',
-  },
-];
+// Group verified, reachable helplines by country, ordered by the seed's displayOrder.
+const verified = CRISIS_SEED.helplines
+  .filter((h) => h.verificationStatus === 'verified') // gating boundary
+  // Defensive: a row with no way to reach help cannot render usefully — skip it.
+  .filter((h) => h.callNumber !== null || (h.textCapable && h.textNumber !== null))
+  .sort((a, b) => a.displayOrder - b.displayOrder);
 
-// --- The bundled dataset (fixture) -------------------------------------------------
-// IN (no helpline rows) is intentionally present in the roster + emergency map but
-// ABSENT from helplinesByRegion, so resolving to IN exercises the dataset-gap state.
+const helplinesByRegion: Record<string, HelplineRow[]> = {};
+for (const h of verified) {
+  const bucket = helplinesByRegion[h.countryIso2] ?? [];
+  bucket.push(toHelplineRow(h));
+  helplinesByRegion[h.countryIso2] = bucket;
+}
+
+const regions: RegionOption[] = CRISIS_SEED.countries
+  .map((c) => ({ code: c.iso2, name: c.countryName }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+
 export const CRISIS_DATASET: CrisisDataset = {
-  emergencyByRegion: {
-    US: '911',
-    GB: '999',
-    BD: '999',
-    IN: '112',
-    AU: '000',
-    CA: '911',
-    DE: '112',
-    FR: '112',
-    ES: '112',
-    SE: '112',
-    BR: '188',
-    NZ: '111',
-    IE: '112',
-    ZA: '112',
-    NG: '112',
-    JP: '110',
-  },
-  helplinesByRegion: {
-    US: US_FIXTURES,
-    GB: GB_FIXTURES,
-    BD: BD_FIXTURES,
-  },
-  regions: [
-    { code: 'AU', name: 'Australia' },
-    { code: 'BD', name: 'Bangladesh' },
-    { code: 'BR', name: 'Brazil' },
-    { code: 'CA', name: 'Canada' },
-    { code: 'FR', name: 'France' },
-    { code: 'DE', name: 'Germany' },
-    { code: 'IN', name: 'India' },
-    { code: 'IE', name: 'Ireland' },
-    { code: 'JP', name: 'Japan' },
-    { code: 'NZ', name: 'New Zealand' },
-    { code: 'NG', name: 'Nigeria' },
-    { code: 'ZA', name: 'South Africa' },
-    { code: 'ES', name: 'Spain' },
-    { code: 'SE', name: 'Sweden' },
-    { code: 'GB', name: 'United Kingdom' },
-    { code: 'US', name: 'United States' },
-  ],
+  emergencyByRegion,
+  helplinesByRegion,
+  regions,
   defaultEmergencyNumber: '112',
 };

@@ -45,9 +45,10 @@ describe('resolveRegion precedence', () => {
 describe('dataset lookups + gap detection', () => {
   it('reports helplines where the dataset has them, and the gap otherwise', () => {
     expect(hasHelplines(CRISIS_DATASET, 'US')).toBe(true);
-    // IN is in the roster + emergency map but has NO helpline rows → gap state.
-    expect(hasHelplines(CRISIS_DATASET, 'IN')).toBe(false);
-    expect(getHelplines(CRISIS_DATASET, 'IN')).toEqual([]);
+    // SE is in the roster + emergency map but its only seed line is needs_verification
+    // → filtered out → NO verified helpline rows → gap state.
+    expect(hasHelplines(CRISIS_DATASET, 'SE')).toBe(false);
+    expect(getHelplines(CRISIS_DATASET, 'SE')).toEqual([]);
     // Wholly unknown region → gap state, no throw.
     expect(hasHelplines(CRISIS_DATASET, 'ZZ')).toBe(false);
   });
