@@ -1,6 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { AccessibilityInfo } from 'react-native';
 import { Easing } from 'react-native-reanimated';
+
+// Wave B2 (S45): the in-app reduced-motion override. ADDITIVE — OR-ed with the OS
+// setting below so the signature is unchanged and every existing caller keeps
+// working; the only difference is the toggle now also drives motion. The getter
+// is pure (no React, no RN) and the subscribe is a plain listener set, so this
+// adds no test-runner coupling.
+import { getReducedMotionOverride, subscribeAppearance } from '@/lib/persistence/appearance';
 
 type EasingFactory = ReturnType<typeof Easing.bezier>;
 
@@ -42,19 +49,26 @@ export function easingFn(key: EasingKey): EasingFactory {
 }
 
 export function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
+  const [osReduced, setOsReduced] = useState(false);
 
   useEffect(() => {
     let active = true;
     AccessibilityInfo.isReduceMotionEnabled().then((value) => {
-      if (active) setReduced(value);
+      if (active) setOsReduced(value);
     });
-    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduced);
+    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', setOsReduced);
     return () => {
       active = false;
       sub.remove();
     };
   }, []);
 
-  return reduced;
+  // In-app override (S45). Either source wins: OS Reduce Motion OR the in-app toggle.
+  const appOverride = useSyncExternalStore(
+    subscribeAppearance,
+    getReducedMotionOverride,
+    getReducedMotionOverride,
+  );
+
+  return osReduced || appOverride;
 }
