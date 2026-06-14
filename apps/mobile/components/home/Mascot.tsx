@@ -5,6 +5,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
+  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle, Ellipse, Rect } from 'react-native-svg';
@@ -23,7 +24,13 @@ const WIDTH = 76;
 const HEIGHT = 88;
 const BREATHE_SCALE = 1.03;
 
-export function Mascot({ testID }: { testID?: string }) {
+type MascotProps = {
+  testID?: string;
+  /** Bumps to fire a single tilt — on save, and the one return tilt after an absence. */
+  tiltSignal?: number;
+};
+
+export function Mascot({ testID, tiltSignal = 0 }: MascotProps) {
   const reduced = useReducedMotion();
   const { colorScheme } = useColorScheme();
   const pick = (themed: ThemedColor) => colorForScheme(themed, colorScheme);
@@ -47,7 +54,18 @@ export function Mascot({ testID }: { testID?: string }) {
     return () => cancelAnimation(scale);
   }, [reduced, scale]);
 
-  const breathingStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const tilt = useSharedValue(0);
+  useEffect(() => {
+    if (tiltSignal === 0 || reduced) return;
+    tilt.value = withSequence(
+      withTiming(-0.12, { duration: 140, easing: easingFn('out') }),
+      withTiming(0, { duration: 240, easing: easingFn('standard') }),
+    );
+  }, [tiltSignal, reduced, tilt]);
+
+  const breathingStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }, { rotate: `${tilt.value}rad` }],
+  }));
 
   return (
     <Animated.View
