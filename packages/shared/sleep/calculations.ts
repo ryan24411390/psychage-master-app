@@ -22,8 +22,8 @@ import type {
 
 /** Parse "HH:MM" to minutes since midnight. */
 export function parseTime(time: string): number {
-  const [h, m] = time.split(':').map(Number);
-  return h * 60 + (m || 0);
+  const [hStr = '0', mStr = '0'] = time.split(':');
+  return Number(hStr) * 60 + (Number(mStr) || 0);
 }
 
 /** Minutes since midnight to "HH:MM" (wraps >1440). */
@@ -93,8 +93,12 @@ const SCORE_WEIGHTS = {
   latency: 0.15,
 } as const;
 
+// Concrete fallback so the lookup is total under noUncheckedIndexedAccess (the
+// string-indexed Record returns T | undefined for any key, including 'adult_26_64').
+const DEFAULT_DURATION_REC = { min: 420, max: 540, ideal: 480, label: 'Adult (26–64)' } as const;
+
 function scoreDuration(avgMinutes: number, ageRange: string): number {
-  const rec = SLEEP_RECOMMENDATIONS[ageRange] ?? SLEEP_RECOMMENDATIONS.adult_26_64;
+  const rec = SLEEP_RECOMMENDATIONS[ageRange] ?? DEFAULT_DURATION_REC;
   if (avgMinutes >= rec.min && avgMinutes <= rec.max) return 100;
   if (avgMinutes < rec.min) {
     const deficit = rec.min - avgMinutes;
@@ -225,24 +229,26 @@ export function calculateStreak(
   entries: readonly SleepEntry[],
   today: LocalCalendarDate,
 ): StreakData {
-  if (entries.length === 0) {
+  // Day numbers, newest first (lexical desc on YYYY-MM-DD equals chronological desc).
+  const days = [...entries]
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+    .map((e) => ({ day: dayNumber(e.date), date: e.date as string }));
+
+  const newest = days[0];
+  if (newest === undefined) {
     return { current: 0, best: 0, last_logged_date: '', weekly_count: 0 };
   }
 
-  // Newest first (lexical desc on YYYY-MM-DD equals chronological desc).
-  const sorted = [...entries].sort((a, b) =>
-    a.date < b.date ? 1 : a.date > b.date ? -1 : 0,
-  );
-
   const todayNum = dayNumber(today);
-  const firstNum = dayNumber(sorted[0].date);
 
   // Current streak: 0 if the most recent entry is more than 1 day stale.
   let current = 0;
-  if (todayNum - firstNum <= 1) {
+  if (todayNum - newest.day <= 1) {
     current = 1;
-    for (let i = 1; i < sorted.length; i++) {
-      if (dayNumber(sorted[i - 1].date) - dayNumber(sorted[i].date) === 1) current++;
+    for (let i = 1; i < days.length; i++) {
+      const prev = days[i - 1];
+      const cur = days[i];
+      if (prev !== undefined && cur !== undefined && prev.day - cur.day === 1) current++;
       else break;
     }
   }
@@ -250,8 +256,10 @@ export function calculateStreak(
   // Best streak across all entries.
   let best = 1;
   let temp = 1;
-  for (let i = 1; i < sorted.length; i++) {
-    if (dayNumber(sorted[i - 1].date) - dayNumber(sorted[i].date) === 1) {
+  for (let i = 1; i < days.length; i++) {
+    const prev = days[i - 1];
+    const cur = days[i];
+    if (prev !== undefined && cur !== undefined && prev.day - cur.day === 1) {
       temp++;
       best = Math.max(best, temp);
     } else {
@@ -261,7 +269,7 @@ export function calculateStreak(
   best = Math.max(best, current);
 
   const weekAgo = todayNum - 7;
-  const weekly_count = sorted.filter((e) => dayNumber(e.date) >= weekAgo).length;
+  const weekly_count = days.filter((d) => d.day >= weekAgo).length;
 
-  return { current, best, last_logged_date: sorted[0].date as string, weekly_count };
+  return { current, best, last_logged_date: newest.date, weekly_count };
 }

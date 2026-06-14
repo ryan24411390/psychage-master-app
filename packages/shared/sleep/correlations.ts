@@ -30,8 +30,8 @@ export function pearson(x: readonly number[], y: readonly number[]): number {
   let sumX2 = 0;
   let sumY2 = 0;
   for (let i = 0; i < n; i++) {
-    const dx = x[i] - meanX;
-    const dy = y[i] - meanY;
+    const dx = (x[i] ?? 0) - meanX;
+    const dy = (y[i] ?? 0) - meanY;
     sumXY += dx * dy;
     sumX2 += dx * dx;
     sumY2 += dy * dy;

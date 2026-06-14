@@ -82,7 +82,8 @@ export function scoreChronotype(answers: readonly number[]): ChronotypeResult {
   let animal = mapToAnimal(category);
 
   // Low-ish total with poor morning alertness (Q3) reads as dolphin (light/irregular).
-  if (category === 'neither' && answers[2] <= 2) {
+  const morningAlertness = answers[2];
+  if (category === 'neither' && morningAlertness !== undefined && morningAlertness <= 2) {
     animal = 'dolphin';
   }
 
