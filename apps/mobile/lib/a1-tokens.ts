@@ -58,6 +58,15 @@ export function colorForScheme(themed: ThemedColor, scheme: ColorScheme): string
   return scheme === 'dark' ? themed.dark : themed.light;
 }
 
+// Raw font-family strings (type.family.*) — react-native-svg <Text> needs the
+// family string directly (no className path). Weight is carried by the family,
+// not numeric fontWeight (iOS ignores numeric weight on custom cuts) — matches
+// components/ui/Text.tsx. Only the cuts the SVG surfaces use are exposed.
+export const fontFamilies = {
+  sans: tokens.type.family.sans,
+  sansMedium: tokens.type.family.sansMedium,
+} as const;
+
 const tb = tokens.tabBar;
 
 /**
