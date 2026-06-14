@@ -13,7 +13,8 @@
     "test": "vitest run && jest",
     "test:logic": "vitest run",
     "test:components": "jest",
-    "export:crisis": "tsx ../../scripts/export-crisis-bundle.ts"
+    "export:crisis": "tsx ../../scripts/export-crisis-bundle.ts",
+    "verify:checkin-rls": "tsx ../../scripts/verify-checkin-rls.ts"
   },
   "dependencies": {
     "@expo-google-fonts/fraunces": "0.4.1",
