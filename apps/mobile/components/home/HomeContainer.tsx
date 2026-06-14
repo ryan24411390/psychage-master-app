@@ -218,7 +218,7 @@ export function HomeContainer({
       <HomeView
         model={model}
         onCheckIn={() => setSheetOpen(true)}
-        onHistory={() => {}}
+        onHistory={() => router.push('/history')}
         imprintSignal={imprintSignal}
         tiltSignal={tiltSignal}
         reflectionReady={reflectionReady}
