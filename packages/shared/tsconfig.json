@@ -25,6 +25,6 @@
     },
     "baseUrl": "."
   },
-  "include": ["navigator", "peaf", "sensitivity", "check-in"],
+  "include": ["navigator", "peaf", "sensitivity", "check-in", "data", "mascot", "safety"],
   "exclude": ["node_modules", "dist", "coverage", "**/__tests__/**", "**/*.test.ts"]
 }
