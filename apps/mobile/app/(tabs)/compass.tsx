@@ -32,6 +32,18 @@ export default function CompassScreen() {
           onPress={() => router.push(COMPASS_ROUTES.navigator)}
           testID="compass-tile-navigator"
         />
+        <Text
+          variant="caption"
+          className="mt-2 text-text-secondary dark:text-text-secondary-dark"
+        >
+          {t.reflectHeading}
+        </Text>
+        <CompassTile
+          title={t.moodJournal.title}
+          subLabel={t.moodJournal.sub}
+          onPress={() => router.push(COMPASS_ROUTES.moodJournal)}
+          testID="compass-tile-mood-journal"
+        />
       </ScrollView>
     </ScreenShell>
   );
