@@ -1,0 +1,58 @@
+import { Pressable, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { GlobalHeader } from '@/components/GlobalHeader';
+import { Mascot } from '@/components/home/Mascot';
+import { Button } from '@/components/ui/Button';
+import { Text } from '@/components/ui/Text';
+
+// S2 record + trust (Flow 1). GlobalHeader, the STANDARD mascot (76×88, reused from A1 —
+// not a third size step) in the upper third, three verbatim body lines, a primary
+// "Do your first check-in" that opens S4 over the first-run home, and a quiet "Look
+// around first". Reduced motion: mascot still (the Mascot component handles it). All copy
+// VERBATIM Flow Book.
+
+const L1 = 'Each day, you can note how you are.';
+const L2 = "Five plain words — that's all.";
+const L3 = 'It stays on your phone unless you say otherwise.';
+const PRIMARY = 'Do your first check-in — 30 seconds';
+const SECONDARY = 'Look around first';
+
+export interface RecordTrustViewProps {
+  readonly onCheckIn: () => void;
+  readonly onLookAround: () => void;
+}
+
+export function RecordTrustView({ onCheckIn, onLookAround }: RecordTrustViewProps) {
+  return (
+    <View className="flex-1 bg-background dark:bg-background-dark">
+      <GlobalHeader />
+      <View className="flex-1 gap-8 px-6 pt-6">
+        <View className="items-center">
+          <Mascot />
+        </View>
+        <View className="gap-3">
+          <Text variant="body">{L1}</Text>
+          <Text variant="body">{L2}</Text>
+          <Text variant="body">{L3}</Text>
+        </View>
+      </View>
+      <SafeAreaView edges={['bottom']} className="gap-3 px-6 pb-2">
+        <Button variant="primary" className="w-full" onPress={onCheckIn}>
+          {PRIMARY}
+        </Button>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={SECONDARY}
+          onPress={onLookAround}
+          hitSlop={6}
+          className="min-h-[44px] items-center justify-center"
+        >
+          <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+            {SECONDARY}
+          </Text>
+        </Pressable>
+      </SafeAreaView>
+    </View>
+  );
+}

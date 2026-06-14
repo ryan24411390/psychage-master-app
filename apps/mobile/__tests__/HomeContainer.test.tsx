@@ -126,3 +126,17 @@ describe('HomeContainer — reflection-ready row (Flow 12, one-time)', () => {
     expect(screen.queryByText(REFLECTION_COPY)).toBeNull();
   });
 });
+
+// A2/PR-E: onboarding's "Do your first check-in" arrives with ?checkin=1, which the
+// index route maps to autoOpenCheckIn → S4 opens over the first-run home on mount.
+describe('HomeContainer — autoOpenCheckIn (onboarding → S4)', () => {
+  it('opens the check-in sheet on mount when autoOpenCheckIn is set', () => {
+    renderWithProviders(<HomeContainer store={makeFakeStore()} autoOpenCheckIn />, { haptics: true });
+    expect(screen.getByText('How are you right now?')).toBeTruthy();
+  });
+
+  it('does not open the sheet by default', () => {
+    renderWithProviders(<HomeContainer store={makeFakeStore()} />, { haptics: true });
+    expect(screen.queryByText('How are you right now?')).toBeNull();
+  });
+});
