@@ -17,9 +17,12 @@ import { STATE_LABELS } from '@/lib/check-in-labels';
 // literal constants to the terrain token group"):
 //  • dot HEIGHTS use terrain.fillByState (12/32/52/74/95), NOT v5's linear v/4.
 //  • vertical px (TOP/BOT/BASE/LBL) become fractions of a fixed row height.
-//  • no-entry dots sit at the BASELINE (order prose + v5 + the token's own
-//    _source._note), NOT at terrain.noEntryDot.atFraction (0.5) — that field
-//    contradicts its own note and is treated as a token bug (reported).
+//  • no-entry dots sit at the BASELINE via TERRAIN_BASELINE_Y — derived from
+//    terrain.geometry.baselineFraction (0.95), the single canonical y source that
+//    the baseline line and noteTick lane also key off. terrain.noEntryDot.atFraction
+//    now reads 0.95 too (corrected from a copy-pasted 0.5; see the token fix), so the
+//    token and the render agree on "baseline"; the code keeps reading baselineFraction
+//    because that is what the no-entry dot must sit ON.
 
 export type TerrainValue = CheckInState | null | 'today';
 
