@@ -254,13 +254,14 @@
         "opacity": 0.12
       }
     },
-    "_colorDeferred": {
-      "labelActive": "ink role",
-      "labelInactive": "ink-2 role",
-      "iconTealDot": "teal role — one teal dot per pictogram, tokenized so night can swap it",
-      "activePillPressBg": "pressed-surface / clay role",
-      "insetShadowColor": "ink role",
-      "_reason": "Palette unratified — the Wave A1 order's warm 'LOCKED DESIGN SYSTEM' hexes (clay/ink/ink-2/teal-deep) are absent from the repo and differ from the existing cool color.* palette; even the order's mood hexes differ from color.mood.*. Color bindings deferred pending a design-owner decision; authored in Order 2 once the palette is ratified."
+    "color": {
+      "labelActive": "color.text.primary",
+      "labelInactive": "color.text.secondary",
+      "iconTealDot": "color.primary.default",
+      "activePillPressBg": "color.surface.active",
+      "insetShadowColor": "color.text.primary",
+      "_note": "Bound [a1-palette] to existing cool color.* tokens via path-string refs (consumer resolves light/dark for themed leaves). Shared role map across the six A1 groups: ink->color.text.primary, ink-2->color.text.secondary, ink-3/faint->color.text.tertiary, teal->color.primary.default (themed, so dark mode swaps the pictogram dot), pressed-surface->color.surface.active, border-strong->color.border.hover, neutral-hairline->color.border.default, clay->color.charcoal.300 (see skeletonTerrain).",
+      "_ratifyFlag": "insetShadowColor->color.text.primary inverts to a near-white tone in dark mode (inset-shadow geometry opacity 0.12); an inset shadow should stay dark — color.charcoal.950 (non-themed) may be the correct bind. Design-owner to ratify."
     },
     "_source": {
       "_note": "Bottom tab bar geometry, 4 tabs. Active = pressed treatment (inset shadow + press-bg); inactive = flat; label always visible. GIVEN (Wave A1 order): tabCount 4, icon.size 24, label.size 11 (IBM Plex Sans → type.family.sans), minTarget 44 floor, one teal dot per pictogram. DERIVED (flagged for design ratification): barHeight 56 (iOS HIG tab bar 49pt + label band, rounded onto the 8pt-grid baseline; clears the 44 target + 11/14 label); label.lineHeight 14 (~1.27x of 11, compact-UI ratio); activePill.radius reuses canonical radius.lg (sub-component pill < card 'xl'; 'full' would over-round a wide tab cell); insetShadow geometry {offsetY 1, blur 2, opacity 0.12, inset} — conservative recessed read. Label weight is carried by the family token (sans = 400 cut); no numeric weight scale exists.",
@@ -299,13 +300,20 @@
       "family": "type.family.sans",
       "lineHeight": 14
     },
-    "_colorDeferred": {
-      "dotRing": "border-strong role — the 1px ring is load-bearing (the 'okay' mood tint fails 3:1 alone; the ring rescues contrast)",
-      "connectingLine": "neutral hairline role",
-      "label": "ink-3 role (de-emphasized axis labels)",
-      "todayDotStroke": "teal role (today/now signal)",
-      "moodTint": "intended state->mood mapping {0->mood.1, 1->mood.2, 2->mood.3, 3->mood.4, 4->mood.5}; order says reference existing color.mood.* (do NOT duplicate) — but the mood palette itself is unratified (order's mood hexes differ from the file's color.mood.*), so the binding is deferred",
-      "_reason": "Palette unratified (see tabBar._colorDeferred). Order 2 resolves color bindings."
+    "color": {
+      "dotRing": "color.border.hover",
+      "connectingLine": "color.border.default",
+      "label": "color.text.tertiary",
+      "todayDotStroke": "color.primary.default",
+      "moodTint": {
+        "0": "color.mood.1",
+        "1": "color.mood.2",
+        "2": "color.mood.3",
+        "3": "color.mood.4",
+        "4": "color.mood.5"
+      },
+      "_note": "Bound [a1-palette]. dotRing=border-strong (load-bearing ring), connectingLine=neutral-hairline, label=ink-3 (de-emphasized axis labels), todayDotStroke=teal (today/now signal, themed). moodTint references color.mood.1..5 (mood-feature-scoped; not duplicated).",
+      "_ratifyFlag": "border-strong has no exact token; bound to color.border.hover (the stronger of two borders). The light value of color.border.hover does NOT reach 3:1 vs the paper background (color.background.light), so the load-bearing dot-ring contrast rescue needs re-verification — a darker neutral (e.g. color.charcoal.400/500) may be required. Design-owner to ratify."
     },
     "_source": {
       "_note": "Record (terrain) visualization geometry — component-only. GIVEN (Wave A1 order): dot.radius 6.5 with a 1px ring (load-bearing contrast rescue), noEntryDot.radius 4 (hollow) at baseline, todayDot.radius 8 (dashed open circle) at midline, connectingLine only between consecutive entries, label.size 11, fillByState 12/32/52/74/95 for states 0-4. DERIVED (flagged): atFraction 0.5 = midline and baselineFraction 0.95 = bottom band (verbal anchors expressed as resolution-independent row-height fractions, since no spacing scale exists); todayDot.stroke {width 1.5, dash [3,3]} renders the 'dashed open circle'; connectingLine.width 1 (hairline); label.lineHeight 14.",
@@ -326,11 +334,11 @@
     },
     "chevron": { "size": 20 },
     "gap": { "dotToText": 8, "textToChevron": 8 },
-    "_colorDeferred": {
-      "dot": "teal role",
-      "text": "ink-2 role",
-      "chevron": "ink-3 role",
-      "_reason": "Palette unratified (see tabBar._colorDeferred)."
+    "color": {
+      "dot": "color.primary.default",
+      "text": "color.text.secondary",
+      "chevron": "color.text.tertiary",
+      "_note": "Bound [a1-palette]. dot=teal, text=ink-2 (artifact register, deliberately not the Fraunces voice), chevron=ink-3."
     },
     "_source": {
       "_note": "A 'reflection-ready' ROW (not a banner). GIVEN (Wave A1 order): dot.radius 7, text.size 14 weight 500 (the 500 cut -> type.family.sansMedium; deliberately NOT the Fraunces display register — this announces an artifact, not something the app says about the person), chevron present, minTarget 44. DERIVED (flagged): rowHeight 44 (single-line row set to the target floor); text.lineHeight 20 (~1.43x of 14); chevron.size 20 (passive disclosure glyph < the 24 tab icon); gap 8/8 (8pt-grid baseline).",
@@ -346,18 +354,18 @@
     "capLabel": {
       "size": 10.5,
       "family": "type.family.sans",
-      "weightIntent": 600,
+      "weightIntent": 500,
       "lineHeight": 14
     },
-    "_colorDeferred": {
-      "hairline": "hairline/border role",
-      "capLabelCurrent": "ink-2 role (current month)",
-      "capLabelOther": "ink-3 role (other months; non-text, 3:1 ok)",
-      "_reason": "Palette unratified (see tabBar._colorDeferred)."
+    "color": {
+      "hairline": "color.border.default",
+      "capLabelCurrent": "color.text.secondary",
+      "capLabelOther": "color.text.tertiary",
+      "_note": "Bound [a1-palette]. hairline=neutral-hairline (color.border.default; the 1px rail divider, lighter than the load-bearing border-strong), capLabelCurrent=ink-2, capLabelOther=ink-3 (non-text, 3:1 ok)."
     },
     "_source": {
       "_note": "History continuum trailing-edge month rail. GIVEN (Wave A1 order): columnWidth 36, cap labels Plex 10.5 weight 600, sits behind a hairline, jump minTarget 44 tall. DERIVED (flagged): hairline.width 1; capLabel.lineHeight 14 (compact cap ratio in a 36-wide column).",
-      "_weightNote": "weightIntent 600 has NO bundled font cut — DD-001 ships IBM Plex Sans 400/500/700 only (Fraunces 600 is a serif, wrong for caps). Kept as a literal spec-intent field (NOT a usable family string). Resolve in Phase 6: render-map to type.family.sansBold (700), or bundle @expo-google-fonts/ibm-plex-sans 600.",
+      "_weightNote": "weightIntent 500 maps to the bundled IBM Plex Sans 500 cut (type.family.sansMedium) — the quiet-label register. Render-map capLabel.family -> type.family.sansMedium in Phase 6. (Corrected from 600 in [a1-palette]: DD-001 ships IBM Plex Sans 400/500/700 only, so 600 had no bundled cut; 500 is renderable and is the correct quiet-label weight.)",
       "_calibrationFlag": "Size 10.5 and dp literals 36/44 precede the stubbed type/spacing scales — recalibrate; resolve the 600 cut in Phase 6."
     }
   },
@@ -368,9 +376,9 @@
     "strokeWidth": 1.5,
     "lineCap": "round",
     "laneOffsetBelowDotBaseline": 4,
-    "_colorDeferred": {
-      "stroke": "border-strong role",
-      "_reason": "Palette unratified (see tabBar._colorDeferred)."
+    "color": {
+      "stroke": "color.border.hover",
+      "_note": "Bound [a1-palette]. stroke=border-strong (load-bearing note marker); shares the border-strong ratify caveat in terrain.color._ratifyFlag."
     },
     "_source": {
       "_note": "Note marker on the continuum — says ONLY that a note exists. GIVEN (Wave A1 order): strokeLength 6 (vertical stroke), strokeWidth 1.5, rounded caps (lineCap 'round'), positioned in a fixed lane 4dp below the dot baseline at the noted day's x. Never under the dot (would collide with low states and fake a second data channel).",
@@ -393,10 +401,11 @@
       "family": "type.family.sans",
       "lineHeight": 14
     },
-    "_colorDeferred": {
-      "dotFill": "clay role (placeholder neutral)",
-      "label": "clay role (clay-dash label)",
-      "_reason": "Palette unratified (see tabBar._colorDeferred). 'clay' has no existing token; binding deferred."
+    "color": {
+      "dotFill": "color.charcoal.300",
+      "label": "color.charcoal.300",
+      "_note": "Bound [a1-palette]. clay (placeholder neutral) -> color.charcoal.300 for both the dot fill and the dash label.",
+      "_ratifyFlag": "NO clean 'clay' analog exists in the cool color.* palette. Bound to color.charcoal.300 (non-themed) as nearest placeholder tone; non-themed means dark-mode skeleton parity is unverified (themed alternative: color.border.default). Design-owner to ratify."
     },
     "_source": {
       "_note": "Sync-loading skeleton for the terrain. GIVEN (Wave A1 order): clay-filled dots radius 6.5, NO ring (ring false), at midline (atFraction 0.5), NO connecting thread (connectingLine false), clay-dash labels, STATIC. Deliberately unlike the entry glyph (tinted + ringed, at height) and the no-entry glyph (hollow, at baseline) so loading can never be misread as data or as absence. DERIVED (flagged): label.size 11 (terrain parity); label.lineHeight 14.",
