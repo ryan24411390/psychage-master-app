@@ -1,7 +1,11 @@
+import { asLocalCalendarDate, type CheckInEntry } from '@psychage/shared/check-in';
 import { describe, expect, it } from 'vitest';
 
 import {
+  bridgeCardFor,
+  buildTerrainDaysFromEntries,
   ctaLabel,
+  deriveKind,
   greeting,
   lastNDayLabels,
   partOfDay,
@@ -10,6 +14,13 @@ import {
   statusLine,
   toTerrainDays,
 } from '@/lib/home-model';
+
+function ymd(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function entry(id: string, date: Date, state: 0 | 1 | 2 | 3 | 4): CheckInEntry {
+  return { id, date: asLocalCalendarDate(ymd(date)), state };
+}
 
 describe('partOfDay', () => {
   it('splits morning / afternoon / evening on the v5 thresholds', () => {
@@ -109,5 +120,50 @@ describe('lastNDayLabels / toTerrainDays', () => {
     expect(days[5]?.value).toBe(2);
     expect(days[0]?.value).toBe(1);
     expect(days[6]?.fullLabel).toBeTruthy();
+  });
+});
+
+describe('deriveKind', () => {
+  it('is first-run / checked-in / regular', () => {
+    expect(deriveKind(false, false)).toBe('first-run');
+    expect(deriveKind(true, true)).toBe('checked-in');
+    expect(deriveKind(true, false)).toBe('regular');
+  });
+});
+
+describe('bridgeCardFor', () => {
+  it('shows the bridge only for Low/Very-low; very-low flags the crisis append', () => {
+    expect(bridgeCardFor(0, 10)).toEqual({ kind: 'bridge', register: 'day', veryLow: true });
+    expect(bridgeCardFor(1, 10)).toEqual({ kind: 'bridge', register: 'day', veryLow: false });
+    expect(bridgeCardFor(2, 10)).toBeNull();
+    expect(bridgeCardFor(4, 10)).toBeNull();
+    expect(bridgeCardFor(undefined, 10)).toBeNull();
+  });
+
+  it('uses the night register after 21:00 and before 05:00', () => {
+    expect(bridgeCardFor(1, 22)).toMatchObject({ register: 'night' });
+    expect(bridgeCardFor(1, 3)).toMatchObject({ register: 'night' });
+  });
+});
+
+describe('buildTerrainDaysFromEntries', () => {
+  it('places entries by date — today entry fills the last slot, gaps stay null', () => {
+    const today = new Date(2026, 5, 14);
+    const yesterday = new Date(2026, 5, 13);
+    const days = buildTerrainDaysFromEntries(
+      [entry('a', today, 3), entry('b', yesterday, 1)],
+      today,
+    );
+    expect(days).toHaveLength(7);
+    expect(days[6]?.value).toBe(3); // today checked in
+    expect(days[5]?.value).toBe(1); // yesterday
+    expect(days[0]?.value).toBeNull(); // 6 days ago, no entry
+  });
+
+  it('marks an unchecked today as the today marker', () => {
+    const today = new Date(2026, 5, 14);
+    const days = buildTerrainDaysFromEntries([], today);
+    expect(days[6]?.value).toBe('today');
+    expect(days[0]?.value).toBeNull();
   });
 });

@@ -1,3 +1,5 @@
+import type { CheckInEntry, CheckInState } from '@psychage/shared/check-in';
+
 import type { HomeCard } from '@/components/home/home-card';
 import type { TerrainDay, TerrainValue } from '@/components/terrain/terrain-geometry';
 
@@ -121,4 +123,62 @@ export function toTerrainDays(values: readonly TerrainValue[], today: Date): Ter
     const label = labels[i];
     return { label: label?.short ?? '', fullLabel: label?.full, value };
   });
+}
+
+// --- Live derivation from the RecordStore (sub-slice E) --------------------------
+
+// The subset of CheckInRecordStore the home consumes. Declared structurally so the
+// container can be render-tested with an in-memory double without importing the
+// shared package's runtime (Jest does not transform the workspace TS package).
+export interface HomeStore {
+  getToday(): CheckInEntry | undefined;
+  getRecent(n: number): CheckInEntry[];
+  saveToday(state: CheckInState): CheckInEntry;
+}
+
+/** Local YYYY-MM-DD — must match the RecordStore's toLocalCalendarDate so dates compare. */
+function localCalendarDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/** first-run (no entries) · checked-in (entry today) · regular. (away is dev-only.) */
+export function deriveKind(hasAnyEntry: boolean, hasTodayEntry: boolean): HomeStateKind {
+  if (!hasAnyEntry) return 'first-run';
+  if (hasTodayEntry) return 'checked-in';
+  return 'regular';
+}
+
+/** Bridge card after a Low/Very-low check-in today; night register + very-low crisis append. */
+export function bridgeCardFor(todayState: CheckInState | undefined, hour: number): HomeCard | null {
+  if (todayState === undefined || todayState > 1) return null;
+  return {
+    kind: 'bridge',
+    register: hour >= 21 || hour < 5 ? 'night' : 'day',
+    veryLow: todayState === 0,
+  };
+}
+
+/** Build the 7-day terrain from RecordStore entries: entry → state, today gap → 'today', else null. */
+export function buildTerrainDaysFromEntries(
+  entries: readonly CheckInEntry[],
+  today: Date,
+  n = 7,
+): TerrainDay[] {
+  const byDate = new Map<string, CheckInState>();
+  for (const e of entries) byDate.set(e.date, e.state);
+  const todayStr = localCalendarDate(today);
+  const labels = lastNDayLabels(today, n);
+  const days: TerrainDay[] = [];
+  for (let i = 0; i < n; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (n - 1 - i));
+    const dateStr = localCalendarDate(d);
+    const state = byDate.get(dateStr);
+    const value: TerrainValue = state !== undefined ? state : dateStr === todayStr ? 'today' : null;
+    const label = labels[i];
+    days.push({ label: label?.short ?? '', fullLabel: label?.full, value });
+  }
+  return days;
 }

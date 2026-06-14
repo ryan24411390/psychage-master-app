@@ -1,6 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import Animated, { FadeInUp } from 'react-native-reanimated';
+import Animated, {
+  FadeInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { HomeCardSlot } from '@/components/home/HomeCardSlot';
 import { Mascot } from '@/components/home/Mascot';
@@ -25,11 +31,39 @@ type HomeViewProps = {
   model: HomeViewModel;
   onCheckIn: () => void;
   onHistory: () => void;
+  /** Bumps to fire the home Imprint (first save of today only — never on re-save). */
+  imprintSignal?: number;
+  /** Bumps to tilt the mascot. */
+  tiltSignal?: number;
 };
 
-export function HomeView({ model, onCheckIn, onHistory }: HomeViewProps) {
+export function HomeView({
+  model,
+  onCheckIn,
+  onHistory,
+  imprintSignal = 0,
+  tiltSignal = 0,
+}: HomeViewProps) {
   const reduced = useReducedMotion();
   const [terrainWidth, setTerrainWidth] = useState(318);
+
+  // Imprint — scale .985→1 (~320ms) + a teal inset ring flash on the record well.
+  // Reduced motion = instant fill (no animation); the haptic fires in the container.
+  const imprintScale = useSharedValue(1);
+  const ringOpacity = useSharedValue(0);
+  useEffect(() => {
+    if (imprintSignal === 0 || reduced) return;
+    imprintScale.value = withSequence(
+      withTiming(0.985, { duration: 0 }),
+      withTiming(1, { duration: 320, easing: easingFn('out') }),
+    );
+    ringOpacity.value = withSequence(
+      withTiming(0.9, { duration: 120, easing: easingFn('out') }),
+      withTiming(0, { duration: 320, easing: easingFn('standard') }),
+    );
+  }, [imprintSignal, reduced, imprintScale, ringOpacity]);
+  const wellStyle = useAnimatedStyle(() => ({ transform: [{ scale: imprintScale.value }] }));
+  const ringStyle = useAnimatedStyle(() => ({ opacity: ringOpacity.value }));
 
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
@@ -54,12 +88,20 @@ export function HomeView({ model, onCheckIn, onHistory }: HomeViewProps) {
                 {model.status}
               </Text>
             </View>
-            <Mascot />
+            <Mascot tiltSignal={tiltSignal} />
           </View>
 
-          {/* RECORD WELL — pressed ("it's yours") */}
-          <View className="overflow-hidden rounded-xl bg-surface-active px-4 py-4 dark:bg-surface-active-dark">
+          {/* RECORD WELL — pressed ("it's yours"); Imprint flashes on first save */}
+          <Animated.View
+            style={wellStyle}
+            className="overflow-hidden rounded-xl bg-surface-active px-4 py-4 dark:bg-surface-active-dark"
+          >
             <View className="absolute left-0 right-0 top-0 h-[1.5px] bg-charcoal-950/10" />
+            <Animated.View
+              pointerEvents="none"
+              style={ringStyle}
+              className="absolute inset-0 rounded-xl border-2 border-primary dark:border-primary-dark"
+            />
             <View className="flex-row items-center justify-between">
               <Text
                 variant="caption"
@@ -85,7 +127,7 @@ export function HomeView({ model, onCheckIn, onHistory }: HomeViewProps) {
             >
               <Terrain days={model.terrainDays} width={terrainWidth} />
             </View>
-          </View>
+          </Animated.View>
 
           {/* CHECK-IN CTA */}
           <Button variant="primary" onPress={onCheckIn}>
