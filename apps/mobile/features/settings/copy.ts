@@ -76,4 +76,33 @@ export const CT4_SETTINGS = {
       'Psychage is an educational resource. It does not diagnose, treat, or replace professional care. If you need help now, use the Help now button.',
     version: 'Version',
   },
+
+  privacy: {
+    title: 'Privacy & your data',
+    trust:
+      "Your check-ins live on this device. We don't sell your data, and your record isn't shared unless you choose to share it.",
+    exportLabel: 'Export my record',
+    exportDescription: 'Save a copy as a file you control.',
+    exportJson: 'Export as JSON',
+    exportCsv: 'Export as CSV',
+    exportEmpty: 'Nothing to export yet — your record is empty.',
+    deleteEntry: 'Delete my record',
+  },
+
+  delete: {
+    title: 'Delete my record',
+    heading: 'This deletes your record from this device.',
+    body:
+      'Your check-ins and settings on this device are removed right away. There is no recovery window — once deleted, they cannot be brought back.',
+    continueLabel: 'Continue to delete',
+    keepLabel: 'Keep my account',
+  },
+
+  deleteConfirm: {
+    title: 'Delete my record',
+    heading: 'Delete now?',
+    body: 'This is immediate and permanent on this device.',
+    confirmLabel: 'Delete my record',
+    keepLabel: 'Keep my account',
+  },
 } as const;
