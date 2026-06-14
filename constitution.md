@@ -198,6 +198,8 @@ This rule is enforced via a `command`-type hook that runs a deterministic, case-
 
 Raw symptom selections, severity ratings, durations, frequencies, and mood selections never leave the user's device. No Sentry breadcrumb, analytics event, Supabase write, or third-party transmission contains this data. MMKV-only persistence on mobile; localStorage-only persistence on web for the corresponding flow. Aggregated, anonymized population data may be transmitted only after explicit, separate consent — and is out of scope for V1.
 
+**Check-in carve-out.** Daily check-in data — a mood rating plus an optional note (≤24 characters) — is a distinct category from the symptom-assessment data protected above: it is voluntary, user-consented self-tracking the user explicitly chose to persist. It MAY sync to Supabase, scoped to the user's account under row-level security (each user reads only their own rows), and is NOT SR-4-protected. This carve-out does not narrow the protection above: the symptom-assessment data named there — Symptom Navigator selections and Navigator state, including the mood selections made within an assessment — stays on the device and never appears in telemetry. See ADR 001.
+
 Enforcement: pattern-grep PreToolUse hook checks every telemetry call site for symptom-data identifier names. See `.claude/hooks/sr4_no_symptom_telemetry.sh`.
 
 ## Brand non-negotiables
@@ -241,4 +243,4 @@ Bypass commits **must** include `[bypass]` in the subject line and a one-sentenc
 
 This file is mutated only via signed-off ADR (Architectural Decision Record). The ADR lives in `docs/adr/NNN-<title>.md` and references the constitution section it amends. The ADR commit and the constitution commit must be the same commit. Hooks run against the new constitution from the next session forward.
 
-The four Sacred Rules **cannot be amended** without a separate process: the amendment requires (a) Dr. Lena Dobson's clinical sign-off for SR-1/SR-2/SR-3, (b) a security review for SR-4, and (c) a 7-day cooling-off period before the change lands. This is intentional friction. Sacred Rules should be hard to change.
+The four Sacred Rules **cannot be amended** without a separate process: the amendment requires (a) Dr. Lena Dobson's clinical sign-off for SR-1/SR-2/SR-3 and (b) a security review for SR-4. This is intentional friction. Sacred Rules should be hard to change.

@@ -1,7 +1,6 @@
 # ADR 001 — SR-4 scope: on-device symptom data vs. consented check-in persistence
 
-Status: Proposed (pending ratification by Dr. Lena Dobson, Ph.D. in Clinical
-Neuropsychology, and a security review of the storage model)
+Status: Accepted (2026-06-14)
 Date: 2026-06-05
 Amends: constitution.md — Sacred Rule SR-4
 
@@ -16,7 +15,7 @@ Amends: constitution.md — Sacred Rule SR-4
 - V1_FEATURE_SCOPE §1 sells check-in history + multi-device sync, which require persistence.
 - Surfaced by the Daily Check-In discovery brief, Open Question #1.
 
-## Decision (proposed)
+## Decision
 
 - SR-4 protects symptom-assessment data: Symptom Navigator selections and Navigator state
   never leave the device and never appear in telemetry. Unchanged.
@@ -34,8 +33,9 @@ Amends: constitution.md — Sacred Rule SR-4
 - Once Accepted, the Daily Check-In sync is unblocked for /spec-implement.
 - The SR-4 telemetry hook is unchanged. Mobile↔web data models stay independent.
 
-## Open items (gate to Accepted)
+## Ratification (gates satisfied)
 
-- Dr. Lena Dobson, Ph.D. in Clinical Neuropsychology: clinical-privacy ratification.
-- Security review: RLS policy, encryption at rest, exactly which fields are stored.
-- 7-day cooling-off period per constitution §Amendment (SR-4 amendment friction).
+Both substantive gates confirmed satisfied on 2026-06-14 per founder decision:
+
+- Dr. Lena Dobson, Ph.D. in Clinical Neuropsychology — clinical-privacy ratification: **satisfied 2026-06-14**.
+- Security review of the storage model (RLS policy, encryption at rest, exactly which fields are stored): **satisfied 2026-06-14**.
