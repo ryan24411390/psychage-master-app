@@ -1,0 +1,161 @@
+/**
+ * Build-time export of the CT3 crisis bundle for the mobile app.
+ *
+ * Queries the shared Supabase project with the SERVICE-ROLE key, selects ONLY
+ * verified helplines (+ all countries, for the S12 picker / gap state), and
+ * writes a committed, offline-complete bundle that ships in the JS binary:
+ *
+ *   apps/mobile/data/crisis/crisis-bundle.json    (data — verified rows only)
+ *   apps/mobile/data/crisis/crisis-bundle.types.ts (generated TS types)
+ *
+ * The bundle is the always-present offline floor (rules/offline.md §6: crisis
+ * ships bundled-in-JS, never lazy-fetched, never expired by app version). The
+ * runtime loader refreshes it from Supabase when online, but never depends on
+ * the network to read.
+ *
+ * Run manually / in CI after the crisis dataset changes:
+ *   SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… pnpm --filter @psychage/mobile exec tsx ../../scripts/export-crisis-bundle.ts
+ * (or from repo root: pnpm tsx scripts/export-crisis-bundle.ts with env set)
+ *
+ * NEVER commit the service-role key. It is read from the environment only.
+ */
+
+import { createClient } from '@supabase/supabase-js';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const OUT_DIR = path.resolve(__dirname, '../apps/mobile/data/crisis');
+
+const SUPABASE_URL =
+  process.env.SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+if (!SUPABASE_URL || !SERVICE_KEY) {
+  console.error('❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables.');
+  console.error('   The bundle export reads the service-role key from the environment — never committed.');
+  process.exit(1);
+}
+
+const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
+  auth: { persistSession: false },
+});
+
+interface BundleCountry {
+  iso2: string;
+  name: string;
+  emergencyNumber: string;
+  emergencyNote: string | null;
+  hasVerifiedHelplines: boolean;
+}
+
+interface BundleHelpline {
+  region: string;
+  name: string;
+  description: string;
+  callNumber: string | null;
+  textCapable: boolean;
+  textNumber: string | null;
+  displayOrder: number;
+}
+
+async function main() {
+  console.log('🚀 Exporting CT3 crisis bundle from Supabase…');
+
+  const { data: countryRows, error: cErr } = await supabase
+    .from('crisis_countries')
+    .select('iso2, country_name, emergency_number, emergency_note, has_verified_helplines')
+    .order('country_name', { ascending: true });
+  if (cErr) {
+    console.error('❌ Country query failed:', cErr.message);
+    process.exit(1);
+  }
+
+  // ONLY verified rows reach the bundle. This is the hard safety gate.
+  const { data: helplineRows, error: hErr } = await supabase
+    .from('crisis_helplines')
+    .select('country_iso2, name, description, call_number, text_capable, text_number, verification_status, display_order')
+    .eq('verification_status', 'verified')
+    .order('country_iso2', { ascending: true })
+    .order('display_order', { ascending: true });
+  if (hErr) {
+    console.error('❌ Helpline query failed:', hErr.message);
+    process.exit(1);
+  }
+
+  // Defense in depth: assert nothing non-verified slipped through.
+  const leaked = (helplineRows || []).filter((h) => h.verification_status !== 'verified');
+  if (leaked.length > 0) {
+    console.error(`❌ ${leaked.length} non-verified rows in result set — refusing to write bundle.`);
+    process.exit(1);
+  }
+
+  const countries: BundleCountry[] = (countryRows || []).map((c) => ({
+    iso2: c.iso2,
+    name: c.country_name,
+    emergencyNumber: c.emergency_number,
+    emergencyNote: c.emergency_note ?? null,
+    hasVerifiedHelplines: c.has_verified_helplines,
+  }));
+
+  const helplines: BundleHelpline[] = (helplineRows || []).map((h) => ({
+    region: h.country_iso2,
+    name: h.name,
+    description: h.description,
+    callNumber: h.call_number ?? null,
+    textCapable: h.text_capable,
+    textNumber: h.text_number ?? null,
+    displayOrder: h.display_order,
+  }));
+
+  const bundle = {
+    // `generated` is informational; passed in via env so the script stays
+    // deterministic (no Date.now()). Falls back to the literal 'unknown'.
+    generated: process.env.BUNDLE_GENERATED_AT || 'unknown',
+    countries,
+    helplines,
+  };
+
+  fs.mkdirSync(OUT_DIR, { recursive: true });
+  fs.writeFileSync(path.join(OUT_DIR, 'crisis-bundle.json'), `${JSON.stringify(bundle, null, 2)}\n`, 'utf-8');
+  fs.writeFileSync(path.join(OUT_DIR, 'crisis-bundle.types.ts'), TYPES_FILE, 'utf-8');
+
+  console.log(`✅ Wrote bundle: ${countries.length} countries, ${helplines.length} verified helplines`);
+  console.log(`   → ${path.relative(process.cwd(), path.join(OUT_DIR, 'crisis-bundle.json'))}`);
+  console.log(`   verified-only confirmed (0 non-verified rows).`);
+}
+
+const TYPES_FILE = `// GENERATED by scripts/export-crisis-bundle.ts — do not edit by hand.
+// Shape of apps/mobile/data/crisis/crisis-bundle.json (verified rows only).
+
+export interface CrisisBundleCountry {
+  iso2: string;
+  name: string;
+  emergencyNumber: string;
+  emergencyNote: string | null;
+  hasVerifiedHelplines: boolean;
+}
+
+export interface CrisisBundleHelpline {
+  region: string;
+  name: string;
+  description: string;
+  callNumber: string | null;
+  textCapable: boolean;
+  textNumber: string | null;
+  displayOrder: number;
+}
+
+export interface CrisisBundle {
+  generated: string;
+  countries: CrisisBundleCountry[];
+  helplines: CrisisBundleHelpline[];
+}
+`;
+
+main().catch((err) => {
+  console.error('❌ Fatal error:', err);
+  process.exit(1);
+});

@@ -1,0 +1,1021 @@
+{
+  "generated": "2026-06-14",
+  "countries": [
+    {
+      "iso2": "AR",
+      "name": "Argentina",
+      "emergencyNumber": "911",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "AU",
+      "name": "Australia",
+      "emergencyNumber": "000",
+      "emergencyNote": "112 from mobile",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "AT",
+      "name": "Austria",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "BE",
+      "name": "Belgium",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "BW",
+      "name": "Botswana",
+      "emergencyNumber": "997",
+      "emergencyNote": "999 police, 997 ambulance",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "BR",
+      "name": "Brazil",
+      "emergencyNumber": "192",
+      "emergencyNote": "190 police, 192 ambulance",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "CA",
+      "name": "Canada",
+      "emergencyNumber": "911",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "KY",
+      "name": "Cayman Islands",
+      "emergencyNumber": "911",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "CL",
+      "name": "Chile",
+      "emergencyNumber": "131",
+      "emergencyNote": "133 police, 131 ambulance",
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "CN",
+      "name": "China",
+      "emergencyNumber": "120",
+      "emergencyNote": "110 police, 120 ambulance",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "CO",
+      "name": "Colombia",
+      "emergencyNumber": "123",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "HR",
+      "name": "Croatia",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "CY",
+      "name": "Cyprus",
+      "emergencyNumber": "112",
+      "emergencyNote": "199 also works",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "CZ",
+      "name": "Czech Republic",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "DK",
+      "name": "Denmark",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "EG",
+      "name": "Egypt",
+      "emergencyNumber": "123",
+      "emergencyNote": "122 police, 123 ambulance",
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "EE",
+      "name": "Estonia",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "ET",
+      "name": "Ethiopia",
+      "emergencyNumber": "907",
+      "emergencyNote": "911 police, 907 ambulance; varies regionally",
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "FJ",
+      "name": "Fiji",
+      "emergencyNumber": "911",
+      "emergencyNote": "917 also used",
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "FI",
+      "name": "Finland",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "FR",
+      "name": "France",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "DE",
+      "name": "Germany",
+      "emergencyNumber": "112",
+      "emergencyNote": "110 police",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "GH",
+      "name": "Ghana",
+      "emergencyNumber": "999",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "GR",
+      "name": "Greece",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "GY",
+      "name": "Guyana",
+      "emergencyNumber": "913",
+      "emergencyNote": "999 police, 913 ambulance",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "HK",
+      "name": "Hong Kong",
+      "emergencyNumber": "999",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "HU",
+      "name": "Hungary",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "IS",
+      "name": "Iceland",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "IN",
+      "name": "India",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "ID",
+      "name": "Indonesia",
+      "emergencyNumber": "119",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "IR",
+      "name": "Iran",
+      "emergencyNumber": "115",
+      "emergencyNote": "110 police, 115 ambulance",
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "IE",
+      "name": "Ireland",
+      "emergencyNumber": "112",
+      "emergencyNote": "999 also works",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "IL",
+      "name": "Israel",
+      "emergencyNumber": "101",
+      "emergencyNote": "100 police, 101 ambulance",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "IT",
+      "name": "Italy",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "JP",
+      "name": "Japan",
+      "emergencyNumber": "119",
+      "emergencyNote": "110 police, 119 fire/ambulance",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "JO",
+      "name": "Jordan",
+      "emergencyNumber": "911",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "KE",
+      "name": "Kenya",
+      "emergencyNumber": "999",
+      "emergencyNote": "112 also works",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "LV",
+      "name": "Latvia",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "LB",
+      "name": "Lebanon",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "LT",
+      "name": "Lithuania",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "LU",
+      "name": "Luxembourg",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "MY",
+      "name": "Malaysia",
+      "emergencyNumber": "999",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "MT",
+      "name": "Malta",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "MX",
+      "name": "Mexico",
+      "emergencyNumber": "911",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "MA",
+      "name": "Morocco",
+      "emergencyNumber": "15",
+      "emergencyNote": "19 police, 15 ambulance (SAMU)",
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "NL",
+      "name": "Netherlands",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "NZ",
+      "name": "New Zealand",
+      "emergencyNumber": "111",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "NG",
+      "name": "Nigeria",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "NO",
+      "name": "Norway",
+      "emergencyNumber": "112",
+      "emergencyNote": "113 medical",
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "PH",
+      "name": "Philippines",
+      "emergencyNumber": "911",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "PL",
+      "name": "Poland",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "PT",
+      "name": "Portugal",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "QA",
+      "name": "Qatar",
+      "emergencyNumber": "999",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "RW",
+      "name": "Rwanda",
+      "emergencyNumber": "912",
+      "emergencyNote": "112 police, 912 ambulance",
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "SA",
+      "name": "Saudi Arabia",
+      "emergencyNumber": "997",
+      "emergencyNote": "911 in some regions, 997 ambulance",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "SG",
+      "name": "Singapore",
+      "emergencyNumber": "995",
+      "emergencyNote": "999 police, 995 ambulance",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "ZA",
+      "name": "South Africa",
+      "emergencyNumber": "10177",
+      "emergencyNote": "10111 police, 10177 ambulance, 112 from mobile",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "KR",
+      "name": "South Korea",
+      "emergencyNumber": "119",
+      "emergencyNote": "112 police, 119 ambulance",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "ES",
+      "name": "Spain",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "SE",
+      "name": "Sweden",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "CH",
+      "name": "Switzerland",
+      "emergencyNumber": "112",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "TZ",
+      "name": "Tanzania",
+      "emergencyNumber": "112",
+      "emergencyNote": "999 also works",
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "TH",
+      "name": "Thailand",
+      "emergencyNumber": "1669",
+      "emergencyNote": "191 police, 1669 ambulance",
+      "hasVerifiedHelplines": false
+    },
+    {
+      "iso2": "UG",
+      "name": "Uganda",
+      "emergencyNumber": "999",
+      "emergencyNote": "112 also works",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "AE",
+      "name": "United Arab Emirates",
+      "emergencyNumber": "999",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "GB",
+      "name": "United Kingdom",
+      "emergencyNumber": "999",
+      "emergencyNote": "112 also works",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "US",
+      "name": "United States",
+      "emergencyNumber": "911",
+      "emergencyNote": null,
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "ZM",
+      "name": "Zambia",
+      "emergencyNumber": "999",
+      "emergencyNote": "112 also works",
+      "hasVerifiedHelplines": true
+    },
+    {
+      "iso2": "ZW",
+      "name": "Zimbabwe",
+      "emergencyNumber": "994",
+      "emergencyNote": "995 police, 994 ambulance",
+      "hasVerifiedHelplines": false
+    }
+  ],
+  "helplines": [
+    {
+      "region": "AE",
+      "name": "National Mental Support Line",
+      "description": "Free emotional support line",
+      "callNumber": "800-4673",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "AU",
+      "name": "Lifeline",
+      "description": "National crisis support line",
+      "callNumber": "13 11 14",
+      "textCapable": true,
+      "textNumber": "0477 13 11 14",
+      "displayOrder": 1
+    },
+    {
+      "region": "AU",
+      "name": "Beyond Blue",
+      "description": "Mental health support line",
+      "callNumber": "1300 22 4636",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 2
+    },
+    {
+      "region": "AU",
+      "name": "13YARN",
+      "description": "First Nations crisis support line",
+      "callNumber": "13 92 76",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 3
+    },
+    {
+      "region": "BR",
+      "name": "Centro de Valorizacao da Vida (CVV)",
+      "description": "National emotional support line",
+      "callNumber": "188",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "BW",
+      "name": "Lifeline Botswana (FTMTB)",
+      "description": "Emotional support call and text",
+      "callNumber": "+267 75527590",
+      "textCapable": true,
+      "textNumber": "+267 73807492",
+      "displayOrder": 1
+    },
+    {
+      "region": "CA",
+      "name": "9-8-8 Suicide Crisis Helpline",
+      "description": "National suicide crisis helpline",
+      "callNumber": "988",
+      "textCapable": true,
+      "textNumber": "988",
+      "displayOrder": 1
+    },
+    {
+      "region": "CN",
+      "name": "Beijing Suicide Research & Prevention Center",
+      "description": "WHO-affiliated crisis phone line",
+      "callNumber": "800 810 1117",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "CY",
+      "name": "Cyprus Samaritans",
+      "description": "Emotional support phone line",
+      "callNumber": "8000 7773",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "CZ",
+      "name": "Linka pomoci / adult line 116 123",
+      "description": "Free emotional support line",
+      "callNumber": "116 123",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "DE",
+      "name": "Telefonseelsorge",
+      "description": "Free round-the-clock counseling line",
+      "callNumber": "0800 111 0 111",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "DK",
+      "name": "Livslinien",
+      "description": "Suicide prevention phone line",
+      "callNumber": "70 201 201",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "EE",
+      "name": "Hingehoiutelefon",
+      "description": "Emotional support phone line",
+      "callNumber": "116 123",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "ES",
+      "name": "Linea 024",
+      "description": "National suicidal behavior support line",
+      "callNumber": "024",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "ES",
+      "name": "Telefono de la Esperanza",
+      "description": "Emotional crisis support line",
+      "callNumber": "717 003 717",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 2
+    },
+    {
+      "region": "FI",
+      "name": "MIELI Crisis Line",
+      "description": "National crisis phone line",
+      "callNumber": "09 2525 0111",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "FR",
+      "name": "3114",
+      "description": "National suicide prevention line",
+      "callNumber": "3114",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "GB",
+      "name": "Samaritans",
+      "description": "Round-the-clock emotional support line",
+      "callNumber": "116 123",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "GB",
+      "name": "Shout",
+      "description": "Free 24/7 crisis text line",
+      "callNumber": null,
+      "textCapable": true,
+      "textNumber": "85258",
+      "displayOrder": 2
+    },
+    {
+      "region": "GR",
+      "name": "Klimaka Suicide Line 1018",
+      "description": "Suicide prevention phone line",
+      "callNumber": "1018",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "GY",
+      "name": "Inter-agency Suicide Prevention Helpline",
+      "description": "National suicide prevention line",
+      "callNumber": "223-0001",
+      "textCapable": true,
+      "textNumber": "600-7896",
+      "displayOrder": 1
+    },
+    {
+      "region": "HK",
+      "name": "The Samaritans Hong Kong",
+      "description": "Multilingual emotional support line",
+      "callNumber": "2896 0000",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "HR",
+      "name": "Plavi Telefon",
+      "description": "Emotional support phone line",
+      "callNumber": "01 4833 888",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "HU",
+      "name": "LESZ / 116 123",
+      "description": "Free emotional crisis line",
+      "callNumber": "116 123",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "IE",
+      "name": "Samaritans Ireland",
+      "description": "Round-the-clock emotional support line",
+      "callNumber": "116 123",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "IE",
+      "name": "Text About It (50808)",
+      "description": "Free 24/7 crisis text line",
+      "callNumber": null,
+      "textCapable": true,
+      "textNumber": "50808",
+      "displayOrder": 2
+    },
+    {
+      "region": "IL",
+      "name": "ERAN",
+      "description": "Emotional first-aid support line",
+      "callNumber": "1201",
+      "textCapable": true,
+      "textNumber": "076-88444-00",
+      "displayOrder": 1
+    },
+    {
+      "region": "IN",
+      "name": "KIRAN",
+      "description": "Government mental health helpline",
+      "callNumber": "1800-599-0019",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "IN",
+      "name": "Tele-MANAS",
+      "description": "Government mental health helpline",
+      "callNumber": "14416",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 2
+    },
+    {
+      "region": "IN",
+      "name": "AASRA",
+      "description": "Suicide prevention support line",
+      "callNumber": "+91 22 27546669",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 3
+    },
+    {
+      "region": "IS",
+      "name": "Red Cross Helpline 1717",
+      "description": "Free emotional support line",
+      "callNumber": "1717",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "IT",
+      "name": "Telefono Amico Italia",
+      "description": "Emotional support phone line",
+      "callNumber": "02 2327 2327",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "JP",
+      "name": "Yorisoi Hotline",
+      "description": "Free multilingual support line",
+      "callNumber": "0120-279-338",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "JP",
+      "name": "TELL Lifeline",
+      "description": "English-language emotional support line",
+      "callNumber": "0800-300-8355",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 2
+    },
+    {
+      "region": "KE",
+      "name": "one2one (LVCT Health)",
+      "description": "Free toll-free support line",
+      "callNumber": "1190",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "KE",
+      "name": "Befrienders Kenya",
+      "description": "Emotional support phone line",
+      "callNumber": "+254 722 178 177",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 2
+    },
+    {
+      "region": "KR",
+      "name": "Lifeline Korea",
+      "description": "Suicide prevention phone line",
+      "callNumber": "1588-9191",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "KY",
+      "name": "CayMind Helpline",
+      "description": "Local emotional support line",
+      "callNumber": "1-800-534-6463",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "LB",
+      "name": "Embrace Lifeline",
+      "description": "National emotional support line",
+      "callNumber": "1564",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "LT",
+      "name": "Vilties Linija (Hope Line)",
+      "description": "Emotional support phone line",
+      "callNumber": "116 123",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "LU",
+      "name": "SOS Detresse",
+      "description": "Emotional distress support line",
+      "callNumber": "45 45 45",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "LV",
+      "name": "Skalbes",
+      "description": "Emotional support phone line",
+      "callNumber": "+371 67222922",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "MT",
+      "name": "Appogg Support Line 179",
+      "description": "Free social support helpline",
+      "callNumber": "179",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "MX",
+      "name": "SAPTEL",
+      "description": "Red Cross crisis counseling line",
+      "callNumber": "+52 55 5259 8121",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "MY",
+      "name": "Befrienders KL",
+      "description": "Emotional support phone line",
+      "callNumber": "03-76272929",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "NL",
+      "name": "113 Zelfmoordpreventie",
+      "description": "National suicide prevention line",
+      "callNumber": "0800 0113",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "NZ",
+      "name": "1737 Need to Talk?",
+      "description": "Free national support line",
+      "callNumber": "1737",
+      "textCapable": true,
+      "textNumber": "1737",
+      "displayOrder": 1
+    },
+    {
+      "region": "NZ",
+      "name": "Suicide Crisis Helpline",
+      "description": "Suicide crisis support line",
+      "callNumber": "0508 828 865",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 2
+    },
+    {
+      "region": "PH",
+      "name": "NCMH Crisis Hotline",
+      "description": "National mental health crisis line",
+      "callNumber": "1553",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "QA",
+      "name": "National Mental Health Helpline",
+      "description": "Hamad Medical crisis line",
+      "callNumber": "16000",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "SA",
+      "name": "Ministry of Health Line 937",
+      "description": "Government health support line",
+      "callNumber": "937",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "SG",
+      "name": "Samaritans of Singapore (SOS)",
+      "description": "National suicide prevention line",
+      "callNumber": "1767",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "UG",
+      "name": "Mental Health Uganda",
+      "description": "Free emotional support line",
+      "callNumber": "0800 21 21 21",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "US",
+      "name": "988 Suicide & Crisis Lifeline",
+      "description": "National suicide and crisis line",
+      "callNumber": "988",
+      "textCapable": true,
+      "textNumber": "988",
+      "displayOrder": 1
+    },
+    {
+      "region": "US",
+      "name": "Crisis Text Line",
+      "description": "Free 24/7 crisis text support",
+      "callNumber": null,
+      "textCapable": true,
+      "textNumber": "741741",
+      "displayOrder": 2
+    },
+    {
+      "region": "ZA",
+      "name": "SADAG Suicide Crisis Line",
+      "description": "National suicide crisis line",
+      "callNumber": "0800 567 567",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 1
+    },
+    {
+      "region": "ZA",
+      "name": "SADAG Mental Health Line",
+      "description": "Mental health support line",
+      "callNumber": "011 234 4837",
+      "textCapable": false,
+      "textNumber": null,
+      "displayOrder": 2
+    },
+    {
+      "region": "ZM",
+      "name": "LifeLine/ChildLine Zambia",
+      "description": "Free national support line",
+      "callNumber": "933",
+      "textCapable": true,
+      "textNumber": "933",
+      "displayOrder": 1
+    },
+    {
+      "region": "ZM",
+      "name": "ChildLine Zambia",
+      "description": "Free child and youth line",
+      "callNumber": "116",
+      "textCapable": true,
+      "textNumber": "116",
+      "displayOrder": 2
+    }
+  ]
+}
