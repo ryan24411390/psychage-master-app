@@ -9,4 +9,5 @@ export const CT4_COMPASS = {
   heading: 'When you need something now',
   toolkit: { title: 'Steady yourself right now', sub: 'Toolkit' },
   navigator: { title: 'Make sense of what you feel', sub: 'Symptom Navigator' },
+  mindmate: { title: 'Talk something through', sub: 'MindMate' },
 } as const;
