@@ -6,6 +6,7 @@ import {
   IBMPlexSans_700Bold,
 } from '@expo-google-fonts/ibm-plex-sans';
 import { Fraunces_600SemiBold } from '@expo-google-fonts/fraunces';
+import { QueryClientProvider } from '@tanstack/react-query';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import '../global.css';
@@ -15,6 +16,7 @@ import '../global.css';
 import '@/lib/adapters/featureFlags';
 
 import { HapticProvider } from '@/lib/haptic-context';
+import { queryClient } from '@/lib/query-client';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -41,10 +43,12 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <HapticProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-      </Stack>
-    </HapticProvider>
+    <QueryClientProvider client={queryClient}>
+      <HapticProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </HapticProvider>
+    </QueryClientProvider>
   );
 }

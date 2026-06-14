@@ -5,6 +5,6 @@ export const CT4_FIND = {
   _fixture: 'CT4' as const,
   _marker: FIXTURE,
   title: 'Find care',
-  intro: 'Browse providers and services. The directory opens in a secure in-app view.',
+  intro: 'Browse the provider directory. A listing is information, not a recommendation.',
   openDirectory: 'Open the directory',
 } as const;
