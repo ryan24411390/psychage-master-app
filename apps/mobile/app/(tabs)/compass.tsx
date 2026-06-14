@@ -1,36 +1,38 @@
 import { router } from 'expo-router';
-import { View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { ScrollView } from 'react-native';
 
-import { Button } from '@/components/ui/Button';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
-import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
+import { CompassTile } from '@/features/compass/CompassTile';
+import { CT4_COMPASS } from '@/features/compass/copy';
+import { COMPASS_ROUTES } from '@/features/compass/routes';
 
-// Compass tab — entry to the Symptom Navigator (PR B, Flow 13). The flow itself is a
-// full-screen pushed route (app/navigator.tsx) so it carries no tab bar and unmounts on
-// exit (zero residue, SR-4). The "Begin" launch label is a FIXTURE → CT4. Entrance
-// motion gated on useReducedMotion per DESIGN.mobile.md §3.1.
-
+// S5 Compass tab — the landing SHELL. B2 owns this shell; the tiles link to A2's
+// pushed destinations (S19 Toolkit, S13 Navigator), now live on main via
+// COMPASS_ROUTES (/toolkit, /navigator). B2 does NOT build the destinations.
+// The GlobalHeader (incl. the Help-now pill) is injected by the tabs layout, so
+// this screen carries no header of its own.
 export default function CompassScreen() {
-  const reduced = useReducedMotion();
+  const t = CT4_COMPASS;
   return (
-    <ScreenShell>
-      <Animated.View
-        entering={reduced ? undefined : FadeIn.duration(DURATION.base).easing(easingFn('out'))}
-        className="flex-1 items-center justify-center"
-      >
-        <View className="w-full items-center gap-4">
-          <Text variant="headingLg">Compass</Text>
-          <Button
-            variant="primary"
-            className="mt-2 w-full"
-            onPress={() => router.push('/navigator')}
-          >
-            Begin
-          </Button>
-        </View>
-      </Animated.View>
+    <ScreenShell edges={['bottom']}>
+      <ScrollView contentContainerClassName="gap-3 py-4" showsVerticalScrollIndicator={false}>
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+          {t.heading}
+        </Text>
+        <CompassTile
+          title={t.toolkit.title}
+          subLabel={t.toolkit.sub}
+          onPress={() => router.push(COMPASS_ROUTES.toolkit)}
+          testID="compass-tile-toolkit"
+        />
+        <CompassTile
+          title={t.navigator.title}
+          subLabel={t.navigator.sub}
+          onPress={() => router.push(COMPASS_ROUTES.navigator)}
+          testID="compass-tile-navigator"
+        />
+      </ScrollView>
     </ScreenShell>
   );
 }
