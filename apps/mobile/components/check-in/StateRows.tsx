@@ -5,26 +5,16 @@ import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { colorForScheme, resolveColorRef } from '@/lib/a1-tokens';
+import { STATE_LABELS } from '@/lib/check-in-labels';
 
 // C0.4 the five-state selector. FIXED order Very low → Very good (state 0..4),
 // each row = a proportional fill glyph (terrain.fillByState 12/32/52/74/95%) +
 // plain label + mood tint. Selection = BORDER + CHECK, never color alone (the
 // check mark is a non-color signal). Radio-group VoiceOver semantics; the checked
 // state is announced. No emoji. Ships inside S4 (sub-slice E); built + tested here.
-//
-// Copy is the verbatim v5 `labels` array — Very low / Low / Okay / Good / Very
-// good. (The token _note's Awful…Great set is stale; the order names the endpoints
-// "Very low → Very good" and v5 governs the rest.)
+// Labels are single-sourced (verbatim v5) in lib/check-in-labels.
 
 const STATES: readonly CheckInState[] = [0, 1, 2, 3, 4];
-
-const LABELS: Record<CheckInState, string> = {
-  0: 'Very low',
-  1: 'Low',
-  2: 'Okay',
-  3: 'Good',
-  4: 'Very good',
-};
 
 // Proportional fill heights — these literals mirror terrain.fillByState; the
 // a1-tokens unit test pins fillByState so a token change fails loudly here.
@@ -73,7 +63,7 @@ export function StateRows({ value, onChange }: StateRowsProps) {
             key={state}
             accessibilityRole="radio"
             accessibilityState={{ checked: isSelected }}
-            accessibilityLabel={LABELS[state]}
+            accessibilityLabel={STATE_LABELS[state]}
             onPress={() => onChange(state)}
             className={`min-h-[44px] flex-row items-center gap-3 rounded-lg border-2 px-3 py-2 ${
               isSelected
@@ -83,7 +73,7 @@ export function StateRows({ value, onChange }: StateRowsProps) {
           >
             <FillGlyph state={state} />
             <Text variant="bodyMedium" className="flex-1">
-              {LABELS[state]}
+              {STATE_LABELS[state]}
             </Text>
             {isSelected && <Check size={20} color={checkColor} strokeWidth={2.25} />}
           </Pressable>
