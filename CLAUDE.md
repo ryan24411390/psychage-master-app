@@ -28,34 +28,23 @@ If `PROJECT_CONTEXT.md` is missing, **stop and ask** before significant work.
 
 ## 2. Current state vs planned state
 
-**Today's layout** (pre-monorepo, mobile not yet scaffolded):
+**Current layout** (monorepo migration complete — pnpm workspaces live):
 
 ```
 psychage-master-app/
   .claude/             tooling config
-  .cursor/             Cursor IDE config
-  CLAUDE.md            this file
-  PROJECT_CONTEXT.md   comprehensive context
-  psychage-mobile/     empty — Expo app to be scaffolded here
-```
-
-**Planned layout** (after monorepo migration — see PROJECT_CONTEXT.md §3):
-
-```
-psychage-master-app/
   apps/
-    mobile/            (psychage-mobile moves here)
+    mobile/            Expo SDK 54 app — scaffolded and live
   packages/
     shared/            Navigator scoring + sensitivity filter + PEAF validators
                        (lifted from psychage-v2 web — see PROJECT_CONTEXT.md §6 lift plan)
-    api/               Supabase client + RPC wrappers
-    i18n/              EN/PT/ES/SV/FR translations
-    ui-tokens/         Tailwind config, design tokens
-  supabase/
-    migrations/
+  tokens/              design tokens (web + mobile)
+  pnpm-workspace.yaml  workspace manifest (apps/*, packages/*)
+  CLAUDE.md            this file
+  PROJECT_CONTEXT.md   comprehensive context
 ```
 
-The migration **has not happened yet.** When you reference paths, use today's layout, not planned. If the user asks for something that requires the planned layout (workspaces, shared packages), say so — don't fake it.
+The monorepo migration is **complete** — `apps/mobile/` and `packages/shared/` are live and pnpm workspaces work. **Still to be added** (not yet created — say so, don't fake them): `packages/api` (Supabase client + RPC wrappers), `packages/i18n` (EN/PT/ES/SV/FR), `packages/ui-tokens`, and `supabase/migrations/`. Today only `packages/shared` exists under `packages/`.
 
 ---
 
@@ -81,7 +70,7 @@ The migration **has not happened yet.** When you reference paths, use today's la
 | Build | EAS Build + EAS Update | latest |
 | Testing | Vitest + RNTL + Maestro | latest |
 | Package manager | pnpm | 10.25.0 |
-| Monorepo | Turborepo + pnpm workspaces | 2 / latest |
+| Monorepo | pnpm workspaces (plain `pnpm -r` — no Turborepo) | latest |
 | Lint/format | Biome (replaces ESLint + Prettier) | latest |
 
 No Redux, no Sanity, no Next.js, no styled-components, no Zustand for server state, no `useState` for server data.
@@ -151,7 +140,7 @@ Full PEAF quality framework (11 gates, source tiers, readability) lives in `PROJ
 ## 7. Brand voice & visual
 
 - **Primary teal:** `#1A9B8C`. The brand color. Use sparingly for emphasis, not floods.
-- **Type:** Inter (sans-serif body) + Plus Jakarta Sans (display headings).
+- **Type:** IBM Plex Sans (sans-serif body/UI) + Fraunces (display headings). Per DD-001 (2026-06-10); both SIL OFL, bundled via @expo-google-fonts.
 - **Voice:** warm, calm, educational, person-first. Never clinical. Never sensational. Never "your results suggest you have..." — always "based on your responses, you might find these resources helpful...".
 - **Motion:** Always respect `prefers-reduced-motion`. Reanimated 4 with `useReducedMotion()` hook.
 - **Dark mode:** class-based, full parity with light. No "dark mode is V2."
@@ -160,27 +149,27 @@ UI copy is clinically reviewed by Dr. Dobson before ship for any user-facing sur
 
 ---
 
-## 8. Workspace commands (after Expo scaffold)
+## 8. Workspace commands
 
-These don't work yet — `psychage-mobile/` is empty. Listed for reference; will be operational after Phase 6 (Expo scaffold).
+These are **operational now** — the monorepo is live and `apps/mobile` is scaffolded. The mobile package filter is `@psychage/mobile`.
 
 ```bash
-# Mobile app (from workspace root, after monorepo migration)
-pnpm --filter mobile start       # Expo dev server
-pnpm --filter mobile ios         # iOS simulator
-pnpm --filter mobile android     # Android emulator
-pnpm --filter mobile typecheck   # tsc --noEmit
-pnpm --filter mobile lint        # Biome check
-pnpm --filter mobile test        # Vitest
+# Mobile app (from workspace root)
+pnpm --filter @psychage/mobile start       # Expo dev server
+pnpm --filter @psychage/mobile ios         # iOS simulator
+pnpm --filter @psychage/mobile android     # Android emulator
+pnpm --filter @psychage/mobile typecheck   # tsc --noEmit
+pnpm --filter @psychage/mobile lint        # Biome check
+pnpm --filter @psychage/mobile test        # Vitest
 
 # Workspace-wide
 pnpm install                     # Install all workspace deps
 pnpm typecheck                   # All apps + packages
 pnpm lint                        # All apps + packages
-pnpm build                       # Production bundle (EAS)
+pnpm test                        # All apps + packages
 ```
 
-Until `package.json` exists at root, these are aspirational. Real commands appear after Phase 6.
+Root scripts today are `typecheck`, `lint`, `test` (plus `prepare`). Production bundling runs through EAS Build (see `docs/EAS-PIPELINE-RUNBOOK.md`), not a root `pnpm build`.
 
 ---
 

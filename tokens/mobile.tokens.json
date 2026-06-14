@@ -228,5 +228,189 @@
       "Dr. Dobson clinical sign-off on chime designs (anxious/migraine-overlap audience)",
       "Reduce Audio system setting honored at firing site"
     ]
+  },
+
+  "tabBar": {
+    "_unit": "dp",
+    "tabCount": 4,
+    "barHeight": 56,
+    "minTarget": 44,
+    "icon": {
+      "size": 24
+    },
+    "label": {
+      "size": 11,
+      "family": "type.family.sans",
+      "lineHeight": 14
+    },
+    "activePill": {
+      "radius": "radius.lg",
+      "insetShadow": {
+        "inset": true,
+        "offsetX": 0,
+        "offsetY": 1,
+        "blur": 2,
+        "spread": 0,
+        "opacity": 0.12
+      }
+    },
+    "color": {
+      "labelActive": "color.text.primary",
+      "labelInactive": "color.text.secondary",
+      "iconTealDot": "color.primary.default",
+      "activePillPressBg": "color.surface.active",
+      "insetShadowColor": "color.charcoal.950",
+      "_note": "Bound [a1-palette] to existing cool color.* tokens via path-string refs (consumer resolves light/dark for themed leaves); border-strong/clay/shadow ratified [a1-palette-ratify]. Shared role map across the six A1 groups: ink->color.text.primary, ink-2->color.text.secondary, ink-3/faint->color.text.tertiary, teal->color.primary.default (themed, so dark mode swaps the pictogram dot), pressed-surface->color.surface.active, border-strong->color.charcoal.500 (load-bearing ring/tick; was color.border.hover, failed the 3:1 floor), neutral-hairline->color.border.default, clay->color.border.default (see skeletonTerrain; was color.charcoal.300).",
+      "_ratified": "[a1-palette-ratify] insetShadowColor re-bound color.text.primary -> color.charcoal.950. text.primary inverts to near-white in dark mode; a shadow must stay dark in both registers, and charcoal.950 (#0C0A09, non-themed) names a dark tone for both. (RN has no native inset shadow; the geometry opacity 0.12 is consumed via a later Slice-2 Skia/overlay decision — this token only needs to name a dark color.)"
+    },
+    "_source": {
+      "_note": "Bottom tab bar geometry, 4 tabs. Active = pressed treatment (inset shadow + press-bg); inactive = flat; label always visible. GIVEN (Wave A1 order): tabCount 4, icon.size 24, label.size 11 (IBM Plex Sans → type.family.sans), minTarget 44 floor, one teal dot per pictogram. DERIVED (flagged for design ratification): barHeight 56 (iOS HIG tab bar 49pt + label band, rounded onto the 8pt-grid baseline; clears the 44 target + 11/14 label); label.lineHeight 14 (~1.27x of 11, compact-UI ratio); activePill.radius reuses canonical radius.lg (sub-component pill < card 'xl'; 'full' would over-round a wide tab cell); insetShadow geometry {offsetY 1, blur 2, opacity 0.12, inset} — conservative recessed read. Label weight is carried by the family token (sans = 400 cut); no numeric weight scale exists.",
+      "_implementationNote": "React Native has no portable native inset box-shadow — render the recessed active pill via a Skia inner-shadow or a layered overlay; verify in QA.",
+      "_calibrationFlag": "Font-size 11 and dp literals (24/44/56) precede the intentionally-stubbed type/spacing scales (type._omitted, spacing._omitted) — recalibrate against the first tab-bar screen."
+    }
+  },
+
+  "terrain": {
+    "_unit": "dp",
+    "dot": {
+      "radius": 6.5,
+      "ring": { "width": 1 }
+    },
+    "noEntryDot": {
+      "radius": 4,
+      "atFraction": 0.5
+    },
+    "todayDot": {
+      "radius": 8,
+      "atFraction": 0.5,
+      "stroke": { "width": 1.5, "dash": [3, 3] }
+    },
+    "connectingLine": {
+      "width": 1,
+      "_rule": "drawn ONLY between two consecutive entries; any gap (missing day) breaks the line"
+    },
+    "fillByState": { "0": 12, "1": 32, "2": 52, "3": 74, "4": 95 },
+    "geometry": {
+      "baselineFraction": 0.95,
+      "midlineFraction": 0.5,
+      "_note": "fraction of row height measured from the top; baseline = bottom band, midline = vertical center"
+    },
+    "label": {
+      "size": 11,
+      "family": "type.family.sans",
+      "lineHeight": 14
+    },
+    "color": {
+      "dotRing": "color.charcoal.500",
+      "connectingLine": "color.border.default",
+      "label": "color.text.tertiary",
+      "todayDotStroke": "color.primary.default",
+      "moodTint": {
+        "0": "color.mood.1",
+        "1": "color.mood.2",
+        "2": "color.mood.3",
+        "3": "color.mood.4",
+        "4": "color.mood.5"
+      },
+      "_note": "Bound [a1-palette]; border-strong re-bound [a1-palette-ratify]. dotRing=border-strong (load-bearing ring) -> color.charcoal.500, connectingLine=neutral-hairline (deliberately lighter structural hairline; stays color.border.default), label=ink-3 (de-emphasized axis labels), todayDotStroke=teal (today/now signal, themed). moodTint references color.mood.1..5 (mood-feature-scoped; not duplicated).",
+      "_ratified": "[a1-palette-ratify] border-strong re-bound color.border.hover -> color.charcoal.500. Measured WCAG vs color.background: border.hover.light(#d6d3d1)=1.392:1 FAIL; charcoal.400(#A8A29E)=2.357:1 FAIL; charcoal.500(#78716C)=4.484:1 light / 3.995:1 dark PASS. charcoal.500 is the lightest charcoal leaf clearing the 3:1 floor — keeps the ring quiet while rescuing the okay-mood dot (okay tint color.mood.3 alone is ~2.28:1, below 3:1, so the ring is the sole legibility mechanism = JC-4). connectingLine left at color.border.default: the order's 'bind all three to one charcoal' prose was overridden by its own NOTE and by the file, which already had connectingLine as the lighter, non-load-bearing hairline (file governs)."
+    },
+    "_source": {
+      "_note": "Record (terrain) visualization geometry — component-only. GIVEN (Wave A1 order): dot.radius 6.5 with a 1px ring (load-bearing contrast rescue), noEntryDot.radius 4 (hollow) at baseline, todayDot.radius 8 (dashed open circle) at midline, connectingLine only between consecutive entries, label.size 11, fillByState 12/32/52/74/95 for states 0-4. DERIVED (flagged): atFraction 0.5 = midline and baselineFraction 0.95 = bottom band (verbal anchors expressed as resolution-independent row-height fractions, since no spacing scale exists); todayDot.stroke {width 1.5, dash [3,3]} renders the 'dashed open circle'; connectingLine.width 1 (hairline); label.lineHeight 14.",
+      "_calibrationFlag": "radii 6.5/4/8, fills 12-95 and label-size 11 are literals predating the stubbed type/spacing scales — recalibrate against the first terrain screen.",
+      "_scope": "record-terrain-feature-only — mood tints (deferred) reference color.mood.* (mood-feature-scoped) and inherit that scope restriction."
+    }
+  },
+
+  "reflectionRow": {
+    "_unit": "dp",
+    "rowHeight": 44,
+    "minTarget": 44,
+    "dot": { "radius": 7 },
+    "text": {
+      "size": 14,
+      "family": "type.family.sansMedium",
+      "lineHeight": 20
+    },
+    "chevron": { "size": 20 },
+    "gap": { "dotToText": 8, "textToChevron": 8 },
+    "color": {
+      "dot": "color.primary.default",
+      "text": "color.text.secondary",
+      "chevron": "color.text.tertiary",
+      "_note": "Bound [a1-palette]. dot=teal, text=ink-2 (artifact register, deliberately not the Fraunces voice), chevron=ink-3."
+    },
+    "_source": {
+      "_note": "A 'reflection-ready' ROW (not a banner). GIVEN (Wave A1 order): dot.radius 7, text.size 14 weight 500 (the 500 cut -> type.family.sansMedium; deliberately NOT the Fraunces display register — this announces an artifact, not something the app says about the person), chevron present, minTarget 44. DERIVED (flagged): rowHeight 44 (single-line row set to the target floor); text.lineHeight 20 (~1.43x of 14); chevron.size 20 (passive disclosure glyph < the 24 tab icon); gap 8/8 (8pt-grid baseline).",
+      "_calibrationFlag": "Sizes 14/20/7 and dp literals 44/8 precede the stubbed type/spacing scales — recalibration candidates."
+    }
+  },
+
+  "monthRail": {
+    "_unit": "dp",
+    "columnWidth": 36,
+    "minTarget": 44,
+    "hairline": { "width": 1 },
+    "capLabel": {
+      "size": 10.5,
+      "family": "type.family.sans",
+      "weightIntent": 500,
+      "lineHeight": 14
+    },
+    "color": {
+      "hairline": "color.border.default",
+      "capLabelCurrent": "color.text.secondary",
+      "capLabelOther": "color.text.tertiary",
+      "_note": "Bound [a1-palette]. hairline=neutral-hairline (color.border.default; the 1px rail divider, lighter than the load-bearing border-strong), capLabelCurrent=ink-2, capLabelOther=ink-3 (non-text, 3:1 ok)."
+    },
+    "_source": {
+      "_note": "History continuum trailing-edge month rail. GIVEN (Wave A1 order): columnWidth 36, cap labels Plex 10.5 weight 600, sits behind a hairline, jump minTarget 44 tall. DERIVED (flagged): hairline.width 1; capLabel.lineHeight 14 (compact cap ratio in a 36-wide column).",
+      "_weightNote": "weightIntent 500 maps to the bundled IBM Plex Sans 500 cut (type.family.sansMedium) — the quiet-label register. Render-map capLabel.family -> type.family.sansMedium in Phase 6. (Corrected from 600 in [a1-palette]: DD-001 ships IBM Plex Sans 400/500/700 only, so 600 had no bundled cut; 500 is renderable and is the correct quiet-label weight.)",
+      "_calibrationFlag": "Size 10.5 and dp literals 36/44 precede the stubbed type/spacing scales — recalibrate; resolve the 600 cut in Phase 6."
+    }
+  },
+
+  "noteTick": {
+    "_unit": "dp",
+    "strokeLength": 6,
+    "strokeWidth": 1.5,
+    "lineCap": "round",
+    "laneOffsetBelowDotBaseline": 4,
+    "color": {
+      "stroke": "color.charcoal.500",
+      "_note": "Bound [a1-palette]; re-bound [a1-palette-ratify]. stroke=border-strong (load-bearing note marker) -> color.charcoal.500, sharing one coherent strong-border tone with terrain.dotRing. See terrain.color._ratified for the contrast measurement."
+    },
+    "_source": {
+      "_note": "Note marker on the continuum — says ONLY that a note exists. GIVEN (Wave A1 order): strokeLength 6 (vertical stroke), strokeWidth 1.5, rounded caps (lineCap 'round'), positioned in a fixed lane 4dp below the dot baseline at the noted day's x. Never under the dot (would collide with low states and fake a second data channel).",
+      "_geometryNote": "x = the noted day's column x (shared with terrain.dot x); y top = terrain.geometry.baselineFraction + laneOffsetBelowDotBaseline. Renders as a 6dp vertical line, 1.5dp wide, round caps.",
+      "_calibrationFlag": "dp literals 6/1.5/4 precede the stubbed spacing scale — recalibration candidates."
+    }
+  },
+
+  "skeletonTerrain": {
+    "_unit": "dp",
+    "dot": {
+      "radius": 6.5,
+      "ring": false,
+      "atFraction": 0.5
+    },
+    "connectingLine": false,
+    "shimmer": false,
+    "label": {
+      "size": 11,
+      "family": "type.family.sans",
+      "lineHeight": 14
+    },
+    "color": {
+      "dotFill": "color.border.default",
+      "label": "color.border.default",
+      "_note": "Bound [a1-palette]; clay re-bound [a1-palette-ratify]. clay (placeholder neutral) -> color.border.default for both the dot fill and the dash label.",
+      "_ratified": "[a1-palette-ratify] clay re-bound color.charcoal.300 -> color.border.default per design-owner ruling. border.default is themed (light #e7e5e4 / dark #3f3f46), so the skeleton glyph flips correctly in dark mode; the prior charcoal.300 was non-themed and broke dark-mode skeleton parity. Intentionally low-contrast — a quiet loading placeholder must never be misread as a real data point, so the 3:1 floor does not apply here (skeleton is decorative, not load-bearing)."
+    },
+    "_source": {
+      "_note": "Sync-loading skeleton for the terrain. GIVEN (Wave A1 order): clay-filled dots radius 6.5, NO ring (ring false), at midline (atFraction 0.5), NO connecting thread (connectingLine false), clay-dash labels, STATIC. Deliberately unlike the entry glyph (tinted + ringed, at height) and the no-entry glyph (hollow, at baseline) so loading can never be misread as data or as absence. DERIVED (flagged): label.size 11 (terrain parity); label.lineHeight 14.",
+      "_motionNote": "shimmer:false is asserted at the token level — a shimmer would be a fifth motion verb; the motion vocabulary is closed at four (swift/base/calm/breath). Do not add animation.",
+      "_calibrationFlag": "radius 6.5 and label-size 11 precede the stubbed type/spacing scales — recalibration candidates."
+    }
   }
 }
