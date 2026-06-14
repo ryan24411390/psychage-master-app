@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { User } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 
@@ -13,10 +14,10 @@ export function HeaderAvatar() {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Account"
-      // TODO(slice-?-auth): open identity sheet per DESIGN.mobile.md §2.3
-      // (account, premium, prefs, language, accessibility, data export, sign-out).
-      // Avatar destination is gated on rules/auth.md.
-      onPress={() => {}}
+      // Wave B2 (S42): the avatar opens Settings (Flow 18) — the calm list that
+      // holds prefs, accessibility, privacy/data, supporter, and the sign-out
+      // entry. The account/identity portion stays gated on rules/auth.md (B1).
+      onPress={() => router.push('/settings')}
       hitSlop={4}
     >
       <View className="h-11 w-11 items-center justify-center rounded-full bg-border dark:bg-border-dark">
