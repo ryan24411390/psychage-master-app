@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { colorForScheme, resolveColorRef, tabBarTokens } from '@/lib/a1-tokens';
+import { colorForScheme, resolveColorRef, tabBarTokens, terrainTokens } from '@/lib/a1-tokens';
 
 // Logic test (Vitest) — the A1 token resolver. These assertions double as a
 // drift guard: resolveColorRef throws on a missing/renamed token, and
@@ -49,5 +49,24 @@ describe('tabBarTokens', () => {
     expect(tabBarTokens.minTarget).toBe(44);
     expect(tabBarTokens.iconSize).toBe(24);
     expect(tabBarTokens.insetShadow.opacity).toBe(0.12);
+  });
+});
+
+describe('terrainTokens', () => {
+  it('pins fillByState — the percentages StateRows mirrors in className literals', () => {
+    expect(terrainTokens.fillByState).toEqual({ 0: 12, 1: 32, 2: 52, 3: 74, 4: 95 });
+  });
+
+  it('resolves the mood tints (mood.1..5) and the load-bearing ring (charcoal.500)', () => {
+    expect(terrainTokens.color.moodTint[0]).toEqual({ light: '#8B7FA8', dark: '#8B7FA8' });
+    expect(terrainTokens.color.moodTint[4]).toEqual({ light: '#15B8A6', dark: '#15B8A6' });
+    expect(terrainTokens.color.dotRing).toEqual({ light: '#78716C', dark: '#78716C' });
+  });
+
+  it('carries the terrain geometry verbatim', () => {
+    expect(terrainTokens.dot.radius).toBe(6.5);
+    expect(terrainTokens.todayDot.dash).toEqual([3, 3]);
+    expect(terrainTokens.geometry.baselineFraction).toBe(0.95);
+    expect(terrainTokens.geometry.midlineFraction).toBe(0.5);
   });
 });
