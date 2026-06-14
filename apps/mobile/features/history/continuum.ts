@@ -75,6 +75,14 @@ function mondayOf(d: Date): Date {
   return addDays(d, -backToMonday);
 }
 
+/** Human date for S8's detail header, e.g. "Tuesday 4 June 2026" (data, not copy). */
+export function formatEntryDate(iso: string): string {
+  const dt = parseIso(iso);
+  // getDay: 0=Sun…6=Sat → Mon-first index into DAYS.
+  const full = DAYS[(dt.getDay() + 6) % 7]?.[1] ?? '';
+  return `${full} ${dt.getDate()} ${MONTHS_FULL[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+
 /** Verbatim VoiceOver label for an entry day, e.g. "Tuesday 4 June: Good, with a note: tired." */
 function entryA11yLabel(fullDay: string, iso: string, state: CheckInState, note?: string): string {
   const dt = parseIso(iso);
