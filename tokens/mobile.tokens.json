@@ -278,7 +278,7 @@
     },
     "noEntryDot": {
       "radius": 4,
-      "atFraction": 0.5
+      "atFraction": 0.95
     },
     "todayDot": {
       "radius": 8,
