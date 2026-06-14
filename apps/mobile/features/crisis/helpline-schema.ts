@@ -1,29 +1,35 @@
-// Crisis helpline SCHEMA (Wave A2, PR A — S11/S12).
+// Crisis helpline SCHEMA (Wave A2, PR A — S11/S12; extended for CT3).
 //
-// The `helplineRow` schema is FROZEN by the Wave A2 order prose. No such type
-// exists on `main` (the only crisis type there is packages/shared/navigator
-// `CrisisResource`, a richer Supabase-shaped record). This file builds the frozen
-// five-field schema fresh. The actual verified helpline dataset + the full region
-// roster are the CT3 content/infra workstream — this file is the SCHEMA + the
-// emergency-number contract only. All concrete rows live in `helplines.fixtures.ts`
-// and are flagged CT3.
+// The Wave A2 order froze a five-field `helplineRow` (name, fiveWordDesc, callNumber,
+// textCapable, region) when no verified dataset existed. CT3 then delivered the real
+// verified dataset (see `helplines.seed.ts`), which carries call-only lines, text-only
+// lines (shortcodes with no voice number), and lines whose TEXT number differs from
+// their CALL number. The frozen single-number shape could not represent those without
+// dialing/texting the wrong number — a crisis-safety failure. Per founder decision
+// (2026-06-15) the schema is extended, still five fields: `callNumber` and `textNumber`
+// are each independently nullable (texting no longer reuses the call number), replacing
+// the `textCapable` boolean. `textCapable` is now derived: a row is text-capable iff
+// `textNumber !== null`. Invariant: at least one of the two is non-null.
 //
 // SR-4: nothing here is symptom data; the crisis surface persists only a region
 // override (a country code), never anything about the user's state.
 
-/** ISO 3166-1 alpha-2 region code (e.g. 'US', 'BD', 'GB'). Fixtures use a subset. */
+/** ISO 3166-1 alpha-2 region code (e.g. 'US', 'BD', 'GB'). */
 export type RegionCode = string;
 
 /**
- * One helpline row. The five fields ARE the frozen schema — add none, rename none.
- * `textCapable` true → S11 renders a Text button that opens messaging to `callNumber`
- * (the schema carries a single number; texting reuses it).
+ * One helpline row. Five fields, all carried verbatim into S11/S17.
+ * - `callNumber` — voice number, or `null` for a text-only line (no Call pill renders).
+ * - `textNumber` — SMS number (may differ from `callNumber`), or `null` when the line
+ *   is not text-capable (no Text pill renders).
+ * Invariant (enforced at the fixture boundary): `callNumber` and `textNumber` are not
+ * both null — every shipped row offers at least one way to reach help.
  */
 export interface HelplineRow {
   readonly name: string;
   readonly fiveWordDesc: string;
-  readonly callNumber: string;
-  readonly textCapable: boolean;
+  readonly callNumber: string | null;
+  readonly textNumber: string | null;
   readonly region: RegionCode;
 }
 

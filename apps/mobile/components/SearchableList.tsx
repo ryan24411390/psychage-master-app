@@ -1,6 +1,7 @@
+import { FlashList } from '@shopify/flash-list';
 import { Check, Search } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
@@ -11,9 +12,11 @@ import { colors } from '@/lib/colors';
 // else" search (S14) passes tealDeep. Generic over the row type so both screens reuse
 // it without a shared cross-wave file.
 //
-// Rows ≥44px. No match-highlighting (plain substring filter). Tapping a row selects.
-// `searchPlaceholder` / `noMatchLabel` are chrome strings the Flow Book does not
-// supply — callers pass clearly-flagged CT4 fixtures.
+// Backed by FlashList (per stack rule: FlashList for any list >20 items) now that the
+// CT3 region roster carries ~70 countries. Rows ≥44px. No match-highlighting (plain
+// substring filter). Tapping a row selects. `searchPlaceholder` / `noMatchLabel` are
+// chrome strings the Flow Book does not supply — callers pass clearly-flagged CT4
+// fixtures.
 
 export interface SearchableListProps<T> {
   readonly items: readonly T[];
@@ -69,7 +72,7 @@ export function SearchableList<T>({
         />
       </View>
 
-      <FlatList
+      <FlashList
         data={filtered}
         keyExtractor={getKey}
         keyboardShouldPersistTaps="handled"

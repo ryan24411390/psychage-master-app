@@ -17,7 +17,7 @@ const SYMPTOMS: SymptomOption[] = [
 ];
 
 const HELPLINES: HelplineRow[] = [
-  { name: 'Sample Line', fiveWordDesc: 'Free support, all hours here', callNumber: '111', textCapable: false, region: 'US' },
+  { name: 'Sample Line', fiveWordDesc: 'Free support, all hours here', callNumber: '111', textNumber: null, region: 'US' },
 ];
 
 const OK_RESULT = {
