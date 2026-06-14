@@ -37,7 +37,11 @@ export interface CheckInPushDeps {
   writeContext(): WriteContext;
 }
 
-const productionPushDeps: CheckInPushDeps = {
+// Exported so the anon→account migration push (features/auth/migration/remote.ts)
+// reuses the EXACT same seam — same auth client, user-id source, device/version
+// stamp, and configured-guard — instead of re-wiring a parallel set (SR-4: one
+// check-in write path, no duplicate plumbing).
+export const productionPushDeps: CheckInPushDeps = {
   enabled: isSupabaseConfigured,
   getUserId: async () => {
     // The auth client is the session-bearing instance; getUser reads the live session.
