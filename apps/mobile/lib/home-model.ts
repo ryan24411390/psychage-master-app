@@ -133,7 +133,7 @@ export function toTerrainDays(values: readonly TerrainValue[], today: Date): Ter
 export interface HomeStore {
   getToday(): CheckInEntry | undefined;
   getRecent(n: number): CheckInEntry[];
-  saveToday(state: CheckInState): CheckInEntry;
+  saveToday(state: CheckInState, note?: string): CheckInEntry;
   /**
    * Entries within `[from, to]` inclusive (YYYY-MM-DD local-day strings), oldest
    * first. Mirrors CheckInRecordStore.getRange — a read-only addition to the home's
