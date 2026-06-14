@@ -6,12 +6,14 @@ import { type Dial, dial as defaultDial } from '../dialer';
 import type { HelplineRow } from '../helpline-schema';
 import { smsUrl, telUrl } from '../intents';
 
-// One helpline row on S11: service name · five-word description · a Call pill and,
-// where the row is textCapable, a Text pill. Row ≥56px and grows on wrap (min height
-// + wrapping text). Action pills are rust-OUTLINE (≥44px) — never filled; the single
-// filled rust element on the surface is the emergency button. No haptics here (PLAIN
-// register; the pills open the dialer/messaging directly). `dial` is injectable so a
-// render test asserts the tel:/sms: intent without the native layer.
+// One helpline row on S11: service name · five-word description · a Call pill (when the
+// row has a voice number) and a Text pill (when it has a text number). A text-only line
+// renders no Call pill; a call-only line renders no Text pill — the schema carries the
+// two numbers independently so we never dial or text the wrong one. Row ≥56px and grows
+// on wrap. Action pills are rust-OUTLINE (≥44px) — never filled; the single filled rust
+// element on the surface is the emergency button. No haptics here (PLAIN register; the
+// pills open the dialer/messaging directly). `dial` is injectable so a render test
+// asserts the tel:/sms: intent without the native layer.
 //
 // Reused verbatim by the Navigator halt screen (S17) — do not fork it there.
 
@@ -45,25 +47,29 @@ function CrisisActionPill({
 }
 
 export function CrisisCallRow({ row, dial = defaultDial }: CrisisCallRowProps) {
+  // Destructure so TS narrows each number to a non-null string inside the press handlers.
+  const { name, callNumber, textNumber } = row;
   return (
     <View className="min-h-[56px] flex-row items-center justify-between gap-3 border-b border-border py-3 dark:border-border-dark">
       <View className="flex-1">
-        <Text variant="bodyMedium">{row.name}</Text>
+        <Text variant="bodyMedium">{name}</Text>
         <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
           {row.fiveWordDesc}
         </Text>
       </View>
       <View className="flex-row items-center gap-2">
-        <CrisisActionPill
-          label="Call"
-          accessibilityLabel={`Call ${row.name}`}
-          onPress={() => dial(telUrl(row.callNumber))}
-        />
-        {row.textCapable ? (
+        {callNumber ? (
+          <CrisisActionPill
+            label="Call"
+            accessibilityLabel={`Call ${name}`}
+            onPress={() => dial(telUrl(callNumber))}
+          />
+        ) : null}
+        {textNumber ? (
           <CrisisActionPill
             label="Text"
-            accessibilityLabel={`Text ${row.name}`}
-            onPress={() => dial(smsUrl(row.callNumber))}
+            accessibilityLabel={`Text ${name}`}
+            onPress={() => dial(smsUrl(textNumber))}
           />
         ) : null}
       </View>

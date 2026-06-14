@@ -10,7 +10,7 @@ const ROWS: readonly HelplineRow[] = [
     name: 'Sample Support Line',
     fiveWordDesc: 'Free confidential support, all hours',
     callNumber: '0-000-000-0001',
-    textCapable: true,
+    textNumber: '0-000-000-0001',
     region: 'US',
   },
 ];
