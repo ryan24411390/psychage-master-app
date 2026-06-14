@@ -9,7 +9,8 @@ import { CT4_LEARN } from '@/features/learn/copy';
 
 // S6 Learn — the article rail by topic (fixed order) + a Library entry. A plain
 // ScrollView + map (the category set is small; no FlashList). Each topic opens the
-// article reader (S22); the Library entry opens the WebView browse (S23, PR E).
+// category article list (real Supabase content, S6→list → reader S22); the Library
+// entry opens the WebView browse (S23, PR E).
 export function LearnView() {
   const t = CT4_LEARN;
   return (
@@ -24,7 +25,7 @@ export function LearnView() {
             key={cat.id}
             accessibilityRole="button"
             accessibilityLabel={cat.label}
-            onPress={() => router.push(`/article/${cat.id}`)}
+            onPress={() => router.push(`/learn/${cat.id}`)}
             testID={`learn-category-${cat.id}`}
             className="flex-row items-center gap-3 rounded-xl border border-border bg-surface p-3 dark:border-border-dark dark:bg-surface-dark"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
