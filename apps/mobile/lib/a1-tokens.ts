@@ -79,3 +79,43 @@ export const tabBarTokens = {
     insetShadowColor: resolveColorRef(tb.color.insetShadowColor),
   },
 } as const;
+
+const tr = tokens.terrain;
+
+/**
+ * terrain group (C0.3). Geometry as numbers (fractions are resolution-independent
+ * row-height multipliers); colors pre-resolved. fillByState (0..4 → 12/32/52/74/95)
+ * is the proportional fill level shared by the terrain dots AND the C0.4 state-row
+ * fill glyphs — StateRows mirrors these percentages in className literals and a unit
+ * test pins them here so a token change fails loudly rather than drifting silently.
+ */
+export const terrainTokens = {
+  dot: { radius: tr.dot.radius, ringWidth: tr.dot.ring.width },
+  noEntryDot: { radius: tr.noEntryDot.radius, atFraction: tr.noEntryDot.atFraction },
+  todayDot: {
+    radius: tr.todayDot.radius,
+    atFraction: tr.todayDot.atFraction,
+    strokeWidth: tr.todayDot.stroke.width,
+    dash: tr.todayDot.stroke.dash,
+  },
+  connectingLineWidth: tr.connectingLine.width,
+  fillByState: tr.fillByState,
+  geometry: {
+    baselineFraction: tr.geometry.baselineFraction,
+    midlineFraction: tr.geometry.midlineFraction,
+  },
+  label: { size: tr.label.size, lineHeight: tr.label.lineHeight },
+  color: {
+    dotRing: resolveColorRef(tr.color.dotRing),
+    connectingLine: resolveColorRef(tr.color.connectingLine),
+    label: resolveColorRef(tr.color.label),
+    todayDotStroke: resolveColorRef(tr.color.todayDotStroke),
+    moodTint: {
+      0: resolveColorRef(tr.color.moodTint['0']),
+      1: resolveColorRef(tr.color.moodTint['1']),
+      2: resolveColorRef(tr.color.moodTint['2']),
+      3: resolveColorRef(tr.color.moodTint['3']),
+      4: resolveColorRef(tr.color.moodTint['4']),
+    },
+  },
+} as const;
