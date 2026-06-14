@@ -36,10 +36,10 @@ function CrisisActionPill({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
-      className="min-h-[44px] min-w-[64px] items-center justify-center rounded-full border border-crisis px-4"
+      className="min-h-[44px] min-w-[64px] items-center justify-center rounded-full border border-crisis px-4 dark:border-crisis-dark"
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
-      <Text variant="bodyMedium" className="text-crisis">
+      <Text variant="bodyMedium" className="text-crisis dark:text-crisis-dark">
         {label}
       </Text>
     </Pressable>

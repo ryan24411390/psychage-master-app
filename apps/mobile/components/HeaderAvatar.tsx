@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { User } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 
-import { colors } from '@/lib/colors';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
 // C0.1 avatar — a 44px clay (color.border.default) circle. ANONYMOUS state shows
 // a NEUTRAL GLYPH, never an assumed initial (no display name exists yet). The
@@ -10,6 +10,9 @@ import { colors } from '@/lib/colors';
 // Layout spacing (the gap to the Help-now pill) is owned by GlobalHeader, so this
 // carries no margin of its own.
 export function HeaderAvatar() {
+  // Neutral glyph → secondary ink so it stays visible on the clay circle in both
+  // registers (charcoal-600 would vanish against the dark border fill on black).
+  const tc = useThemeColors();
   return (
     <Pressable
       accessibilityRole="button"
@@ -21,7 +24,7 @@ export function HeaderAvatar() {
       hitSlop={4}
     >
       <View className="h-11 w-11 items-center justify-center rounded-full bg-border dark:bg-border-dark">
-        <User size={20} color={colors.charcoal[600]} strokeWidth={1.75} />
+        <User size={20} color={tc.inkSecondary} strokeWidth={1.75} />
       </View>
     </Pressable>
   );

@@ -15,6 +15,10 @@ const c = tokens.color;
 // Slice 8. Primitives use interim Tailwind defaults until then.
 
 module.exports = {
+  // Class-driven dark mode: NativeWind toggles the `dark` class at runtime via
+  // colorScheme.set(...) (apps/mobile/app/_layout.tsx ← persisted appearance mode).
+  // Required for manual light/night/system control — media-gating throws on set.
+  darkMode: 'class',
   content: ['./app/**/*.{js,jsx,ts,tsx}', './components/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
@@ -57,7 +61,7 @@ module.exports = {
         error: { DEFAULT: c.semantic.error.light, dark: c.semantic.error.dark },
         success: { DEFAULT: c.semantic.success.light, dark: c.semantic.success.dark },
         warning: { DEFAULT: c.semantic.warning.light, dark: c.semantic.warning.dark },
-        crisis: c.crisis.red,
+        crisis: { DEFAULT: c.crisis.red, dark: c.crisis.redDark },
         relevance: {
           high: c.relevance.high,
           moderate: c.relevance.moderate,

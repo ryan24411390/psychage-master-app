@@ -7,7 +7,7 @@ import { Text } from '@/components/ui/Text';
 import { CT4_CONTENT } from '@/features/content/copy';
 import { getCt1Article } from '@/features/content/fixtures/ct1-articles';
 import { ReviewedByCredit } from '@/features/content/ReviewedByCredit';
-import { colors } from '@/lib/colors';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
 // S22 Article reader — NATIVE chrome. This is a pushed route (outside the tabs), so
 // it renders the GlobalHeader itself (carrying the Help-now pill) plus a native
@@ -16,6 +16,7 @@ import { colors } from '@/lib/colors';
 // ReviewedByCredit. A read article shows the pressed "You read this on {day}" mark.
 export function ArticleReader({ slug }: { slug: string }) {
   const t = CT4_CONTENT;
+  const tc = useThemeColors();
   const article = getCt1Article(slug);
 
   return (
@@ -30,7 +31,7 @@ export function ArticleReader({ slug }: { slug: string }) {
           testID="article-back"
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
-          <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
+          <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>

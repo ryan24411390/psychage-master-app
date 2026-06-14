@@ -9,8 +9,9 @@ import { colorForScheme, resolveColorRef, tabBarTokens, terrainTokens } from '@/
 
 describe('resolveColorRef', () => {
   it('resolves a themed base leaf to distinct light/dark registers', () => {
-    expect(resolveColorRef('color.text.primary')).toEqual({ light: '#0a0a0a', dark: '#fafaf9' });
-    expect(resolveColorRef('color.text.secondary')).toEqual({ light: '#57534e', dark: '#d6d3d1' });
+    // Dark register is the true-black palette (see color.background._divergence).
+    expect(resolveColorRef('color.text.primary')).toEqual({ light: '#0a0a0a', dark: '#FFFFFF' });
+    expect(resolveColorRef('color.text.secondary')).toEqual({ light: '#57534e', dark: '#B3B3B3' });
   });
 
   it('resolves a non-themed leaf to the same value in both registers', () => {
@@ -40,8 +41,8 @@ describe('tabBarTokens', () => {
     expect(tabBarTokens.color.iconTealDot).toEqual({ light: '#1A9B8C', dark: '#20B8A6' });
     expect(tabBarTokens.color.insetShadowColor).toEqual({ light: '#0C0A09', dark: '#0C0A09' });
     expect(tabBarTokens.color.activePillPressBg).toEqual({ light: '#e7e5e4', dark: '#262626' });
-    expect(tabBarTokens.color.labelActive).toEqual({ light: '#0a0a0a', dark: '#fafaf9' });
-    expect(tabBarTokens.color.labelInactive).toEqual({ light: '#57534e', dark: '#d6d3d1' });
+    expect(tabBarTokens.color.labelActive).toEqual({ light: '#0a0a0a', dark: '#FFFFFF' });
+    expect(tabBarTokens.color.labelInactive).toEqual({ light: '#57534e', dark: '#B3B3B3' });
   });
 
   it('carries the tab-bar geometry verbatim', () => {

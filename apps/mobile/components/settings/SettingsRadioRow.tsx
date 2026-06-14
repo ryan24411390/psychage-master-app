@@ -1,4 +1,5 @@
 import { Check } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
 import { View } from 'react-native';
 import { Pressable } from 'react-native';
 
@@ -35,6 +36,11 @@ export function SettingsRadioRow<T extends string>({
   value,
   onChange,
 }: SettingsRadioRowProps<T>) {
+  // Selection mark stays on the CHARCOAL register (never teal — the wave's
+  // register-neutral rule). On the true-black canvas charcoal-700 vanishes (~2:1),
+  // so the mark flips to a light charcoal in dark while light mode is unchanged.
+  const { colorScheme } = useColorScheme();
+  const checkColor = colorScheme === 'dark' ? colors.charcoal[300] : colors.charcoal[700];
   return (
     <View accessibilityRole="radiogroup" accessibilityLabel={groupLabel} className="gap-2">
       {options.map((option) => {
@@ -58,7 +64,7 @@ export function SettingsRadioRow<T extends string>({
             {isSelected ? (
               <Check
                 size={20}
-                color={colors.charcoal[700]}
+                color={checkColor}
                 strokeWidth={2.25}
                 testID="settings-radio-check"
               />
