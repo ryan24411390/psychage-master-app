@@ -41,6 +41,9 @@ export const storage: Storage = {
   remove(key) {
     mmkv.remove(key);
   },
+  getAllKeys() {
+    return mmkv.getAllKeys();
+  },
 };
 
 export type { Storage };

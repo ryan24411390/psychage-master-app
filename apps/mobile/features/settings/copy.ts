@@ -104,5 +104,11 @@ export const CT4_SETTINGS = {
     body: 'This is immediate and permanent on this device.',
     confirmLabel: 'Delete my record',
     keepLabel: 'Keep my account',
+    // Shown only when the server-side cascade can't be reached. Person-first,
+    // non-diagnostic, no medical claim — surfaces the gap rather than hiding it.
+    serverFailTitle: "Couldn't reach our servers",
+    serverFailBody:
+      "Your record on this device has been removed, but we couldn't reach our servers to delete your account data — it may still exist. Please try again when you're back online.",
+    serverFailAck: 'OK',
   },
 } as const;
