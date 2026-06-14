@@ -10,6 +10,7 @@ import Animated, {
 
 import { HomeCardSlot } from '@/components/home/HomeCardSlot';
 import { Mascot } from '@/components/home/Mascot';
+import { ReflectionRow } from '@/components/home/ReflectionRow';
 import { Terrain } from '@/components/terrain/Terrain';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
@@ -35,6 +36,10 @@ type HomeViewProps = {
   imprintSignal?: number;
   /** Bumps to tilt the mascot. */
   tiltSignal?: number;
+  /** Show the one-time "reflection ready" row on the record well (Flow 12). */
+  reflectionReady?: boolean;
+  /** Tap handler for the reflection row (marks it opened + opens S9 when it lands). */
+  onReflectionOpen?: () => void;
 };
 
 export function HomeView({
@@ -43,6 +48,8 @@ export function HomeView({
   onHistory,
   imprintSignal = 0,
   tiltSignal = 0,
+  reflectionReady = false,
+  onReflectionOpen,
 }: HomeViewProps) {
   const reduced = useReducedMotion();
   const [terrainWidth, setTerrainWidth] = useState(318);
@@ -127,6 +134,8 @@ export function HomeView({
             >
               <Terrain days={model.terrainDays} width={terrainWidth} />
             </View>
+            {/* Reflection-ready row — in place, no settle (consistent with S3) */}
+            {reflectionReady && <ReflectionRow onOpen={onReflectionOpen} />}
           </Animated.View>
 
           {/* CHECK-IN CTA */}

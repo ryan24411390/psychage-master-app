@@ -1,4 +1,9 @@
-import { asLocalCalendarDate, type CheckInEntry } from '@psychage/shared/check-in';
+import {
+  asLocalCalendarDate,
+  type CheckInEntry,
+  CheckInRecordStore,
+  type Storage,
+} from '@psychage/shared/check-in';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -7,10 +12,13 @@ import {
   ctaLabel,
   deriveKind,
   greeting,
+  isReflectionAvailable,
   lastNDayLabels,
   partOfDay,
+  priorWeekBounds,
   readForHour,
   recordLabel,
+  REFLECTION_MIN_ENTRIES,
   statusLine,
   toTerrainDays,
 } from '@/lib/home-model';
@@ -20,6 +28,35 @@ function ymd(d: Date): string {
 }
 function entry(id: string, date: Date, state: 0 | 1 | 2 | 3 | 4): CheckInEntry {
   return { id, date: asLocalCalendarDate(ymd(date)), state };
+}
+
+function memStorage(): Storage {
+  const m = new Map<string, string>();
+  return {
+    get: (k) => m.get(k) ?? null,
+    set: (k, v) => {
+      m.set(k, v);
+    },
+    remove: (k) => {
+      m.delete(k);
+    },
+  };
+}
+
+/** A real store seeded with one check-in per date (saveToday keys to the clock — Date Rule 1). */
+function storeSeededOn(dates: Date[]): CheckInRecordStore {
+  let clock = new Date(2026, 0, 1);
+  let n = 0;
+  const store = new CheckInRecordStore({
+    storage: memStorage(),
+    now: () => clock,
+    generateId: () => `id${n++}`,
+  });
+  for (const d of dates) {
+    clock = d;
+    store.saveToday(2);
+  }
+  return store;
 }
 
 describe('partOfDay', () => {
@@ -165,5 +202,56 @@ describe('buildTerrainDaysFromEntries', () => {
     const days = buildTerrainDaysFromEntries([], today);
     expect(days[6]?.value).toBe('today');
     expect(days[0]?.value).toBeNull();
+  });
+});
+
+describe('priorWeekBounds', () => {
+  // 2026-06-15 is a Monday; 06-08 (Mon) .. 06-14 (Sun) is the week before it.
+  it('returns the Monday–Sunday week before the week containing today', () => {
+    expect(priorWeekBounds(new Date(2026, 5, 15))).toEqual({ from: '2026-06-08', to: '2026-06-14' });
+  });
+
+  it('returns the SAME prior week from any day mid-week (never the in-progress week)', () => {
+    // Wed 06-17 is in the week 06-15..06-21; its candidate is still 06-08..06-14.
+    expect(priorWeekBounds(new Date(2026, 5, 17))).toEqual({ from: '2026-06-08', to: '2026-06-14' });
+    // Sun 06-21 (last day of that week) — still the prior week, not the current one.
+    expect(priorWeekBounds(new Date(2026, 5, 21))).toEqual({ from: '2026-06-08', to: '2026-06-14' });
+    // The following Monday 06-22 rolls the candidate forward to 06-15..06-21.
+    expect(priorWeekBounds(new Date(2026, 5, 22))).toEqual({ from: '2026-06-15', to: '2026-06-21' });
+  });
+});
+
+describe('isReflectionAvailable (Flow 12 following-Monday rule)', () => {
+  const monday = new Date(2026, 5, 15); // prior week = 06-08 .. 06-14
+
+  it('(a) a prior week with ≥3 entries is available the following Monday', () => {
+    const store = storeSeededOn([new Date(2026, 5, 8), new Date(2026, 5, 9), new Date(2026, 5, 10)]);
+    expect(isReflectionAvailable(store, monday)).toBe(true);
+  });
+
+  it('(b) a prior week with <3 entries is not available', () => {
+    const store = storeSeededOn([new Date(2026, 5, 8), new Date(2026, 5, 9)]);
+    expect(isReflectionAvailable(store, monday)).toBe(false);
+  });
+
+  it('(c) a mid-week third entry does not trigger before the following Monday', () => {
+    // Three entries land in the CURRENT week (06-15..06-21); the prior week is empty.
+    const store = storeSeededOn([
+      new Date(2026, 5, 15),
+      new Date(2026, 5, 16),
+      new Date(2026, 5, 17),
+    ]);
+    expect(isReflectionAvailable(store, new Date(2026, 5, 17))).toBe(false); // candidate = empty prior week
+    expect(isReflectionAvailable(store, new Date(2026, 5, 22))).toBe(true); // following Monday: that week is now prior
+  });
+
+  it('(e) the boundary is the single REFLECTION_MIN_ENTRIES constant', () => {
+    expect(REFLECTION_MIN_ENTRIES).toBe(3);
+    const three = storeSeededOn([new Date(2026, 5, 8), new Date(2026, 5, 9), new Date(2026, 5, 10)]);
+    const two = storeSeededOn([new Date(2026, 5, 8), new Date(2026, 5, 9)]);
+    // 3 → available, 2 → not. Lowering the constant to 2 flips the second assertion —
+    // the single-source proof (the literal is never scattered through the logic).
+    expect(isReflectionAvailable(three, monday)).toBe(true);
+    expect(isReflectionAvailable(two, monday)).toBe(false);
   });
 });

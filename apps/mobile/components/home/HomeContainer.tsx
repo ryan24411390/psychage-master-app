@@ -6,6 +6,7 @@ import { CheckInSheet } from '@/components/check-in/CheckInSheet';
 import { HomeView } from '@/components/home/HomeView';
 import type { TerrainValue } from '@/components/terrain/terrain-geometry';
 import { Text } from '@/components/ui/Text';
+import { storage } from '@/lib/adapters/storage';
 import { STATE_LABELS } from '@/lib/check-in-labels';
 import { useHaptics } from '@/lib/haptic-context';
 import {
@@ -17,11 +18,16 @@ import {
   type HomeStateKind,
   type HomeStore,
   type HomeViewModel,
+  isReflectionAvailable,
   readForHour,
   recordLabel,
   statusLine,
   toTerrainDays,
 } from '@/lib/home-model';
+import {
+  isReflectionRowOpened,
+  markReflectionRowOpened,
+} from '@/lib/persistence/reflection-row';
 
 // Stateful S3 container (sub-slice E). Takes the RecordStore as a prop so render
 // tests inject an in-memory double (the real store imports the shared package at
@@ -32,6 +38,19 @@ import {
 
 type DevMode = 'live' | HomeStateKind;
 const DEV_MODES: readonly DevMode[] = ['live', 'first-run', 'regular', 'checked-in', 'away'];
+
+// Dismissal seam for the one-time reflection row — injected so render tests can drive
+// the opened/not-opened states directly. The default is the mobile-local flag (off the
+// RecordStore; see lib/persistence/reflection-row for why local, not store meta).
+export interface ReflectionGate {
+  isOpened(): boolean;
+  markOpened(): void;
+}
+
+const storageReflectionGate: ReflectionGate = {
+  isOpened: () => isReflectionRowOpened(storage),
+  markOpened: () => markReflectionRowOpened(storage),
+};
 
 // Fixture day-values (v5 shapes) for the forced dev states.
 const REGULAR_VALUES: readonly TerrainValue[] = [3, 2, 1, null, 2, 3, 'today'];
@@ -107,17 +126,38 @@ function buildLiveModel(store: HomeStore, now: Date): HomeViewModel {
   };
 }
 
-export function HomeContainer({ store }: { store: HomeStore }) {
+export function HomeContainer({
+  store,
+  reflectionGate = storageReflectionGate,
+}: {
+  store: HomeStore;
+  reflectionGate?: ReflectionGate;
+}) {
   const { fireHaptic } = useHaptics();
   const [devMode, setDevMode] = useState<DevMode>('live');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [imprintSignal, setImprintSignal] = useState(0);
   const [tiltSignal, setTiltSignal] = useState(0);
+  const [reflectionOpened, setReflectionOpened] = useState(() => reflectionGate.isOpened());
 
   // Derived fresh each render (cheap store reads). After a save, the setState calls in
   // handleSave re-render and re-derive from the now-mutated store — no memo/tick needed.
+  const now = new Date();
   const model =
-    devMode === 'live' ? buildLiveModel(store, new Date()) : buildFixtureModel(devMode, new Date());
+    devMode === 'live' ? buildLiveModel(store, now) : buildFixtureModel(devMode, now);
+
+  // The one-time reflection row: only in live mode, only while available (Flow 12's
+  // following-Monday rule, store-derived) AND not yet opened. Fixtures never show it.
+  const reflectionReady =
+    devMode === 'live' && !reflectionOpened && isReflectionAvailable(store, now);
+
+  const handleReflectionOpen = useCallback(() => {
+    reflectionGate.markOpened();
+    setReflectionOpened(true);
+    // S9 STUB: the weekly reflection screen is a later A2 wave — opening the row is
+    // the one-time dismissal this slice delivers; the destination is out of scope.
+    // TODO(A2/S9): navigate to the reflection screen when it lands.
+  }, [reflectionGate]);
 
   const handleSave = useCallback(
     (state: CheckInState) => {
@@ -166,6 +206,8 @@ export function HomeContainer({ store }: { store: HomeStore }) {
         onHistory={() => {}}
         imprintSignal={imprintSignal}
         tiltSignal={tiltSignal}
+        reflectionReady={reflectionReady}
+        onReflectionOpen={handleReflectionOpen}
       />
 
       {sheetOpen && <CheckInSheet onSave={handleSave} onClose={() => setSheetOpen(false)} />}

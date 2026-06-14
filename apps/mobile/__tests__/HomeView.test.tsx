@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
 
 import type { HomeViewModel } from '@/lib/home-model';
 import { READS, toTerrainDays } from '@/lib/home-model';
@@ -57,5 +57,27 @@ describe('HomeView (S3)', () => {
     expect(screen.getByText('Welcome')).toBeTruthy();
     expect(screen.getByText('This is your space. It starts whenever you’re ready.')).toBeTruthy();
     expect(screen.getByText('Your record')).toBeTruthy();
+  });
+
+  it('omits the reflection-ready row unless reflectionReady is set', () => {
+    render(REGULAR);
+    expect(screen.queryByText('This week’s reflection is ready.')).toBeNull();
+  });
+
+  it('renders the reflection-ready row (verbatim copy) with a tap handler when ready', () => {
+    const onReflectionOpen = jest.fn();
+    renderWithProviders(
+      <HomeView
+        model={REGULAR}
+        onCheckIn={() => {}}
+        onHistory={() => {}}
+        reflectionReady
+        onReflectionOpen={onReflectionOpen}
+      />,
+      { haptics: true },
+    );
+    expect(screen.getByText('This week’s reflection is ready.')).toBeTruthy();
+    fireEvent.press(screen.getByRole('button', { name: 'This week’s reflection is ready.' }));
+    expect(onReflectionOpen).toHaveBeenCalledTimes(1);
   });
 });
