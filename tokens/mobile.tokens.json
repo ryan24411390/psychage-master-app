@@ -259,9 +259,9 @@
       "labelInactive": "color.text.secondary",
       "iconTealDot": "color.primary.default",
       "activePillPressBg": "color.surface.active",
-      "insetShadowColor": "color.text.primary",
-      "_note": "Bound [a1-palette] to existing cool color.* tokens via path-string refs (consumer resolves light/dark for themed leaves). Shared role map across the six A1 groups: ink->color.text.primary, ink-2->color.text.secondary, ink-3/faint->color.text.tertiary, teal->color.primary.default (themed, so dark mode swaps the pictogram dot), pressed-surface->color.surface.active, border-strong->color.border.hover, neutral-hairline->color.border.default, clay->color.charcoal.300 (see skeletonTerrain).",
-      "_ratifyFlag": "insetShadowColor->color.text.primary inverts to a near-white tone in dark mode (inset-shadow geometry opacity 0.12); an inset shadow should stay dark — color.charcoal.950 (non-themed) may be the correct bind. Design-owner to ratify."
+      "insetShadowColor": "color.charcoal.950",
+      "_note": "Bound [a1-palette] to existing cool color.* tokens via path-string refs (consumer resolves light/dark for themed leaves); border-strong/clay/shadow ratified [a1-palette-ratify]. Shared role map across the six A1 groups: ink->color.text.primary, ink-2->color.text.secondary, ink-3/faint->color.text.tertiary, teal->color.primary.default (themed, so dark mode swaps the pictogram dot), pressed-surface->color.surface.active, border-strong->color.charcoal.500 (load-bearing ring/tick; was color.border.hover, failed the 3:1 floor), neutral-hairline->color.border.default, clay->color.border.default (see skeletonTerrain; was color.charcoal.300).",
+      "_ratified": "[a1-palette-ratify] insetShadowColor re-bound color.text.primary -> color.charcoal.950. text.primary inverts to near-white in dark mode; a shadow must stay dark in both registers, and charcoal.950 (#0C0A09, non-themed) names a dark tone for both. (RN has no native inset shadow; the geometry opacity 0.12 is consumed via a later Slice-2 Skia/overlay decision — this token only needs to name a dark color.)"
     },
     "_source": {
       "_note": "Bottom tab bar geometry, 4 tabs. Active = pressed treatment (inset shadow + press-bg); inactive = flat; label always visible. GIVEN (Wave A1 order): tabCount 4, icon.size 24, label.size 11 (IBM Plex Sans → type.family.sans), minTarget 44 floor, one teal dot per pictogram. DERIVED (flagged for design ratification): barHeight 56 (iOS HIG tab bar 49pt + label band, rounded onto the 8pt-grid baseline; clears the 44 target + 11/14 label); label.lineHeight 14 (~1.27x of 11, compact-UI ratio); activePill.radius reuses canonical radius.lg (sub-component pill < card 'xl'; 'full' would over-round a wide tab cell); insetShadow geometry {offsetY 1, blur 2, opacity 0.12, inset} — conservative recessed read. Label weight is carried by the family token (sans = 400 cut); no numeric weight scale exists.",
@@ -301,7 +301,7 @@
       "lineHeight": 14
     },
     "color": {
-      "dotRing": "color.border.hover",
+      "dotRing": "color.charcoal.500",
       "connectingLine": "color.border.default",
       "label": "color.text.tertiary",
       "todayDotStroke": "color.primary.default",
@@ -312,8 +312,8 @@
         "3": "color.mood.4",
         "4": "color.mood.5"
       },
-      "_note": "Bound [a1-palette]. dotRing=border-strong (load-bearing ring), connectingLine=neutral-hairline, label=ink-3 (de-emphasized axis labels), todayDotStroke=teal (today/now signal, themed). moodTint references color.mood.1..5 (mood-feature-scoped; not duplicated).",
-      "_ratifyFlag": "border-strong has no exact token; bound to color.border.hover (the stronger of two borders). The light value of color.border.hover does NOT reach 3:1 vs the paper background (color.background.light), so the load-bearing dot-ring contrast rescue needs re-verification — a darker neutral (e.g. color.charcoal.400/500) may be required. Design-owner to ratify."
+      "_note": "Bound [a1-palette]; border-strong re-bound [a1-palette-ratify]. dotRing=border-strong (load-bearing ring) -> color.charcoal.500, connectingLine=neutral-hairline (deliberately lighter structural hairline; stays color.border.default), label=ink-3 (de-emphasized axis labels), todayDotStroke=teal (today/now signal, themed). moodTint references color.mood.1..5 (mood-feature-scoped; not duplicated).",
+      "_ratified": "[a1-palette-ratify] border-strong re-bound color.border.hover -> color.charcoal.500. Measured WCAG vs color.background: border.hover.light(#d6d3d1)=1.392:1 FAIL; charcoal.400(#A8A29E)=2.357:1 FAIL; charcoal.500(#78716C)=4.484:1 light / 3.995:1 dark PASS. charcoal.500 is the lightest charcoal leaf clearing the 3:1 floor — keeps the ring quiet while rescuing the okay-mood dot (okay tint color.mood.3 alone is ~2.28:1, below 3:1, so the ring is the sole legibility mechanism = JC-4). connectingLine left at color.border.default: the order's 'bind all three to one charcoal' prose was overridden by its own NOTE and by the file, which already had connectingLine as the lighter, non-load-bearing hairline (file governs)."
     },
     "_source": {
       "_note": "Record (terrain) visualization geometry — component-only. GIVEN (Wave A1 order): dot.radius 6.5 with a 1px ring (load-bearing contrast rescue), noEntryDot.radius 4 (hollow) at baseline, todayDot.radius 8 (dashed open circle) at midline, connectingLine only between consecutive entries, label.size 11, fillByState 12/32/52/74/95 for states 0-4. DERIVED (flagged): atFraction 0.5 = midline and baselineFraction 0.95 = bottom band (verbal anchors expressed as resolution-independent row-height fractions, since no spacing scale exists); todayDot.stroke {width 1.5, dash [3,3]} renders the 'dashed open circle'; connectingLine.width 1 (hairline); label.lineHeight 14.",
@@ -377,8 +377,8 @@
     "lineCap": "round",
     "laneOffsetBelowDotBaseline": 4,
     "color": {
-      "stroke": "color.border.hover",
-      "_note": "Bound [a1-palette]. stroke=border-strong (load-bearing note marker); shares the border-strong ratify caveat in terrain.color._ratifyFlag."
+      "stroke": "color.charcoal.500",
+      "_note": "Bound [a1-palette]; re-bound [a1-palette-ratify]. stroke=border-strong (load-bearing note marker) -> color.charcoal.500, sharing one coherent strong-border tone with terrain.dotRing. See terrain.color._ratified for the contrast measurement."
     },
     "_source": {
       "_note": "Note marker on the continuum — says ONLY that a note exists. GIVEN (Wave A1 order): strokeLength 6 (vertical stroke), strokeWidth 1.5, rounded caps (lineCap 'round'), positioned in a fixed lane 4dp below the dot baseline at the noted day's x. Never under the dot (would collide with low states and fake a second data channel).",
@@ -402,10 +402,10 @@
       "lineHeight": 14
     },
     "color": {
-      "dotFill": "color.charcoal.300",
-      "label": "color.charcoal.300",
-      "_note": "Bound [a1-palette]. clay (placeholder neutral) -> color.charcoal.300 for both the dot fill and the dash label.",
-      "_ratifyFlag": "NO clean 'clay' analog exists in the cool color.* palette. Bound to color.charcoal.300 (non-themed) as nearest placeholder tone; non-themed means dark-mode skeleton parity is unverified (themed alternative: color.border.default). Design-owner to ratify."
+      "dotFill": "color.border.default",
+      "label": "color.border.default",
+      "_note": "Bound [a1-palette]; clay re-bound [a1-palette-ratify]. clay (placeholder neutral) -> color.border.default for both the dot fill and the dash label.",
+      "_ratified": "[a1-palette-ratify] clay re-bound color.charcoal.300 -> color.border.default per design-owner ruling. border.default is themed (light #e7e5e4 / dark #3f3f46), so the skeleton glyph flips correctly in dark mode; the prior charcoal.300 was non-themed and broke dark-mode skeleton parity. Intentionally low-contrast — a quiet loading placeholder must never be misread as a real data point, so the 3:1 floor does not apply here (skeleton is decorative, not load-bearing)."
     },
     "_source": {
       "_note": "Sync-loading skeleton for the terrain. GIVEN (Wave A1 order): clay-filled dots radius 6.5, NO ring (ring false), at midline (atFraction 0.5), NO connecting thread (connectingLine false), clay-dash labels, STATIC. Deliberately unlike the entry glyph (tinted + ringed, at height) and the no-entry glyph (hollow, at baseline) so loading can never be misread as data or as absence. DERIVED (flagged): label.size 11 (terrain parity); label.lineHeight 14.",
