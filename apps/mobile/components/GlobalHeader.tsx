@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { LifeBuoy } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,8 +21,10 @@ function HelpNowPill() {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Help now"
-      // Crisis surface is a later order — wire the press target, not the destination.
-      onPress={() => {}}
+      // A2/PR-A: the crisis surface now exists — wire the destination (the in-file
+      // note above invited this; the global `router` keeps render safe so no nav
+      // context is needed at render, only on press). Crisis is reachable in ≤1 tap.
+      onPress={() => router.push('/crisis')}
       hitSlop={4}
       className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-3"
     >
