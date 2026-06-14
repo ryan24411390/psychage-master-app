@@ -29,13 +29,22 @@ export interface PostgrestResult<T> {
 export type InsertValues = Record<string, unknown> | readonly Record<string, unknown>[];
 
 /**
+ * The subset of supabase-js upsert options the wrappers use. `onConflict` names the
+ * unique-constraint columns a re-write collides on (e.g. the per-day check-in key) so
+ * the upsert UPDATEs the existing row instead of inserting a duplicate.
+ */
+export interface UpsertOptions {
+  readonly onConflict?: string;
+}
+
+/**
  * Minimal thenable query builder. A bare `await builder` resolves to a list
  * (`PostgrestResult<readonly Row[]>`); `.single()` / `.maybeSingle()` narrow to one.
  */
 export interface PostgrestBuilder<Row> extends PromiseLike<PostgrestResult<readonly Row[]>> {
   select(columns?: string): PostgrestBuilder<Row>;
   insert(values: InsertValues): PostgrestBuilder<Row>;
-  upsert(values: InsertValues): PostgrestBuilder<Row>;
+  upsert(values: InsertValues, options?: UpsertOptions): PostgrestBuilder<Row>;
   eq(column: string, value: string): PostgrestBuilder<Row>;
   single(): PromiseLike<PostgrestResult<Row>>;
   maybeSingle(): PromiseLike<PostgrestResult<Row | null>>;
