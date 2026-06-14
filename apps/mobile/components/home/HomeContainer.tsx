@@ -1,5 +1,6 @@
 import type { CheckInState } from '@psychage/shared/check-in';
-import { useCallback, useState } from 'react';
+import { router } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { CheckInSheet } from '@/components/check-in/CheckInSheet';
@@ -129,9 +130,17 @@ function buildLiveModel(store: HomeStore, now: Date): HomeViewModel {
 export function HomeContainer({
   store,
   reflectionGate = storageReflectionGate,
+  navigateToReflection = () => router.push('/reflection'),
+  autoOpenCheckIn = false,
 }: {
   store: HomeStore;
   reflectionGate?: ReflectionGate;
+  // Navigation seam (mirrors reflectionGate): the default pushes S9; render tests
+  // inject a spy so they never touch the real router (which throws without a root).
+  navigateToReflection?: () => void;
+  // A2/PR-E: onboarding's "Do your first check-in" opens S4 over the first-run home
+  // via the ?checkin=1 route param, which the index route maps to this prop.
+  autoOpenCheckIn?: boolean;
 }) {
   const { fireHaptic } = useHaptics();
   const [devMode, setDevMode] = useState<DevMode>('live');
@@ -139,6 +148,12 @@ export function HomeContainer({
   const [imprintSignal, setImprintSignal] = useState(0);
   const [tiltSignal, setTiltSignal] = useState(0);
   const [reflectionOpened, setReflectionOpened] = useState(() => reflectionGate.isOpened());
+
+  // Open S4 once on mount when arriving from onboarding (?checkin=1). The param stays
+  // truthy, but the effect only fires on mount/prop-change, so closing the sheet is final.
+  useEffect(() => {
+    if (autoOpenCheckIn) setSheetOpen(true);
+  }, [autoOpenCheckIn]);
 
   // Derived fresh each render (cheap store reads). After a save, the setState calls in
   // handleSave re-render and re-derive from the now-mutated store — no memo/tick needed.
@@ -154,15 +169,15 @@ export function HomeContainer({
   const handleReflectionOpen = useCallback(() => {
     reflectionGate.markOpened();
     setReflectionOpened(true);
-    // S9 STUB: the weekly reflection screen is a later A2 wave — opening the row is
-    // the one-time dismissal this slice delivers; the destination is out of scope.
-    // TODO(A2/S9): navigate to the reflection screen when it lands.
-  }, [reflectionGate]);
+    // A2/PR-D: S9 now exists — navigate to it (via the injected seam). The one-time
+    // dismissal above still fires on tap (kept).
+    navigateToReflection();
+  }, [reflectionGate, navigateToReflection]);
 
   const handleSave = useCallback(
-    (state: CheckInState) => {
+    (state: CheckInState, note?: string) => {
       const firstSaveToday = store.getToday() === undefined;
-      store.saveToday(state);
+      store.saveToday(state, note);
       fireHaptic('confirm');
       // Imprint (ring + scale) fires ONLY on the first save of today; a same-day
       // re-save overwrites without replaying it. The haptic fires either way.
@@ -203,7 +218,7 @@ export function HomeContainer({
       <HomeView
         model={model}
         onCheckIn={() => setSheetOpen(true)}
-        onHistory={() => {}}
+        onHistory={() => router.push('/history')}
         imprintSignal={imprintSignal}
         tiltSignal={tiltSignal}
         reflectionReady={reflectionReady}

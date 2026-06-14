@@ -1,27 +1,38 @@
-import { View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { router } from 'expo-router';
+import { ScrollView } from 'react-native';
 
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
-import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
+import { CompassTile } from '@/features/compass/CompassTile';
+import { CT4_COMPASS } from '@/features/compass/copy';
+import { COMPASS_ROUTES } from '@/features/compass/routes';
 
-// Canonical tab-screen template (W2-A): ScreenShell + token-variant Text only —
-// no raw color/font literals. Entrance motion gated on useReducedMotion per the
-// DESIGN.mobile.md §3.1 two-tier rule. Stub body until first-screen calibration.
-
+// S5 Compass tab — the landing SHELL. B2 owns this shell; the tiles link to A2's
+// pushed destinations (S19 Toolkit, S13 Navigator), now live on main via
+// COMPASS_ROUTES (/toolkit, /navigator). B2 does NOT build the destinations.
+// The GlobalHeader (incl. the Help-now pill) is injected by the tabs layout, so
+// this screen carries no header of its own.
 export default function CompassScreen() {
-  const reduced = useReducedMotion();
+  const t = CT4_COMPASS;
   return (
-    <ScreenShell>
-      <Animated.View
-        entering={reduced ? undefined : FadeIn.duration(DURATION.base).easing(easingFn('out'))}
-        className="flex-1 items-center justify-center"
-      >
-        <View className="gap-3 items-center">
-          <Text variant="headingLg">Compass</Text>
-          <Text variant="body">Coming soon.</Text>
-        </View>
-      </Animated.View>
+    <ScreenShell edges={['bottom']}>
+      <ScrollView contentContainerClassName="gap-3 py-4" showsVerticalScrollIndicator={false}>
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+          {t.heading}
+        </Text>
+        <CompassTile
+          title={t.toolkit.title}
+          subLabel={t.toolkit.sub}
+          onPress={() => router.push(COMPASS_ROUTES.toolkit)}
+          testID="compass-tile-toolkit"
+        />
+        <CompassTile
+          title={t.navigator.title}
+          subLabel={t.navigator.sub}
+          onPress={() => router.push(COMPASS_ROUTES.navigator)}
+          testID="compass-tile-navigator"
+        />
+      </ScrollView>
     </ScreenShell>
   );
 }

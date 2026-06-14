@@ -1,6 +1,9 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 
+import { isSupabaseConfigured } from '@/lib/supabase/client';
+
 import { createStubAuthService, type AuthService, type AuthSession } from './auth-service';
+import { createSupabaseAuthService } from './supabase-auth-service';
 
 // useAuth() — the React context wrapper rules/auth.md §10 requires for all auth calls.
 //
@@ -14,9 +17,13 @@ interface AuthContextValue {
   setSession(session: AuthSession | null): void;
 }
 
-// Module-singleton stub so the default context (no provider) and the provider default
-// share one service instance. Swapped for the real Supabase-backed service later.
-const defaultService = createStubAuthService();
+// Module-singleton service shared by the default context (no provider) and the
+// provider default. Env-gated (Slice 2): the real Supabase-backed service is used
+// when EXPO_PUBLIC_SUPABASE_* is configured; otherwise the in-memory stub keeps
+// screens (and tests) working with no backend.
+const defaultService: AuthService = isSupabaseConfigured()
+  ? createSupabaseAuthService()
+  : createStubAuthService();
 
 const AuthContext = createContext<AuthContextValue>({
   session: null,

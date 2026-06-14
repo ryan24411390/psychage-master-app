@@ -1,27 +1,41 @@
-import { View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { router } from 'expo-router';
+import { ScrollView } from 'react-native';
 
+import { Button } from '@/components/ui/Button';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
-import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
+import { CT4_FIND } from '@/features/find/copy';
+import { OfflineFallback } from '@/features/offline/OfflineFallback';
+import { useIsOnline } from '@/features/offline/useIsOnline';
 
-// Canonical tab-screen template (W2-A): ScreenShell + token-variant Text only —
-// no raw color/font literals. Entrance motion gated on useReducedMotion per the
-// DESIGN.mobile.md §3.1 two-tier rule. Stub body until first-screen calibration.
-
+// S28 Find tab. Online: a thin landing into the directory (S26, a WebView screen in
+// PR E — the push resolves once that route lands). Offline: the honest fallback, so
+// the Find directory never shows a dead WebView. The GlobalHeader is the tabs header.
 export default function FindScreen() {
-  const reduced = useReducedMotion();
+  const online = useIsOnline();
+
+  if (!online) {
+    return (
+      <ScreenShell edges={['bottom']}>
+        <OfflineFallback variant="offline" testID="find-offline" />
+      </ScreenShell>
+    );
+  }
+
+  const t = CT4_FIND;
   return (
-    <ScreenShell>
-      <Animated.View
-        entering={reduced ? undefined : FadeIn.duration(DURATION.base).easing(easingFn('out'))}
-        className="flex-1 items-center justify-center"
-      >
-        <View className="gap-3 items-center">
-          <Text variant="headingLg">Find</Text>
-          <Text variant="body">Coming soon.</Text>
-        </View>
-      </Animated.View>
+    <ScreenShell edges={['bottom']}>
+      <ScrollView contentContainerClassName="gap-4 py-4" showsVerticalScrollIndicator={false}>
+        <Text variant="headingLg" className="px-1">
+          {t.title}
+        </Text>
+        <Text variant="body" className="px-1 text-text-secondary dark:text-text-secondary-dark">
+          {t.intro}
+        </Text>
+        <Button variant="primary" onPress={() => router.push('/find/directory')} testID="find-open-directory">
+          {t.openDirectory}
+        </Button>
+      </ScrollView>
     </ScreenShell>
   );
 }
