@@ -1,9 +1,16 @@
-// Supabase client — the mobile app's single @supabase/supabase-js instance.
+// Supabase AUTH client — the session-bearing @supabase/supabase-js instance.
 //
-// Slice 2 (platform JWT claim) introduces the FIRST real Supabase binding in the
-// mobile app, scoped to AUTH only (sign-up / sign-in / sign-out / session) plus
-// the record_auth_event RPC. No personal-data reads/writes go through here yet —
-// those land with their own slices.
+// Slice 2 (platform JWT claim). Scoped to AUTH only: sign-up / sign-in /
+// sign-out / session + the record_auth_event RPC. No personal-data reads/writes.
+//
+// RELATIONSHIP TO `@/lib/supabase` (lib/supabase.ts): that module is the
+// READ-ONLY ANON client for public reference data (crisis, articles) —
+// persistSession:false, returns null when unconfigured. THIS module is the
+// session-bearing AUTH client — persistSession:true + expo-secure-store. They
+// are deliberately separate instances with different contracts; a distinct
+// `storageKey` keeps their session storage from colliding. Consolidating both
+// into `packages/api` is the planned follow-up (see lib/supabase.ts's own note)
+// — out of scope for the identity-substrate slice.
 //
 // SECURITY (Procedure-B checklist):
 //   #1 TLS — the URL is HTTPS; supabase-js enforces TLS on every request.
@@ -29,7 +36,7 @@ export function isSupabaseConfigured(): boolean {
   return readEnv() !== null;
 }
 
-export function createSupabaseClient(
+export function createSupabaseAuthClient(
   url: string,
   anonKey: string,
   storage: SupabaseAuthStorage = secureStoreStorage,
@@ -37,6 +44,9 @@ export function createSupabaseClient(
   return createClient(url, anonKey, {
     auth: {
       storage,
+      // distinct from the anon read client (lib/supabase.ts) to avoid a shared
+      // GoTrue storage key across the two coexisting instances.
+      storageKey: 'psychage-auth',
       persistSession: true,
       autoRefreshToken: true,
       // No URL-based session detection on native (no browser redirect surface).
@@ -47,13 +57,13 @@ export function createSupabaseClient(
 
 let cached: SupabaseClient | null = null;
 
-/** Lazy singleton. Throws only if called without configured env. */
-export function getSupabaseClient(): SupabaseClient {
+/** Lazy singleton auth client. Throws only if called without configured env. */
+export function getSupabaseAuthClient(): SupabaseClient {
   if (cached) return cached;
   const env = readEnv();
   if (!env) {
     throw new Error('Supabase env not configured (EXPO_PUBLIC_SUPABASE_URL / _ANON_KEY).');
   }
-  cached = createSupabaseClient(env.url, env.anonKey);
+  cached = createSupabaseAuthClient(env.url, env.anonKey);
   return cached;
 }

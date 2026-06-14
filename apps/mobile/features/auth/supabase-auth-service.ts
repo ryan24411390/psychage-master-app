@@ -20,7 +20,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { getOrCreateDeviceId } from '@/lib/device-id';
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { getSupabaseAuthClient } from '@/lib/supabase/client';
 
 import type { AuthResult, AuthService, VerificationStatus } from './auth-service';
 
@@ -45,7 +45,7 @@ function isNetworkError(error: unknown): boolean {
 }
 
 export function createSupabaseAuthService(deps: SupabaseAuthServiceDeps = {}): AuthService {
-  const client = deps.client ?? getSupabaseClient();
+  const client = deps.client ?? getSupabaseAuthClient();
   const deviceId = deps.deviceId ?? getOrCreateDeviceId();
 
   // Best-effort audit. Never throws into the auth UX; a failed audit write must
