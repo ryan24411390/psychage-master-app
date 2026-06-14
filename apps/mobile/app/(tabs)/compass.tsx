@@ -8,10 +8,10 @@ import { CT4_COMPASS } from '@/features/compass/copy';
 import { COMPASS_ROUTES } from '@/features/compass/routes';
 
 // S5 Compass tab — the landing SHELL. B2 owns this shell; the tiles link to A2's
-// pushed destinations (S19 Toolkit, S13 Navigator) which land later — the pushes
-// resolve to route-not-found until then (correct stub). B2 does NOT build the
-// destinations. The GlobalHeader (incl. the Help-now pill) is injected by the tabs
-// layout, so this screen carries no header of its own.
+// pushed destinations (S19 Toolkit, S13 Navigator), now live on main via
+// COMPASS_ROUTES (/toolkit, /navigator). B2 does NOT build the destinations.
+// The GlobalHeader (incl. the Help-now pill) is injected by the tabs layout, so
+// this screen carries no header of its own.
 export default function CompassScreen() {
   const t = CT4_COMPASS;
   return (

@@ -1,0 +1,120 @@
+-- DO NOT APPLY — CONTRACT STUB, NOT APPLY-READY. ──────────────────────────────
+-- Named *.sql.gated so it falls OUTSIDE the Supabase CLI apply glob
+-- (supabase/migrations/*.sql). It captures the therapist-contact encryption
+-- surface for therapist_links: the pgsodium extension, a named encryption key,
+-- and the two SECURITY DEFINER RPCs (get_therapist_links / upsert_therapist_link).
+--
+-- It is GATED on the ADR-001 security review, which owns the encryption/decrypt
+-- surface and MUST resolve before this lands as a real migration:
+--   * key-id sourcing — migration-created named key vs Vault-secret reference.
+--     The <KEY_ID> placeholder below is UNRESOLVED (design.md §Open design
+--     decisions). The file cannot apply until it is a real uuid.
+--   * W-1 — confirm pgsodium.crypto_aead_det_encrypt is the non-deprecated
+--     replacement for Supabase TCE (Transparent Column Encryption).
+--   * W-2 — deterministic AEAD maps identical plaintext -> identical ciphertext,
+--     enabling equality-correlation across users on a raw ciphertext read.
+--     Decrypt is RPC-only (no equality query need), so prefer NON-deterministic
+--     AEAD unless a justification is recorded.
+--   * EC-missing-1 — get_therapist_links() MUST fail closed if the key is absent
+--     or rotated: no plaintext, no key-id leak, no crash. (Sketched below; the
+--     key-absence path needs a real test once the key id is known.)
+--   * EC-missing-2 (highest-risk) — the decrypt RPC is SECURITY DEFINER and
+--     bypasses RLS; the in-function `where user_id = auth.uid()` plus the null
+--     -session guard are the ONLY things stopping it returning every user's
+--     decrypted contacts. A dedicated negative test (null/anon JWT -> ZERO rows)
+--     MUST ship with it.
+--
+-- The therapist_links TABLE + read RLS already shipped in
+-- 20260614000004_therapist_links.sql (email_enc/phone_enc/notes_enc bytea exist).
+-- This file only ADDS the extension + key + RPCs.
+--
+-- TO LIFT: resolve the items above under ADR-001, replace <KEY_ID>, add the
+-- negative tests, then move/rename to
+--   supabase/migrations/<ts>_therapist_links_encryption.sql in a separate PR.
+-- ──────────────────────────────────────────────────────────────────────────────
+
+create extension if not exists pgsodium;
+
+-- get_therapist_links(): owner-scoped decrypt. Fails closed on no session.
+create or replace function get_therapist_links()
+returns table (
+  id uuid, user_id uuid, created_at timestamptz, updated_at timestamptz,
+  device_id text, client_version text, schema_version int,
+  display_name text, role text, treats_tags text[], session_frequency text,
+  email text, phone_e164 text, notes text
+)
+language plpgsql stable security definer set search_path = public, pg_temp
+as $$
+begin
+  -- fail closed: no authenticated user -> zero rows (EC-missing-2)
+  if auth.uid() is null then
+    return;
+  end if;
+
+  return query
+  select tl.id, tl.user_id, tl.created_at, tl.updated_at,
+         tl.device_id, tl.client_version, tl.schema_version,
+         tl.display_name, tl.role, tl.treats_tags, tl.session_frequency,
+         convert_from(pgsodium.crypto_aead_det_decrypt(tl.email_enc, null::bytea, '<KEY_ID>'::uuid), 'utf8'),
+         convert_from(pgsodium.crypto_aead_det_decrypt(tl.phone_enc, null::bytea, '<KEY_ID>'::uuid), 'utf8'),
+         convert_from(pgsodium.crypto_aead_det_decrypt(tl.notes_enc, null::bytea, '<KEY_ID>'::uuid), 'utf8')
+  from therapist_links tl
+  where tl.user_id = auth.uid();
+end;
+$$;
+
+-- upsert_therapist_link(): encrypt + owner+platform check. Plaintext never persists.
+create or replace function upsert_therapist_link(
+  p_id uuid, p_display_name text, p_role text, p_treats_tags text[],
+  p_session_frequency text, p_email text, p_phone_e164 text, p_notes text,
+  p_device_id text, p_client_version text
+)
+returns uuid
+language plpgsql security definer set search_path = public, pg_temp
+as $$
+declare
+  v_key_id uuid := '<KEY_ID>'::uuid;
+  v_id uuid;
+begin
+  -- mirror the RLS write gate inside the DEFINER function (AC-4.3)
+  if auth.uid() is null or auth.jwt() ->> 'platform' <> 'mobile' then
+    raise exception 'unauthorized: mobile platform required';
+  end if;
+
+  -- pre-encrypt plaintext validation (AC-4.4)
+  if p_email is not null and (length(p_email) = 0 or length(p_email) > 320) then
+    raise exception 'email length must be 1..320';
+  end if;
+  if p_phone_e164 is not null and p_phone_e164 !~ '^\+[1-9]\d{1,14}$' then
+    raise exception 'phone_e164 must be E.164';
+  end if;
+  if p_notes is not null and length(p_notes) > 2000 then
+    raise exception 'notes length must be <= 2000';
+  end if;
+
+  insert into therapist_links (
+    id, user_id, device_id, client_version, schema_version,
+    display_name, role, treats_tags, session_frequency,
+    email_enc, phone_enc, notes_enc
+  ) values (
+    coalesce(p_id, gen_random_uuid()), auth.uid(), p_device_id, p_client_version, 1,
+    p_display_name, p_role, p_treats_tags, p_session_frequency,
+    case when p_email     is null then null else pgsodium.crypto_aead_det_encrypt(convert_to(p_email,     'utf8'), null::bytea, v_key_id) end,
+    case when p_phone_e164 is null then null else pgsodium.crypto_aead_det_encrypt(convert_to(p_phone_e164, 'utf8'), null::bytea, v_key_id) end,
+    case when p_notes     is null then null else pgsodium.crypto_aead_det_encrypt(convert_to(p_notes,     'utf8'), null::bytea, v_key_id) end
+  )
+  on conflict (id) do update set
+    display_name      = excluded.display_name,
+    role              = excluded.role,
+    treats_tags       = excluded.treats_tags,
+    session_frequency = excluded.session_frequency,
+    email_enc         = excluded.email_enc,
+    phone_enc         = excluded.phone_enc,
+    notes_enc         = excluded.notes_enc,
+    updated_at        = now()
+  where therapist_links.user_id = auth.uid()
+  returning id into v_id;
+
+  return v_id;
+end;
+$$;
