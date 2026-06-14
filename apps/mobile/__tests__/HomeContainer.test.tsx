@@ -99,15 +99,22 @@ describe('HomeContainer — reflection-ready row (Flow 12, one-time)', () => {
         opened = true;
       },
     };
-    renderWithProviders(<HomeContainer store={makeAvailableStore()} reflectionGate={gate} />, {
-      haptics: true,
-    });
+    const navSpy = jest.fn(); // A2/PR-D: nav seam — never touch the real router in a render test
+    renderWithProviders(
+      <HomeContainer
+        store={makeAvailableStore()}
+        reflectionGate={gate}
+        navigateToReflection={navSpy}
+      />,
+      { haptics: true },
+    );
 
     expect(screen.getByText(REFLECTION_COPY)).toBeTruthy();
 
     fireEvent.press(screen.getByRole('button', { name: REFLECTION_COPY }));
 
     expect(opened).toBe(true); // dismissal persisted via the gate
+    expect(navSpy).toHaveBeenCalledTimes(1); // A2/PR-D: and navigates to S9
     expect(screen.queryByText(REFLECTION_COPY)).toBeNull(); // and gone, in place
   });
 
@@ -117,5 +124,19 @@ describe('HomeContainer — reflection-ready row (Flow 12, one-time)', () => {
       haptics: true,
     });
     expect(screen.queryByText(REFLECTION_COPY)).toBeNull();
+  });
+});
+
+// A2/PR-E: onboarding's "Do your first check-in" arrives with ?checkin=1, which the
+// index route maps to autoOpenCheckIn → S4 opens over the first-run home on mount.
+describe('HomeContainer — autoOpenCheckIn (onboarding → S4)', () => {
+  it('opens the check-in sheet on mount when autoOpenCheckIn is set', () => {
+    renderWithProviders(<HomeContainer store={makeFakeStore()} autoOpenCheckIn />, { haptics: true });
+    expect(screen.getByText('How are you right now?')).toBeTruthy();
+  });
+
+  it('does not open the sheet by default', () => {
+    renderWithProviders(<HomeContainer store={makeFakeStore()} />, { haptics: true });
+    expect(screen.queryByText('How are you right now?')).toBeNull();
   });
 });
