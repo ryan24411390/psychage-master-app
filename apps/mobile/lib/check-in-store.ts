@@ -22,3 +22,14 @@ export function getCheckInStore(): CheckInRecordStore {
   }
   return store;
 }
+
+// Wave B2 (S48): drop the cached singleton so the NEXT getCheckInStore()
+// re-constructs and re-load()s from disk. The store caches entries in-memory at
+// construction, so a "delete my record" that only clears the storage key would
+// leave a stale live instance still answering getRecent() from its cached Map.
+// The delete flow calls wipeLocalData(storage) (clears disk) THEN
+// resetCheckInStore() so the next read reflects the now-empty disk. Additive —
+// existing callers are unaffected.
+export function resetCheckInStore(): void {
+  store = null;
+}
