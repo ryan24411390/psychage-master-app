@@ -134,6 +134,12 @@ export interface HomeStore {
   getToday(): CheckInEntry | undefined;
   getRecent(n: number): CheckInEntry[];
   saveToday(state: CheckInState): CheckInEntry;
+  /**
+   * Entries within `[from, to]` inclusive (YYYY-MM-DD local-day strings), oldest
+   * first. Mirrors CheckInRecordStore.getRange — a read-only addition to the home's
+   * structural view of the store (the store's public op contract is unchanged).
+   */
+  getRange(from: string, to: string): CheckInEntry[];
 }
 
 /** Local YYYY-MM-DD — must match the RecordStore's toLocalCalendarDate so dates compare. */
@@ -181,4 +187,45 @@ export function buildTerrainDaysFromEntries(
     days.push({ label: label?.short ?? '', fullLabel: label?.full, value });
   }
   return days;
+}
+
+// --- Reflection availability (Flow 12) -------------------------------------------
+
+/**
+ * Minimum check-ins in a Monday–Sunday week for that week to have a reflection.
+ * Founder-revisable open question (Flow 12 flags 2 / 1 / any-entry as alternatives):
+ * THE single source — change here and every boundary moves. Never inline the literal.
+ */
+export const REFLECTION_MIN_ENTRIES = 3;
+
+/**
+ * The Monday–Sunday week IMMEDIATELY BEFORE the week containing `today`, as
+ * inclusive YYYY-MM-DD local-day bounds. This is the only week a reflection can be
+ * "available" for: a reflection for a completed week becomes available the FOLLOWING
+ * Monday, so the candidate is always the prior completed week — never the in-progress
+ * one. (Weeks are Monday–Sunday; LocalCalendarDate is device-local-day based, so all
+ * arithmetic is local — no UTC, matching the RecordStore's date rules.)
+ */
+export function priorWeekBounds(today: Date): { from: string; to: string } {
+  // JS getDay(): 0=Sun..6=Sat. Map to Mon=0..Sun=6 to find this week's Monday.
+  const daysSinceMonday = (today.getDay() + 6) % 7;
+  const y = today.getFullYear();
+  const m = today.getMonth();
+  const d = today.getDate();
+  const priorMonday = new Date(y, m, d - daysSinceMonday - 7);
+  const priorSunday = new Date(y, m, d - daysSinceMonday - 1);
+  return { from: localCalendarDate(priorMonday), to: localCalendarDate(priorSunday) };
+}
+
+/**
+ * Is this week's reflection available? True iff the prior completed Monday–Sunday
+ * week held ≥ REFLECTION_MIN_ENTRIES check-ins. A mid-week Nth entry in the CURRENT
+ * week never triggers it — only the following Monday, when that week becomes the
+ * prior one, can. Weeks below the threshold simply have no reflection (the user is
+ * never told they "missed" one — the caller renders nothing). Dismissal is layered
+ * on by the caller; this is the pure store-derived trigger.
+ */
+export function isReflectionAvailable(store: Pick<HomeStore, 'getRange'>, today: Date): boolean {
+  const { from, to } = priorWeekBounds(today);
+  return store.getRange(from, to).length >= REFLECTION_MIN_ENTRIES;
 }
