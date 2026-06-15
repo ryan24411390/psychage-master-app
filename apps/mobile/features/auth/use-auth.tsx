@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 
@@ -39,6 +39,26 @@ export function AuthProvider({
   service?: AuthService;
 }) {
   const [session, setSession] = useState<AuthSession | null>(null);
+
+  // Boot hydration + reactivity (web parity: AuthContext getSession + onAuthStateChange).
+  // Without this the context boots null forever — the token persists in secure-store,
+  // but the UI would falsely read "signed out" after a relaunch (and Settings, mounted
+  // outside the old (auth)-local provider, never saw a session at all). The listener
+  // keeps state in sync with token refresh, expiry-logout, and sign-out from anywhere.
+  useEffect(() => {
+    let active = true;
+    void service.getSession().then((restored) => {
+      if (active) setSession(restored);
+    });
+    const unsubscribe = service.onAuthChange((next) => {
+      if (active) setSession(next);
+    });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [service]);
+
   const value = useMemo<AuthContextValue>(
     () => ({ session, service, setSession }),
     [session, service],

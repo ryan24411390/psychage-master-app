@@ -17,6 +17,7 @@ import '../global.css';
 // at module init, which runs the SR-13 migrator before any consumer reads isTierEnabled.
 import '@/lib/adapters/featureFlags';
 
+import { AuthProvider } from '@/features/auth';
 import { HapticProvider } from '@/lib/haptic-context';
 import { queryClient } from '@/lib/query';
 import { useAppearance } from '@/lib/use-appearance';
@@ -70,9 +71,15 @@ export default function RootLayout() {
       <HapticProvider>
         <AppearanceSync />
         <ThemedStatusBar />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-        </Stack>
+        {/* App-wide auth context (web parity): one provider at the root so every
+            screen — Settings included — reads the same hydrated session. Replaces
+            the former (auth)-group-local provider that left the rest of the app
+            seeing session:null. */}
+        <AuthProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+          </Stack>
+        </AuthProvider>
       </HapticProvider>
     </QueryClientProvider>
   );

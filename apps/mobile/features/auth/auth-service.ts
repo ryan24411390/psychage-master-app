@@ -32,6 +32,18 @@ export interface AuthService {
   resendVerification(): Promise<{ ok: boolean }>;
   getVerificationStatus(): Promise<VerificationStatus>;
   signOut(): Promise<void>;
+  /**
+   * The current persisted session, or null when signed out. The boot-hydration
+   * source: supabase-js restores the token from secure-store, but the React
+   * context must read it back to reflect "still signed in" after a relaunch.
+   */
+  getSession(): Promise<AuthSession | null>;
+  /**
+   * Subscribe to auth-state changes (sign-in, sign-out, token refresh, expiry).
+   * Listener fires with the new session or null; returns an unsubscribe fn.
+   * Mirrors web AuthContext's onAuthStateChange (the runtime state updater).
+   */
+  onAuthChange(listener: (session: AuthSession | null) => void): () => void;
 }
 
 export interface StubAuthOptions {
@@ -44,11 +56,16 @@ export interface StubAuthOptions {
 export function createStubAuthService(options: StubAuthOptions = {}): AuthService {
   const offline = options.offline ?? false;
   let session: AuthSession | null = null;
+  const listeners = new Set<(session: AuthSession | null) => void>();
+  const emit = () => {
+    for (const listener of listeners) listener(session);
+  };
 
   return {
     async signUp(email: string) {
       if (offline) return { ok: false, error: 'offline' };
       session = { email, verified: false };
+      emit();
       return { ok: true, session };
     },
     async signIn(email: string) {
@@ -57,6 +74,7 @@ export function createStubAuthService(options: StubAuthOptions = {}): AuthServic
       // against Supabase and returns { ok: false, error: 'invalid-credentials' } on
       // any failure — the same generic code for wrong-password and unknown-email.
       session = { email, verified: true };
+      emit();
       return { ok: true, session };
     },
     async resendVerification() {
@@ -67,6 +85,16 @@ export function createStubAuthService(options: StubAuthOptions = {}): AuthServic
     },
     async signOut() {
       session = null;
+      emit();
+    },
+    async getSession() {
+      return session;
+    },
+    onAuthChange(listener) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
     },
   };
 }

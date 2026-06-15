@@ -17,15 +17,24 @@
 // 'invalid-credentials' (or 'offline' for network failures). No message strings
 // leave this module.
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Session, SupabaseClient } from '@supabase/supabase-js';
 
 import { getOrCreateDeviceId } from '@/lib/device-id';
 import { getSupabaseAuthClient } from '@/lib/supabase/client';
 import { isNetworkError } from '@/lib/supabase/is-network-error';
 
-import type { AuthResult, AuthService, VerificationStatus } from './auth-service';
+import type { AuthResult, AuthService, AuthSession, VerificationStatus } from './auth-service';
 
 type AuthEventType = 'sign_up' | 'sign_in' | 'sign_out';
+
+// Map a supabase-js Session to the lightweight AuthSession the UI reads. The same
+// {email, verified} shape signUp/signIn already return — so boot-hydration and the
+// onAuthStateChange listener stay consistent with the post-auth result.
+function toAuthSession(session: Session | null): AuthSession | null {
+  const email = session?.user?.email;
+  if (!email) return null;
+  return { email, verified: Boolean(session?.user?.email_confirmed_at) };
+}
 
 export interface SupabaseAuthServiceDeps {
   /** Defaults to the lazy app singleton; injected in tests. */
@@ -124,6 +133,27 @@ export function createSupabaseAuthService(deps: SupabaseAuthServiceDeps = {}): A
       } catch {
         // session is cleared locally by supabase-js even on network failure
       }
+    },
+
+    // Boot hydration. supabase-js restores the token from expo-secure-store
+    // (persistSession:true); this reads it back so the context reflects a still-
+    // valid session after an app relaunch instead of falsely showing signed-out.
+    async getSession() {
+      try {
+        const { data } = await client.auth.getSession();
+        return toAuthSession(data.session);
+      } catch {
+        return null;
+      }
+    },
+
+    // Runtime state updater (web parity: AuthContext onAuthStateChange). Fires on
+    // sign-in, sign-out, token refresh, and refresh-failure → logout.
+    onAuthChange(listener) {
+      const { data } = client.auth.onAuthStateChange((_event, session) => {
+        listener(toAuthSession(session));
+      });
+      return () => data.subscription.unsubscribe();
     },
   } satisfies AuthService;
 }
