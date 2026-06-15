@@ -20,6 +20,7 @@ export { MoodJournalStore, type MoodJournalAnomaly } from './moment-store';
 export {
   type Clock,
   type IdFactory,
+  isValence,
   type LocalCalendarDate,
   type MomentEntry,
   type MomentInput,
@@ -28,6 +29,9 @@ export {
   type MoodJournalStoreDeps,
   NOTE_MAX_LENGTH,
   type Storage,
+  type Valence,
+  VALENCE_MAX,
+  VALENCE_MIN,
 } from './types';
 
 // Tag vocabularies (the closed emotion/trigger sets) + guards
@@ -44,11 +48,16 @@ export {
 export {
   type DayGroup,
   emotionFrequency,
+  streakSummary,
+  type StreakSummary,
   type TagCount,
   timeline,
   triggerFrequency,
   triggerMoodCoOccurrence,
   type TriggerMoodCoOccurrence,
+  type ValenceDayAverage,
+  type ValenceDirection,
+  valenceTrend,
 } from './patterns';
 
 // Local-calendar-date construction (re-exported from check-in so this barrel is

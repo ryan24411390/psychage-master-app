@@ -34,6 +34,12 @@ export function MoodJournalView({ momentStore }: MoodJournalViewProps) {
     setSheetOpen(false);
   };
 
+  const handleDelete = (id: string) => {
+    // Local-only delete; refresh from the store so the timeline + insights re-derive.
+    momentStore.deleteMoment(id);
+    setMoments(momentStore.getAll());
+  };
+
   return (
     <View className="flex-1">
       <ScrollView contentContainerClassName="gap-4 px-4 py-4" showsVerticalScrollIndicator={false}>
@@ -52,7 +58,7 @@ export function MoodJournalView({ momentStore }: MoodJournalViewProps) {
             </Text>
           </Card>
         ) : (
-          <PatternView moments={moments} />
+          <PatternView moments={moments} onDelete={handleDelete} />
         )}
       </ScrollView>
 
