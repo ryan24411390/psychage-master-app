@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { HeaderAvatar } from '@/components/HeaderAvatar';
 import { Text } from '@/components/ui/Text';
-import { colors } from '@/lib/colors';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
 // C0.1 global header — persistent top chrome on every screen: wordmark (Fraunces)
 // left; Help-now pill (crisis outline) + avatar right. Static chrome — no
@@ -17,6 +17,9 @@ import { colors } from '@/lib/colors';
 // NOTE: "Help now" is the only label the order names but does not quote verbatim;
 // derived from the element's own name ("Help-now pill"). Flagged for CT4 sign-off.
 function HelpNowPill() {
+  // Crisis ink/outline brighten to crisis-dark (#EF4444) on the true-black canvas so
+  // the pill clears WCAG body contrast (5.6:1 vs 4.35:1) and keeps its urgency.
+  const tc = useThemeColors();
   return (
     <Pressable
       accessibilityRole="button"
@@ -26,10 +29,10 @@ function HelpNowPill() {
       // context is needed at render, only on press). Crisis is reachable in ≤1 tap.
       onPress={() => router.push('/crisis')}
       hitSlop={4}
-      className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-3"
+      className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-3 dark:border-crisis-dark"
     >
-      <LifeBuoy size={18} color={colors.crisis} strokeWidth={1.75} />
-      <Text variant="bodyMedium" className="text-[13px] text-crisis">
+      <LifeBuoy size={18} color={tc.crisis} strokeWidth={1.75} />
+      <Text variant="bodyMedium" className="text-[13px] text-crisis dark:text-crisis-dark">
         Help now
       </Text>
     </Pressable>

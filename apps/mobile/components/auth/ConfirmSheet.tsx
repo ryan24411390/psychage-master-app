@@ -33,7 +33,7 @@ export function ConfirmSheet({
   return (
     <Animated.View
       entering={reduced ? undefined : FadeIn.duration(DURATION.swift)}
-      className="absolute inset-0 z-40 justify-end bg-charcoal-900/40"
+      className="absolute inset-0 z-40 justify-end bg-charcoal-900/40 dark:bg-black/60"
     >
       <Pressable
         // Tap-to-dismiss backdrop. Hidden from accessibility — the explicit Cancel

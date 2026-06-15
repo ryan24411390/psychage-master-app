@@ -16,8 +16,8 @@ import { ArticleBody } from '@/features/content/blocks/ArticleBody';
 import { CT4_CONTENT } from '@/features/content/copy';
 import { ReviewedByCredit } from '@/features/content/ReviewedByCredit';
 import { getArticleBySlug } from '@/lib/articles';
-import { colors } from '@/lib/colors';
 import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
 // S22 Article reader — NATIVE chrome + NATIVE body. Pushed over the tabs, so it
 // renders the GlobalHeader itself (Help-now pill reachable, SR-2) plus a native
@@ -29,6 +29,7 @@ import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
 // enforcement point). A missing article reports its absence — never placeholder prose.
 export function ArticleReader({ slug }: { slug: string }) {
   const t = CT4_CONTENT;
+  const tc = useThemeColors();
   const { width } = useWindowDimensions();
 
   const { data: article, isLoading } = useQuery({
@@ -49,7 +50,7 @@ export function ArticleReader({ slug }: { slug: string }) {
           testID="article-back"
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
-          <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
+          <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>
@@ -58,7 +59,7 @@ export function ArticleReader({ slug }: { slug: string }) {
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center" testID="article-loading">
-          <ActivityIndicator color={colors.teal[500]} />
+          <ActivityIndicator color={tc.primary} />
         </View>
       ) : !article ? (
         <View className="flex-1 items-center justify-center px-8">

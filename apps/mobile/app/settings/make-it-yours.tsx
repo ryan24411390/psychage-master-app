@@ -9,7 +9,7 @@ import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
 import { CT4_SETTINGS } from '@/features/settings/copy';
 import { storage } from '@/lib/adapters/storage';
-import { colors } from '@/lib/colors';
+import { useThemeColors } from '@/lib/use-theme-colors';
 import {
   type HomeLead,
   loadPersonalization,
@@ -23,6 +23,7 @@ const LEAD_ORDER: readonly HomeLead[] = ['check-in', 'navigator', 'toolkit'];
 
 export default function MakeItYoursScreen() {
   const t = CT4_SETTINGS.makeItYours;
+  const tc = useThemeColors();
   const initial = loadPersonalization(storage);
   const [name, setName] = useState(initial.name ?? '');
   const [homeLead, setHomeLead] = useState<HomeLead>(initial.homeLead);
@@ -41,7 +42,7 @@ export default function MakeItYoursScreen() {
             value={name}
             onChangeText={setName}
             placeholder={t.namePlaceholder}
-            placeholderTextColor={colors.text.tertiary.light}
+            placeholderTextColor={tc.inkTertiary}
             accessibilityLabel={t.nameLabel}
             className="min-h-[44px] rounded-lg border border-border px-3 font-sans text-base text-text-primary dark:border-border-dark dark:text-text-primary-dark"
             testID="personalization-name-input"
