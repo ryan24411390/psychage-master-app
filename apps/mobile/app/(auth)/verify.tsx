@@ -14,7 +14,7 @@ export default function VerifyScreen() {
     <VerifyPanel
       email={email}
       onResend={() => {
-        void service.resendVerification();
+        void service.resendVerification(email);
       }}
     />
   );

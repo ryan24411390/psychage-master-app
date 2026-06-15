@@ -29,7 +29,13 @@ export interface AuthResult {
 export interface AuthService {
   signUp(email: string, password: string): Promise<AuthResult>;
   signIn(email: string, password: string): Promise<AuthResult>;
-  resendVerification(): Promise<{ ok: boolean }>;
+  /**
+   * Resend the signup confirmation email. `email` is the address from the verify
+   * screen's route param. When email confirmation is ON, signUp returns NO session
+   * (the user must confirm first), so the impl CANNOT rely on getSession() for the
+   * address — it must use this param. Falls back to the session email when omitted.
+   */
+  resendVerification(email?: string): Promise<{ ok: boolean }>;
   getVerificationStatus(): Promise<VerificationStatus>;
   signOut(): Promise<void>;
   /**
@@ -77,7 +83,7 @@ export function createStubAuthService(options: StubAuthOptions = {}): AuthServic
       emit();
       return { ok: true, session };
     },
-    async resendVerification() {
+    async resendVerification(_email?: string) {
       return { ok: !offline };
     },
     async getVerificationStatus() {

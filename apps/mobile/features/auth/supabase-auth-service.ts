@@ -101,14 +101,21 @@ export function createSupabaseAuthService(deps: SupabaseAuthServiceDeps = {}): A
       }
     },
 
-    async resendVerification() {
+    async resendVerification(email?: string) {
       try {
-        const {
-          data: { session },
-        } = await client.auth.getSession();
-        const email = session?.user?.email;
-        if (!email) return { ok: false };
-        const { error } = await client.auth.resend({ type: 'signup', email });
+        // Prefer the address passed from the verify screen's route param: when email
+        // confirmation is ON, signUp returns NO session, so getSession() is empty here
+        // and the resend would silently no-op. Fall back to the session email (e.g. a
+        // signed-in-but-unverified user re-requesting from settings).
+        let target = email;
+        if (!target) {
+          const {
+            data: { session },
+          } = await client.auth.getSession();
+          target = session?.user?.email;
+        }
+        if (!target) return { ok: false };
+        const { error } = await client.auth.resend({ type: 'signup', email: target });
         return { ok: !error };
       } catch {
         return { ok: false };
