@@ -1,8 +1,9 @@
-// Mood 5-point scale — DRAFT direction B: "minimal face".
+// Mood 5-point scale glyph — "minimal face" (was direction B).
 //
-// DRAFT for clinical review (Slice 3a). NOT wired into any live surface.
-// Dr. Lena Dobson selects direction A (MoodGlyphGradient) vs B (this) before any
-// production use. Mood is an emotional concept → VERIFY gate.
+// Chosen direction (Slice 3a): Dr. Lena Dobson reviewed A (MoodGlyphGradient) vs
+// B (this) and selected B with no changes — clearing the VERIFY gate for the
+// mood-level concept. Direction A was removed; this glyph is now wired into the
+// live check-in surfaces (StateRows + the EntryDetailSheet read-only mirror).
 //
 // Visual: a single ink-only circle with two dot eyes and ONE mouth whose
 // curvature maps to state — a downward arc at "Very low" through flat at "Okay"

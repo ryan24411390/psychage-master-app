@@ -41,13 +41,17 @@ BodyScanGlyph without visual drift.
 
 ## First proof — mood 5-point scale (this slice)
 
-Two draft directions, both implementing the contract, both unwired:
+Two draft directions were proposed, both implementing the contract:
 
 - **A — `MoodGlyphGradient`** (`abstract level`): a circle whose internal fill rises with
   mood, tinted by `moodTint` at `fillByState` levels. Reuses the terrain vocabulary; no face.
 - **B — `MoodGlyphFace`** (`minimal face`): an ink-only circle with dot eyes and one mouth
   whose curvature maps Very low (∩) → Okay (—) → Very good (∪). Drawn, not emoji; mono-legible.
 
-Reviewed at 44dp and 24dp, light and dark, on `app/dev-icons.tsx`.
-**Open decision:** Dr. Lena Dobson picks A vs B. Wire-in (replacing `FillGlyph`) follows in a
-separate post-sign-off slice — not in this one.
+Both were reviewed at 44dp and 24dp, light and dark, on `app/dev-icons.tsx`.
+**Decision (CHOSEN):** Dr. Lena Dobson reviewed both and selected **B — `MoodGlyphFace`**, no
+changes requested. This cleared the VERIFY gate for the mood-level concept. **Direction A
+(`MoodGlyphGradient`) was removed.** B is now **wired** into the live check-in surfaces — it
+replaced the placeholder fill-bar glyph in `components/check-in/StateRows.tsx` and its
+read-only mirror in `components/history/EntryDetailSheet.tsx`. The Terrain history dots keep
+their existing color encoding (a face does not read at dot size — intentional).
