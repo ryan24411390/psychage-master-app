@@ -1,21 +1,31 @@
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { ChevronLeft, MapPin, Search, SlidersHorizontal } from 'lucide-react-native';
+import { ArrowUpDown, ChevronDown, ChevronLeft, MapPin, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
+import { useBookmarkedIds } from '@/features/bookmarks/hooks';
 import { OfflineFallback } from '@/features/offline/OfflineFallback';
 import { useIsOnline } from '@/features/offline/useIsOnline';
 import { colors } from '@/lib/colors';
 
+import { useRecentlyViewed } from '@/lib/use-recently-viewed';
+
 import { DirectoryFilters, type FilterDraft } from './DirectoryFilters';
 import { DIRECTORY_COPY } from './copy';
-import { hasActiveSearch, useFeaturedProviders, useProviderSearch } from './hooks';
+import { hasActiveSearch, useFeaturedProviders, useProviderSearch, useSpecialties } from './hooks';
 import { DEFAULT_RADIUS_MILES, requestAndGetCoords, type Coords } from './location';
+import { DirectorySkeleton } from './DirectorySkeleton';
 import { ProviderCard } from './ProviderCard';
+import { RecentlyViewedRail } from './RecentlyViewedRail';
+import { SortSheet, type SortOption } from './SortSheet';
 import type { ProviderSearchParams } from './types';
+
+// Below this result count a scope is "thin" — we nudge the user to widen.
+const COVERAGE_MIN = 25;
 
 // S26 Provider Directory — NATIVE list (replaces the WebView wrapper). Reads REAL
 // providers live from the shared Supabase. Filter-first: the paginated search runs
@@ -33,15 +43,43 @@ const EMPTY_FILTERS: FilterDraft = {
   accepting: false,
 };
 
-export function DirectoryView() {
+// `embedded` = rendered as the Find tab root (the tabs GlobalHeader already sits
+// above it, so we skip our own header + the back row). The standalone
+// /find/directory deep-link route renders it un-embedded (own header + back).
+// initialState/initialCity seed the browse scope from the persisted home location.
+export function DirectoryView({
+  embedded = false,
+  initialState = null,
+  initialCity = null,
+  scopeLabel,
+  onEditLocation,
+}: {
+  embedded?: boolean;
+  initialState?: string | null;
+  initialCity?: string | null;
+  /** Human label for the current home scope (e.g. "California · San Francisco"). */
+  scopeLabel?: string;
+  /** Re-open the one-time location setup (tapping the scope chip). */
+  onEditLocation?: () => void;
+} = {}) {
   const online = useIsOnline();
+  const recent = useRecentlyViewed();
   const [text, setText] = useState('');
   const [debounced, setDebounced] = useState('');
-  const [filters, setFilters] = useState<FilterDraft>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<FilterDraft>(() => ({
+    ...EMPTY_FILTERS,
+    state: initialState ?? '',
+  }));
+  const [city] = useState<string>(initialCity ?? '');
   const [coords, setCoords] = useState<Coords | null>(null);
   const [locNotice, setLocNotice] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+  const [sort, setSort] = useState<SortOption>('relevance');
   const [searchFocused, setSearchFocused] = useState(false);
+  const specialties = useSpecialties();
+  const savedProviderIds = useBookmarkedIds('provider');
+  const savedCount = savedProviderIds.data?.size ?? 0;
 
   // Debounce the text query so we don't fire a request per keystroke.
   useEffect(() => {
@@ -53,6 +91,7 @@ export function DirectoryView() {
     () => ({
       query: debounced || undefined,
       state: filters.state || undefined,
+      city: city || undefined,
       specialty_slugs: filters.specialtySlugs.length ? filters.specialtySlugs : undefined,
       telehealth: filters.telehealth || undefined,
       in_person: filters.inPerson || undefined,
@@ -60,10 +99,10 @@ export function DirectoryView() {
       latitude: coords?.latitude,
       longitude: coords?.longitude,
       radius_miles: coords ? DEFAULT_RADIUS_MILES : undefined,
-      sort_by: coords ? 'distance' : 'relevance',
+      sort_by: sort,
       per_page: 20,
     }),
-    [debounced, filters, coords],
+    [debounced, filters, city, coords, sort],
   );
 
   const active = hasActiveSearch(params);
@@ -83,17 +122,36 @@ export function DirectoryView() {
     if (coords) {
       setCoords(null);
       setLocNotice(false);
+      if (sort === 'distance') setSort('relevance');
       return;
     }
     const res = await requestAndGetCoords();
     if (res.status === 'granted') {
       setCoords(res.coords);
       setLocNotice(false);
+      setSort('distance'); // a geo search defaults to nearest-first
     } else {
       // Coords are used only for the query; nothing is persisted or logged.
       setLocNotice(true);
     }
   };
+
+  // Quick specialty suggestions under the search box — tapping one runs a fast
+  // slug-scoped search instead of a free-text scan. Hidden once a specialty is set.
+  const suggestions =
+    text.trim().length >= 2 && !filters.specialtySlugs.length
+      ? (specialties.data ?? [])
+          .filter((s) => s.label.toLowerCase().includes(text.trim().toLowerCase()))
+          .slice(0, 3)
+      : [];
+
+  const applySpecialty = (slug: string) => {
+    setFilters((f) => ({ ...f, specialtySlugs: [slug] }));
+    setText('');
+  };
+
+  const showCoverage =
+    active && !loading && search.total > 0 && search.total <= COVERAGE_MIN && !!filters.state;
 
   const onEndReached = () => {
     if (active && search.hasNextPage && !search.isFetchingNextPage) {
@@ -104,7 +162,7 @@ export function DirectoryView() {
   if (!online) {
     return (
       <View className="flex-1 bg-background dark:bg-background-dark">
-        <GlobalHeader />
+        {embedded ? null : <GlobalHeader />}
         <OfflineFallback variant="offline" testID="directory-offline" />
       </View>
     );
@@ -112,26 +170,45 @@ export function DirectoryView() {
 
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
-      <GlobalHeader />
+      {embedded ? null : <GlobalHeader />}
 
-      <View className="flex-row items-center px-2">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          onPress={() => router.back()}
-          hitSlop={8}
-          testID="directory-back"
-          className="min-h-[44px] flex-row items-center gap-1 px-2"
-        >
-          <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
-            Back
-          </Text>
-        </Pressable>
-      </View>
+      {embedded ? null : (
+        <View className="flex-row items-center px-2">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            onPress={() => router.back()}
+            hitSlop={8}
+            testID="directory-back"
+            className="min-h-[44px] flex-row items-center gap-1 px-2"
+          >
+            <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
+            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              Back
+            </Text>
+          </Pressable>
+        </View>
+      )}
 
       <View className="gap-3 px-4 pb-2">
         <Text variant="headingLg">{t.title}</Text>
+
+        {/* Scope chip — shows the home location and re-opens setup on tap. */}
+        {embedded && onEditLocation ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t.editScope}
+            onPress={onEditLocation}
+            testID="directory-scope"
+            className="min-h-[36px] flex-row items-center gap-1.5 self-start rounded-full border border-border px-3 py-1.5 dark:border-border-dark"
+          >
+            <MapPin size={16} color={colors.primary.default.light} strokeWidth={1.75} />
+            <Text variant="bodySm" className="text-text-primary dark:text-text-primary-dark">
+              {scopeLabel || t.scopeAllStates}
+            </Text>
+            <ChevronDown size={14} color={colors.charcoal[500]} strokeWidth={2} />
+          </Pressable>
+        ) : null}
 
         {/* Search */}
         <View
@@ -190,7 +267,41 @@ export function DirectoryView() {
               {filterCount > 0 ? `${t.filtersButton} (${filterCount})` : t.filtersButton}
             </Text>
           </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t.sortButton}
+            onPress={() => setSortOpen(true)}
+            testID="directory-sort"
+            className="min-h-[36px] flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5 dark:border-border-dark"
+          >
+            <ArrowUpDown size={16} color={colors.charcoal[500]} strokeWidth={1.75} />
+            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              {t.sortButton}
+            </Text>
+          </Pressable>
         </View>
+
+        {/* Specialty quick-suggestions */}
+        {suggestions.length > 0 ? (
+          <View className="flex-row flex-wrap gap-2">
+            {suggestions.map((s) => (
+              <Pressable
+                key={s.slug}
+                accessibilityRole="button"
+                accessibilityLabel={t.searchSpecialtyHint(s.label)}
+                onPress={() => applySpecialty(s.slug)}
+                testID={`suggest-${s.slug}`}
+                className="min-h-[36px] flex-row items-center gap-1.5 rounded-full border border-primary px-3 py-1.5 dark:border-primary-dark"
+              >
+                <Search size={14} color={colors.primary.default.light} strokeWidth={1.75} />
+                <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+                  {s.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
 
         {locNotice ? (
           <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
@@ -209,11 +320,29 @@ export function DirectoryView() {
             {t.resultCount(search.total)}
           </Text>
         ) : null}
+
+        {showCoverage ? (
+          <View className="flex-row flex-wrap items-center gap-1.5 rounded-lg bg-surface-accent px-3 py-2 dark:bg-surface-accent-dark">
+            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              {t.coverageNote(scopeLabel || filters.state, search.total)}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t.coverageAction}
+              onPress={() => setFilters((f) => ({ ...f, state: '' }))}
+              testID="directory-coverage-widen"
+            >
+              <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+                {t.coverageAction}
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
       </View>
 
       {loading ? (
-        <View className="flex-1 items-center justify-center" testID="directory-loading">
-          <ActivityIndicator color={colors.primary.default.light} />
+        <View className="flex-1" testID="directory-loading">
+          <DirectorySkeleton />
         </View>
       ) : (
         <FlashList
@@ -225,14 +354,52 @@ export function DirectoryView() {
           onEndReached={onEndReached}
           renderItem={({ item }) => <ProviderCard provider={item} onPress={(id) => router.push(`/find/provider/${id}`)} />}
           ListHeaderComponent={
-            <Text variant="caption" className="pb-2 text-text-tertiary dark:text-text-tertiary-dark">
-              {t.disclaimer}
-            </Text>
+            <View>
+              {!active ? (
+                <RecentlyViewedRail
+                  items={recent.items}
+                  onPress={(id) => router.push(`/find/provider/${id}`)}
+                />
+              ) : null}
+              <Text variant="caption" className="pb-2 text-text-tertiary dark:text-text-tertiary-dark">
+                {t.disclaimer}
+              </Text>
+            </View>
           }
           ListEmptyComponent={
-            <Text variant="body" className="py-6 text-center text-text-secondary dark:text-text-secondary-dark">
-              {active ? t.noResults : t.emptyPrompt}
-            </Text>
+            active ? (
+              <View className="items-center gap-3 px-6 pt-10" testID="directory-empty">
+                <View className="h-14 w-14 items-center justify-center rounded-full bg-surface dark:bg-surface-dark">
+                  <Search size={22} color={colors.charcoal[500]} strokeWidth={1.75} />
+                </View>
+                <Text variant="heading" className="text-center">
+                  {t.emptyTitle}
+                </Text>
+                <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
+                  {t.noResults}
+                </Text>
+                <View className="w-full gap-2 pt-1">
+                  {debounced ? (
+                    <Button variant="secondary" onPress={() => setText('')} testID="directory-empty-clear">
+                      {t.emptyClearSearch}
+                    </Button>
+                  ) : null}
+                  {filters.state ? (
+                    <Button
+                      variant="secondary"
+                      onPress={() => setFilters((f) => ({ ...f, state: '' }))}
+                      testID="directory-empty-widen"
+                    >
+                      {t.emptyWiden}
+                    </Button>
+                  ) : null}
+                </View>
+              </View>
+            ) : (
+              <Text variant="body" className="py-6 text-center text-text-secondary dark:text-text-secondary-dark">
+                {t.emptyPrompt}
+              </Text>
+            )
           }
           ListFooterComponent={
             search.isFetchingNextPage ? (
@@ -244,6 +411,19 @@ export function DirectoryView() {
         />
       )}
 
+      {/* Floating compare — appears once 2+ providers are saved. */}
+      {savedCount >= 2 ? (
+        <View className="absolute inset-x-4 bottom-4">
+          <Button
+            variant="primary"
+            onPress={() => router.push('/find/compare')}
+            testID="directory-compare"
+          >
+            {t.compareCta(Math.min(savedCount, 3))}
+          </Button>
+        </View>
+      ) : null}
+
       <DirectoryFilters
         visible={sheetOpen}
         initial={filters}
@@ -252,6 +432,17 @@ export function DirectoryView() {
           setSheetOpen(false);
         }}
         onClose={() => setSheetOpen(false)}
+      />
+
+      <SortSheet
+        visible={sortOpen}
+        value={sort}
+        geoEnabled={!!coords}
+        onSelect={(next) => {
+          setSort(next);
+          setSortOpen(false);
+        }}
+        onClose={() => setSortOpen(false)}
       />
     </View>
   );

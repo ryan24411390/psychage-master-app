@@ -16,7 +16,41 @@ export const DIRECTORY_COPY = {
   nearMe: 'Near me',
   locationDenied: 'Location off — searching by your other filters.',
   emptyPrompt: 'Search or add a filter to browse the directory.',
+  recentlyViewed: 'Recently viewed',
+  scopeAllStates: 'All states',
+  editScope: 'Change location',
+
+  // Sort (order, not a ranking of quality). Maps to search_providers_v3 sort_by.
+  sortButton: 'Sort',
+  sortTitle: 'Sort',
+  sortNote: 'Sorting changes order only. It is not a ranking of quality.',
+  sortRelevance: 'Relevance',
+  sortName: 'Name (A–Z)',
+  sortNearest: 'Nearest',
+
+  // Thin-coverage banner (real total). CT-pending.
+  coverageNote: (place: string, n: number) => `Limited coverage in ${place} (${n}).`,
+  coverageAction: 'Browse all states',
+
+  // Specialty quick-suggestions under the search box.
+  searchSpecialtyHint: (label: string) => `Search ${label}`,
+
+  // Compare (saved providers, side by side). Up to 3. CT-pending.
+  compareTitle: 'Compare',
+  compareCta: (n: number) => `Compare ${n} saved`,
+  compareEmptyTitle: 'Nothing to compare yet',
+  compareEmptyBody: 'Save two or three providers to compare them side by side.',
+  compareRemove: 'Remove',
+  compareCap: 'Comparing your 3 most recently saved.',
+  fieldType: 'Type',
+  fieldLocation: 'Location',
+  fieldModality: 'Modality',
+  fieldVerified: 'Verified',
+  none: '—',
   noResults: 'No providers match these filters.',
+  emptyTitle: 'No providers match',
+  emptyClearSearch: 'Clear search',
+  emptyWiden: 'Browse all states',
   droppedState: 'No match in that state — showing the city instead.',
   resultCount: (n: number) => `${n.toLocaleString()} ${n === 1 ? 'provider' : 'providers'}`,
   loadingMore: 'Loading more…',
@@ -28,6 +62,15 @@ export const DIRECTORY_COPY = {
   badgeUnclaimed: 'Listed',
   telehealth: 'Telehealth',
   inPerson: 'In person',
+  acceptingPatients: 'Accepting new patients',
+
+  // Provenance / credentials (detail). Informational — provider's own registry
+  // data, not a Psychage endorsement. CT-pending.
+  credentialsTitle: 'Credentials & verification',
+  npiLabel: 'NPI',
+  licenseLabel: 'License',
+  npiSource: 'Listed from the NPI registry',
+  lastConfirmed: (when: string) => `Last confirmed ${when}`,
 
   // Detail (S27)
   about: 'About',

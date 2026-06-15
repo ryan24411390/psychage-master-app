@@ -1,5 +1,12 @@
 import { fireEvent, screen } from '@testing-library/react-native';
 
+// The card mounts BookmarkSaveSlot, which calls useFocusEffect (needs a nav
+// context the test renderer has none of) and router on the sign-in path.
+jest.mock('expo-router', () => ({
+  router: { push: jest.fn() },
+  useFocusEffect: () => undefined,
+}));
+
 import { ProviderCard } from '@/features/directory/ProviderCard';
 import type { ProviderCardData } from '@/features/directory/types';
 
@@ -34,26 +41,39 @@ const base: ProviderCardData = {
   insurance_tags: [],
 };
 
+// query: true — the card now mounts BookmarkSaveSlot (a save-from-list toggle),
+// which reads the auth uid via TanStack Query.
+const opts = { query: true, haptics: true } as const;
+
 describe('ProviderCard', () => {
   it('renders the real name, credentials and location verbatim', () => {
-    renderWithProviders(<ProviderCard provider={base} onPress={() => {}} />);
+    renderWithProviders(<ProviderCard provider={base} onPress={() => {}} />, opts);
     expect(screen.getByText('BRIAN SWANSON')).toBeTruthy();
     expect(screen.getByText(', Psy.D., J.D.')).toBeTruthy();
     expect(screen.getByText('Psychologist · Reseda, CA')).toBeTruthy();
     expect(screen.getByText('Telehealth')).toBeTruthy();
     expect(screen.getByText('Anxiety')).toBeTruthy();
+    expect(screen.getByText('Accepting new patients')).toBeTruthy();
     expect(screen.getByText('Listed')).toBeTruthy(); // seeded → "Listed", not an endorsement
   });
 
+  it('shows the distance only on a geo search', () => {
+    renderWithProviders(<ProviderCard provider={{ ...base, distance_miles: 4.2 }} onPress={() => {}} />, opts);
+    expect(screen.getByText('Psychologist · Reseda, CA · 4.2 mi')).toBeTruthy();
+  });
+
   it('omits absent fields without inventing them', () => {
-    renderWithProviders(<ProviderCard provider={{ ...base, credentials_suffix: null }} onPress={() => {}} />);
+    renderWithProviders(
+      <ProviderCard provider={{ ...base, credentials_suffix: null }} onPress={() => {}} />,
+      opts,
+    );
     expect(screen.queryByText(/Psy\.D/)).toBeNull();
   });
 
   it('fires onPress with the provider id', () => {
     const onPress = jest.fn();
-    renderWithProviders(<ProviderCard provider={base} onPress={onPress} />);
-    fireEvent.press(screen.getByLabelText('BRIAN SWANSON'));
+    renderWithProviders(<ProviderCard provider={base} onPress={onPress} />, opts);
+    fireEvent.press(screen.getByTestId('provider-card-p1'));
     expect(onPress).toHaveBeenCalledWith('p1');
   });
 });

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { CalendarCheck, ChevronLeft, Globe, Mail, MapPin, Navigation, Phone } from 'lucide-react-native';
+import { useEffect } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
@@ -10,7 +11,9 @@ import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
 import { dial } from '@/features/crisis/dialer';
 import { colors } from '@/lib/colors';
 import { useHaptics } from '@/lib/haptic-context';
+import { useRecentlyViewed } from '@/lib/use-recently-viewed';
 
+import { Avatar } from './Avatar';
 import { directionsUrl, formatAddress, mailtoUrl, telUrl, webUrl } from './contact';
 import { DIRECTORY_COPY } from './copy';
 import { cleanDisplayName } from './mapping';
@@ -36,6 +39,14 @@ function badgeLabel(p: { status: string; verified_at: string | null }): string |
 
 function primaryLocation(p: ProviderWithDetails): ProviderLocation | null {
   return p.locations.find((l) => l.is_primary) ?? p.locations[0] ?? null;
+}
+
+/** ISO verified_at → "Jun 2025", or null when absent/unparseable. */
+function formatVerified(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
 }
 
 function Chrome({ children }: { children: React.ReactNode }) {
@@ -127,6 +138,17 @@ export function ProviderDetailView({ id }: { id: string }) {
     enabled: !!id,
   });
 
+  // Record this view for the directory's "recently viewed" rail (local, capped).
+  const { record } = useRecentlyViewed();
+  useEffect(() => {
+    if (!data) return;
+    record({
+      id: data.id,
+      name: cleanDisplayName(data.display_name) || data.display_name,
+      photoUrl: data.photo_url,
+    });
+  }, [data, record]);
+
   if (isLoading) {
     return (
       <Chrome>
@@ -170,44 +192,48 @@ export function ProviderDetailView({ id }: { id: string }) {
     <Chrome>
       <ScrollView contentContainerClassName="gap-5 px-4 pb-10 pt-1" showsVerticalScrollIndicator={false}>
         {/* Identity */}
-        <View className="gap-1">
-          <View className="flex-row items-start justify-between gap-2">
-            <Text variant="headingLg" className="flex-1">
-              {name}
-            </Text>
-            <View className="flex-row items-center gap-1">
-              {badge ? (
-                <View className="rounded-full bg-surface px-2.5 py-1 dark:bg-surface-dark">
-                  <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
-                    {badge}
-                  </Text>
-                </View>
-              ) : null}
-              {/* Save this provider — resource_id is the provider id (T-008). */}
-              <BookmarkSaveSlot resourceType="provider" resourceId={id} testID="provider-save" />
+        <View className="flex-row gap-3">
+          <Avatar name={name} photoUrl={p.photo_url} size="lg" />
+          <View className="flex-1 gap-1">
+            <View className="flex-row items-start justify-between gap-2">
+              <Text variant="headingLg" className="flex-1">
+                {name}
+              </Text>
+              <View className="flex-row items-center gap-1">
+                {badge ? (
+                  <View className="rounded-full bg-surface px-2.5 py-1 dark:bg-surface-dark">
+                    <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+                      {badge}
+                    </Text>
+                  </View>
+                ) : null}
+                {/* Save this provider — resource_id is the provider id (T-008). */}
+                <BookmarkSaveSlot resourceType="provider" resourceId={id} testID="provider-save" />
+              </View>
             </View>
+            {p.credentials_suffix ? (
+              <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
+                {p.credentials_suffix}
+              </Text>
+            ) : null}
+            {typeLine ? (
+              <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+                {typeLine}
+              </Text>
+            ) : null}
+            {p.practice_name ? (
+              <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+                {p.practice_name}
+              </Text>
+            ) : null}
           </View>
-          {p.credentials_suffix ? (
-            <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
-              {p.credentials_suffix}
-            </Text>
-          ) : null}
-          {typeLine ? (
-            <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
-              {typeLine}
-            </Text>
-          ) : null}
-          {p.practice_name ? (
-            <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
-              {p.practice_name}
-            </Text>
-          ) : null}
         </View>
 
-        {/* Modality */}
-        {(p.telehealth_available || p.in_person_available) && (
+        {/* Modality + accepting */}
+        {(p.telehealth_available || p.in_person_available || p.is_accepting_patients) && (
           <TagRow
             items={[
+              ...(p.is_accepting_patients ? [t.acceptingPatients] : []),
               ...(p.telehealth_available ? [t.telehealth] : []),
               ...(p.in_person_available ? [t.inPerson] : []),
             ]}
@@ -298,6 +324,28 @@ export function ProviderDetailView({ id }: { id: string }) {
             </View>
           </Section>
         ) : null}
+
+        {/* Credentials & verification — provider's own registry data (informational). */}
+        {(p.npi_number || p.license_number || p.verified_at) && (
+          <Section title={t.credentialsTitle}>
+            {p.npi_number ? (
+              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                {`${t.npiLabel} ${p.npi_number}`}
+              </Text>
+            ) : null}
+            {p.license_number ? (
+              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                {`${t.licenseLabel} ${[p.license_number, p.license_state].filter(Boolean).join(' · ')}`}
+              </Text>
+            ) : null}
+            <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
+              {(() => {
+                const when = formatVerified(p.verified_at);
+                return when ? `${t.npiSource} · ${t.lastConfirmed(when)}` : t.npiSource;
+              })()}
+            </Text>
+          </Section>
+        )}
 
         {/* Linkage → My Therapist (S39 pre-fill). Contact stays in-memory, never logged. */}
         <View className="pt-1">

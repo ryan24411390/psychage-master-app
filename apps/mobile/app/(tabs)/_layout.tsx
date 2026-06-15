@@ -18,7 +18,8 @@ export default function TabsLayout() {
       <Tabs.Screen name="index" options={{ title: 'Today' }} />
       <Tabs.Screen name="learn" options={{ title: 'Learn' }} />
       <Tabs.Screen name="compass" options={{ title: 'Compass' }} />
-      <Tabs.Screen name="find" options={{ title: 'Find' }} />
+      {/* Find renders its own header (prototype port), so suppress the global one. */}
+      <Tabs.Screen name="find" options={{ title: 'Find', headerShown: false }} />
     </Tabs>
   );
 }
