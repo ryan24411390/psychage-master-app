@@ -8,31 +8,9 @@
 
 // @shopify/flash-list's ViewHolder layout pass throws under react-test-renderer,
 // so the real component renders no queryable children (incl. ListEmptyComponent).
-// Mock it to a plain View that maps data → renderItem, or renders the empty-state
-// component when there's no data — keeps list content, including empty-state
-// intros, assertable. No test renders a real FlashList.
-jest.mock('@shopify/flash-list', () => {
-  const React = require('react');
-  const { View } = require('react-native');
-  const FlashList = ({ data, renderItem, ListEmptyComponent, keyExtractor, testID }) => {
-    const items = data ?? [];
-    let body;
-    if (items.length === 0) {
-      body = React.isValidElement(ListEmptyComponent)
-        ? ListEmptyComponent
-        : ListEmptyComponent
-          ? React.createElement(ListEmptyComponent)
-          : null;
-    } else {
-      body = items.map((item, index) =>
-        React.createElement(
-          React.Fragment,
-          { key: keyExtractor ? keyExtractor(item, index) : index },
-          renderItem({ item, index }),
-        ),
-      );
-    }
-    return React.createElement(View, { testID }, body);
-  };
-  return { FlashList };
-});
+// Activate the manual mock in __mocks__/@shopify/flash-list.js — a plain View that
+// maps data → renderItem (or renders the empty-state when there's no data) so list
+// content, including empty-state intros, is assertable. No test renders a real
+// FlashList. The mock lives in a module file (not a jest.mock factory here) to stay
+// clear of babel-plugin-jest-hoist's out-of-scope-variable rule.
+jest.mock('@shopify/flash-list');
