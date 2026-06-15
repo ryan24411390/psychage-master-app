@@ -61,6 +61,7 @@ module.exports = {
           'hover-dark': c.border.hover.dark,
           accent: c.border.accent.light,
           'accent-dark': c.border.accent.dark,
+          hairline: 'rgba(26,26,46,0.08)',
         },
         error: { DEFAULT: c.semantic.error.light, dark: c.semantic.error.dark },
         success: { DEFAULT: c.semantic.success.light, dark: c.semantic.success.dark },
@@ -99,6 +100,15 @@ module.exports = {
           3: c.mood['3'].light,
           4: c.mood['4'].light,
           5: c.mood['5'].light,
+        },
+        paper: {
+          DEFAULT: '#FBF9F4',
+          dark: '#FBF9F4', // Ensure dark mode respects paper if it gets triggered
+        },
+        intent: {
+          now: { DEFAULT: '#E4F1EE', chip: '#157F73' },
+          patterns: { DEFAULT: '#ECE9F3', chip: '#6C5FA8' },
+          understand: { DEFAULT: '#E6ECF2', chip: '#3F5B78' },
         },
       },
       borderRadius: {

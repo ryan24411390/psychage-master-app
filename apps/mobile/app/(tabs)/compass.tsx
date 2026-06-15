@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { ScrollView } from 'react-native';
+import { View, ScrollView } from 'react-native';
+import { Book, Compass, HeartHandshake, LifeBuoy, MessageCircle, Moon, Sparkles } from 'lucide-react-native';
 
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
@@ -15,7 +16,7 @@ import { COMPASS_ROUTES } from '@/features/compass/routes';
 export default function CompassScreen() {
   const t = CT4_COMPASS;
   return (
-    <ScreenShell edges={['bottom']}>
+    <ScreenShell edges={['bottom']} className="bg-paper dark:bg-paper">
       <ScrollView contentContainerClassName="gap-3 py-4" showsVerticalScrollIndicator={false}>
         <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {t.heading}
@@ -24,32 +25,51 @@ export default function CompassScreen() {
           title={t.toolkit.title}
           subLabel={t.toolkit.sub}
           onPress={() => router.push(COMPASS_ROUTES.toolkit)}
+          tint="now"
+          icon={LifeBuoy}
+          variant="hero"
           testID="compass-tile-toolkit"
         />
-        <CompassTile
-          title={t.navigator.title}
-          subLabel={t.navigator.sub}
-          onPress={() => router.push(COMPASS_ROUTES.navigator)}
-          testID="compass-tile-navigator"
-        />
-        <CompassTile
-          title={t.relationship.title}
-          subLabel={t.relationship.sub}
-          onPress={() => router.push(COMPASS_ROUTES.relationship)}
-          testID="compass-tile-relationship"
-        />
-        <CompassTile
-          title={t.mindmate.title}
-          subLabel={t.mindmate.sub}
-          onPress={() => router.push(COMPASS_ROUTES.mindmate)}
-          testID="compass-tile-mindmate"
-        />
-        <CompassTile
-          title={t.clarity.title}
-          subLabel={t.clarity.sub}
-          onPress={() => router.push(COMPASS_ROUTES.clarity)}
-          testID="compass-tile-clarity"
-        />
+        <View className="flex-row gap-3">
+          <CompassTile
+            title={t.navigator.title}
+            subLabel={t.navigator.sub}
+            onPress={() => router.push(COMPASS_ROUTES.navigator)}
+            tint="now"
+            icon={Compass}
+            variant="standard"
+            testID="compass-tile-navigator"
+          />
+          <CompassTile
+            title={t.relationship.title}
+            subLabel={t.relationship.sub}
+            onPress={() => router.push(COMPASS_ROUTES.relationship)}
+            tint="now"
+            icon={HeartHandshake}
+            variant="standard"
+            testID="compass-tile-relationship"
+          />
+        </View>
+        <View className="flex-row gap-3">
+          <CompassTile
+            title={t.mindmate.title}
+            subLabel={t.mindmate.sub}
+            onPress={() => router.push(COMPASS_ROUTES.mindmate)}
+            tint="now"
+            icon={MessageCircle}
+            variant="standard"
+            testID="compass-tile-mindmate"
+          />
+          <CompassTile
+            title={t.clarity.title}
+            subLabel={t.clarity.sub}
+            onPress={() => router.push(COMPASS_ROUTES.clarity)}
+            tint="now"
+            icon={Sparkles}
+            variant="standard"
+            testID="compass-tile-clarity"
+          />
+        </View>
         <Text
           variant="caption"
           className="mt-2 text-text-secondary dark:text-text-secondary-dark"
@@ -60,6 +80,9 @@ export default function CompassScreen() {
           title={t.moodJournal.title}
           subLabel={t.moodJournal.sub}
           onPress={() => router.push(COMPASS_ROUTES.moodJournal)}
+          tint="patterns"
+          icon={Book}
+          variant="hero"
           testID="compass-tile-mood-journal"
         />
         <Text
@@ -72,6 +95,9 @@ export default function CompassScreen() {
           title={t.sleep.title}
           subLabel={t.sleep.sub}
           onPress={() => router.push(COMPASS_ROUTES.sleep)}
+          tint="understand"
+          icon={Moon}
+          variant="hero"
           testID="compass-tile-sleep"
         />
       </ScrollView>
