@@ -6,16 +6,19 @@ import { Text } from '@/components/ui/Text';
 import { CategoryStillLife } from '@/features/learn/CategoryStillLife';
 import { LEARN_CATEGORIES } from '@/features/learn/categories';
 import { CT4_LEARN } from '@/features/learn/copy';
+import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
 
-// S6 Learn — the article rail by topic (fixed order) + a Library entry. A plain
-// ScrollView + map (the category set is small; no FlashList). Each topic opens the
-// category article list (real Supabase content, S6→list → reader S22); the Library
-// entry opens the WebView browse (S23, PR E).
+// S6 Learn — the article rail by topic (fixed order) + a Conditions entry + a
+// Library entry. A plain ScrollView + map (the category set is small; no
+// FlashList). Each topic opens the category article list (real Supabase content,
+// S6→list → reader S22); the Conditions entry opens the conditions library
+// (/conditions); the Library entry opens the WebView browse (S23, PR E).
 export function LearnView() {
   const t = CT4_LEARN;
   return (
     <ScreenShell edges={['bottom']}>
-      <ScrollView contentContainerClassName="gap-3 py-4" showsVerticalScrollIndicator={false}>
+      <ReadingTextSizeProvider>
+        <ScrollView contentContainerClassName="gap-3 py-4" showsVerticalScrollIndicator={false}>
         <Text variant="body" className="px-1 text-text-secondary dark:text-text-secondary-dark">
           {t.intro}
         </Text>
@@ -39,6 +42,19 @@ export function LearnView() {
 
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={t.conditionsLabel}
+          onPress={() => router.push('/conditions')}
+          testID="learn-conditions-entry"
+          className="min-h-[44px] justify-center rounded-xl border border-border px-4 dark:border-border-dark"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        >
+          <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+            {t.conditionsLabel}
+          </Text>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
           accessibilityLabel={t.libraryLabel}
           onPress={() => router.push('/library')}
           testID="learn-library-entry"
@@ -49,7 +65,8 @@ export function LearnView() {
             {t.libraryLabel}
           </Text>
         </Pressable>
-      </ScrollView>
+        </ScrollView>
+      </ReadingTextSizeProvider>
     </ScreenShell>
   );
 }

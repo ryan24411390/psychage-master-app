@@ -20,13 +20,13 @@ export const KNOWN_LOCAL_KEYS = [
   'mobile:reminder-settings', // B2 lib/persistence/reminder-settings
   'mobile:appearance', // B2 lib/persistence/appearance
   'mobile:personalization', // B2 lib/persistence/personalization
+  'mobile:sync-consent', // settings lib/persistence/sync-consent (check-in backup consent)
+  'mobile:reading-text-size', // settings lib/persistence/reading-text-size
 ] as const;
 
-// KNOWN GAP (out of B2 scope to close): the check-in store quarantines a corrupt
-// blob under a dynamically-suffixed key `${CHECK_IN_STORAGE_KEY}:quarantine:<iso>-<uuid>`.
-// Those keys cannot be enumerated through {get,set,remove}, so wipeLocalData
-// cannot reach them. They only ever populate on a rare corrupt-blob anomaly, hold
-// already-corrupt local data, and never sync. Closing this needs a getAllKeys()/
-// clearAll() method on the Storage adapter (MMKV exposes both natively) — a
-// forbidden edit to the read-only storage adapter in this wave. FLAGGED.
+// The check-in store quarantines a corrupt blob under a dynamically-suffixed key
+// `${CHECK_IN_STORAGE_KEY}:quarantine:<iso>-<uuid>`. These have no static entry
+// here, so wipeLocalData reaches them by enumerating getAllKeys() and removing any
+// key carrying the `:quarantine:` segment (gap previously FLAGGED here is now
+// closed — the Storage adapter exposes getAllKeys()).
 export const QUARANTINE_KEY_PREFIX = `${CHECK_IN_STORAGE_KEY}:quarantine:`;

@@ -17,12 +17,14 @@ import { CT4_CONTENT } from '@/features/content/copy';
 import { ReviewedByCredit } from '@/features/content/ReviewedByCredit';
 import { getArticleBySlug } from '@/lib/articles';
 import { colors } from '@/lib/colors';
+import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
 
 // S22 Article reader — NATIVE chrome + NATIVE body. Pushed over the tabs, so it
 // renders the GlobalHeader itself (Help-now pill reachable, SR-2) plus a native
 // back row. Article CONTENT is the real, clinician-reviewed body fetched live from
 // the shared Supabase and rendered verbatim via ArticleBody (HTML → native PEAF
-// blocks). The byline mirrors the web exactly: author "Psychage Team · Editor"
+// blocks), inside the ReadingTextSizeProvider so the reader's text-size control
+// applies. The byline mirrors the web exactly: author "Psychage Team · Editor"
 // plus the full Dr. Dobson reviewer credit (ReviewedByCredit, the single
 // enforcement point). A missing article reports its absence — never placeholder prose.
 export function ArticleReader({ slug }: { slug: string }) {
@@ -68,49 +70,54 @@ export function ArticleReader({ slug }: { slug: string }) {
           </Text>
         </View>
       ) : (
-        <ScrollView
-          contentContainerClassName="gap-3 px-5 pb-12"
-          showsVerticalScrollIndicator={false}
-        >
-          {article.heroImageUrl ? (
-            <Image
-              source={{ uri: article.heroImageUrl }}
-              accessibilityIgnoresInvertColors
-              resizeMode="cover"
-              style={{ width: width - 40, height: (width - 40) / 1.78, borderRadius: 12 }}
-            />
-          ) : null}
+        <ReadingTextSizeProvider>
+          <ScrollView
+            contentContainerClassName="gap-3 px-5 pb-12"
+            showsVerticalScrollIndicator={false}
+          >
+            {article.heroImageUrl ? (
+              <Image
+                source={{ uri: article.heroImageUrl }}
+                accessibilityIgnoresInvertColors
+                resizeMode="cover"
+                style={{ width: width - 40, height: (width - 40) / 1.78, borderRadius: 12 }}
+              />
+            ) : null}
 
-          <View className="flex-row items-center gap-2">
-            <Text
-              variant="caption"
-              className="rounded-full bg-surface-active px-2 py-0.5 text-text-secondary dark:bg-surface-active-dark dark:text-text-secondary-dark"
-            >
-              {article.categoryName}
-            </Text>
-            {article.readTime ? (
-              <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
-                {`${article.readTime} min read`}
+            <View className="flex-row items-center gap-2">
+              <Text
+                variant="caption"
+                className="rounded-full bg-surface-active px-2 py-0.5 text-text-secondary dark:bg-surface-active-dark dark:text-text-secondary-dark"
+              >
+                {article.categoryName}
+              </Text>
+              {article.readTime ? (
+                <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
+                  {`${article.readTime} min read`}
+                </Text>
+              ) : null}
+            </View>
+
+            <Text variant="headingLg">{article.title}</Text>
+            {article.subtitle ? (
+              <Text
+                variant="bodyMedium"
+                className="text-text-secondary dark:text-text-secondary-dark"
+              >
+                {article.subtitle}
               </Text>
             ) : null}
-          </View>
 
-          <Text variant="headingLg">{article.title}</Text>
-          {article.subtitle ? (
-            <Text variant="bodyMedium" className="text-text-secondary dark:text-text-secondary-dark">
-              {article.subtitle}
-            </Text>
-          ) : null}
+            <View className="gap-0.5">
+              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+                {`${article.authorName} · ${article.authorRole}`}
+              </Text>
+              <ReviewedByCredit />
+            </View>
 
-          <View className="gap-0.5">
-            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
-              {`${article.authorName} · ${article.authorRole}`}
-            </Text>
-            <ReviewedByCredit />
-          </View>
-
-          <ArticleBody html={article.contentHtml} />
-        </ScrollView>
+            <ArticleBody html={article.contentHtml} />
+          </ScrollView>
+        </ReadingTextSizeProvider>
       )}
     </View>
   );
