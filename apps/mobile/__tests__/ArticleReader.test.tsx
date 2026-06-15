@@ -2,8 +2,12 @@ import { render, screen } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { HapticProvider } from '@/lib/haptic-context';
 
-jest.mock('expo-router', () => ({ router: { back: jest.fn(), push: jest.fn() } }));
+jest.mock('expo-router', () => ({
+  router: { back: jest.fn(), push: jest.fn() },
+  useFocusEffect: jest.fn(),
+}));
 jest.mock('@/lib/articles', () => ({ getArticleBySlug: jest.fn() }));
 
 import { ArticleReader } from '@/features/content/ArticleReader';
@@ -35,7 +39,9 @@ function renderReader(ui: ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <SafeAreaProvider initialMetrics={INITIAL_METRICS}>
-      <QueryClientProvider client={client}>{ui}</QueryClientProvider>
+      <QueryClientProvider client={client}>
+        <HapticProvider>{ui}</HapticProvider>
+      </QueryClientProvider>
     </SafeAreaProvider>,
   );
 }

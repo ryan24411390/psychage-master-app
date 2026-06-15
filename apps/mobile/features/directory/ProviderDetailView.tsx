@@ -6,6 +6,7 @@ import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
+import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
 import { dial } from '@/features/crisis/dialer';
 import { colors } from '@/lib/colors';
 import { useHaptics } from '@/lib/haptic-context';
@@ -174,13 +175,17 @@ export function ProviderDetailView({ id }: { id: string }) {
             <Text variant="headingLg" className="flex-1">
               {name}
             </Text>
-            {badge ? (
-              <View className="rounded-full bg-surface px-2.5 py-1 dark:bg-surface-dark">
-                <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
-                  {badge}
-                </Text>
-              </View>
-            ) : null}
+            <View className="flex-row items-center gap-1">
+              {badge ? (
+                <View className="rounded-full bg-surface px-2.5 py-1 dark:bg-surface-dark">
+                  <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+                    {badge}
+                  </Text>
+                </View>
+              ) : null}
+              {/* Save this provider — resource_id is the provider id (T-008). */}
+              <BookmarkSaveSlot resourceType="provider" resourceId={id} testID="provider-save" />
+            </View>
           </View>
           {p.credentials_suffix ? (
             <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">

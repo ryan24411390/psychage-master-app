@@ -1,0 +1,32 @@
+# Bookmarks E2E (T-013) — save → list → open → unsave → empty.
+# Runs on iOS sim + Android emulator: `maestro test .maestro/bookmarks.yaml`.
+# Requires a signed-in session (saving is account-scoped); a prior auth flow or a
+# seeded session must run first. Not part of PR CI (no device infra) — manual/nightly.
+appId: com.psychage.app
+---
+- launchApp:
+    clearState: false
+
+# Open an article from Learn, then save it (icon fills + medium haptic).
+- tapOn: { id: 'tab-learn' }
+- tapOn: { text: '.*', index: 0 } # first article card
+- assertVisible: { id: 'article-save' }
+- tapOn: { id: 'article-save' }
+- assertVisible: { text: 'Saved. Tap to remove.' }
+
+# Settings → Saved → the item is listed.
+- tapOn: { id: 'header-avatar' }
+- tapOn: { id: 'settings-row-saved' }
+- assertVisible: { text: 'Saved' }
+- assertVisible: { id: 'saved-row-.*' }
+
+# Open it from the list and return.
+- tapOn: { id: 'saved-row-.*' }
+- assertVisible: { id: 'article-save' }
+- back
+
+# Unsave from the list → empty state.
+- tapOn:
+    id: 'saved-row-.*'
+    point: '90%,50%' # trailing unsave control on the row
+- assertVisible: { text: 'Nothing saved yet' }

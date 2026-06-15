@@ -3,7 +3,10 @@ import type { ReactElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('@/components/GlobalHeader', () => ({ GlobalHeader: () => null }));
-jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn() } }));
+jest.mock('expo-router', () => ({
+  router: { push: jest.fn(), back: jest.fn() },
+  useFocusEffect: jest.fn(),
+}));
 jest.mock('@/features/crisis/dialer', () => ({ dial: jest.fn() }));
 jest.mock('@/features/directory/queries', () => ({ getProviderById: jest.fn() }));
 
