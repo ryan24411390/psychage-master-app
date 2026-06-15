@@ -2,6 +2,7 @@ import { fireEvent, screen } from '@testing-library/react-native';
 import { router } from 'expo-router';
 
 import SettingsHubScreen from '@/app/settings/index';
+import { AuthProvider, createStubAuthService } from '@/features/auth';
 
 import { renderWithProviders } from './_helpers';
 
@@ -22,7 +23,9 @@ describe('S42 Settings hub', () => {
     expect(screen.getByTestId('settings-row-supporter')).toBeTruthy();
     expect(screen.getByTestId('settings-row-crisis')).toBeTruthy();
     expect(screen.getByTestId('settings-row-account-status')).toBeTruthy();
-    expect(screen.getByTestId('settings-row-sign-out')).toBeTruthy();
+    // Signed-out default (no AuthProvider) → the auth row is Sign in, not Sign out.
+    // Mutual exclusivity across both states is pinned in pr110-settings-auth-parity.test.tsx.
+    expect(screen.getByTestId('settings-row-sign-in')).toBeTruthy();
     expect(screen.getByTestId('settings-row-delete-account')).toBeTruthy();
   });
 
@@ -42,9 +45,17 @@ describe('S42 Settings hub', () => {
     expect(pushMock).toHaveBeenCalledWith('/crisis');
   });
 
-  it('sign-out routes to the wired S37 confirm sheet', () => {
-    renderWithProviders(<SettingsHubScreen />);
-    fireEvent.press(screen.getByTestId('settings-row-sign-out'));
+  it('sign-out routes to the wired S37 confirm sheet', async () => {
+    // Sign-out only renders when signed in — seed a session via the stub service
+    // and mount the provider so the ternary flips before we press.
+    const service = createStubAuthService();
+    await service.signIn('person@example.com', 'a-good-password');
+    renderWithProviders(
+      <AuthProvider service={service}>
+        <SettingsHubScreen />
+      </AuthProvider>,
+    );
+    fireEvent.press(await screen.findByTestId('settings-row-sign-out'));
     expect(pushMock).toHaveBeenCalledWith('/sign-out');
   });
 
