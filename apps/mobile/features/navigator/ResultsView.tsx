@@ -84,7 +84,7 @@ export function ResultsView({
       </View>
 
       <ScrollView contentContainerClassName="gap-6 px-4 pb-10">
-        <View className="border-l-4 border-primary px-4 py-3 rounded-r-xl bg-teal-50/20 dark:bg-neutral-900/30">
+        <View className="border-l-4 border-primary px-4 py-3 rounded-r-xl bg-surface-accent/20 dark:bg-surface-accent-dark/10">
           <Text variant="body" className="italic text-text-primary dark:text-text-primary-dark">
             {CAVEAT}
           </Text>

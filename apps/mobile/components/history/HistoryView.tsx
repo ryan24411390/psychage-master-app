@@ -71,7 +71,7 @@ export function HistoryView({
               accessibilityLabel="This week’s reflection is ready."
               onPress={onReflection}
               hitSlop={6}
-              className="min-h-[44px] justify-center p-4 rounded-xl border border-teal-100/60 bg-teal-50/20 shadow-sm dark:border-teal-800/40 dark:bg-teal-900/10"
+              className="min-h-[44px] justify-center p-4 rounded-xl border border-border-accent/60 bg-surface-accent/20 shadow-sm dark:border-border-accent-dark/40 dark:bg-surface-accent-dark/10"
             >
               <Text variant="bodyMedium" className="text-primary dark:text-primary-dark font-sans-medium">
                 This week’s reflection is ready.

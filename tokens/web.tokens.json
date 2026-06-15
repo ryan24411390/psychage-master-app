@@ -22,14 +22,18 @@
       "default": { "light": "#F9F7F3", "dark": "#171717" },
       "hover":   { "light": "#f5f5f4", "dark": "#1F1F1F" },
       "active":  { "light": "#e7e5e4", "dark": "#262626" },
+      "accent":  { "light": "#F0FDFA", "dark": "#0D5C54" },
       "_source": {
         "default.light": "src/styles/tokens.css:55",
         "default.dark":  "src/styles/tokens.css:114",
         "hover.light":   "src/styles/tokens.css:56",
         "hover.dark":    "src/styles/tokens.css:115",
         "active.light":  "src/styles/tokens.css:57",
-        "active.dark":   "src/styles/tokens.css:116"
-      }
+        "active.dark":   "src/styles/tokens.css:116",
+        "accent.light":  "color.teal.50 (alias)",
+        "accent.dark":   "color.teal.900 (alias)"
+      },
+      "_accent": "accent = teal-tinted callout/quote surface (light teal-50 #F0FDFA, dark teal-900 #0D5C54). Reuses the brand teal scale — no invented value. Added for cross-platform parity (convention #1) with tokens/mobile.tokens.json color.surface.accent, where it backs the caveat/quote/state surfaces; web may adopt it for the same surfaces."
     },
     "primary": {
       "default": { "light": "#1A9B8C", "dark": "#20B8A6" },
@@ -61,12 +65,16 @@
     "border": {
       "default": { "light": "#e7e5e4", "dark": "#3f3f46" },
       "hover":   { "light": "#d6d3d1", "dark": "#52525b" },
+      "accent":  { "light": "#E6F5F3", "dark": "#158A7D" },
       "_source": {
         "default.light": "src/styles/tokens.css:73",
         "default.dark":  "src/styles/tokens.css:132",
         "hover.light":   "src/styles/tokens.css:75",
-        "hover.dark":    "src/styles/tokens.css:134"
-      }
+        "hover.dark":    "src/styles/tokens.css:134",
+        "accent.light":  "color.teal.100 (alias)",
+        "accent.dark":   "color.teal.700 (alias)"
+      },
+      "_accent": "accent = teal-tinted border pairing with surface.accent (light teal-100 #E6F5F3, dark teal-700 #158A7D). Reuses the brand teal scale. Added for parity with tokens/mobile.tokens.json color.border.accent."
     },
     "semantic": {
       "error":   { "light": "#dc2626", "dark": "#f87171" },

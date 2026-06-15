@@ -60,7 +60,7 @@ export function EarlierReflectionsView({ weeks, onBack }: EarlierReflectionsView
               >
                 {w.rangeLabel}
               </Text>
-              <View className="border-l-4 border-primary px-3 py-1 bg-teal-50/20 dark:bg-teal-900/10 rounded-r-lg">
+              <View className="border-l-4 border-primary px-3 py-1 bg-surface-accent/20 dark:bg-surface-accent-dark/10 rounded-r-lg">
                 <Text className="font-display text-[16px] italic text-text-primary dark:text-text-primary-dark">
                   {w.line}
                 </Text>
