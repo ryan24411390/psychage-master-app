@@ -6,6 +6,7 @@
 export const COMPASS_ROUTES = {
   navigator: '/navigator', // A2 S13 — Symptom Navigator
   toolkit: '/toolkit', // A2 S19 — Toolkit
+  mindmate: '/tools/mindmate', // S-MM — MindMate AI companion (native chat)
   clarity: '/tools/clarity', // S32 — Clarity Score (native flow)
   moodJournal: '/tools/mood-journal', // Mood Journal — patterns & triggers
 } as const;

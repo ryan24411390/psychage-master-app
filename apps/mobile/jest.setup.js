@@ -5,3 +5,12 @@
 // real SafeAreaView and reads its displayName, which a module mock clobbers.
 // Tests that mount ScreenShell render inside a real SafeAreaProvider seeded
 // with static initialMetrics instead (see __tests__/_helpers.tsx).
+
+// @shopify/flash-list's ViewHolder layout pass throws under react-test-renderer,
+// so the real component renders no queryable children (incl. ListEmptyComponent).
+// Activate the manual mock in __mocks__/@shopify/flash-list.js — a plain View that
+// maps data → renderItem (or renders the empty-state when there's no data) so list
+// content, including empty-state intros, is assertable. No test renders a real
+// FlashList. The mock lives in a module file (not a jest.mock factory here) to stay
+// clear of babel-plugin-jest-hoist's out-of-scope-variable rule.
+jest.mock('@shopify/flash-list');

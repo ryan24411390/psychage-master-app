@@ -33,6 +33,12 @@ export default function CompassScreen() {
           testID="compass-tile-navigator"
         />
         <CompassTile
+          title={t.mindmate.title}
+          subLabel={t.mindmate.sub}
+          onPress={() => router.push(COMPASS_ROUTES.mindmate)}
+          testID="compass-tile-mindmate"
+        />
+        <CompassTile
           title={t.clarity.title}
           subLabel={t.clarity.sub}
           onPress={() => router.push(COMPASS_ROUTES.clarity)}
