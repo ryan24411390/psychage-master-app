@@ -19,6 +19,7 @@ export default function SettingsLayout() {
       />
       <Stack.Screen name="appearance" options={{ title: t.appearance.title }} />
       <Stack.Screen name="about" options={{ title: t.about.title }} />
+      <Stack.Screen name="acknowledgments" options={{ title: t.acknowledgments.title }} />
       {/* PR B */}
       <Stack.Screen name="privacy" options={{ title: t.hub.rows.privacy }} />
       <Stack.Screen name="delete" options={{ title: 'Delete' }} />

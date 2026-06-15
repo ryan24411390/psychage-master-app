@@ -8,6 +8,7 @@ import { CT4_CONTENT } from '@/features/content/copy';
 import { getCt1Article } from '@/features/content/fixtures/ct1-articles';
 import { ReviewedByCredit } from '@/features/content/ReviewedByCredit';
 import { colors } from '@/lib/colors';
+import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
 
 // S22 Article reader — NATIVE chrome. This is a pushed route (outside the tabs), so
 // it renders the GlobalHeader itself (carrying the Help-now pill) plus a native
@@ -37,7 +38,8 @@ export function ArticleReader({ slug }: { slug: string }) {
         </Pressable>
       </View>
 
-      <ScrollView contentContainerClassName="gap-3 px-5 pb-12" showsVerticalScrollIndicator={false}>
+      <ReadingTextSizeProvider>
+        <ScrollView contentContainerClassName="gap-3 px-5 pb-12" showsVerticalScrollIndicator={false}>
         <View className="flex-row items-center gap-2">
           <Text
             variant="caption"
@@ -69,7 +71,8 @@ export function ArticleReader({ slug }: { slug: string }) {
             {para}
           </Text>
         ))}
-      </ScrollView>
+        </ScrollView>
+      </ReadingTextSizeProvider>
     </View>
   );
 }

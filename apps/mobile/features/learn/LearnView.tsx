@@ -6,6 +6,7 @@ import { Text } from '@/components/ui/Text';
 import { CategoryStillLife } from '@/features/learn/CategoryStillLife';
 import { LEARN_CATEGORIES } from '@/features/learn/categories';
 import { CT4_LEARN } from '@/features/learn/copy';
+import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
 
 // S6 Learn — the article rail by topic (fixed order) + a Conditions entry + a
 // Library entry. A plain ScrollView + map (the category set is small; no
@@ -16,7 +17,8 @@ export function LearnView() {
   const t = CT4_LEARN;
   return (
     <ScreenShell edges={['bottom']}>
-      <ScrollView contentContainerClassName="gap-3 py-4" showsVerticalScrollIndicator={false}>
+      <ReadingTextSizeProvider>
+        <ScrollView contentContainerClassName="gap-3 py-4" showsVerticalScrollIndicator={false}>
         <Text variant="body" className="px-1 text-text-secondary dark:text-text-secondary-dark">
           {t.intro}
         </Text>
@@ -63,7 +65,8 @@ export function LearnView() {
             {t.libraryLabel}
           </Text>
         </Pressable>
-      </ScrollView>
+        </ScrollView>
+      </ReadingTextSizeProvider>
     </ScreenShell>
   );
 }

@@ -10,6 +10,7 @@ import { storage } from '@/lib/adapters/storage';
 import { mapEntryToCheckInInput } from '@/lib/check-in-sync-map';
 import { getOrCreateDeviceId } from '@/lib/device-id';
 import { generateId } from '@/lib/id';
+import { getCheckInSyncConsent } from '@/lib/persistence/sync-consent';
 import { getSupabaseAuthClient, isSupabaseConfigured } from '@/lib/supabase/client';
 
 // The app's single CheckInRecordStore, constructed with the mobile DI seam
@@ -29,6 +30,13 @@ import { getSupabaseAuthClient, isSupabaseConfigured } from '@/lib/supabase/clie
 export interface CheckInPushDeps {
   /** True only when the Supabase env is configured (else the push is a no-op). */
   enabled(): boolean;
+  /**
+   * The user's explicit check-in cloud-backup CONSENT (SR-4 / ADR-001). The push is
+   * skipped when false — this is the privacy gate the carve-out's "consented self-
+   * tracking" basis rests on. Read synchronously from the on-device consent store;
+   * default OFF, so no entry leaves the device until the person opts in (S46).
+   */
+  getConsent(): boolean;
   /** The authenticated user's id, or null when signed out (push is then skipped). */
   getUserId(): Promise<string | null>;
   /** The session-bearing write client (the existing auth client, cast to the seam). */
@@ -43,6 +51,7 @@ export interface CheckInPushDeps {
 // check-in write path, no duplicate plumbing).
 export const productionPushDeps: CheckInPushDeps = {
   enabled: isSupabaseConfigured,
+  getConsent: getCheckInSyncConsent,
   getUserId: async () => {
     // The auth client is the session-bearing instance; getUser reads the live session.
     const { data, error } = await getSupabaseAuthClient().auth.getUser();
@@ -59,8 +68,9 @@ export const productionPushDeps: CheckInPushDeps = {
 
 /**
  * Best-effort, push-only backup of one local entry. Skips silently when the env is
- * unconfigured or the user is signed out; swallows any write/auth error. NEVER throws
- * — the local save is the source of truth and must not be affected by the push.
+ * unconfigured, the user has NOT consented to cloud backup (SR-4 / ADR-001), or the
+ * user is signed out; swallows any write/auth error. NEVER throws — the local save is
+ * the source of truth and must not be affected by the push.
  */
 export async function pushCheckInEntry(
   entry: CheckInEntry,
@@ -68,6 +78,10 @@ export async function pushCheckInEntry(
 ): Promise<void> {
   try {
     if (!deps.enabled()) return;
+    // USER-CONSENT GATE (SR-4 / ADR-001): no push without the person's explicit
+    // opt-in. Checked before getUserId() so an un-consented backup never even
+    // reads the auth session. Default OFF — silence here is the privacy-safe path.
+    if (!deps.getConsent()) return;
     const userId = await deps.getUserId();
     if (!userId) return;
     await writeCheckIn(deps.getWriteClient(), mapEntryToCheckInInput(entry, userId), deps.writeContext());
