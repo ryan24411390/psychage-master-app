@@ -30,7 +30,7 @@ export function LearnView() {
             accessibilityLabel={cat.label}
             onPress={() => router.push(`/learn/${cat.id}`)}
             testID={`learn-category-${cat.id}`}
-            className="flex-row items-center gap-3 rounded-xl border border-border bg-surface p-3 dark:border-border-dark dark:bg-surface-dark"
+            className="flex-row items-center gap-4 rounded-xl border border-border/50 bg-surface p-4 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
             <CategoryStillLife testID={`learn-art-${cat.id}`} />
@@ -58,7 +58,7 @@ export function LearnView() {
           accessibilityLabel={t.libraryLabel}
           onPress={() => router.push('/library')}
           testID="learn-library-entry"
-          className="min-h-[44px] justify-center rounded-xl border border-border px-4 dark:border-border-dark"
+          className="min-h-[44px] justify-center rounded-xl border border-border/50 bg-surface px-4 py-3 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">

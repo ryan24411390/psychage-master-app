@@ -28,10 +28,10 @@ export function RecordTrustView({ onCheckIn, onLookAround }: RecordTrustViewProp
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
       <View className="flex-1 gap-8 px-6 pt-6">
-        <View className="items-center">
+        <View className="items-center mt-4 mb-2">
           <Mascot />
         </View>
-        <View className="gap-3">
+        <View className="gap-4 p-5 rounded-xl border border-border/50 bg-surface shadow-sm dark:border-border-dark/50 dark:bg-surface-dark">
           <Text variant="body">{L1}</Text>
           <Text variant="body">{L2}</Text>
           <Text variant="body">{L3}</Text>

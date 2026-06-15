@@ -30,7 +30,7 @@ function BridgeCardBody({ card }: { card: BridgeCard }) {
           accessibilityRole="button"
           accessibilityLabel={`${chipName} ${chipMin}`}
           onPress={() => {}}
-          className="min-h-[44px] flex-row items-center gap-1 rounded-full border border-border px-3 dark:border-border-dark"
+          className="min-h-[44px] flex-row items-center gap-1 rounded-full border border-border/50 bg-surface px-3 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
         >
           <Text variant="bodyMedium">{chipName}</Text>
           <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
@@ -73,7 +73,7 @@ function ReminderCardBody({ card }: { card: ReminderCard }) {
           accessibilityLabel="9:00 PM"
           // Opens the system time picker — wired when the reminder trigger lands (post-A1).
           onPress={() => {}}
-          className="min-h-[44px] justify-center rounded-full border border-border px-3 dark:border-border-dark"
+          className="min-h-[44px] justify-center rounded-full border border-border/50 bg-surface px-3 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
         >
           <Text variant="bodyMedium">9:00 PM</Text>
         </Pressable>
@@ -108,7 +108,7 @@ export function HomeCardSlot({ card }: { card: HomeCard | null }) {
   return (
     <Animated.View
       entering={reduced ? undefined : FadeInUp.duration(DURATION.base).easing(easingFn('standard'))}
-      className="mt-3 rounded-xl border border-border bg-surface px-4 py-4 dark:border-border-dark dark:bg-surface-dark"
+      className="mt-3 rounded-xl border border-border/50 bg-surface px-4 py-4 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
     >
       {card.kind === 'bridge' ? (
         <BridgeCardBody card={card} />
