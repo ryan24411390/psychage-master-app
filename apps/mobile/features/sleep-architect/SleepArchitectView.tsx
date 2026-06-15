@@ -2,7 +2,12 @@ import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import type { SleepEntry, SleepEntryInput, SleepRecordStore } from '@psychage/shared/sleep';
+import type {
+  ChronotypeResult,
+  SleepEntry,
+  SleepEntryInput,
+  SleepRecordStore,
+} from '@psychage/shared/sleep';
 
 import { Button } from '@/components/ui/Button';
 import { CrisisPill } from '@/components/CrisisPill';
@@ -12,6 +17,7 @@ import { SleepDashboard } from '@/features/sleep-architect/dashboard/SleepDashbo
 import { SleepDiary } from '@/features/sleep-architect/diary/SleepDiary';
 import { SleepLogForm } from '@/features/sleep-architect/diary/SleepLogForm';
 import { SleepDisclaimer } from '@/features/sleep-architect/shared/SleepDisclaimer';
+import { SleepTools } from '@/features/sleep-architect/tools/SleepTools';
 import { getSleepStore } from '@/lib/sleep-store';
 
 // Sleep Architect shell. Pushed OUTSIDE the tabs, so it carries its OWN crisis
@@ -19,7 +25,7 @@ import { getSleepStore } from '@/lib/sleep-store';
 // writes go through the injected SleepRecordStore (LOCAL-ONLY, SR-4). The store is a
 // prop (default: the app singleton) so render tests inject an in-memory double.
 
-type Tab = 'overview' | 'diary' | 'dashboard';
+type Tab = 'overview' | 'diary' | 'dashboard' | 'tools';
 type Editing = { mode: 'new' } | { mode: 'edit'; entry: SleepEntry } | null;
 
 type SleepArchitectViewProps = {
@@ -51,6 +57,18 @@ export function SleepArchitectView({ store = getSleepStore() }: SleepArchitectVi
       }
     },
     [editing, store, reload],
+  );
+
+  const handleSaveTargets = useCallback(
+    (result: ChronotypeResult) => {
+      store.saveSettings({
+        chronotype: result.animal,
+        target_bedtime: result.ideal_bedtime,
+        target_wake_time: result.ideal_wake_time,
+      });
+      reload();
+    },
+    [store, reload],
   );
 
   return (
@@ -92,6 +110,13 @@ export function SleepArchitectView({ store = getSleepStore() }: SleepArchitectVi
             {tab === 'dashboard' ? (
               <SleepDashboard entries={entries} settings={settings} />
             ) : null}
+            {tab === 'tools' ? (
+              <SleepTools
+                entries={entries}
+                settings={settings}
+                onSaveTargets={handleSaveTargets}
+              />
+            ) : null}
           </ScrollView>
         </>
       )}
@@ -128,6 +153,7 @@ function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
     { key: 'overview', label: CT4_SLEEP.tabs.overview },
     { key: 'diary', label: CT4_SLEEP.tabs.diary },
     { key: 'dashboard', label: CT4_SLEEP.tabs.dashboard },
+    { key: 'tools', label: CT4_SLEEP.tabs.tools },
   ];
   return (
     <View className="flex-row border-b border-border px-4 dark:border-border-dark">
