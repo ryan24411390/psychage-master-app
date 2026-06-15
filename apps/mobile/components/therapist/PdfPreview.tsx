@@ -6,6 +6,7 @@ import { AuthTextField } from '@/components/auth/AuthTextField';
 import { Terrain } from '@/components/terrain/Terrain';
 import type { TerrainDay } from '@/components/terrain/terrain-geometry';
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
 import { THERAPIST_COPY } from '@/features/therapist/copy';
@@ -56,12 +57,9 @@ export function PdfPreview({
           {summaryLine}
         </Text>
 
-        <View
-          onLayout={onLayout}
-          className="rounded-xl border border-border bg-surface p-3 dark:border-border-dark dark:bg-surface-dark"
-        >
+        <Card onLayout={onLayout} className="p-3">
           {width > 0 ? <Terrain days={terrainDays} width={width - 24} /> : null}
-        </View>
+        </Card>
 
         {isEmpty ? (
           <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
