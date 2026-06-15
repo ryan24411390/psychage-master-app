@@ -1,8 +1,6 @@
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
-import { SettingsRow } from '@/components/settings/SettingsRow';
 import { SettingsSection } from '@/components/settings/SettingsSection';
 import { SettingsToggleRow } from '@/components/settings/SettingsToggleRow';
 import { Button } from '@/components/ui/Button';
@@ -22,9 +20,10 @@ import { useSyncConsent } from '@/lib/use-sync-consent';
 // CONSENT toggle (SR-4 / ADR-001 — the gate the carve-out's "consented self-
 // tracking" basis rests on; default OFF, genuinely gates lib/check-in-store
 // pushCheckInEntry), transparency about on-device vs backed-up data, export my
-// record (CSV/JSON, U3), a local-only "clear on-device data" reset, and the honest
-// two-screen delete pair (S47/S48). Export reads the RecordStore and hands a file
-// to the OS share sheet — a user-initiated local export, NOT SR-4 exfiltration.
+// record (CSV/JSON, U3), and a local-only "clear on-device data" reset. Export
+// reads the RecordStore and hands a file to the OS share sheet — a user-initiated
+// local export, NOT SR-4 exfiltration. The full hard-immediate account deletion
+// (S47/S48) lives under Account in the hub — this screen no longer duplicates it.
 export default function PrivacyScreen() {
   const t = CT4_SETTINGS.privacy;
   const [busy, setBusy] = useState(false);
@@ -137,15 +136,6 @@ export default function PrivacyScreen() {
             </Button>
           )}
         </View>
-
-        <SettingsSection>
-          <SettingsRow
-            label={t.deleteEntry}
-            destructive
-            onPress={() => router.push('/settings/delete')}
-            testID="privacy-delete-entry"
-          />
-        </SettingsSection>
       </ScrollView>
     </ScreenShell>
   );

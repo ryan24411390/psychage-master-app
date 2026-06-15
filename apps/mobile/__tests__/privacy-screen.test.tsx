@@ -32,12 +32,6 @@ describe('S46 Privacy & your data', () => {
     await waitFor(() => expect(shareMock).toHaveBeenCalledWith('json', expect.any(String)));
   });
 
-  it('the delete entry leads to the honest delete screen', () => {
-    renderWithProviders(<PrivacyScreen />, { haptics: true });
-    fireEvent.press(screen.getByTestId('privacy-delete-entry'));
-    expect(router.push as jest.Mock).toHaveBeenCalledWith('/settings/delete');
-  });
-
   it('check-in backup consent defaults OFF and flips on (gates the sync)', () => {
     expect(getCheckInSyncConsent()).toBe(false);
     renderWithProviders(<PrivacyScreen />, { haptics: true });
