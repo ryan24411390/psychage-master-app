@@ -84,18 +84,22 @@ export function ResultsView({
       </View>
 
       <ScrollView contentContainerClassName="gap-6 px-4 pb-10">
-        <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
-          {CAVEAT}
-        </Text>
+        <View className="border-l-4 border-primary px-4 py-3 rounded-r-xl bg-teal-50/20 dark:bg-neutral-900/30">
+          <Text variant="body" className="italic text-text-primary dark:text-text-primary-dark">
+            {CAVEAT}
+          </Text>
+        </View>
 
         {shown.map((r) => (
-          <View key={r.condition_id} className="gap-2">
+          <View key={r.condition_id} className="gap-2 p-5 rounded-xl border border-border/50 bg-surface shadow-sm dark:border-border-dark/50 dark:bg-surface-dark">
             <RelevancePhrase phrase={r.relevance_label} />
             <Text variant="heading">{r.name}</Text>
             <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
               {r.description_for_user}
             </Text>
-            <OnwardLink label="Read about this" onPress={() => onReadAbout(r.condition_id)} />
+            <View className="mt-2">
+              <OnwardLink label="Read about this" onPress={() => onReadAbout(r.condition_id)} />
+            </View>
           </View>
         ))}
 

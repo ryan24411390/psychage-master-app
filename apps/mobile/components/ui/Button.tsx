@@ -21,7 +21,7 @@ type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
 };
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-primary dark:bg-primary-dark',
+  primary: 'bg-primary dark:bg-primary-dark shadow-sm',
   secondary: 'bg-transparent border border-border dark:border-border-dark',
   ghost: 'bg-transparent',
 };

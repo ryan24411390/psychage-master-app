@@ -85,7 +85,7 @@ export function HomeView({
           className="gap-6"
         >
           {/* STATE ZONE */}
-          <View className="flex-row items-start justify-between gap-3">
+          <View className="flex-row items-start justify-between gap-3 bg-teal-50/30 border border-teal-100/50 dark:bg-neutral-900/30 dark:border-teal-800/30 p-5 rounded-xl shadow-sm">
             <View className="flex-1 gap-1">
               <Text variant="headingLg">{model.greeting}</Text>
               <Text
@@ -154,7 +154,7 @@ export function HomeView({
             <Pressable
               accessibilityRole="button"
               onPress={() => {}}
-              className="rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
+              className="rounded-xl border border-border/50 bg-surface p-4 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
             >
               <Text variant="heading">Steady yourself right now</Text>
               <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
@@ -164,7 +164,7 @@ export function HomeView({
             <Pressable
               accessibilityRole="button"
               onPress={() => {}}
-              className="rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
+              className="rounded-xl border border-border/50 bg-surface p-4 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
             >
               <Text variant="heading">Make sense of what you feel</Text>
               <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
@@ -181,7 +181,7 @@ export function HomeView({
             <Pressable
               accessibilityRole="button"
               onPress={() => {}}
-              className="gap-1 rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
+              className="gap-1 rounded-xl border border-border/50 bg-surface p-4 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
             >
               <View className="flex-row items-center gap-2">
                 <Text
@@ -208,9 +208,9 @@ export function HomeView({
                   key={topic}
                   accessibilityRole="button"
                   onPress={() => {}}
-                  className="min-h-[44px] justify-center rounded-full border border-border px-3 dark:border-border-dark"
+                  className="min-h-[44px] items-center justify-center rounded-full border border-border/50 bg-surface px-4 py-2 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
                 >
-                  <Text variant="bodySm">{topic}</Text>
+                  <Text variant="bodySm" className="font-sans-medium">{topic}</Text>
                 </Pressable>
               ))}
             </View>

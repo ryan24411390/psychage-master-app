@@ -52,17 +52,19 @@ export function EarlierReflectionsView({ weeks, onBack }: EarlierReflectionsView
           weeks.map((w) => (
             <View
               key={w.weekStartIso}
-              className="gap-1 border-b border-border pb-3 dark:border-border-dark"
+              className="gap-3 p-4 rounded-xl border border-border/50 bg-surface shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
             >
               <Text
                 variant="caption"
-                className="text-text-tertiary dark:text-text-tertiary-dark"
+                className="text-text-tertiary dark:text-text-tertiary-dark font-sans-medium"
               >
                 {w.rangeLabel}
               </Text>
-              <Text className="font-display text-[18px] italic text-text-primary dark:text-text-primary-dark">
-                {w.line}
-              </Text>
+              <View className="border-l-4 border-primary px-3 py-1 bg-teal-50/20 dark:bg-teal-900/10 rounded-r-lg">
+                <Text className="font-display text-[16px] italic text-text-primary dark:text-text-primary-dark">
+                  {w.line}
+                </Text>
+              </View>
             </View>
           ))
         )}
