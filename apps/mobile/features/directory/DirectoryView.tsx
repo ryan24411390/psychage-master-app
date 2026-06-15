@@ -18,6 +18,7 @@ import { DirectoryFilters, type FilterDraft } from './DirectoryFilters';
 import { DIRECTORY_COPY } from './copy';
 import { hasActiveSearch, useFeaturedProviders, useProviderSearch, useSpecialties } from './hooks';
 import { DEFAULT_RADIUS_MILES, requestAndGetCoords, type Coords } from './location';
+import { DirectorySkeleton } from './DirectorySkeleton';
 import { ProviderCard } from './ProviderCard';
 import { RecentlyViewedRail } from './RecentlyViewedRail';
 import { SortSheet, type SortOption } from './SortSheet';
@@ -340,8 +341,8 @@ export function DirectoryView({
       </View>
 
       {loading ? (
-        <View className="flex-1 items-center justify-center" testID="directory-loading">
-          <ActivityIndicator color={colors.primary.default.light} />
+        <View className="flex-1" testID="directory-loading">
+          <DirectorySkeleton />
         </View>
       ) : (
         <FlashList
@@ -366,9 +367,39 @@ export function DirectoryView({
             </View>
           }
           ListEmptyComponent={
-            <Text variant="body" className="py-6 text-center text-text-secondary dark:text-text-secondary-dark">
-              {active ? t.noResults : t.emptyPrompt}
-            </Text>
+            active ? (
+              <View className="items-center gap-3 px-6 pt-10" testID="directory-empty">
+                <View className="h-14 w-14 items-center justify-center rounded-full bg-surface dark:bg-surface-dark">
+                  <Search size={22} color={colors.charcoal[500]} strokeWidth={1.75} />
+                </View>
+                <Text variant="heading" className="text-center">
+                  {t.emptyTitle}
+                </Text>
+                <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
+                  {t.noResults}
+                </Text>
+                <View className="w-full gap-2 pt-1">
+                  {debounced ? (
+                    <Button variant="secondary" onPress={() => setText('')} testID="directory-empty-clear">
+                      {t.emptyClearSearch}
+                    </Button>
+                  ) : null}
+                  {filters.state ? (
+                    <Button
+                      variant="secondary"
+                      onPress={() => setFilters((f) => ({ ...f, state: '' }))}
+                      testID="directory-empty-widen"
+                    >
+                      {t.emptyWiden}
+                    </Button>
+                  ) : null}
+                </View>
+              </View>
+            ) : (
+              <Text variant="body" className="py-6 text-center text-text-secondary dark:text-text-secondary-dark">
+                {t.emptyPrompt}
+              </Text>
+            )
           }
           ListFooterComponent={
             search.isFetchingNextPage ? (
