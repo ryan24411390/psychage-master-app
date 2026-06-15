@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { AddMomentSheet } from '@/features/mood-journal/AddMomentSheet';
 import { CT4_MOOD_JOURNAL } from '@/features/mood-journal/copy';
@@ -44,15 +45,12 @@ export function MoodJournalView({ momentStore }: MoodJournalViewProps) {
         </View>
 
         {moments.length === 0 ? (
-          <View
-            testID="mood-journal-empty"
-            className="rounded-xl border border-border bg-surface p-5 dark:border-border-dark dark:bg-surface-dark"
-          >
+          <Card testID="mood-journal-empty" className="p-5">
             <Text variant="heading">{t.empty.heading}</Text>
             <Text variant="body" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
               {t.empty.body}
             </Text>
-          </View>
+          </Card>
         ) : (
           <PatternView moments={moments} />
         )}

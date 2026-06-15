@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { View } from 'react-native';
 
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 
 // A labelled group of settings rows. Optional heading + a hairline-bordered
@@ -22,9 +23,9 @@ export function SettingsSection({ title, children }: SettingsSectionProps) {
           {title}
         </Text>
       ) : null}
-      <View className="rounded-xl border border-border px-2 dark:border-border-dark">
+      <Card variant="outline" className="px-2">
         {children}
-      </View>
+      </Card>
     </View>
   );
 }

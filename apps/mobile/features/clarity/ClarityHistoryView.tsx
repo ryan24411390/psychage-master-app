@@ -1,5 +1,6 @@
 import { Pressable, ScrollView, View } from 'react-native';
 
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 
 import { TIER_COPY, describeChange } from './bands';
@@ -44,10 +45,7 @@ export function ClarityHistoryView({ snapshots, onStartNew }: ClarityHistoryView
           const prev = snapshots[i + 1];
           const change = i === 0 && prev ? describeChange(s.composite, prev.composite) : null;
           return (
-            <View
-              key={s.id}
-              className="gap-1 rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
-            >
+            <Card key={s.id} className="gap-1">
               <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 {formatDate(s.date)}
               </Text>
@@ -57,7 +55,7 @@ export function ClarityHistoryView({ snapshots, onStartNew }: ClarityHistoryView
                   {change}
                 </Text>
               ) : null}
-            </View>
+            </Card>
           );
         })
       )}

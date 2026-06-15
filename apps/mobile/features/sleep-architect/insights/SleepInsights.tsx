@@ -8,6 +8,7 @@ import {
   type SleepEntry,
 } from '@psychage/shared/sleep';
 
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
 
@@ -80,10 +81,7 @@ export function SleepInsights({ entries }: { entries: readonly SleepEntry[] }) {
         </Text>
       ) : (
         meaningful.map(({ metric, result }) => (
-          <View
-            key={metric}
-            className="gap-1 rounded-xl border border-border bg-surface px-4 py-4 dark:border-border-dark dark:bg-surface-dark"
-          >
+          <Card key={metric} className="gap-1 px-4 py-4">
             <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               {t.strengthLabel[result.significance]} · {t.pairs(result.sample_size)}
             </Text>
@@ -91,7 +89,7 @@ export function SleepInsights({ entries }: { entries: readonly SleepEntry[] }) {
               {t.metricLabel[metric]}{' '}
               {result.coefficient >= 0 ? t.directionUp : t.directionDown}.
             </Text>
-          </View>
+          </Card>
         ))
       )}
     </View>

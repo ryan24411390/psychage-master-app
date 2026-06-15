@@ -3,6 +3,7 @@ import { useColorScheme } from 'nativewind';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
 
@@ -50,10 +51,7 @@ export function EarlierReflectionsView({ weeks, onBack }: EarlierReflectionsView
           </Text>
         ) : (
           weeks.map((w) => (
-            <View
-              key={w.weekStartIso}
-              className="gap-3 p-4 rounded-xl border border-border/50 bg-surface shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
-            >
+            <Card key={w.weekStartIso} variant="elevated" className="gap-3">
               <Text
                 variant="caption"
                 className="text-text-tertiary dark:text-text-tertiary-dark font-sans-medium"
@@ -65,7 +63,7 @@ export function EarlierReflectionsView({ weeks, onBack }: EarlierReflectionsView
                   {w.line}
                 </Text>
               </View>
-            </View>
+            </Card>
           ))
         )}
       </ScrollView>
