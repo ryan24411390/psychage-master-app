@@ -229,6 +229,41 @@ Dynamic Type scales row text; High Contrast uses `color.text.primary`.
 
 ---
 
+## Copy strings (EN) — SR-3 reviewable artifact
+
+The full EN string set (resolves `_review.md` B-1: SR-3 needs inspectable copy, not key names).
+T-003 lands these verbatim in `features/bookmarks/copy.ts`. All content-neutral, person-first,
+educational, non-medical (App Store 1.4.1). Condition-referencing strings: **none** — kept neutral
+to minimize the Dr. Dobson review surface (Rule §7). `sr3_diagnostic_language.sh` is a seed-phrase
+scan only; these strings are additionally hand-checked against the forbidden-phrase set.
+
+| Key | EN string |
+|---|---|
+| `save.article` | Save this article |
+| `save.provider` | Save this provider |
+| `save.tool` | Save this tool |
+| `saved.aria` | Saved. Tap to remove. |
+| `error.save` | Couldn't save — check your connection and try again. |
+| `error.load` | Couldn't load your saved items. |
+| `signin.title` | Keep this for later |
+| `signin.body` | Sign in to save articles, providers, and tools to your account, so they're here whenever you come back — on any device. |
+| `signin.cta` | Sign in to save |
+| `signin.dismiss` | Not now |
+| `list.title` | Saved |
+| `filter.all` | All |
+| `filter.articles` | Articles |
+| `filter.providers` | Providers |
+| `filter.tools` | Tools |
+| `row.unavailable` | No longer available |
+| `row.remove` | Remove |
+| `empty.title` | Nothing saved yet |
+| `empty.body` | Tap the bookmark on any article, provider, or tool to keep it here. |
+| `empty.cta` | Explore Learn |
+
+None of the above asserts a diagnosis, condition, or clinical claim; none uses "you have / you are
+/ diagnosed". Person-first and content-neutral throughout. PT/ES/SV/FR deferred until `packages/i18n`
+(CLAUDE.md §2).
+
 ## Data model
 
 | Entity | Storage | Schema | Notes |

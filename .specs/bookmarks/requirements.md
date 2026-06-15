@@ -82,7 +82,7 @@
 **Acceptance criteria:**
 - AC-5.1: Anonymous tap on save does NOT write to `bookmarks` (RLS would reject anyway) and does NOT silently fail — it surfaces a sign-in path.
 - AC-5.2: Prompt copy is educational and content-neutral (see SR-3). Exact UX (modal/inline/route) is a design decision.
-- AC-5.3: After successful sign-in initiated from the prompt, the originally-tapped item is saved (or the user is returned to it in an unsaved state — design picks; requirement: the intent is not silently dropped without feedback).
+- AC-5.3: After sign-in initiated from the sign-in sheet completes successfully, the system completes the original save and the detail surface reflects the saved state within one render cycle. If the post-sign-in save call fails, the standard save-error toast (EC-1) is shown and the control reverts to unsaved. (Resolved per design decision #1 — auto-complete; no abandoned-intent branch. Replaces the earlier OR-phrasing flagged in `_review.md` B-2.)
 
 ### Story US-6: Persistence across sessions and devices
 

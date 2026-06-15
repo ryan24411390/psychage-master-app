@@ -185,7 +185,7 @@ No `supabase/migrations/` (table live). No `packages/i18n/` (not created; string
 
 ## Open items (surface in /spec-review)
 
-1. **Tool-save surface (T-009)** — tools lack a uniform detail screen; resource_id↔tool mapping must come from the `tools` table (6 rows). If mapping is unclean, T-009 narrows to tools with a stable id and the rest become follow-up. Weakest-defined surface.
+1. **Tool-save surface (T-009) — RESOLVED at /spec-review (2026-06-15).** There is no `tools` DB table referenced in the mobile codebase, so `resource_id` for tools = the **stable Expo Router route slug** (`clarity`, `sleep`, `mood-journal`, `mindmate`, `relationship-health`) with `resource_type='tool'`. Saved-list tap routes the slug → `app/tools/<slug>.tsx`. No `tools`-table dependency; all five tool screens are in scope. (web parity: web stores tool slugs in the same column.)
 2. **i18n** — EN-only via copy.ts at ship; PT/ES/SV/FR deferred until `packages/i18n` exists.
 3. **Sentry scrub** — deferred until Sentry is wired in mobile.
 
