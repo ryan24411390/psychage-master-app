@@ -1,41 +1,23 @@
 import { ScreenShell } from '@/components/ui/ScreenShell';
-import { DirectoryView } from '@/features/directory/DirectoryView';
-import { LocationSetup } from '@/features/directory/LocationSetup';
+import FindCareScreen from '@/features/find/FindCareScreen';
 import { OfflineFallback } from '@/features/offline/OfflineFallback';
 import { useIsOnline } from '@/features/offline/useIsOnline';
-import { useDirectoryLocation } from '@/lib/use-directory-location';
 
-// S28 Find tab — the directory IS the tab (no dead landing tap). A one-time
-// location gate runs on first visit (LocationSetup persists a home browse scope);
-// every visit after lands straight in the directory, scoped to that state. The
-// tabs GlobalHeader (with the crisis pill, SR-2) sits above this content, so the
-// embedded directory does not render its own header. Online-only per
+// S28 Find tab — the full provider-discovery experience (location → state → city →
+// type → results → profile → compare), a faithful port of the FindCare prototype
+// wired to real shared-Supabase data. It renders its own header (the tabs
+// GlobalHeader is hidden for this tab in (tabs)/_layout.tsx). Online-only per
 // rules/offline.md; offline shows the honest fallback.
 export default function FindScreen() {
   const online = useIsOnline();
-  const loc = useDirectoryLocation();
 
   if (!online) {
     return (
-      <ScreenShell edges={['bottom']}>
+      <ScreenShell edges={['top', 'bottom']}>
         <OfflineFallback variant="offline" testID="find-offline" />
       </ScreenShell>
     );
   }
 
-  if (!loc.configured) {
-    return <LocationSetup />;
-  }
-
-  const scopeLabel = loc.stateName ? [loc.stateName, loc.city].filter(Boolean).join(' · ') : undefined;
-
-  return (
-    <DirectoryView
-      embedded
-      initialState={loc.stateAbbr}
-      initialCity={loc.city}
-      scopeLabel={scopeLabel}
-      onEditLocation={loc.resetLocation}
-    />
-  );
+  return <FindCareScreen />;
 }

@@ -1,6 +1,8 @@
-import { fireEvent, screen } from '@testing-library/react-native';
+import { screen } from '@testing-library/react-native';
 
 jest.mock('@/features/offline/useIsOnline', () => ({ useIsOnline: jest.fn() }));
+jest.mock('@/components/HeaderAvatar', () => ({ HeaderAvatar: () => null }));
+jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn() }, useFocusEffect: () => undefined }));
 
 import FindScreen from '@/app/(tabs)/find';
 import { useIsOnline } from '@/features/offline/useIsOnline';
@@ -13,32 +15,25 @@ import { renderWithProviders } from './_helpers';
 
 const onlineMock = useIsOnline as unknown as jest.Mock;
 
-describe('S28 Find — location gate', () => {
+describe('S28 Find — prototype port', () => {
   beforeEach(() => {
-    // Fresh, unconfigured location for each case (in-memory storage is a singleton).
+    // Fresh, unconfigured location so the screen starts on the location step.
     __resetDirectoryLocationCacheForTests();
     resetDirectoryLocation();
     __resetDirectoryLocationCacheForTests();
   });
 
-  it('offline: shows the honest fallback instead of a dead directory', () => {
+  it('offline: shows the honest fallback instead of the directory', () => {
     onlineMock.mockReturnValue(false);
-    renderWithProviders(<FindScreen />, { haptics: true });
+    renderWithProviders(<FindScreen />, { haptics: true, query: true });
     expect(screen.getByTestId('find-offline')).toBeTruthy();
   });
 
-  it('online + first visit: shows the one-time location setup', () => {
-    onlineMock.mockReturnValue(true);
-    renderWithProviders(<FindScreen />, { haptics: true });
-    expect(screen.getByTestId('setup-browse-all')).toBeTruthy();
-    expect(screen.getByTestId('setup-state-CA')).toBeTruthy();
-  });
-
-  it('online + completing setup flips the gate to the directory', () => {
+  it('online + first visit: shows the location hero', () => {
     onlineMock.mockReturnValue(true);
     renderWithProviders(<FindScreen />, { haptics: true, query: true });
-    // "Browse all states" completes setup with no scope → directory opens.
-    fireEvent.press(screen.getByTestId('setup-browse-all'));
-    expect(screen.getByTestId('directory-filters')).toBeTruthy();
+    expect(screen.getByText('Find care')).toBeTruthy();
+    expect(screen.getByText('Use my location')).toBeTruthy();
+    expect(screen.getByText('Enter my state instead')).toBeTruthy();
   });
 });

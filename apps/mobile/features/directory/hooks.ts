@@ -6,7 +6,7 @@
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
-import { getFeaturedProviders, getSpecialties, searchProviders } from './queries';
+import { getFeaturedProviders, getProviderTypes, getSpecialties, searchProviders } from './queries';
 import type { ProviderCardData, ProviderSearchParams } from './types';
 
 /** True when the user has narrowed the directory in any way. */
@@ -52,6 +52,14 @@ export function useSpecialties() {
   return useQuery({
     queryKey: ['providers', 'specialties'],
     queryFn: () => getSpecialties(),
+    staleTime: 30 * 60_000,
+  });
+}
+
+export function useProviderTypes() {
+  return useQuery({
+    queryKey: ['providers', 'types'],
+    queryFn: () => getProviderTypes(),
     staleTime: 30 * 60_000,
   });
 }
