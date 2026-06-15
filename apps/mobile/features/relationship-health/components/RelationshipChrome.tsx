@@ -4,7 +4,7 @@ import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/Text';
-import { colors } from '@/lib/colors';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
 import { CT4_RELATIONSHIP } from '../copy';
 
@@ -23,6 +23,7 @@ export interface RelationshipChromeProps {
 
 export function RelationshipChrome({ children, onBack, onHelp, backLabel }: RelationshipChromeProps) {
   const t = CT4_RELATIONSHIP;
+  const tc = useThemeColors();
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <View className="flex-row items-center justify-between px-4 pt-1">
@@ -33,7 +34,7 @@ export function RelationshipChrome({ children, onBack, onHelp, backLabel }: Rela
           hitSlop={8}
           className="min-h-[44px] flex-row items-center gap-1 pr-2"
         >
-          <ChevronLeft size={22} color={colors.charcoal[600]} strokeWidth={1.75} />
+          <ChevronLeft size={22} color={tc.inkSecondary} strokeWidth={1.75} />
           <Text variant="bodyMedium" className="text-[15px] text-text-secondary dark:text-text-secondary-dark">
             {backLabel ?? t.back}
           </Text>
@@ -46,7 +47,7 @@ export function RelationshipChrome({ children, onBack, onHelp, backLabel }: Rela
           hitSlop={4}
           className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-3"
         >
-          <LifeBuoy size={18} color={colors.crisis} strokeWidth={1.75} />
+          <LifeBuoy size={18} color={tc.crisis} strokeWidth={1.75} />
           <Text variant="bodyMedium" className="text-[13px] text-crisis">
             {t.helpNow}
           </Text>
