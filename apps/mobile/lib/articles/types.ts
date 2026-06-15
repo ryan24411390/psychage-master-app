@@ -10,6 +10,33 @@
 export const ARTICLE_AUTHOR_NAME = 'Psychage Team';
 export const ARTICLE_AUTHOR_ROLE = 'Editor';
 
+/** A populated browse category, read live from the `article_categories` taxonomy
+ * (never hardcoded). `articleCount` is the count of PUBLISHED articles — the hub
+ * lists only categories with count > 0. */
+export type ArticleCategory = {
+  slug: string;
+  name: string;
+  /** lucide icon name from the DB (e.g. "BookOpen"); may be absent. */
+  icon: string | null;
+  /** Accent hex from the DB; may be absent. */
+  color: string | null;
+  displayOrder: number;
+  articleCount: number;
+};
+
+/** One reference backing an article (from `article_citations`), shown in the
+ * reader's References section. Rendered verbatim — never paraphrased. */
+export type Citation = {
+  title: string;
+  authors: readonly string[];
+  year: number | null;
+  url: string | null;
+  doi: string | null;
+  journalName: string | null;
+  tier: number | null;
+  sortOrder: number;
+};
+
 /** List-row projection — the fields the browse list needs (no body). */
 export type ArticleListItem = {
   slug: string;
@@ -23,7 +50,7 @@ export type ArticleListItem = {
   createdAt: string;
 };
 
-/** Full article — adds the verbatim body + byline for the native reader. */
+/** Full article — adds the verbatim body + byline + citations for the reader. */
 export type ArticleDetail = ArticleListItem & {
   subtitle: string | null;
   /** Verbatim clinician-reviewed body, as stored on the web (never altered). */
@@ -32,4 +59,6 @@ export type ArticleDetail = ArticleListItem & {
   /** Author display name (see ARTICLE_AUTHOR_NAME). */
   authorName: string;
   authorRole: string;
+  /** References, sorted by sort_order. Empty when the article cites nothing. */
+  citations: readonly Citation[];
 };

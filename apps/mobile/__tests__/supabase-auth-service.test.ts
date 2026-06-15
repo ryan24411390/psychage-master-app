@@ -16,6 +16,10 @@ function makeFakeClient(overrides: {
   getSession?: unknown;
   resend?: unknown;
 } = {}) {
+  // Captured onAuthStateChange callbacks + an unsubscribe spy, so tests can drive
+  // the listener and assert teardown.
+  const authStateListeners: Array<(event: string, session: unknown) => void> = [];
+  const unsubscribe = vi.fn();
   const calls = {
     signUp: vi.fn(
       async (_args: unknown) => overrides.signUp ?? { data: { session: {}, user: {} }, error: null },
@@ -28,11 +32,15 @@ function makeFakeClient(overrides: {
       async () => overrides.getSession ?? { data: { session: null }, error: null },
     ),
     resend: vi.fn(async (_args: unknown) => overrides.resend ?? { error: null }),
+    onAuthStateChange: vi.fn((cb: (event: string, session: unknown) => void) => {
+      authStateListeners.push(cb);
+      return { data: { subscription: { unsubscribe } } };
+    }),
   };
   const rpc = vi.fn(async () => ({ data: null, error: null }));
   // biome-ignore lint/suspicious/noExplicitAny: narrow fake, not the full client type.
   const client = { auth: calls, rpc } as any;
-  return { client, calls, rpc };
+  return { client, calls, rpc, authStateListeners, unsubscribe };
 }
 
 describe('supabase auth service — platform claim', () => {
@@ -121,6 +129,60 @@ describe('supabase auth service — generic errors (checklist #3, no existence l
     const result = await svc.signIn('a@b.co', 'password123');
 
     expect(result.error).toBe('offline');
+  });
+});
+
+describe('supabase auth service — getSession (boot hydration)', () => {
+  it('maps a confirmed session to {email, verified:true}', async () => {
+    const { client } = makeFakeClient({
+      getSession: {
+        data: { session: { user: { email: 'a@b.co', email_confirmed_at: '2026-01-01T00:00:00Z' } } },
+        error: null,
+      },
+    });
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    expect(await svc.getSession()).toEqual({ email: 'a@b.co', verified: true });
+  });
+
+  it('maps an unconfirmed session to verified:false', async () => {
+    const { client } = makeFakeClient({
+      getSession: {
+        data: { session: { user: { email: 'a@b.co', email_confirmed_at: null } } },
+        error: null,
+      },
+    });
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    expect(await svc.getSession()).toEqual({ email: 'a@b.co', verified: false });
+  });
+
+  it('returns null when there is no persisted session', async () => {
+    const { client } = makeFakeClient(); // default getSession → session:null
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    expect(await svc.getSession()).toBeNull();
+  });
+});
+
+describe('supabase auth service — onAuthChange (runtime state updater)', () => {
+  it('forwards mapped sessions to the listener and unsubscribes on teardown', () => {
+    const { client, authStateListeners, unsubscribe } = makeFakeClient();
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+    const seen: Array<{ email: string; verified: boolean } | null> = [];
+
+    const stop = svc.onAuthChange((s) => seen.push(s));
+
+    // Drive supabase-js firing SIGNED_IN then SIGNED_OUT.
+    authStateListeners[0]?.('SIGNED_IN', {
+      user: { email: 'a@b.co', email_confirmed_at: '2026-01-01T00:00:00Z' },
+    });
+    authStateListeners[0]?.('SIGNED_OUT', null);
+
+    expect(seen).toEqual([{ email: 'a@b.co', verified: true }, null]);
+
+    stop();
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -1,15 +1,10 @@
 import { Stack } from 'expo-router';
 
-import { AuthProvider } from '@/features/auth';
-
-// (auth) route group — S33–S37. Auto-registered by Expo Router under the root Stack
-// (no edit to app/_layout.tsx needed). Wrapped in AuthProvider so every screen reads
-// auth through useAuth() (rules/auth.md §10). These screens are navigable in isolation;
-// their ENTRY POINTS from settings/home are wired by the surfaces that own them.
+// (auth) route group — S33–S37. Auto-registered by Expo Router under the root Stack.
+// The AuthProvider now lives at the ROOT (app/_layout.tsx) so the whole app shares one
+// hydrated session; this group no longer mounts its own (a nested provider would shadow
+// the root and reintroduce the ephemeral-session bug). Screens read auth via useAuth()
+// (rules/auth.md §10).
 export default function AuthLayout() {
-  return (
-    <AuthProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </AuthProvider>
-  );
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

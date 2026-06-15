@@ -14,7 +14,9 @@ import { GlobalHeader } from '@/components/GlobalHeader';
 import { Text } from '@/components/ui/Text';
 import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
 import { ArticleBody } from '@/features/content/blocks/ArticleBody';
+import { Citations } from '@/features/content/Citations';
 import { CT4_CONTENT } from '@/features/content/copy';
+import { MedicalDisclaimer } from '@/features/content/MedicalDisclaimer';
 import { ReviewedByCredit } from '@/features/content/ReviewedByCredit';
 import { getArticleBySlug } from '@/lib/articles';
 import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
@@ -27,7 +29,9 @@ import { useThemeColors } from '@/lib/use-theme-colors';
 // blocks), inside the ReadingTextSizeProvider so the reader's text-size control
 // applies. The byline mirrors the web exactly: author "Psychage Team · Editor"
 // plus the full Dr. Dobson reviewer credit (ReviewedByCredit, the single
-// enforcement point). A missing article reports its absence — never placeholder prose.
+// enforcement point). An educational MedicalDisclaimer (SR-3) sits above the body
+// and the article's References (article_citations) render below it. A missing
+// article reports its absence — never placeholder prose.
 export function ArticleReader({ slug }: { slug: string }) {
   const t = CT4_CONTENT;
   const tc = useThemeColors();
@@ -119,7 +123,11 @@ export function ArticleReader({ slug }: { slug: string }) {
               <ReviewedByCredit />
             </View>
 
+            <MedicalDisclaimer />
+
             <ArticleBody html={article.contentHtml} />
+
+            <Citations items={article.citations} />
           </ScrollView>
         </ReadingTextSizeProvider>
       )}

@@ -22,6 +22,7 @@ export const CT4_SETTINGS = {
       privacy: 'Privacy & your data',
       about: 'About & legal',
       supporter: 'Keep Psychage free',
+      signIn: 'Sign in',
       signOut: 'Sign out',
       account: 'Account',
       deleteAccount: 'Delete my record',
