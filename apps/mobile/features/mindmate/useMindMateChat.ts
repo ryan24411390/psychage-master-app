@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 
 import { MindMateUnavailableError, SafetyReplacementError } from './errors';
 import { sendMessage as defaultSendMessage } from './mindmate-service';
+import { precheckCrisis } from './safety/crisis-keywords';
 import type { ChatMessage, ChatTurnMeta } from './types';
 
 // In-memory conversation controller (SR-privacy: messages live ONLY here — never
@@ -69,9 +70,8 @@ export function useMindMateChat(options: UseMindMateChatOptions = {}): UseMindMa
 
       // Client crisis pre-check (SR-2) — instant, offline, takes priority over the
       // AI reply: we surface crisis and do NOT call the backend for this turn.
-      // Done via dynamic import so the keyword set isn't part of the hot path bundle
-      // until the first send.
-      const { precheckCrisis } = await import('./safety/crisis-keywords');
+      // Statically imported so this safety path can never depend on a runtime
+      // module fetch resolving.
       if (precheckCrisis(text)) {
         setMessages((prev) => [...prev, userMsg]);
         triggerCrisis();
