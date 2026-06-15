@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 
 import { CT4_RELATIONSHIP } from '../copy';
@@ -38,7 +39,7 @@ const SEVERITY_DOT: Record<PatternSeverity, string> = {
 
 function PatternCard({ pattern }: { pattern: DetectedPattern }) {
   return (
-    <View className="rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+    <Card>
       <View className="mb-1.5 flex-row items-center gap-2">
         <View className={`h-2 w-2 rounded-full ${SEVERITY_DOT[pattern.severity]}`} />
         <Text variant="bodyMedium" className="flex-1 text-[15px]">
@@ -51,7 +52,7 @@ function PatternCard({ pattern }: { pattern: DetectedPattern }) {
       <Text variant="caption" className="mt-2 text-text-tertiary dark:text-text-tertiary-dark leading-4">
         {pattern.scienceNote}
       </Text>
-    </View>
+    </Card>
   );
 }
 
@@ -107,10 +108,7 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
             const subScores = result.subDimensionScores[d] as Record<string, number>;
             const subMetas = SUB_DIMENSION_META.filter((m) => m.domain === d);
             return (
-              <View
-                key={d}
-                className="gap-3 rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
-              >
+              <Card key={d} className="gap-3">
                 <DomainBar label={DOMAIN_META[d].name} score={result.domainScores[d]} />
                 <View className="gap-1.5 pl-1">
                   {subMetas.map((m) => (
@@ -124,7 +122,7 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
                     </View>
                   ))}
                 </View>
-              </View>
+              </Card>
             );
           })}
         </View>
@@ -164,10 +162,7 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
               {t.stepsHeading}
             </Text>
             {interventions.map((iv) => (
-              <View
-                key={iv.id}
-                className="gap-2 rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
-              >
+              <Card key={iv.id} className="gap-2">
                 <Text variant="bodyMedium" className="text-[15px]">
                   {iv.title}
                 </Text>
@@ -177,7 +172,7 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
                 <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
                   {`${iv.difficulty} · ${iv.timeEstimate}`}
                 </Text>
-              </View>
+              </Card>
             ))}
           </View>
         ) : null}

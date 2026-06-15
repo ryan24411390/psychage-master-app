@@ -1,7 +1,7 @@
 import { Info } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { View } from 'react-native';
 
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
 import { colors } from '@/lib/colors';
@@ -14,7 +14,7 @@ export function SleepDisclaimer() {
   const tint =
     colorScheme === 'dark' ? colors.text.tertiary.dark : colors.text.tertiary.light;
   return (
-    <View className="flex-row gap-2 rounded-xl border border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark">
+    <Card className="flex-row gap-2 px-4 py-3">
       <Info size={16} color={tint} strokeWidth={1.75} />
       <Text
         variant="caption"
@@ -22,6 +22,6 @@ export function SleepDisclaimer() {
       >
         {CT4_SLEEP.disclaimer}
       </Text>
-    </View>
+    </Card>
   );
 }

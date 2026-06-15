@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 import { calculateMetrics, formatDuration, type SleepEntry } from '@psychage/shared/sleep';
 
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
 
@@ -27,12 +28,12 @@ export function SleepDiary({ entries, onLog, onSelect }: SleepDiaryProps) {
       </Button>
 
       {entries.length === 0 ? (
-        <View className="gap-1 rounded-xl border border-border bg-surface px-4 py-6 dark:border-border-dark dark:bg-surface-dark">
+        <Card className="gap-1 px-4 py-6">
           <Text variant="bodyBold">{t.emptyTitle}</Text>
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             {t.emptyBody}
           </Text>
-        </View>
+        </Card>
       ) : (
         <FlashList
           data={entries as SleepEntry[]}
