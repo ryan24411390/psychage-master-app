@@ -2,12 +2,17 @@ import { useCallback, useRef, useState } from 'react';
 
 import { MindMateUnavailableError, SafetyReplacementError } from './errors';
 import { sendMessage as defaultSendMessage } from './mindmate-service';
+import { persistExchange as defaultPersistExchange } from './persistence/chat-store';
 import { precheckCrisis } from './safety/crisis-keywords';
 import type { ChatMessage, ChatTurnMeta } from './types';
 
-// In-memory conversation controller (SR-privacy: messages live ONLY here — never
+// In-memory conversation controller. By DEFAULT messages live ONLY here — never
 // written to MMKV/secure-store, never sent to Sentry/analytics; they vanish on
-// unmount). State is plain React (Zustand/TanStack Query are not in the V1 deps).
+// unmount. The ONLY exception is consent-gated cloud persistence: when the person
+// opts in via the in-chat banner AND is signed in, each completed (non-crisis) turn
+// is mirrored to Supabase best-effort (persistExchange). Consent OFF (the default)
+// keeps the conversation exactly as ephemeral as before. State is plain React
+// (Zustand/TanStack Query are not in the V1 deps).
 
 let seq = 0;
 const nextId = () => `mm-${++seq}`;
@@ -15,6 +20,7 @@ const nextId = () => `mm-${++seq}`;
 export type ChatStatus = 'idle' | 'sending' | 'error';
 
 type SendFn = typeof defaultSendMessage;
+type PersistFn = typeof defaultPersistExchange;
 
 export interface UseMindMateChatOptions {
   /** Region code forwarded to the backend so crisis resources match locale. */
@@ -23,6 +29,11 @@ export interface UseMindMateChatOptions {
   onCrisis?: () => void;
   /** Injectable for tests; defaults to the real streaming service. */
   sendImpl?: SendFn;
+  /**
+   * Injectable consent-gated persister; defaults to the real best-effort writer
+   * (which self-no-ops unless the user consented AND is signed in). Fire-and-forget.
+   */
+  persistImpl?: PersistFn;
 }
 
 export interface UseMindMateChat {
@@ -44,7 +55,12 @@ function toApi(messages: ChatMessage[]): { role: 'user' | 'assistant'; content: 
 }
 
 export function useMindMateChat(options: UseMindMateChatOptions = {}): UseMindMateChat {
-  const { region, onCrisis, sendImpl = defaultSendMessage } = options;
+  const {
+    region,
+    onCrisis,
+    sendImpl = defaultSendMessage,
+    persistImpl = defaultPersistExchange,
+  } = options;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [status, setStatus] = useState<ChatStatus>('idle');
@@ -53,6 +69,9 @@ export function useMindMateChat(options: UseMindMateChatOptions = {}): UseMindMa
   const [needsSignIn, setNeedsSignIn] = useState(false);
 
   const sessionId = useRef<string | undefined>(undefined);
+  // The persisted ai_conversations row id, reused across turns once created. Lives
+  // only for the session; consent OFF means it's never populated (no write happens).
+  const conversationId = useRef<string | null>(null);
 
   const triggerCrisis = useCallback(() => {
     setCrisisActive(true);
@@ -87,7 +106,13 @@ export function useMindMateChat(options: UseMindMateChatOptions = {}): UseMindMa
       ]);
       setStatus('sending');
 
+      // Captured for the post-turn persist (kept out of React state — needed
+      // synchronously once the stream resolves).
+      let turnMeta: ChatTurnMeta | undefined;
+      let assistantText = '';
+
       const onMeta = (meta: ChatTurnMeta) => {
+        turnMeta = meta;
         sessionId.current = meta.sessionId || sessionId.current;
         if (meta.isCrisis) {
           setMessages((prev) =>
@@ -107,6 +132,7 @@ export function useMindMateChat(options: UseMindMateChatOptions = {}): UseMindMa
           { messages: apiMessages, sessionId: sessionId.current, region },
           onMeta,
         )) {
+          assistantText += chunk;
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantId ? { ...m, content: m.content + chunk } : m,
@@ -117,6 +143,23 @@ export function useMindMateChat(options: UseMindMateChatOptions = {}): UseMindMa
           prev.map((m) => (m.id === assistantId ? { ...m, isStreaming: false } : m)),
         );
         setStatus('idle');
+
+        // Consent-gated, best-effort cloud backup of the completed exchange. NEVER for
+        // a crisis turn (crisis content stays on-device). persistImpl self-no-ops unless
+        // the user consented AND is signed in, so consent OFF writes nothing. Fire-and-
+        // forget — a failed/blocked write never affects the in-memory conversation.
+        if (!turnMeta?.isCrisis) {
+          void persistImpl({
+            sessionId: turnMeta?.sessionId ?? sessionId.current ?? '',
+            conversationId: conversationId.current,
+            userContent: text,
+            assistantContent: assistantText,
+            safetyLevel: turnMeta?.safetyLevel,
+            citations: turnMeta?.citations,
+          }).then((id) => {
+            if (id) conversationId.current = id;
+          });
+        }
       } catch (err) {
         if (err instanceof SafetyReplacementError) {
           // SR-3: server replaced the output — REPLACE the partial text, don't append.
@@ -142,7 +185,7 @@ export function useMindMateChat(options: UseMindMateChatOptions = {}): UseMindMa
         );
       }
     },
-    [messages, region, status, sendImpl, triggerCrisis],
+    [messages, region, status, sendImpl, persistImpl, triggerCrisis],
   );
 
   return { messages, status, error, crisisActive, needsSignIn, send };
