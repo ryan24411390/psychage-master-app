@@ -1,0 +1,319 @@
+import { useQuery } from '@tanstack/react-query';
+import { router } from 'expo-router';
+import { CalendarCheck, ChevronLeft, Globe, Mail, MapPin, Navigation, Phone } from 'lucide-react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+
+import { GlobalHeader } from '@/components/GlobalHeader';
+import { Button } from '@/components/ui/Button';
+import { Text } from '@/components/ui/Text';
+import { dial } from '@/features/crisis/dialer';
+import { colors } from '@/lib/colors';
+import { useHaptics } from '@/lib/haptic-context';
+
+import { directionsUrl, formatAddress, mailtoUrl, telUrl, webUrl } from './contact';
+import { DIRECTORY_COPY } from './copy';
+import { cleanDisplayName } from './mapping';
+import { getProviderById } from './queries';
+import { getTrustBadge } from './trust';
+import type { ProviderLocation, ProviderWithDetails } from './types';
+
+// S27 Provider detail — NATIVE (replaces the WebView wrapper). Renders REAL, verbatim
+// provider fields from the shared Supabase. Contact actions open the platform handler
+// from the provider's OWN stored values — never a typed-in or inferred number. Framing
+// is informational only: no endorsement, no "verified by Psychage". GlobalHeader keeps
+// the crisis pill reachable (SR-2).
+
+const t = DIRECTORY_COPY;
+
+function badgeLabel(p: { status: string; verified_at: string | null }): string | null {
+  const badge = getTrustBadge({ status: p.status, verified_at: p.verified_at });
+  if (badge === 'verified') return t.badgeVerified;
+  if (badge === 'claimed') return t.badgeClaimed;
+  if (badge === 'unclaimed') return t.badgeUnclaimed;
+  return null;
+}
+
+function primaryLocation(p: ProviderWithDetails): ProviderLocation | null {
+  return p.locations.find((l) => l.is_primary) ?? p.locations[0] ?? null;
+}
+
+function Chrome({ children }: { children: React.ReactNode }) {
+  return (
+    <View className="flex-1 bg-background dark:bg-background-dark">
+      <GlobalHeader />
+      <View className="flex-row items-center px-2">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          onPress={() => router.back()}
+          hitSlop={8}
+          testID="provider-back"
+          className="min-h-[44px] flex-row items-center gap-1 px-2"
+        >
+          <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
+          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            Back
+          </Text>
+        </Pressable>
+      </View>
+      {children}
+    </View>
+  );
+}
+
+// A contact-action tile (call / website / directions / email / booking). Fires
+// haptic.affirm before opening the platform handler — initiating contact is a
+// meaningful commit, so it meets the sensorial floor (DESIGN.mobile.md §3.3).
+function ContactActionTile({
+  icon,
+  label,
+  onPress,
+  testID,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onPress: () => void;
+  testID: string;
+}) {
+  const { fireHaptic } = useHaptics();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={() => {
+        fireHaptic('affirm');
+        onPress();
+      }}
+      testID={testID}
+      className="min-h-[44px] flex-1 items-center gap-1 rounded-lg border border-border py-2 dark:border-border-dark"
+      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+    >
+      {icon}
+      <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <View className="gap-1.5">
+      <Text variant="bodyMedium">{title}</Text>
+      {children}
+    </View>
+  );
+}
+
+function TagRow({ items }: { items: string[] }) {
+  return (
+    <View className="flex-row flex-wrap gap-1.5">
+      {items.map((label) => (
+        <View key={label} className="rounded-full bg-surface px-2.5 py-1 dark:bg-surface-dark">
+          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            {label}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+export function ProviderDetailView({ id }: { id: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['providers', 'detail', id],
+    queryFn: () => getProviderById(id),
+    enabled: !!id,
+  });
+
+  if (isLoading) {
+    return (
+      <Chrome>
+        <View className="flex-1 items-center justify-center" testID="provider-loading">
+          <ActivityIndicator color={colors.primary.default.light} />
+        </View>
+      </Chrome>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Chrome>
+        <View className="flex-1 items-center justify-center gap-2 px-6">
+          <Text variant="heading" className="text-center">
+            {t.notFoundTitle}
+          </Text>
+          <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
+            {t.notFoundBody}
+          </Text>
+        </View>
+      </Chrome>
+    );
+  }
+
+  const p = data;
+  const name = cleanDisplayName(p.display_name) || p.display_name;
+  const loc = primaryLocation(p);
+  const badge = badgeLabel(p);
+  const place = loc ? [loc.city, loc.state_province].filter(Boolean).join(', ') : '';
+  const typeLine = [p.provider_type?.label, place].filter(Boolean).join(' · ');
+  const address = formatAddress(loc);
+  const mapsUrl = directionsUrl(loc);
+  const site = webUrl(p.website_url);
+  const booking = webUrl(p.appointment_url);
+
+  // Best single contact to seed the My-Therapist record (real values only).
+  const linkContact = p.phone ?? p.email ?? p.website_url ?? undefined;
+
+  return (
+    <Chrome>
+      <ScrollView contentContainerClassName="gap-5 px-4 pb-10 pt-1" showsVerticalScrollIndicator={false}>
+        {/* Identity */}
+        <View className="gap-1">
+          <View className="flex-row items-start justify-between gap-2">
+            <Text variant="headingLg" className="flex-1">
+              {name}
+            </Text>
+            {badge ? (
+              <View className="rounded-full bg-surface px-2.5 py-1 dark:bg-surface-dark">
+                <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+                  {badge}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+          {p.credentials_suffix ? (
+            <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
+              {p.credentials_suffix}
+            </Text>
+          ) : null}
+          {typeLine ? (
+            <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+              {typeLine}
+            </Text>
+          ) : null}
+          {p.practice_name ? (
+            <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+              {p.practice_name}
+            </Text>
+          ) : null}
+        </View>
+
+        {/* Modality */}
+        {(p.telehealth_available || p.in_person_available) && (
+          <TagRow
+            items={[
+              ...(p.telehealth_available ? [t.telehealth] : []),
+              ...(p.in_person_available ? [t.inPerson] : []),
+            ]}
+          />
+        )}
+
+        {/* Contact actions — REAL stored values only, conditional on presence */}
+        {(p.phone || site || mapsUrl || p.email || booking) && (
+          <Section title={t.contact}>
+            <View className="flex-row flex-wrap gap-2">
+              {p.phone ? (
+                <ContactActionTile
+                  testID="provider-call"
+                  icon={<Phone size={18} color={colors.primary.default.light} strokeWidth={1.75} />}
+                  label={t.call}
+                  onPress={() => dial(telUrl(p.phone as string))}
+                />
+              ) : null}
+              {site ? (
+                <ContactActionTile
+                  testID="provider-website"
+                  icon={<Globe size={18} color={colors.primary.default.light} strokeWidth={1.75} />}
+                  label={t.website}
+                  onPress={() => dial(site)}
+                />
+              ) : null}
+              {mapsUrl ? (
+                <ContactActionTile
+                  testID="provider-directions"
+                  icon={<Navigation size={18} color={colors.primary.default.light} strokeWidth={1.75} />}
+                  label={t.directions}
+                  onPress={() => dial(mapsUrl)}
+                />
+              ) : null}
+              {p.email ? (
+                <ContactActionTile
+                  testID="provider-email"
+                  icon={<Mail size={18} color={colors.primary.default.light} strokeWidth={1.75} />}
+                  label={t.email}
+                  onPress={() => dial(mailtoUrl(p.email as string))}
+                />
+              ) : null}
+              {booking ? (
+                <ContactActionTile
+                  testID="provider-booking"
+                  icon={<CalendarCheck size={18} color={colors.primary.default.light} strokeWidth={1.75} />}
+                  label={t.booking}
+                  onPress={() => dial(booking)}
+                />
+              ) : null}
+            </View>
+          </Section>
+        )}
+
+        {p.bio ? (
+          <Section title={t.about}>
+            <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
+              {p.bio}
+            </Text>
+          </Section>
+        ) : null}
+
+        {p.specialties.length > 0 ? (
+          <Section title={t.specialties}>
+            <TagRow items={p.specialties.map((s) => s.label)} />
+          </Section>
+        ) : null}
+
+        {p.languages.length > 0 ? (
+          <Section title={t.languages}>
+            <TagRow items={p.languages.map((l) => l.label)} />
+          </Section>
+        ) : null}
+
+        {p.insurance_plans.length > 0 ? (
+          <Section title={t.insurance}>
+            <TagRow items={p.insurance_plans.map((i) => i.name)} />
+          </Section>
+        ) : null}
+
+        {address ? (
+          <Section title={t.locations}>
+            <View className="flex-row items-start gap-1.5">
+              <MapPin size={16} color={colors.charcoal[500]} strokeWidth={1.75} />
+              <Text variant="body" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
+                {address}
+              </Text>
+            </View>
+          </Section>
+        ) : null}
+
+        {/* Linkage → My Therapist (S39 pre-fill). Contact stays in-memory, never logged. */}
+        <View className="pt-1">
+          <Button
+            variant="secondary"
+            testID="provider-use-as-therapist"
+            onPress={() =>
+              router.push({
+                pathname: '/add-provider',
+                params: { name, ...(linkContact ? { contact: linkContact } : {}) },
+              })
+            }
+          >
+            {t.useAsTherapist}
+          </Button>
+        </View>
+
+        <Text variant="caption" className="pt-1 text-text-tertiary dark:text-text-tertiary-dark">
+          {t.disclaimer}
+        </Text>
+      </ScrollView>
+    </Chrome>
+  );
+}
