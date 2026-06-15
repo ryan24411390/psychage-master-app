@@ -39,9 +39,9 @@ import { CONFIDENCE_CAP } from './constants';
  *    - Multiply weight by combined modifier
  * 2. Sum all matched symptom scores → raw_score
  * 3. Normalize: raw_score / max_possible_score
- * 4. Apply count cap: min(1.0, matched_count / 5)
+ * 4. Apply count cap: min(1.0, matched_count / 3)
  * 5. Apply confidence cap: min(result, 0.75)
- * 6. If below minimum symptom count: multiply by penalty (0.3)
+ * 6. If below minimum symptom count: multiply by config.below_minimum_penalty (default 0.6)
  */
 export function calculateConditionScore(
   userSymptoms: NormalizedSymptom[],
