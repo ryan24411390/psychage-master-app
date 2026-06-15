@@ -7,17 +7,19 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 
+import { ONBOARDING_COPY } from './copy';
+
 // S2 record + trust (Flow 1). GlobalHeader, the STANDARD mascot (76×88, reused from A1 —
 // not a third size step) in the upper third, three verbatim body lines, a primary
 // "Do your first check-in" that opens S4 over the first-run home, and a quiet "Look
 // around first". Reduced motion: mascot still (the Mascot component handles it). All copy
-// VERBATIM Flow Book.
+// VERBATIM Flow Book (now sourced from ./copy — CT4 §1).
 
-const L1 = 'Each day, you can note how you are.';
-const L2 = "Five plain words — that's all.";
-const L3 = 'It stays on your phone unless you say otherwise.';
-const PRIMARY = 'Do your first check-in — 30 seconds';
-const SECONDARY = 'Look around first';
+const L1 = ONBOARDING_COPY.trustL1;
+const L2 = ONBOARDING_COPY.trustL2;
+const L3 = ONBOARDING_COPY.trustL3;
+const PRIMARY = ONBOARDING_COPY.firstCheckin;
+const SECONDARY = ONBOARDING_COPY.lookAround;
 
 export interface RecordTrustViewProps {
   readonly onCheckIn: () => void;

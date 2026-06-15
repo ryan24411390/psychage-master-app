@@ -4,7 +4,8 @@ export const CT4_CONTENT = {
   _fixture: 'CT4' as const,
   _marker: 'FIXTURE — not final copy (pending Dr. Dobson review)',
   back: 'Back',
-  readOn: (weekday: string): string => `You read this on ${weekday}`,
+  // CT4 §11 [VOICE][FINAL] revisit memory line — trailing period verbatim.
+  readOn: (weekday: string): string => `You read this on ${weekday}.`,
   // SR-3 educational framing — no diagnostic language, person-first. Mirrors the
   // conditions surface; points at the always-present Help now (SR-2).
   disclaimer:

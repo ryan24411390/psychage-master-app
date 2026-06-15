@@ -8,6 +8,7 @@ import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
 
 import { RelevancePhrase } from './components/RelevancePhrase';
+import { NAVIGATOR_COPY } from './copy';
 
 // S18 — results. Up to THREE "possible explanations", each shown as TEXT only: a plain
 // condition name, the relevance as a closed-vocabulary PHRASE (Possible · Likely ·
@@ -19,9 +20,9 @@ import { RelevancePhrase } from './components/RelevancePhrase';
 // now" → Toolkit S19 (PR C), "Find professional care" → Find (B2 stub).
 //
 // The condition names + descriptions come from the fixture KB (CT4). The caveat + the
-// onward-path labels are Flow Book verbatim.
+// onward-path labels are Flow Book verbatim, sourced from ./copy (CT4 §9).
 
-const CAVEAT = 'No online tool can be certain. A clinician can.';
+const CAVEAT = NAVIGATOR_COPY.caveat;
 
 /** The lean result shape the view renders — a subset of the engine's
  *  NavigatorResultItem, so this view never imports the shared package. */
@@ -75,7 +76,7 @@ export function ResultsView({
       <View className="px-4 pt-1">
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back"
+          accessibilityLabel={NAVIGATOR_COPY.back}
           onPress={onBack}
           hitSlop={8}
           className="min-h-[44px] w-11 justify-center"
@@ -99,16 +100,19 @@ export function ResultsView({
               {r.description_for_user}
             </Text>
             <View className="mt-2">
-              <OnwardLink label="Read about this" onPress={() => onReadAbout(r.condition_id)} />
+              <OnwardLink
+                label={NAVIGATOR_COPY.readAbout}
+                onPress={() => onReadAbout(r.condition_id)}
+              />
             </View>
           </Card>
         ))}
 
         <View className="gap-1 border-t border-border pt-4 dark:border-border-dark">
-          <OnwardLink label="Something steadying now" onPress={onSteadyingNow} />
-          <OnwardLink label="Find professional care" onPress={onFindCare} />
+          <OnwardLink label={NAVIGATOR_COPY.steadyingNow} onPress={onSteadyingNow} />
+          <OnwardLink label={NAVIGATOR_COPY.findCare} onPress={onFindCare} />
           {onSaveForLater ? (
-            <OnwardLink label="Save this for later" onPress={onSaveForLater} />
+            <OnwardLink label={NAVIGATOR_COPY.saveForLater} onPress={onSaveForLater} />
           ) : null}
         </View>
       </ScrollView>

@@ -6,7 +6,8 @@ import { HomeCardSlot } from '@/components/home/HomeCardSlot';
 // C0.5 — the home card slot rendered from fixtures. Bridge copy is verbatim v5;
 // the reminder's known copy (time chip + buttons) is verbatim from the order, its
 // question line caller-supplied.
-const CRISIS = /people you can reach, right away/;
+// CT4 §3 very-low extra line (verbatim).
+const CRISIS = /If things feel unsafe, help is one tap away\./;
 
 describe('HomeCardSlot', () => {
   it('renders nothing when there is no card', () => {

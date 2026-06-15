@@ -4,7 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/Text';
 import { CrisisCallRow } from '@/features/crisis/components/CrisisCallRow';
 import { EmergencyButton } from '@/features/crisis/components/EmergencyButton';
+import { CRISIS_COPY } from '@/features/crisis/copy';
 import type { HelplineRow } from '@/features/crisis/helpline-schema';
+
+import { NAVIGATOR_COPY } from './copy';
 
 // S17 — the Navigator halt. Fires on a "Yes" to the severity question OR on a
 // CRISIS-flagged selection (the engine's safety screen). PLAIN register, NO mascot.
@@ -12,10 +15,10 @@ import type { HelplineRow } from '@/features/crisis/helpline-schema';
 // reusing S11's components — never a rebuilt crisis UI. A quiet "Go back" covers a
 // mis-tap; the flow never resumes into results past a halt without walking back.
 //
-// Lead copy is VERBATIM Flow Book (Flow 13).
-
-const HALT_LEAD = "Then let's pause this. What you're feeling deserves real support right now.";
-const EMERGENCY_LABEL = 'Call your local emergency number';
+// Lead copy is VERBATIM Flow Book (Flow 13), sourced from ./copy (CT4 §9); the
+// embedded emergency label is single-sourced from the crisis copy.
+const HALT_LEAD = NAVIGATOR_COPY.haltLead;
+const EMERGENCY_LABEL = CRISIS_COPY.callEmergency;
 
 export interface HaltViewProps {
   readonly emergencyNumber: string;
@@ -39,7 +42,7 @@ export function HaltView({ emergencyNumber, helplines, onGoBack }: HaltViewProps
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel={NAVIGATOR_COPY.goBack}
           onPress={onGoBack}
           hitSlop={8}
           className="min-h-[44px] justify-center"
@@ -48,7 +51,7 @@ export function HaltView({ emergencyNumber, helplines, onGoBack }: HaltViewProps
             variant="bodySm"
             className="text-text-secondary underline dark:text-text-secondary-dark"
           >
-            Go back
+            {NAVIGATOR_COPY.goBack}
           </Text>
         </Pressable>
       </ScrollView>

@@ -16,6 +16,7 @@ import { type NavigatorArea, type SymptomOption, symptomsForArea } from './areas
 import type { ClarifierQuestion } from './clarifiers';
 import { ChipXL } from './components/ChipXL';
 import { SymptomChip } from './components/SymptomChip';
+import { NAVIGATOR_COPY } from './copy';
 import {
   buildUserInputs,
   createNavigatorReducer,
@@ -34,21 +35,19 @@ import { ResultsView, type ResultItemVM } from './ResultsView';
 export type RunNavigator = (inputs: UserSymptomInput[]) => NavigatorResults;
 
 const AREAS: ReadonlyArray<{ area: NavigatorArea; label: string }> = [
-  { area: 'body', label: 'Body' },
-  { area: 'mind', label: 'Mind' },
-  { area: 'sleep', label: 'Sleep' },
-  { area: 'both', label: 'Both/not sure' },
+  { area: 'body', label: NAVIGATOR_COPY.areaBody },
+  { area: 'mind', label: NAVIGATOR_COPY.areaMind },
+  { area: 'sleep', label: NAVIGATOR_COPY.areaSleep },
+  { area: 'both', label: NAVIGATOR_COPY.areaBoth },
 ];
 
-// VERBATIM Flow Book (Flow 13).
-const SEVERITY_QUESTION =
-  'Right now, are you thinking about hurting yourself, or do you feel unsafe?';
-// FIXTURE chrome → CT4.
-const CONTINUE_LABEL = 'Continue';
-const SOMETHING_ELSE = 'Something else';
-const SEARCH_PLACEHOLDER = 'Search';
-const SEARCH_A11Y = 'Search symptoms';
-const NO_MATCH = 'No match';
+// All chrome below is VERBATIM Flow Book (Flow 13), now sourced from ./copy (CT4 §9).
+const SEVERITY_QUESTION = NAVIGATOR_COPY.severityQuestion;
+const CONTINUE_LABEL = NAVIGATOR_COPY.continue;
+const SOMETHING_ELSE = NAVIGATOR_COPY.somethingElse;
+const SEARCH_PLACEHOLDER = NAVIGATOR_COPY.searchPlaceholder;
+const SEARCH_A11Y = NAVIGATOR_COPY.searchA11y;
+const NO_MATCH = NAVIGATOR_COPY.noMatch;
 
 export interface NavigatorFlowProps {
   readonly symptoms: readonly SymptomOption[];
@@ -68,7 +67,7 @@ function BackButton({ onPress }: { onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Back"
+      accessibilityLabel={NAVIGATOR_COPY.back}
       onPress={onPress}
       hitSlop={8}
       className="min-h-[44px] w-11 justify-center"
@@ -187,8 +186,14 @@ export function NavigatorFlow({
             <Text variant="headingLg" accessibilityRole="header">
               {SEVERITY_QUESTION}
             </Text>
-            <ChipXL label="No" onPress={() => dispatch({ type: 'ANSWER_SEVERITY', answer: 'no' })} />
-            <ChipXL label="Yes" onPress={() => dispatch({ type: 'ANSWER_SEVERITY', answer: 'yes' })} />
+            <ChipXL
+              label={NAVIGATOR_COPY.severityNo}
+              onPress={() => dispatch({ type: 'ANSWER_SEVERITY', answer: 'no' })}
+            />
+            <ChipXL
+              label={NAVIGATOR_COPY.severityYes}
+              onPress={() => dispatch({ type: 'ANSWER_SEVERITY', answer: 'yes' })}
+            />
           </View>
         )}
       </ScrollView>

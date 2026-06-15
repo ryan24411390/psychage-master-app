@@ -72,7 +72,7 @@ describe('S22 ArticleReader', () => {
     (getArticleBySlug as jest.Mock).mockResolvedValue(ARTICLE);
     renderReader(<ArticleReader slug={ARTICLE.slug} />);
     const credit = await screen.findByText(
-      'Reviewed by Dr. Lena Dobson, Ph.D. in Clinical Neuropsychology',
+      'Reviewed by Dr. Lena Dobson, Ph.D. in Clinical Neuropsychology.',
     );
     expect(credit).toBeTruthy();
     expect(credit.props.numberOfLines).toBeUndefined(); // never shortened
