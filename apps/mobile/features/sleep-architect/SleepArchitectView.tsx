@@ -17,7 +17,9 @@ import { SleepDashboard } from '@/features/sleep-architect/dashboard/SleepDashbo
 import { SleepDiary } from '@/features/sleep-architect/diary/SleepDiary';
 import { SleepLogForm } from '@/features/sleep-architect/diary/SleepLogForm';
 import { SleepDisclaimer } from '@/features/sleep-architect/shared/SleepDisclaimer';
+import { SleepInsights } from '@/features/sleep-architect/insights/SleepInsights';
 import { SleepTools } from '@/features/sleep-architect/tools/SleepTools';
+import { WindDown } from '@/features/sleep-architect/winddown/WindDown';
 import { getSleepStore } from '@/lib/sleep-store';
 
 // Sleep Architect shell. Pushed OUTSIDE the tabs, so it carries its OWN crisis
@@ -25,7 +27,7 @@ import { getSleepStore } from '@/lib/sleep-store';
 // writes go through the injected SleepRecordStore (LOCAL-ONLY, SR-4). The store is a
 // prop (default: the app singleton) so render tests inject an in-memory double.
 
-type Tab = 'overview' | 'diary' | 'dashboard' | 'tools';
+type Tab = 'overview' | 'diary' | 'dashboard' | 'tools' | 'wind-down' | 'insights';
 type Editing = { mode: 'new' } | { mode: 'edit'; entry: SleepEntry } | null;
 
 type SleepArchitectViewProps = {
@@ -117,6 +119,8 @@ export function SleepArchitectView({ store = getSleepStore() }: SleepArchitectVi
                 onSaveTargets={handleSaveTargets}
               />
             ) : null}
+            {tab === 'wind-down' ? <WindDown /> : null}
+            {tab === 'insights' ? <SleepInsights entries={entries} /> : null}
           </ScrollView>
         </>
       )}
@@ -154,9 +158,16 @@ function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
     { key: 'diary', label: CT4_SLEEP.tabs.diary },
     { key: 'dashboard', label: CT4_SLEEP.tabs.dashboard },
     { key: 'tools', label: CT4_SLEEP.tabs.tools },
+    { key: 'wind-down', label: CT4_SLEEP.tabs.windDown },
+    { key: 'insights', label: CT4_SLEEP.tabs.insights },
   ];
   return (
-    <View className="flex-row border-b border-border px-4 dark:border-border-dark">
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      className="max-h-12 flex-grow-0 border-b border-border dark:border-border-dark"
+      contentContainerClassName="px-4"
+    >
       {items.map((item) => {
         const active = item.key === tab;
         return (
@@ -165,7 +176,7 @@ function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
             onPress={() => onChange(item.key)}
-            className={`min-h-[44px] flex-1 items-center justify-center border-b-2 ${
+            className={`min-h-[44px] items-center justify-center border-b-2 px-4 ${
               active ? 'border-primary dark:border-primary-dark' : 'border-transparent'
             }`}
           >
@@ -178,6 +189,6 @@ function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
           </Pressable>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }

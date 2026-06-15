@@ -19,6 +19,67 @@ export const CT4_SLEEP = {
     diary: 'Diary',
     dashboard: 'Patterns',
     tools: 'Tools',
+    windDown: 'Wind-down',
+    insights: 'Insights',
+  },
+
+  windDown: {
+    intro: 'A few calming options for the hour before bed. Use what helps.',
+    breathingTitle: 'Guided breathing',
+    breathingBody: 'A short paced-breathing exercise to settle your body.',
+    breathingCta: 'Open breathing',
+    brainDumpTitle: 'Brain dump',
+    brainDumpBody: 'Empty your head onto the page so it’s not on your mind. Stays on this device.',
+    brainDumpPlaceholder: 'Whatever’s on your mind…',
+    brainDumpClear: 'Clear',
+    cbtiTitle: 'About sleep',
+    crisisLine: 'If something heavier is on your mind, support is here for you.',
+  },
+
+  // CBT-I education cards (ported from the web tool). Educational only — not therapy.
+  cbtiCards: [
+    {
+      id: 'stimulus_control',
+      title: 'The bed–sleep connection',
+      body: 'Brains link the bed with whatever happens there. Keeping the bed for sleep helps it learn bed = sleep. If you can’t sleep after ~20 minutes, get up, do something quiet, and return when sleepy.',
+    },
+    {
+      id: 'sleep_pressure',
+      title: 'How sleep pressure builds',
+      body: 'The longer you’re awake, the stronger the drive to sleep. Late naps and afternoon caffeine drain that pressure — so mornings-only caffeine and earlier naps tend to help.',
+    },
+    {
+      id: 'circadian',
+      title: 'Your internal clock',
+      body: 'Light is the strongest signal for your body clock. Bright light soon after waking and dimmer light before bed, with a steady wake time, keep the rhythm anchored.',
+    },
+    {
+      id: 'cognitive',
+      title: 'When sleep thoughts spiral',
+      body: 'Worrying about not sleeping makes sleep harder. Noticing the thought — “have I coped after a rough night before?” — can take some of the pressure off.',
+    },
+  ],
+
+  insights: {
+    title: 'Sleep & morning mood',
+    intro: 'As you log, this looks for gentle links between your nights and how you feel in the morning. Patterns, not proof.',
+    insufficient: 'Keep logging — links appear once there are about two weeks of nights.',
+    none: 'No clear links yet. That’s common, and not a problem.',
+    pairs: (n: number) => `Based on ${n} nights`,
+    strengthLabel: {
+      strong: 'Clear link',
+      moderate: 'Some link',
+      weak: 'Slight link',
+      none: 'No clear link',
+    },
+    metricLabel: {
+      duration: 'Sleep length',
+      efficiency: 'Sleep efficiency',
+      quality: 'Sleep quality',
+      latency: 'Time to fall asleep',
+    },
+    directionUp: 'tends to go with a better morning mood',
+    directionDown: 'tends to go with a lower morning mood',
   },
 
   tools: {
