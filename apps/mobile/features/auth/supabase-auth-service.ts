@@ -21,6 +21,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { getOrCreateDeviceId } from '@/lib/device-id';
 import { getSupabaseAuthClient } from '@/lib/supabase/client';
+import { isNetworkError } from '@/lib/supabase/is-network-error';
 
 import type { AuthResult, AuthService, VerificationStatus } from './auth-service';
 
@@ -31,17 +32,6 @@ export interface SupabaseAuthServiceDeps {
   readonly client?: SupabaseClient;
   /** Defaults to the stable per-install id; injected in tests. */
   readonly deviceId?: string;
-}
-
-// supabase-js network failures surface as AuthRetryableFetchError / fetch TypeErrors.
-function isNetworkError(error: unknown): boolean {
-  if (!error || typeof error !== 'object') return false;
-  const name = 'name' in error ? String((error as { name: unknown }).name) : '';
-  const message = 'message' in error ? String((error as { message: unknown }).message) : '';
-  return (
-    name === 'AuthRetryableFetchError' ||
-    /network|fetch|connection/i.test(message)
-  );
 }
 
 export function createSupabaseAuthService(deps: SupabaseAuthServiceDeps = {}): AuthService {

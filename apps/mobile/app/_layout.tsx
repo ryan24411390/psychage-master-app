@@ -6,6 +6,7 @@ import {
   IBMPlexSans_700Bold,
 } from '@expo-google-fonts/ibm-plex-sans';
 import { Fraunces_600SemiBold } from '@expo-google-fonts/fraunces';
+import { QueryClientProvider } from '@tanstack/react-query';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { colorScheme, useColorScheme } from 'nativewind';
@@ -17,6 +18,7 @@ import '../global.css';
 import '@/lib/adapters/featureFlags';
 
 import { HapticProvider } from '@/lib/haptic-context';
+import { queryClient } from '@/lib/query';
 import { useAppearance } from '@/lib/use-appearance';
 import { resolveColorScheme } from '@/lib/theme';
 
@@ -64,12 +66,14 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <HapticProvider>
-      <AppearanceSync />
-      <ThemedStatusBar />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-      </Stack>
-    </HapticProvider>
+    <QueryClientProvider client={queryClient}>
+      <HapticProvider>
+        <AppearanceSync />
+        <ThemedStatusBar />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </HapticProvider>
+    </QueryClientProvider>
   );
 }

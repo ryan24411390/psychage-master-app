@@ -49,6 +49,7 @@ function makeClient(capture: Capture, throwOnUpsert = false): SupabaseLike {
 function deps(over: Partial<CheckInPushDeps>, capture: Capture, throwOnUpsert = false): CheckInPushDeps {
   return {
     enabled: () => true,
+    getConsent: () => true,
     getUserId: async () => 'user-1',
     getWriteClient: () => makeClient(capture, throwOnUpsert),
     writeContext: () => CTX,
@@ -96,6 +97,25 @@ describe('pushCheckInEntry — best-effort backup', () => {
 
     expect(getUserId).not.toHaveBeenCalled();
     expect(capture.upsert).toBeUndefined();
+  });
+
+  it('skips the write when the user has NOT consented (SR-4 / ADR-001 gate)', async () => {
+    const capture: Capture = {};
+    const getUserId = vi.fn(async () => 'user-1');
+    // Consent OFF: the push must be skipped even though Supabase is configured and a
+    // user is signed in. The gate is checked before getUserId, so auth is never read.
+    await pushCheckInEntry(ENTRY, deps({ getConsent: () => false, getUserId }, capture));
+
+    expect(getUserId).not.toHaveBeenCalled();
+    expect(capture.upsert).toBeUndefined();
+  });
+
+  it('writes when consent is ON and the user is signed in', async () => {
+    const capture: Capture = {};
+    await pushCheckInEntry(ENTRY, deps({ getConsent: () => true }, capture));
+
+    expect(capture.table).toBe('check_ins');
+    expect(capture.upsert).toMatchObject({ user_id: 'user-1', mood_score: 7 });
   });
 
   it('omits prompt_response when the entry has no note', async () => {
