@@ -6,7 +6,10 @@ jest.mock('expo-router', () => ({ router: { back: jest.fn(), push: jest.fn() } }
 import { getCategoryBySlug } from '@psychage/shared/peaf';
 
 import { ConditionDetailView } from '@/features/conditions/ConditionDetailView';
-import { getConditionSummary } from '@/features/conditions/data/condition-summaries';
+import {
+  getConditionSubTopics,
+  getConditionSummary,
+} from '@/features/conditions/data/condition-summaries';
 import { selectConditionDetail } from '@/features/conditions/select';
 
 import { renderWithProviders } from './_helpers';
@@ -30,6 +33,16 @@ describe('Conditions library (topic overview)', () => {
     expect(summary.length).toBeGreaterThan(0);
     expect(screen.getByTestId('condition-summary')).toBeTruthy();
     expect(screen.getByText(summary)).toBeTruthy();
+  });
+
+  it('renders the verbatim reviewed sub-topic outline (B1), not authored text', () => {
+    renderWithProviders(<ConditionDetailView slug="anxiety-stress" />);
+    const subTopics = getConditionSubTopics('anxiety-stress');
+    expect(subTopics.length).toBeGreaterThan(0);
+    expect(screen.getByTestId('condition-subtopics')).toBeTruthy();
+    for (const topic of subTopics) {
+      expect(screen.getByText(`•  ${topic}`)).toBeTruthy();
+    }
   });
 
   it('routes to the real article library on browse', () => {

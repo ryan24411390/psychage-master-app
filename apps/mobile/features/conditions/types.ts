@@ -23,5 +23,7 @@ export type ConditionCategory = {
  * ported), and the names of its related, also-condition-focused topics. */
 export type ConditionDetail = ConditionCategory & {
   summary: string | null;
+  /** Verbatim reviewed sub-topic outline ("what this covers"); `[]` if none ported. */
+  subTopics: readonly string[];
   related: ConditionCategory[];
 };

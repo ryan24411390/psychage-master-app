@@ -17,6 +17,7 @@ export const CONDITIONS_COPY = {
     'Plain-language topics about mental health, drawn from our reviewed library. This is educational — it is not a diagnosis.',
   // Detail screen (generic — shown under every topic name; no per-condition claim).
   detailIntro: 'Reviewed, plain-language articles on this topic.',
+  coversLabel: 'What this covers',
   browseLabel: 'Browse articles in the library',
   relatedLabel: 'Related topics',
   // Shared.

@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { CONTENT_CATEGORIES, getCategoryBySlug } from '@psychage/shared/peaf';
 
 import {
-  CONDITION_SUMMARIES,
+  CONDITION_TOPICS,
+  getConditionSubTopics,
   getConditionSummary,
 } from '@/features/conditions/data/condition-summaries';
 import { selectConditionCategories, selectConditionDetail } from '@/features/conditions/select';
@@ -74,25 +75,25 @@ describe('selectConditionDetail', () => {
     }
   });
 
-  it('carries the verbatim reviewed summary, never an authored one', () => {
+  it('carries the verbatim reviewed summary + sub-topics, never authored ones', () => {
     const detail = selectConditionDetail('anxiety-stress');
     expect(detail?.summary).toBe(getConditionSummary('anxiety-stress'));
-    expect(detail?.summary).toBe(CONDITION_SUMMARIES['anxiety-stress']);
+    expect(detail?.summary).toBe(CONDITION_TOPICS['anxiety-stress']?.summary);
     expect((detail?.summary?.length ?? 0)).toBeGreaterThan(0);
+    expect(detail?.subTopics).toEqual(getConditionSubTopics('anxiety-stress'));
+    expect((detail?.subTopics.length ?? 0)).toBeGreaterThan(0);
   });
 
-  it('reports summary null for a condition topic with no ported summary', () => {
-    // brain-neuroscience is condition-focused; if it is ever the case that a
-    // condition has no ported summary, the selector must return null (the screen
-    // degrades to name + browse) rather than fabricate text.
+  it('reports summary null / empty sub-topics for a slug with nothing ported', () => {
     const detail = selectConditionDetail('anxiety-stress');
-    // sanity: the field is exactly the data-module value (null or verbatim string)
+    // the fields are exactly the data-module values (verbatim or null/[]) — never fabricated
     expect(detail?.summary).toBe(getConditionSummary('anxiety-stress'));
+    expect(detail?.subTopics).toEqual(getConditionSubTopics('anxiety-stress'));
   });
 });
 
-describe('CONDITION_SUMMARIES (verbatim port integrity)', () => {
-  const entries = Object.entries(CONDITION_SUMMARIES);
+describe('CONDITION_TOPICS (verbatim port integrity)', () => {
+  const entries = Object.entries(CONDITION_TOPICS);
 
   it('is keyed only by real, condition-focused taxonomy slugs', () => {
     for (const [slug] of entries) {
@@ -102,17 +103,21 @@ describe('CONDITION_SUMMARIES (verbatim port integrity)', () => {
     }
   });
 
-  it('has only non-empty summaries', () => {
-    for (const [, summary] of entries) {
+  it('has non-empty summary + sub-topics for every entry', () => {
+    for (const [, { summary, subTopics }] of entries) {
       expect(summary.trim().length).toBeGreaterThan(0);
+      expect(subTopics.length).toBeGreaterThan(0);
+      for (const topic of subTopics) expect(topic.trim().length).toBeGreaterThan(0);
     }
   });
 
-  it('contains no diagnostic-claim language (SR-2)', () => {
-    for (const [, summary] of entries) {
-      const lower = summary.toLowerCase();
-      for (const phrase of DIAGNOSTIC_PHRASES) {
-        expect(lower).not.toContain(phrase);
+  it('contains no diagnostic-claim language (SR-2) in any string', () => {
+    for (const [, { summary, subTopics }] of entries) {
+      for (const text of [summary, ...subTopics]) {
+        const lower = text.toLowerCase();
+        for (const phrase of DIAGNOSTIC_PHRASES) {
+          expect(lower).not.toContain(phrase);
+        }
       }
     }
   });

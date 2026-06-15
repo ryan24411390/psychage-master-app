@@ -9,12 +9,12 @@ import { selectConditionDetail } from '@/features/conditions/select';
 import { colors } from '@/lib/colors';
 
 // Conditions library (topic overview). Pushed route → renders GlobalHeader (Help-
-// now pill, SR-2) + native back row. The screen shows the reviewed topic NAME and
-// the reviewed topic SUMMARY, both VERBATIM from the web (the summary via
-// data/condition-summaries.ts — sourced, never authored here), and routes into
-// REAL content (the Library WebView). It authors no symptom list or likelihood —
-// not a diagnostic flow (SR-3). Unknown / non-condition slugs fall back to a safe
-// "not found" state.
+// now pill, SR-2) + native back row. The screen shows the reviewed topic NAME, the
+// reviewed topic SUMMARY, and the reviewed sub-topic outline ("what this covers"),
+// all VERBATIM from the web (summary + subTopics via data/condition-summaries.ts —
+// sourced, never authored here), and routes into REAL content (the Library
+// WebView). It authors no symptom list or likelihood — not a diagnostic flow
+// (SR-3). Unknown / non-condition slugs fall back to a safe "not found" state.
 export function ConditionDetailView({ slug }: { slug: string }) {
   const t = CONDITIONS_COPY;
   const detail = selectConditionDetail(slug);
@@ -58,6 +58,21 @@ export function ConditionDetailView({ slug }: { slug: string }) {
           >
             {detail.summary ?? t.detailIntro}
           </Text>
+
+          {detail.subTopics.length > 0 ? (
+            <View className="gap-1.5 pt-1" testID="condition-subtopics">
+              <Text variant="bodyMedium">{t.coversLabel}</Text>
+              {detail.subTopics.map((topic) => (
+                <Text
+                  key={topic}
+                  variant="body"
+                  className="text-text-secondary dark:text-text-secondary-dark"
+                >
+                  {`•  ${topic}`}
+                </Text>
+              ))}
+            </View>
+          ) : null}
 
           <Pressable
             accessibilityRole="button"

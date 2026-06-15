@@ -164,14 +164,16 @@ reviewed topic summaries.
    content) and `/article/[slug]`; deepening to per-topic article lists (A2) is wiring to the
    in-flight repo, not new content.
 
-**B1 (approved, built) — verbatim topic summaries.** Each condition detail screen shows the
-reviewed `Category.description` from the web (e.g. anxiety: *"Understanding anxiety disorders,
-stress responses, and evidence-based coping strategies…"*), **sourced verbatim** into
+**B1 (approved, built) — verbatim topic summaries + sub-topic outlines.** Each condition
+detail screen shows the reviewed `Category.description` (e.g. anxiety: *"Understanding anxiety
+disorders, stress responses, and evidence-based coping strategies…"*) **and** the reviewed
+`Category.subTopics` outline ("what this covers"), both **sourced verbatim** into
 `features/conditions/data/condition-summaries.ts` (extracted programmatically from the web
-`_shared.ts` on 2026-06-15 — not authored, not paraphrased). 20 condition topics covered. The
-selector exposes it as `summary`; the screen renders it verbatim, degrading to a generic line
-when a topic has no ported summary. A test asserts the rendered text equals the data-module
-value and that no diagnostic-claim phrase appears. Inherits the web content's review status.
+`_shared.ts` on 2026-06-15 via `JSON.stringify` so escaping is exact — not authored, not
+paraphrased). 20 condition topics covered, each with summary + sub-topics. The selector
+exposes `summary` + `subTopics`; the screen renders them verbatim, degrading gracefully when a
+topic has nothing ported. Tests assert rendered text equals the data-module value and that no
+diagnostic-claim phrase appears in any string. Inherits the web content's review status.
 
 **Deliberately NOT built (left in the proposal):**
 - **B2 deeper "what people experience" sections** — that content lives in the reviewed article
