@@ -2,9 +2,10 @@ import { FlashList } from '@shopify/flash-list';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { ArticleListCard } from '@/features/content/ArticleListCard';
 import { getLearnCategory } from '@/features/learn/categories';
@@ -60,7 +61,7 @@ export function CategoryArticlesView({ id }: { id: string }) {
         ListEmptyComponent={
           isLoading ? (
             <View className="items-center py-12">
-              <ActivityIndicator color={colors.teal[500]} />
+              <AppLoader />
             </View>
           ) : (
             <Text

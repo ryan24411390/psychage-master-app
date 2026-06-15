@@ -1,13 +1,14 @@
-import { Pressable, type PressableProps } from 'react-native';
+import { type PressableProps, ActivityIndicator } from 'react-native';
 import { type ReactNode } from 'react';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { useHaptics } from '@/lib/haptic-context';
 
 import { Text } from './Text';
+import { AnimatedPressable } from './AnimatedPressable';
 
 // Primary action primitive. DESIGN.mobile.md §3.3 firing-rule: every primary
-// CTA fires haptic.affirm. Pressed state = opacity dim only (no scale/transform
-// — contract favors sensorial restraint; no press motion is specified).
+// CTA fires haptic.affirm. Pressed state = opacity dim + Reanimated spring scale.
 // Size `default` meets 44pt iOS HIG touch-target floor (DESIGN.mobile.md §7).
 //
 // Parity note (web ui/Button.tsx has 6 variants × 4 sizes): mobile carries the
@@ -24,6 +25,7 @@ type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
   size?: ButtonSize;
   children: ReactNode;
   className?: string;
+  isLoading?: boolean;
 };
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -57,12 +59,13 @@ export function Button({
   className,
   onPress,
   disabled,
+  isLoading,
   ...props
 }: ButtonProps) {
   const { fireHaptic } = useHaptics();
 
   const handlePress: PressableProps['onPress'] = (event) => {
-    if (disabled) return;
+    if (disabled || isLoading) return;
     fireHaptic('affirm');
     onPress?.(event);
   };
@@ -73,23 +76,36 @@ export function Button({
     .join(' ');
 
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onPress={handlePress}
       className={composed}
-      style={({ pressed }) => ({
-        opacity: disabled ? 0.5 : pressed ? 0.8 : 1,
-        transform: [{ scale: pressed && !disabled ? 0.98 : 1 }],
+      scaleTo={0.96}
+      style={({ pressed }: { pressed: boolean }) => ({
+        opacity: disabled || isLoading ? 0.5 : pressed ? 0.85 : 1,
       })}
       {...props}
     >
-      {typeof children === 'string' ? (
-        <Text className={textVariantClasses[variant]}>{children}</Text>
-      ) : (
-        children
-      )}
-    </Pressable>
+      <Animated.View
+        layout={LinearTransition.springify().damping(16).stiffness(200)}
+        className="flex-row items-center justify-center gap-2"
+      >
+        {isLoading ? (
+          <Animated.View entering={FadeIn} exiting={FadeOut}>
+            <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? '#fff' : '#1A9B8C'} size="small" />
+          </Animated.View>
+        ) : typeof children === 'string' ? (
+          <Animated.Text entering={FadeIn} exiting={FadeOut} className={textVariantClasses[variant]}>
+            <Text className={textVariantClasses[variant]}>{children}</Text>
+          </Animated.Text>
+        ) : (
+          <Animated.View entering={FadeIn} exiting={FadeOut}>
+            {children}
+          </Animated.View>
+        )}
+      </Animated.View>
+    </AnimatedPressable>
   );
 }

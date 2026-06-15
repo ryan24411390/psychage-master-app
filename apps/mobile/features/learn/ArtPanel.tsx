@@ -1,15 +1,25 @@
-import type { ReactNode } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { type ReactNode, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
+import { Skeleton } from '@/components/ui/Skeleton';
 import { gradientForKey } from '@/features/learn/art';
 
 // Abstract thumbnail surface for Learn cards. Two modes, one component:
-//   • real art — when the article carries a hero_image_url, show it (cover).
+//   • real art — when the article carries a hero_image_url, show it (uncropped).
 //   • token panel — otherwise, a deterministic teal/charcoal gradient (art.ts).
 // Never a faux figure/blob (no-invented-art rule). The caller owns the frame
 // (aspect ratio, radius, overflow) via className; ArtPanel fills it. When
 // `children` are present a bottom scrim is laid down so white overlay text reads.
+//
+// Image rendering = blur-fill letterbox: the hero is shown `contain` (its full
+// content, never cropped) over a blurred+dimmed `cover` copy of itself filling
+// the frame's letterbox bars. Same uniform frame for portrait/landscape/square/
+// ultrawide → a consistent feed with zero crop and no layout shift (the aspect
+// className fixes the height before load). A loading skeleton covers the gap
+// while the source decodes; a broken/missing URL falls back to the gradient
+// (so a dead 404 host never renders a blank surface).
 
 type ArtPanelProps = {
   /** Stable key for the gradient pick — pass the article slug or category id. */
@@ -25,17 +35,53 @@ type ArtPanelProps = {
 export function ArtPanel({ artKey, imageUrl, className, scrim = false, children }: ArtPanelProps) {
   const g = gradientForKey(artKey);
   const gradId = `g${Math.abs(hash(artKey))}`;
+  const [loaded, setLoaded] = useState(false);
+  const [errored, setErrored] = useState(false);
+
+  // Reset load/error state when the source changes — FlashList recycles this
+  // component across rows, so a stale `errored`/`loaded` would force the gradient
+  // (or a missing skeleton) onto a recycled card whose new URL is perfectly valid.
+  // Adjusting state during render (vs an effect) avoids a stale-frame flash on recycle.
+  const [prevUrl, setPrevUrl] = useState(imageUrl);
+  if (imageUrl !== prevUrl) {
+    setPrevUrl(imageUrl);
+    setLoaded(false);
+    setErrored(false);
+  }
+  const showImage = Boolean(imageUrl) && !errored;
+
   return (
     <View className={['overflow-hidden bg-surface-active dark:bg-surface-active-dark', className]
       .filter(Boolean)
       .join(' ')}>
-      {imageUrl ? (
-        <Image
-          source={{ uri: imageUrl }}
-          accessibilityIgnoresInvertColors
-          resizeMode="cover"
-          style={StyleSheet.absoluteFill}
-        />
+      {showImage ? (
+        <>
+          {/* Blurred cover copy fills the letterbox bars behind the real image. */}
+          <Image
+            source={{ uri: imageUrl ?? undefined }}
+            recyclingKey={imageUrl ?? undefined}
+            accessibilityIgnoresInvertColors
+            contentFit="cover"
+            blurRadius={24}
+            cachePolicy="memory-disk"
+            style={StyleSheet.absoluteFill}
+          />
+          <View style={StyleSheet.absoluteFill} pointerEvents="none" className="bg-black/15" />
+          {/* The real image, fully visible (contain) — never cropped. */}
+          <Image
+            source={{ uri: imageUrl ?? undefined }}
+            recyclingKey={imageUrl ?? undefined}
+            accessibilityIgnoresInvertColors
+            contentFit="contain"
+            transition={250}
+            cachePolicy="memory-disk"
+            onLoadStart={() => setLoaded(false)}
+            onLoad={() => setLoaded(true)}
+            onError={() => setErrored(true)}
+            style={StyleSheet.absoluteFill}
+          />
+          {loaded ? null : <Skeleton style={StyleSheet.absoluteFill} />}
+        </>
       ) : (
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <Svg height="100%" width="100%">

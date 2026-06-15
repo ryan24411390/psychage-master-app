@@ -34,7 +34,7 @@ export function MostReadList({ articles }: { articles: readonly ArticleListItem[
             {String(i + 1).padStart(2, '0')}
           </Text>
           <View className="flex-1 gap-1">
-            <Text variant="bodyMedium" numberOfLines={2}>
+            <Text variant="bodyMedium" numberOfLines={1} ellipsizeMode="tail">
               {article.title}
             </Text>
             <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">

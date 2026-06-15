@@ -3,7 +3,7 @@ import { X } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
-import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 import { StateRows } from '@/components/check-in/StateRows';
 import { Button } from '@/components/ui/Button';
@@ -70,6 +70,7 @@ export function CheckInSheet({
   return (
     <Animated.View
       entering={reduced ? undefined : FadeIn.duration(DURATION.swift)}
+      exiting={reduced ? undefined : FadeOut.duration(DURATION.swift)}
       className="absolute inset-0 z-40 justify-end bg-charcoal-900/40 dark:bg-black/60"
     >
       <Pressable
@@ -80,7 +81,10 @@ export function CheckInSheet({
       />
       <Animated.View
         entering={
-          reduced ? undefined : FadeInUp.duration(DURATION.base).easing(easingFn('standard'))
+          reduced ? undefined : SlideInDown.duration(DURATION.base).easing(easingFn('standard'))
+        }
+        exiting={
+          reduced ? undefined : SlideOutDown.duration(DURATION.base).easing(easingFn('standard'))
         }
         className="rounded-t-xl bg-surface px-5 pb-6 pt-5 dark:bg-surface-dark"
       >

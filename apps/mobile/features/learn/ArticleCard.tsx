@@ -1,14 +1,18 @@
 import { router } from 'expo-router';
-import { Pressable, View } from 'react-native';
+import { memo } from 'react';
+import { Pressable } from 'react-native';
 
-import { Text } from '@/components/ui/Text';
 import { ArtPanel } from '@/features/learn/ArtPanel';
 import { useHaptics } from '@/lib/haptic-context';
 import type { ArticleListItem } from '@/lib/articles';
 
-// The content card used inside a topic rail. Art panel on top (real hero or
-// token gradient), then a Fraunces title, a two-line summary, and a meta line.
-// Tap → native reader (haptic.tap on navigation, DESIGN.mobile.md §3.3).
+// The content card used inside a topic rail — image-only: the hero (real, blur-
+// filled and uncropped via ArtPanel; token gradient as fallback) styled as a
+// self-contained card (rounded + border + light shadow per the mobile card
+// grammar; mobile elevates via border, DESIGN.mobile.md §1.4/§1.6). No title or
+// meta text — the article is announced to assistive tech via accessibilityLabel.
+// Tap → native reader (haptic.tap, DESIGN.mobile.md §3.3). memo'd — rails
+// re-render on scroll/parent state and the row props are stable.
 
 type ArticleCardProps = {
   article: ArticleListItem;
@@ -16,7 +20,7 @@ type ArticleCardProps = {
   className?: string;
 };
 
-export function ArticleCard({ article, className }: ArticleCardProps) {
+export const ArticleCard = memo(function ArticleCard({ article, className }: ArticleCardProps) {
   const { fireHaptic } = useHaptics();
 
   return (
@@ -32,32 +36,11 @@ export function ArticleCard({ article, className }: ArticleCardProps) {
       className={['active:opacity-90', className].filter(Boolean).join(' ')}
       style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
     >
-      <ArtPanel artKey={article.slug} imageUrl={article.heroImageUrl} className="aspect-[16/10] rounded-xl" />
-      <View className="gap-1.5 px-0.5 pt-3">
-        <Text
-          variant="caption"
-          className="font-sans-bold uppercase tracking-[0.08em] text-teal-700 dark:text-primary-dark"
-        >
-          {article.categoryName}
-        </Text>
-        <Text variant="heading" numberOfLines={2} className="text-[17px] leading-[21px]">
-          {article.title}
-        </Text>
-        {article.seoDescription ? (
-          <Text
-            variant="bodySm"
-            numberOfLines={2}
-            className="text-text-secondary dark:text-text-secondary-dark"
-          >
-            {article.seoDescription}
-          </Text>
-        ) : null}
-        {article.readTime ? (
-          <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
-            {`${article.readTime} min read`}
-          </Text>
-        ) : null}
-      </View>
+      <ArtPanel
+        artKey={article.slug}
+        imageUrl={article.heroImageUrl}
+        className="aspect-[16/10] rounded-2xl border border-border shadow-sm dark:border-border-dark dark:shadow-none"
+      />
     </Pressable>
   );
-}
+});

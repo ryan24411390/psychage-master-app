@@ -3,9 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronLeft, Search, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { ArticleListCard } from '@/features/content/ArticleListCard';
 import { CT4_LEARN } from '@/features/learn/copy';
@@ -84,34 +85,36 @@ export function SearchView() {
       </View>
 
       {!active ? (
-        <Text
-          variant="body"
-          className="px-5 py-10 text-center text-text-tertiary dark:text-text-tertiary-dark"
-        >
-          Search a feeling, topic, or condition to find guides.
-        </Text>
+        <View className="flex-1 items-center justify-center p-8 pb-32">
+          <Text
+            variant="body"
+            className="text-center text-text-tertiary dark:text-text-tertiary-dark"
+          >
+            Search a feeling, topic, or condition to find guides.
+          </Text>
+        </View>
       ) : (
         <FlashList
           data={results}
           keyExtractor={(item: ArticleListItem) => item.slug}
-          contentContainerClassName="px-4 pb-12"
+          contentContainerClassName="px-5 pb-12 pt-3"
           keyboardShouldPersistTaps="handled"
           ItemSeparatorComponent={() => <View className="h-3" />}
           ListEmptyComponent={
-            isLoading ? (
-              <View className="items-center py-12">
-                <ActivityIndicator color={tc.primary} />
-              </View>
-            ) : (
-              <Text
-                variant="body"
-                className="px-1 py-10 text-center text-text-secondary dark:text-text-secondary-dark"
-              >
-                {isError
-                  ? 'Search is unavailable right now. Please try again.'
-                  : `No guides match “${query}”.`}
-              </Text>
-            )
+            <View className="flex-1 items-center justify-center p-8 pt-20">
+              {isLoading ? (
+                <AppLoader />
+              ) : (
+                <Text
+                  variant="body"
+                  className="text-center text-text-secondary dark:text-text-secondary-dark"
+                >
+                  {isError
+                    ? 'Search is unavailable right now. Please try again.'
+                    : `No guides match “${query}”.`}
+                </Text>
+              )}
+            </View>
           }
           renderItem={({ item }: { item: ArticleListItem }) => <ArticleListCard article={item} />}
         />

@@ -3,9 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { ArticleListCard } from '@/features/content/ArticleListCard';
 import { ArtPanel } from '@/features/learn/ArtPanel';
@@ -170,7 +171,7 @@ function Tier2({ category }: { category: LearnCategory }) {
       ListEmptyComponent={
         isLoading ? (
           <View className="items-center py-12">
-            <ActivityIndicator />
+            <AppLoader />
           </View>
         ) : (
           <Text

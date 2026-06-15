@@ -50,4 +50,96 @@ export const AUTH_COPY = {
 
   // Shared offline state — auth needs the network; honest, not a spinner.
   offlineLine: 'You are offline. Reconnect to continue.', // CT4
+
+  // ── Amendment 2026-06-16 (auth-experience pass) — all CT4, Dr. Dobson review ──
+
+  // S0 — Front-door Welcome gate. Continue = anonymous entry (Tier-1 preserved).
+  welcomeTitle: 'Psychage', // CT4
+  welcomeTagline: 'A calmer way to understand what you might be going through.', // CT4
+  welcomeContinue: 'Explore without an account', // CT4
+  welcomeLogin: 'Log in', // CT4
+  welcomeSignUp: 'Create an account', // CT4
+
+  // Sign-up "full SaaS" fields (Q3).
+  nameLabel: 'Full name', // CT4
+  nameHint: 'The name to show on your account', // CT4
+  nameEmptyLine: 'Enter your name', // CT4
+  confirmLabel: 'Confirm password', // CT4
+  confirmHint: 'Re-enter the same password', // CT4
+  confirmEmptyLine: 'Re-enter your password', // CT4
+  confirmMismatchLine: 'Those passwords do not match', // CT4
+  // Password-strength meter labels (display only — min-8 is the only gate).
+  strengthLabel: 'Password strength', // CT4
+  strengthWeak: 'Weak', // CT4
+  strengthFair: 'Fair', // CT4
+  strengthGood: 'Good', // CT4
+  strengthStrong: 'Strong', // CT4
+  // Terms + Privacy acceptance (App Store 5.1.1). Links are placeholders pending legal.
+  termsPrefix: 'I agree to the ', // CT4
+  termsLink: 'Terms of Service', // CT4
+  termsAnd: ' and ', // CT4
+  privacyLink: 'Privacy Policy', // CT4
+  termsRequiredLine: 'Please accept the Terms and Privacy Policy to continue', // CT4
+
+  // Login polish.
+  forgotLink: 'Forgot password?', // CT4
+  showPasswordLabel: 'Show password', // CT4
+  hidePasswordLabel: 'Hide password', // CT4
+
+  // Social sign-in (Apple + Google).
+  socialDivider: 'or', // CT4
+  continueWithApple: 'Continue with Apple', // CT4
+  continueWithGoogle: 'Continue with Google', // CT4
+  socialFailedLine: 'That sign-in could not be completed. Please try again.', // CT4
+
+  // Forgot password.
+  forgotTitle: 'Reset your password', // CT4
+  forgotBody: 'Enter your email and a reset link will be sent.', // CT4
+  forgotPrimary: 'Send reset link', // CT4
+  forgotBackToSignIn: 'Back to sign in', // CT4
+  // Anti-enumeration: the same confirmation whether or not the address has an account.
+  forgotSentTitle: 'Check your email', // CT4
+  forgotSentBody: (email: string) =>
+    `If an account exists for ${email}, a reset link is on its way.`, // CT4
+
+  // Reset password (reached via the recovery deep-link).
+  resetTitle: 'Choose a new password', // CT4
+  resetBody: 'Enter a new password for your account.', // CT4
+  resetPrimary: 'Update password', // CT4
+  resetWeakLine: 'That password is too weak. Use at least 8 characters.', // CT4
+  resetDoneTitle: 'Password updated', // CT4
+  resetDoneBody: 'The new password is set. Use it next time you sign in.', // CT4
+  resetDonePrimary: 'Continue', // CT4
+  resetExpiredTitle: 'This link has expired', // CT4
+  resetExpiredBody: 'Reset links expire after a short time for safety. Request a new one.', // CT4
+  resetExpiredPrimary: 'Request a new link', // CT4
+
+  // Verification success (deep-link landing).
+  verifySuccessTitle: 'Email confirmed', // CT4
+  verifySuccessBody: 'The email is confirmed — everything is ready.', // CT4
+  verifySuccessPrimary: 'Continue', // CT4
+
+  // Session expired (graceful re-auth).
+  sessionExpiredTitle: 'Please sign in again', // CT4
+  sessionExpiredBody:
+    'For safety, sessions end after a while. Sign in to pick up where things left off.', // CT4
+  sessionExpiredPrimary: 'Sign in', // CT4
+  sessionExpiredSecondary: 'Not now', // CT4
+
+  // Generic auth error + maintenance (Supabase outage) — reusable states.
+  authErrorTitle: 'Something went wrong', // CT4
+  authErrorBody: 'That could not be completed just now. Please try again.', // CT4
+  authErrorPrimary: 'Try again', // CT4
+  authMaintenanceTitle: 'Back in a moment', // CT4
+  authMaintenanceBody: 'Sign-in is briefly unavailable. Please try again in a few minutes.', // CT4
+
+  // Just-in-time account prompts (rules/auth.md §2). Skippable, never blocking.
+  streakSaveTitle: 'Keep your streak safe', // CT4
+  streakSaveBody: 'Save your check-in streak so it survives a new phone.', // CT4
+  streakSavePrimary: 'Save my streak', // CT4
+  streakSaveSkip: 'Skip for now', // CT4
+  therapistLinkTitle: 'Keep this private', // CT4
+  therapistLinkBody: "Adding a therapist saves their details securely. It takes about 30 seconds.", // CT4
+  therapistLinkPrimary: 'Create an account', // CT4
+  therapistLinkSkip: 'Skip for now', // CT4
 } as const;

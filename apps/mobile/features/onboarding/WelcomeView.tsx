@@ -33,7 +33,7 @@ export function WelcomeView({ reduced, onContinue }: WelcomeViewProps) {
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
-      <Settle {...settleProps} className="flex-1 items-center justify-center gap-6 px-6 my-4">
+      <Settle {...settleProps} className="flex-1 items-center justify-center gap-6 px-5 my-4">
         <View className="mb-4">
           <OnboardingMascot testID="onboarding-host-mascot" />
         </View>
@@ -44,7 +44,7 @@ export function WelcomeView({ reduced, onContinue }: WelcomeViewProps) {
           {BODY}
         </Text>
       </Settle>
-      <SafeAreaView edges={['bottom']} className="px-6 pb-2">
+      <SafeAreaView edges={['bottom']} className="px-5 pb-2">
         <Button variant="primary" size="lg" className="w-full" onPress={onContinue}>
           {ONBOARDING_COPY.continue}
         </Button>

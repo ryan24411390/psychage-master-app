@@ -4,10 +4,17 @@
 export { AUTH_COPY } from './copy';
 export {
   PASSWORD_MIN_LENGTH,
+  passwordStrength,
   validateEmail,
+  validateFullName,
   validatePassword,
+  validatePasswordConfirmation,
+  type ConfirmError,
   type EmailError,
+  type NameError,
   type PasswordError,
+  type PasswordStrength,
+  type StrengthLevel,
 } from './validate';
 export {
   createStubAuthService,
@@ -15,9 +22,11 @@ export {
   type AuthResult,
   type AuthService,
   type AuthSession,
+  type SocialProvider,
   type VerificationStatus,
 } from './auth-service';
 export { AuthProvider, useAuth } from './use-auth';
+export { useSocialSignIn } from './use-social-sign-in';
 export { mergeCheckInRecords, type MergeResult } from './migration/merge';
 export {
   lastSevenDayWindow,

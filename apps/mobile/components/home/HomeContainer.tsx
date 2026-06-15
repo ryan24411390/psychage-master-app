@@ -13,8 +13,10 @@ import { useHaptics } from '@/lib/haptic-context';
 import {
   bridgeCardFor,
   buildTerrainDaysFromEntries,
+  calculateDormantTool,
   ctaLabel,
   deriveKind,
+  generateMoodInsight,
   greeting,
   type HomeStateKind,
   type HomeStore,
@@ -25,6 +27,7 @@ import {
   statusLine,
   toTerrainDays,
 } from '@/lib/home-model';
+import { readingProgressStore } from '@/lib/reading-progress-store';
 import {
   isReflectionRowOpened,
   markReflectionRowOpened,
@@ -53,11 +56,11 @@ const storageReflectionGate: ReflectionGate = {
   markOpened: () => markReflectionRowOpened(storage),
 };
 
-// Fixture day-values (v5 shapes) for the forced dev states.
-const REGULAR_VALUES: readonly TerrainValue[] = [3, 2, 1, null, 2, 3, 'today'];
-const CHECKED_IN_VALUES: readonly TerrainValue[] = [2, 1, 3, null, 2, 3, 1];
-const FIRST_RUN_VALUES: readonly TerrainValue[] = [null, null, null, null, null, null, 'today'];
-const AWAY_VALUES: readonly TerrainValue[] = [2, null, null, null, null, null, 'today'];
+// Fixture day-values (v5 shapes) for the forced dev states. Expanded to 14 days.
+const REGULAR_VALUES: readonly TerrainValue[] = [null, null, null, null, null, null, null, 3, 2, 1, null, 2, 3, 'today'];
+const CHECKED_IN_VALUES: readonly TerrainValue[] = [null, null, null, null, null, null, null, 2, 1, 3, null, 2, 3, 1];
+const FIRST_RUN_VALUES: readonly TerrainValue[] = [null, null, null, null, null, null, null, null, null, null, null, null, null, 'today'];
+const AWAY_VALUES: readonly TerrainValue[] = [null, null, null, null, null, null, null, 2, null, null, null, null, null, 'today'];
 
 function buildFixtureModel(kind: HomeStateKind, now: Date): HomeViewModel {
   const hour = now.getHours();
@@ -72,6 +75,9 @@ function buildFixtureModel(kind: HomeStateKind, now: Date): HomeViewModel {
         read,
         ctaLabel: ctaLabel(false),
         card: null,
+        dormantTool: null,
+        insight: null,
+        inProgressReads: [],
       };
     case 'checked-in':
       return {
@@ -82,6 +88,9 @@ function buildFixtureModel(kind: HomeStateKind, now: Date): HomeViewModel {
         read,
         ctaLabel: ctaLabel(true),
         card: bridgeCardFor(1, hour),
+        dormantTool: null,
+        insight: { headline: "Mostly okay these two weeks.", consistency: "5 check-ins · 14 days" },
+        inProgressReads: [],
       };
     case 'away':
       return {
@@ -92,6 +101,9 @@ function buildFixtureModel(kind: HomeStateKind, now: Date): HomeViewModel {
         read,
         ctaLabel: ctaLabel(false),
         card: null,
+        dormantTool: null,
+        insight: null,
+        inProgressReads: [],
       };
     default:
       return {
@@ -102,6 +114,9 @@ function buildFixtureModel(kind: HomeStateKind, now: Date): HomeViewModel {
         read,
         ctaLabel: ctaLabel(false),
         card: null,
+        dormantTool: { tool: { id: 'navigator', name: 'Symptom Navigator', title: 'Make sense of what you feel', route: '/tool/navigator', reEngage: true, thresholdDays: 21 }, sinceDays: 22 },
+        insight: { headline: "Your record is just beginning.", consistency: "4 check-ins · 14 days" },
+        inProgressReads: [],
       };
   }
 }
@@ -109,9 +124,10 @@ function buildFixtureModel(kind: HomeStateKind, now: Date): HomeViewModel {
 function buildLiveModel(store: HomeStore, now: Date): HomeViewModel {
   const hour = now.getHours();
   const today = store.getToday();
-  const recent = store.getRecent(7);
+  const recent = store.getRecent(14); // We need 14 days now!
   const kind = deriveKind(recent.length > 0, today !== undefined);
   const prior = today ? recent.find((e) => e.id !== today.id) : recent[0];
+  const terrainDays = buildTerrainDaysFromEntries(recent, now, 14);
   return {
     greeting: greeting(kind, hour),
     status: statusLine(kind, {
@@ -120,10 +136,13 @@ function buildLiveModel(store: HomeStore, now: Date): HomeViewModel {
       hasPrior: prior !== undefined,
     }),
     recordLabel: recordLabel(recent.length),
-    terrainDays: buildTerrainDaysFromEntries(recent, now),
+    terrainDays,
     read: readForHour(hour),
     ctaLabel: ctaLabel(today !== undefined),
     card: today ? bridgeCardFor(today.state, hour) : null,
+    dormantTool: calculateDormantTool(),
+    insight: generateMoodInsight(terrainDays),
+    inProgressReads: readingProgressStore.getInProgressReads(),
   };
 }
 
@@ -191,7 +210,7 @@ export function HomeContainer({
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
       {__DEV__ && (
-        <View className="flex-row flex-wrap gap-2 px-4 pt-1">
+        <View className="absolute right-0 top-12 z-50 flex-row flex-wrap justify-end gap-2 px-4 w-full" pointerEvents="box-none">
           {DEV_MODES.map((m) => (
             <Pressable
               key={m}

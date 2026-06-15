@@ -1,12 +1,15 @@
 import type { CheckInState } from '@psychage/shared/check-in';
 import { Check } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import Animated, { ZoomIn } from 'react-native-reanimated';
 
 import { MoodGlyphFace } from '@/components/icon-system/mood';
 import { Text } from '@/components/ui/Text';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { colorForScheme, resolveColorRef } from '@/lib/a1-tokens';
 import { STATE_LABELS } from '@/lib/check-in-labels';
+import { useReducedMotion } from '@/lib/motion';
 
 // C0.4 the five-state selector. FIXED order Very low → Very good (state 0..4),
 // each row = the mood-scale glyph (MoodGlyphFace — direction B, clinically signed
@@ -27,30 +30,36 @@ type StateRowsProps = {
 export function StateRows({ value, onChange }: StateRowsProps) {
   const { colorScheme } = useColorScheme();
   const checkColor = colorForScheme(resolveColorRef('color.primary.default'), colorScheme);
+  const reduced = useReducedMotion();
 
   return (
     <View accessibilityRole="radiogroup" className="gap-2">
       {STATES.map((state) => {
         const isSelected = value === state;
         return (
-          <Pressable
+          <AnimatedPressable
             key={state}
             accessibilityRole="radio"
             accessibilityState={{ checked: isSelected }}
             accessibilityLabel={STATE_LABELS[state]}
             onPress={() => onChange(state)}
+            scaleTo={0.98}
             className={`min-h-[44px] flex-row items-center gap-3 rounded-lg border-2 px-3 py-2 ${
               isSelected
-                ? 'border-primary dark:border-primary-dark'
-                : 'border-border dark:border-border-dark'
+                ? 'border-primary dark:border-primary-dark bg-primary/5 dark:bg-primary-dark/5'
+                : 'border-border dark:border-border-dark bg-transparent'
             }`}
           >
             <MoodGlyphFace state={state} />
             <Text variant="bodyMedium" className="flex-1">
               {STATE_LABELS[state]}
             </Text>
-            {isSelected && <Check size={20} color={checkColor} strokeWidth={2.25} />}
-          </Pressable>
+            {isSelected && (
+              <Animated.View entering={reduced ? undefined : ZoomIn.duration(150)}>
+                <Check size={20} color={checkColor} strokeWidth={2.25} />
+              </Animated.View>
+            )}
+          </AnimatedPressable>
         );
       })}
     </View>

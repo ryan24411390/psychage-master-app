@@ -2,9 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { CalendarCheck, ChevronLeft, Globe, Mail, MapPin, Navigation, Phone } from 'lucide-react-native';
 import { useEffect } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AppLoader } from '@/components/ui/AppLoader';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
@@ -153,7 +154,7 @@ export function ProviderDetailView({ id }: { id: string }) {
     return (
       <Chrome>
         <View className="flex-1 items-center justify-center" testID="provider-loading">
-          <ActivityIndicator color={colors.primary.default.light} />
+          <AppLoader />
         </View>
       </Chrome>
     );

@@ -4,6 +4,7 @@ import { Pressable } from 'react-native';
 
 import { CT4_SETTINGS } from '@/features/settings/copy';
 import { useThemeColors } from '@/lib/use-theme-colors';
+import { useReducedMotion } from '@/lib/motion';
 
 // Settings stack (Flow 18). Pushed over the tabs as its own stack, so it carries
 // a native header (back chevron + title) instead of the GlobalHeader. Titles +
@@ -13,8 +14,16 @@ import { useThemeColors } from '@/lib/use-theme-colors';
 export default function SettingsLayout() {
   const t = CT4_SETTINGS;
   const tc = useThemeColors();
+  const reduced = useReducedMotion();
+
   return (
-    <Stack screenOptions={{ headerShown: true, headerBackButtonDisplayMode: 'minimal' }}>
+    <Stack
+      screenOptions={{
+        headerShown: true,
+        headerBackButtonDisplayMode: 'minimal',
+        animation: reduced ? 'fade' : 'default',
+      }}
+    >
       <Stack.Screen
         name="index"
         options={{
@@ -38,7 +47,11 @@ export default function SettingsLayout() {
       <Stack.Screen name="reminders" options={{ title: t.reminders.title }} />
       <Stack.Screen
         name="make-it-yours"
-        options={{ title: t.makeItYours.title, presentation: 'modal' }}
+        options={{
+          title: t.makeItYours.title,
+          presentation: reduced ? 'transparentModal' : 'modal',
+          animation: reduced ? 'fade' : 'default',
+        }}
       />
       <Stack.Screen name="appearance" options={{ title: t.appearance.title }} />
       <Stack.Screen name="about" options={{ title: t.about.title }} />
@@ -46,7 +59,14 @@ export default function SettingsLayout() {
       {/* PR B */}
       <Stack.Screen name="privacy" options={{ title: t.hub.rows.privacy }} />
       <Stack.Screen name="delete" options={{ title: 'Delete' }} />
-      <Stack.Screen name="delete-confirm" options={{ title: 'Delete', presentation: 'modal' }} />
+      <Stack.Screen
+        name="delete-confirm"
+        options={{
+          title: 'Delete',
+          presentation: reduced ? 'transparentModal' : 'modal',
+          animation: reduced ? 'fade' : 'default',
+        }}
+      />
       {/* PR C */}
       <Stack.Screen name="supporter" options={{ title: t.hub.rows.supporter }} />
     </Stack>

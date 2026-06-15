@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
 
@@ -55,7 +56,7 @@ export function ToolkitsView() {
 
         {isLoading ? (
           <View className="items-center py-12" testID="toolkits-loading">
-            <ActivityIndicator color={colors.primary.default.light} />
+            <AppLoader />
           </View>
         ) : toolkits.length === 0 ? (
           <View className="py-12" testID="toolkits-empty">

@@ -25,6 +25,18 @@ export const EASING = {
   breath: 'cubic-bezier(0.45, 0, 0.55, 1)',
 } as const;
 
+export const SPRING_PRESETS = {
+  swift: { damping: 15, stiffness: 200, mass: 0.5 },
+  calm: { damping: 18, stiffness: 100, mass: 1 },
+  bouncy: { damping: 12, stiffness: 150, mass: 0.8 },
+  gentle: { damping: 20, stiffness: 80, mass: 1.2 },
+  // Premium motion additions:
+  magnetic: { damping: 16, stiffness: 220, mass: 0.4 }, // Sharp and snappy, Apple-like button feel
+  playful: { damping: 12, stiffness: 180, mass: 0.6 },  // Arc browser-like bouncy entry
+  deep: { damping: 25, stiffness: 120, mass: 1.5 },     // Heavy feeling for bottom sheets / deep cards
+  subtle: { damping: 20, stiffness: 250, mass: 0.8 },   // Fast, very little overshoot for micro-interactions
+} as const;
+
 export type DurationKey = keyof typeof DURATION;
 export type EasingKey = keyof typeof EASING;
 

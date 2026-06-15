@@ -293,17 +293,27 @@ function ImageBlock({
 }) {
   const [failed, setFailed] = useState(false);
   const width = useContentWidth();
-  if (!src || failed) return null; // missing illustration → render nothing (gap, never invented)
+  if (!src) return null; // no illustration at all → render nothing (never invented)
   const w = node ? Number(node.attrs.width) : Number.NaN;
   const h = node ? Number(node.attrs.height) : Number.NaN;
   const aspect = w > 0 && h > 0 ? w / h : 1.6;
+  // Broken source (had a URL, failed to load) → a neutral token-tinted box at the
+  // image's own aspect, so the prose rhythm is preserved instead of collapsing.
+  if (failed) {
+    return (
+      <View
+        className="my-1 rounded-xl bg-surface-active dark:bg-surface-active-dark"
+        style={{ width, height: width / aspect }}
+      />
+    );
+  }
   return (
     <View className="my-1 gap-1">
       <Image
         source={{ uri: src }}
         accessibilityLabel={alt || undefined}
         onError={() => setFailed(true)}
-        resizeMode="cover"
+        resizeMode="contain"
         style={{ width, height: width / aspect, borderRadius: 12 }}
       />
       {caption ? (

@@ -25,6 +25,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Modal, Pressable, ScrollView, TextInput, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withRepeat, withSpring, withTiming } from 'react-native-reanimated';
+import { useColorScheme } from 'nativewind';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HeaderAvatar } from '@/components/HeaderAvatar';
 import { Text } from '@/components/ui/Text';
@@ -33,6 +35,7 @@ import { dial } from '@/features/crisis/dialer';
 import { useHaptics } from '@/lib/haptic-context';
 import { useDirectoryLocation } from '@/lib/use-directory-location';
 import { recordRecentlyViewed } from '@/lib/persistence/recently-viewed';
+import { colors } from '@/lib/colors';
 
 import { telUrl } from '@/features/directory/contact';
 import { useProviderSearch, useProviderTypes } from '@/features/directory/hooks';
@@ -43,13 +46,6 @@ import { ABBR, STATES } from '@/features/directory/states';
 import { getTrustBadge } from '@/features/directory/trust';
 import type { ProviderCardData, ProviderSearchParams, ProviderType, ProviderWithDetails } from '@/features/directory/types';
 
-// Prototype palette (intentionally not tokens — see header note).
-const TEAL = '#16897A';
-const TEAL_PRESS = '#0F6E5F';
-const INK = '#1B1B19';
-const SOFT = '#6F6E67';
-const FAINT = '#A6A39A';
-const RED = '#D63A30';
 
 // City suggestions are navigation hints (like the state list) — not provider data.
 const CITIES: Record<string, string[]> = {
@@ -138,12 +134,12 @@ function useCountUp(target: number, reduce: boolean) {
   }, [target, reduce]);
   return v;
 }
-function Tap({ onPress, children, className, style }: { onPress?: () => void; children: React.ReactNode; className?: string; style?: ViewStyle }) {
+function Tap({ onPress, children, className, style, accessibilityLabel, accessibilityRole }: { onPress?: () => void; children: React.ReactNode; className?: string; style?: ViewStyle; accessibilityLabel?: string; accessibilityRole?: any }) {
   const s = useSharedValue(1);
   const a = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
   const cfg = { damping: 18, stiffness: 320, mass: 0.5 };
   return (
-    <Pressable onPress={onPress} onPressIn={() => { s.value = withSpring(0.97, cfg); }} onPressOut={() => { s.value = withSpring(1, cfg); }}>
+    <Pressable accessibilityLabel={accessibilityLabel} accessibilityRole={accessibilityRole ?? 'button'} onPress={onPress} onPressIn={() => { s.value = withSpring(0.97, cfg); }} onPressOut={() => { s.value = withSpring(1, cfg); }}>
       <Animated.View className={className} style={[a, style]}>{children}</Animated.View>
     </Pressable>
   );
@@ -152,7 +148,7 @@ function Skeleton() {
   const o = useSharedValue(0.5);
   useEffect(() => { o.value = withRepeat(withTiming(1, { duration: 720 }), -1, true); }, [o]);
   const a = useAnimatedStyle(() => ({ opacity: o.value }));
-  return <Animated.View style={a} className="h-[92px] rounded-2xl bg-[#EAE6DB] mb-3" />;
+  return <Animated.View style={a} className="h-[92px] rounded-2xl bg-border dark:bg-border-dark mb-4" />;
 }
 
 type Step = 'location' | 'manual' | 'city' | 'type' | 'outside' | 'results' | 'profile' | 'compare';
@@ -160,6 +156,17 @@ type Step = 'location' | 'manual' | 'city' | 'type' | 'outside' | 'results' | 'p
 export default function FindCareScreen() {
   const reduce = useReduceMotion();
   const dl = useDirectoryLocation();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const insets = useSafeAreaInsets();
+
+  const ink = isDark ? colors.text.primary.dark : colors.text.primary.light;
+  const soft = isDark ? colors.text.secondary.dark : colors.text.secondary.light;
+  const faint = isDark ? colors.text.tertiary.dark : colors.text.tertiary.light;
+  const teal = isDark ? colors.teal[400] : colors.teal[600];
+  const tealPress = isDark ? colors.teal[500] : colors.teal[700];
+  const red = isDark ? colors.crisis.dark : colors.crisis.light;
+
   const { fireHaptic } = useHaptics();
 
   const [step, setStep] = useState<Step>(dl.configured && dl.stateName ? 'results' : 'location');
@@ -245,17 +252,17 @@ export default function FindCareScreen() {
 
   /* ----------------------------- shared chrome ----------------------------- */
   const Header = ({ back, title }: { back?: () => void; title?: string }) => (
-    <View className="flex-row items-center justify-between px-5 pt-1 pb-2">
+    <View className="flex-row items-center justify-between px-5 pt-2 pb-3">
       {back ? (
-        <Tap onPress={back}><View className="p-1"><ChevronLeft size={24} color={INK} /></View></Tap>
+        <Tap onPress={back}><View className="p-2.5"><ChevronLeft size={24} color={ink} /></View></Tap>
       ) : (
-        <Text className="font-display text-[22px] text-[#1B1B19]">Psychage</Text>
+        <Text className="font-display text-2xl text-text-primary dark:text-text-primary-dark">Psychage</Text>
       )}
-      {title ? <Text className="font-sans-bold text-base text-[#1B1B19]">{title}</Text> : null}
+      {title ? <Text className="font-sans-bold text-base text-text-primary dark:text-text-primary-dark">{title}</Text> : null}
       <View className="flex-row items-center gap-2.5">
         <Tap onPress={() => setSheet('crisis')}>
-          <View className="flex-row items-center gap-1.5 bg-white border-[1.5px] border-[#D63A30] rounded-full px-3.5 py-1.5">
-            <LifeBuoy size={17} color={RED} /><Text className="font-sans-medium text-[15px] text-[#1B1B19]">Help now</Text>
+          <View className="flex-row items-center gap-1.5 bg-surface dark:bg-surface-dark border-[1.5px] border-error dark:border-error-dark rounded-full px-3.5 py-1.5">
+            <LifeBuoy size={17} color={red} /><Text className="font-sans-medium text-base text-text-primary dark:text-text-primary-dark">Help now</Text>
           </View>
         </Tap>
         <HeaderAvatar />
@@ -264,12 +271,12 @@ export default function FindCareScreen() {
   );
   const Chip = ({ label, onPress }: { label: string; onPress: () => void }) => (
     <Tap onPress={onPress}>
-      <View className="flex-row items-center gap-1.5 bg-white border border-[#0000001A] rounded-full px-3 py-2 self-start">
-        <Text className="font-sans-medium text-[13px] text-[#1B1B19]">{label}</Text><ChevronDown size={14} color={SOFT} />
+      <View className="flex-row items-center gap-1.5 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-full px-3 py-2 self-start">
+        <Text className="font-sans-medium text-sm text-text-primary dark:text-text-primary-dark">{label}</Text><ChevronDown size={14} color={soft} />
       </View>
     </Tap>
   );
-  const Primary = ({ label, onPress, disabled, color = TEAL, icon }: { label: string; onPress?: () => void; disabled?: boolean; color?: string; icon?: React.ReactNode }) => (
+  const Primary = ({ label, onPress, disabled, color = teal, icon }: { label: string; onPress?: () => void; disabled?: boolean; color?: string; icon?: React.ReactNode }) => (
     <Tap onPress={disabled ? undefined : onPress}>
       <View style={{ backgroundColor: color, opacity: disabled ? 0.45 : 1 }} className="rounded-[13px] py-4 flex-row items-center justify-center gap-2">
         {icon}<Text className="font-sans-bold text-white text-base">{label}</Text>
@@ -280,15 +287,15 @@ export default function FindCareScreen() {
   /* ============================ LOCATION ============================ */
   if (step === 'location')
     return (
-      <SafeAreaView edges={['top']} className="flex-1 bg-[#F4F1E9]">
+      <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
         <Header />
-        <View className="px-[22px] pt-2">
-          <Text className="font-display text-[34px] text-[#1B1B19] mt-1.5 mb-2.5">Find care</Text>
-          <Text className="font-sans text-[#6F6E67] text-[15.5px] leading-6 mb-2">Browse NPI-verified providers licensed in your state. A listing is information, not a recommendation.</Text>
-          <View className="h-[120px] items-center justify-center my-4 bg-[#E2F0EC] rounded-[18px]"><BadgeCheck size={30} color={TEAL} /></View>
+        <View className="px-5 pt-2">
+          <Text className="font-display text-4xl text-text-primary dark:text-text-primary-dark mt-1.5 mb-2.5">Find care</Text>
+          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-2">Browse NPI-verified providers licensed in your state. A listing is information, not a recommendation.</Text>
+          <View className="h-[120px] items-center justify-center my-4 bg-surface-accent dark:bg-surface-accent-dark rounded-[18px]"><BadgeCheck size={30} color={teal} /></View>
           <Primary label="Use my location" onPress={onUseLocation} />
-          <Tap onPress={() => setStep('manual')}><View className="py-3.5 items-center"><Text className="font-sans-bold text-[15px] text-[#16897A]">Enter my state instead</Text></View></Tap>
-          <Text className="font-sans text-[#6F6E67] text-[12.5px] text-center mt-1.5">State sets who can legally see you. Change it anytime.</Text>
+          <Tap onPress={() => setStep('manual')}><View className="py-4 items-center"><Text className="font-sans-bold text-base text-primary dark:text-primary-dark">Enter my state instead</Text></View></Tap>
+          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-xs text-center mt-1.5">State sets who can legally see you. Change it anytime.</Text>
         </View>
       </SafeAreaView>
     );
@@ -296,13 +303,13 @@ export default function FindCareScreen() {
   /* ============================ STATE ============================ */
   if (step === 'manual')
     return (
-      <SafeAreaView edges={['top']} className="flex-1 bg-[#F4F1E9]">
+      <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
         <Header back={() => setStep('location')} />
-        <View className="px-[22px] flex-1">
-          <Text className="font-display text-[27px] text-[#1B1B19] mt-1.5 mb-2.5">Which state?</Text>
-          <Text className="font-sans text-[#6F6E67] text-[15.5px] leading-6 mb-3.5">Providers are licensed by state. Coverage varies — some states have far fewer.</Text>
-          <View className="flex-row items-center gap-2.5 bg-white border border-[#0000001A] rounded-xl px-3.5 py-3">
-            <Search size={18} color={SOFT} /><TextInput placeholder="Search states" placeholderTextColor={FAINT} value={stateQ} onChangeText={setStateQ} className="flex-1 font-sans text-base text-[#1B1B19]" />
+        <View className="px-5 flex-1">
+          <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark mt-1.5 mb-2.5">Which state?</Text>
+          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-3.5">Providers are licensed by state. Coverage varies — some states have far fewer.</Text>
+          <View className="flex-row items-center gap-2.5 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-xl px-4 py-4">
+            <Search size={18} color={soft} /><TextInput placeholder="Search states" placeholderTextColor={faint} value={stateQ} onChangeText={setStateQ} className="flex-1 font-sans text-base text-text-primary dark:text-text-primary-dark" />
           </View>
           <FlashList
             className="mt-3"
@@ -311,15 +318,15 @@ export default function FindCareScreen() {
             keyboardShouldPersistTaps="handled"
             renderItem={({ item: s }) => (
               <Tap onPress={() => { setLoc(s); setCity(null); setCityQ(''); setStep('city'); }}>
-                <View className="flex-row items-center justify-between py-3.5 border-b border-[#0000001A]">
-                  <Text className="font-sans text-[#1B1B19] text-base">{s}</Text>
-                  <ChevronRight size={18} color={SOFT} />
+                <View className="flex-row items-center justify-between py-4 border-b border-border dark:border-border-dark">
+                  <Text className="font-sans text-text-primary dark:text-text-primary-dark text-base">{s}</Text>
+                  <ChevronRight size={18} color={soft} />
                 </View>
               </Tap>
             )}
             ListFooterComponent={
               <Tap onPress={() => setStep('outside')}>
-                <View className="flex-row items-center justify-between py-3.5 mt-1"><Text className="font-sans text-[#6F6E67] text-base">I'm outside the United States</Text><ChevronRight size={18} color={SOFT} /></View>
+                <View className="flex-row items-center justify-between py-4 mt-1"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base">I'm outside the United States</Text><ChevronRight size={18} color={soft} /></View>
               </Tap>
             }
             showsVerticalScrollIndicator={false}
@@ -332,22 +339,22 @@ export default function FindCareScreen() {
   if (step === 'city' && loc) {
     const cities = citiesFor(loc).filter((c) => c.toLowerCase().includes(cityQ.toLowerCase()));
     return (
-      <SafeAreaView edges={['top']} className="flex-1 bg-[#F4F1E9]">
+      <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
         <Header back={() => setStep('manual')} />
-        <View className="px-[22px] flex-1">
+        <View className="px-5 flex-1">
           <Chip label={loc} onPress={() => setStep('manual')} />
-          <Text className="font-display text-[27px] text-[#1B1B19] mt-3 mb-2.5">Which city?</Text>
-          <Text className="font-sans text-[#6F6E67] text-[15.5px] leading-6 mb-3.5">Filter by practice location, or browse the whole state.</Text>
-          <View className="flex-row items-center gap-2.5 bg-white border border-[#0000001A] rounded-xl px-3.5 py-3">
-            <Search size={18} color={SOFT} /><TextInput placeholder={`Search cities in ${loc}`} placeholderTextColor={FAINT} value={cityQ} onChangeText={setCityQ} className="flex-1 font-sans text-base text-[#1B1B19]" />
+          <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark mt-3 mb-2.5">Which city?</Text>
+          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-3.5">Filter by practice location, or browse the whole state.</Text>
+          <View className="flex-row items-center gap-2.5 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-xl px-4 py-4">
+            <Search size={18} color={soft} /><TextInput placeholder={`Search cities in ${loc}`} placeholderTextColor={faint} value={cityQ} onChangeText={setCityQ} className="flex-1 font-sans text-base text-text-primary dark:text-text-primary-dark" />
           </View>
           <ScrollView className="mt-3" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-            <Tap onPress={() => { setCity('all'); setStep('type'); }}><View className="flex-row items-center justify-between py-3.5 border-b border-[#0000001A]"><Text className="font-sans-medium text-[#1B1B19] text-base">All cities in {loc}</Text><ChevronRight size={18} color={SOFT} /></View></Tap>
+            <Tap onPress={() => { setCity('all'); setStep('type'); }}><View className="flex-row items-center justify-between py-4 border-b border-border dark:border-border-dark"><Text className="font-sans-medium text-text-primary dark:text-text-primary-dark text-base">All cities in {loc}</Text><ChevronRight size={18} color={soft} /></View></Tap>
             {cities.map((c) => (
-              <Tap key={c} onPress={() => { setCity(c); setStep('type'); }}><View className="flex-row items-center justify-between py-3.5 border-b border-[#0000001A]"><Text className="font-sans text-[#1B1B19] text-base">{c}</Text><ChevronRight size={18} color={SOFT} /></View></Tap>
+              <Tap key={c} onPress={() => { setCity(c); setStep('type'); }}><View className="flex-row items-center justify-between py-4 border-b border-border dark:border-border-dark"><Text className="font-sans text-text-primary dark:text-text-primary-dark text-base">{c}</Text><ChevronRight size={18} color={soft} /></View></Tap>
             ))}
             {cityQ && !cities.length ? (
-              <Tap onPress={() => { setCity(cityQ); setStep('type'); }}><View className="flex-row items-center justify-between py-3.5 border-b border-[#0000001A]"><Text className="font-sans text-[#1B1B19] text-base">Use “{cityQ}”</Text><ChevronRight size={18} color={SOFT} /></View></Tap>
+              <Tap onPress={() => { setCity(cityQ); setStep('type'); }}><View className="flex-row items-center justify-between py-4 border-b border-border dark:border-border-dark"><Text className="font-sans text-text-primary dark:text-text-primary-dark text-base">Use “{cityQ}”</Text><ChevronRight size={18} color={soft} /></View></Tap>
             ) : null}
             <View className="h-4" />
           </ScrollView>
@@ -359,30 +366,30 @@ export default function FindCareScreen() {
   /* ============================ TYPE ============================ */
   if (step === 'type')
     return (
-      <SafeAreaView edges={['top']} className="flex-1 bg-[#F4F1E9]">
+      <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
         <Header back={() => setStep(city ? 'city' : 'manual')} />
-        <View className="px-[22px] flex-1">
+        <View className="px-5 flex-1">
           <View className="flex-row gap-2">
             {loc ? <Chip label={loc} onPress={() => setStep('manual')} /> : null}
             {cityLabel ? <Chip label={cityLabel} onPress={() => setStep('city')} /> : null}
           </View>
-          <Text className="font-display text-[27px] text-[#1B1B19] mt-3 mb-2.5">What type of provider?</Text>
-          <Text className="font-sans text-[#6F6E67] text-[15.5px] leading-6 mb-3.5">Provider type comes straight from the NPI registry.</Text>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 16 }}>
+          <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark mt-3 mb-2.5">What type of provider?</Text>
+          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-3.5">Provider type comes straight from the NPI registry.</Text>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}>
             <Tap onPress={() => startType(null)}>
-              <View className="flex-row items-center justify-between border-[1.5px] border-[#0000001A] rounded-2xl p-4 mb-2.5 bg-white">
-                <View><Text className="font-sans-bold text-[#1B1B19] text-base">All provider types</Text><Text className="font-sans text-[#6F6E67] text-[13px]">Browse everyone in {cityLabel ?? loc}</Text></View>
-                <ChevronRight size={18} color={SOFT} />
+              <View className="flex-row items-center justify-between border-[1.5px] border-border dark:border-border-dark rounded-2xl p-4 mb-3 bg-surface shadow-sm dark:shadow-none dark:bg-surface-dark">
+                <View><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">All provider types</Text><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm">Browse everyone in {cityLabel ?? loc}</Text></View>
+                <ChevronRight size={18} color={soft} />
               </View>
             </Tap>
             {(types.data ?? []).map((t: ProviderType) => {
               const Icon = iconForType(t.slug);
               return (
                 <Tap key={t.id} onPress={() => startType({ id: t.id, label: t.label })}>
-                  <View className="flex-row items-center gap-3 border-[1.5px] border-[#0000001A] rounded-2xl p-4 mb-2.5 bg-white">
-                    <View className="w-[38px] h-[38px] rounded-[10px] bg-[#E2F0EC] items-center justify-center"><Icon size={18} color={TEAL} /></View>
-                    <View className="flex-1"><Text className="font-sans-bold text-[#1B1B19] text-base">{t.label}</Text>{t.description ? <Text className="font-sans text-[#6F6E67] text-[13px]">{t.description}</Text> : null}</View>
-                    <ChevronRight size={18} color={SOFT} />
+                  <View className="flex-row items-center gap-3 border-[1.5px] border-border dark:border-border-dark rounded-2xl p-4 mb-3 bg-surface shadow-sm dark:shadow-none dark:bg-surface-dark">
+                    <View className="w-[38px] h-[38px] rounded-[10px] bg-surface-accent dark:bg-surface-accent-dark items-center justify-center"><Icon size={18} color={teal} /></View>
+                    <View className="flex-1"><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">{t.label}</Text>{t.description ? <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm">{t.description}</Text> : null}</View>
+                    <ChevronRight size={18} color={soft} />
                   </View>
                 </Tap>
               );
@@ -395,17 +402,17 @@ export default function FindCareScreen() {
   /* ============================ OUTSIDE US ============================ */
   if (step === 'outside')
     return (
-      <SafeAreaView edges={['top']} className="flex-1 bg-[#F4F1E9]">
+      <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
         <Header back={() => setStep('manual')} />
-        <View className="px-[22px] pt-2">
-          <Text className="font-display text-[26px] text-[#1B1B19] mb-2.5">The directory is U.S.-only for now</Text>
-          <Text className="font-sans text-[#6F6E67] text-[15.5px] leading-6 mb-2">We currently list NPI-registered providers in the United States. We're working on more regions.</Text>
-          <View className="bg-[#FBE9E7] rounded-2xl p-4 my-2">
-            <View className="flex-row items-center gap-2 mb-1.5"><LifeBuoy size={18} color={RED} /><Text className="font-sans-bold text-[#1B1B19] text-[15px]">In crisis right now?</Text></View>
-            <Text className="font-sans text-[#6F6E67] text-sm leading-5">You can still reach help. If you're in immediate danger, contact your local emergency number.</Text>
-            <View className="mt-3"><Primary label="See crisis resources" color={RED} onPress={() => setSheet('crisis')} /></View>
+        <View className="px-5 pt-2">
+          <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark mb-2.5">The directory is U.S.-only for now</Text>
+          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-2">We currently list NPI-registered providers in the United States. We're working on more regions.</Text>
+          <View className="bg-[#FBE9E7] dark:bg-[#3D2523] rounded-2xl p-4 my-2">
+            <View className="flex-row items-center gap-2 mb-1.5"><LifeBuoy size={18} color={red} /><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">In crisis right now?</Text></View>
+            <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5">You can still reach help. If you're in immediate danger, contact your local emergency number.</Text>
+            <View className="mt-3"><Primary label="See crisis resources" color={red} onPress={() => setSheet('crisis')} /></View>
           </View>
-          <Tap onPress={() => setStep('manual')}><View className="py-3.5 items-center"><Text className="font-sans-bold text-[15px] text-[#16897A]">I'm actually in the U.S.</Text></View></Tap>
+          <Tap onPress={() => setStep('manual')}><View className="py-4 items-center"><Text className="font-sans-bold text-base text-primary dark:text-primary-dark">I'm actually in the U.S.</Text></View></Tap>
         </View>
       </SafeAreaView>
     );
@@ -423,29 +430,29 @@ export default function FindCareScreen() {
   const loading = search.isLoading;
 
   const ListHeader = (
-    <View className="bg-[#F4F1E9] pt-1 pb-2.5 border-b border-[#0000001A]">
+    <View className="bg-background dark:bg-background-dark pt-1 pb-2.5 border-b border-border dark:border-border-dark">
       <View className="flex-row gap-2 flex-wrap mb-2.5">
         <Chip label={locLabel} onPress={() => setStep('manual')} />
         {loc ? <Chip label={cityLabel ?? `All ${loc}`} onPress={() => setStep('city')} /> : null}
         <Chip label={typeSel ? typeSel.label : 'All types'} onPress={() => setStep('type')} />
       </View>
-      <View className="flex-row items-center gap-2.5 bg-white border border-[#0000001A] rounded-xl px-3.5 py-2.5">
-        <Search size={17} color={SOFT} /><TextInput placeholder="Search by name" placeholderTextColor={FAINT} value={query} onChangeText={setQuery} className="flex-1 font-sans text-base text-[#1B1B19]" />
-        {query ? <Tap onPress={() => setQuery('')}><X size={16} color={SOFT} /></Tap> : null}
+      <View className="flex-row items-center gap-2.5 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-xl px-3.5 py-2.5">
+        <Search size={17} color={soft} /><TextInput placeholder="Search by name" placeholderTextColor={faint} value={query} onChangeText={setQuery} className="flex-1 font-sans text-base text-text-primary dark:text-text-primary-dark" />
+        {query ? <Tap accessibilityLabel="Clear search" onPress={() => setQuery('')} className="p-2 -mr-2"><X size={16} color={soft} /></Tap> : null}
       </View>
       <View className="flex-row items-center justify-between mt-2.5">
         {loading ? (
-          <Text className="font-sans-bold text-[14.5px] text-[#1B1B19]">Searching…</Text>
+          <Text className="font-sans-bold text-sm text-text-primary dark:text-text-primary-dark">Searching…</Text>
         ) : (
-          <View className="flex-row items-center gap-1.5"><BadgeCheck size={15} color={TEAL} /><Text className="font-sans-bold text-[14.5px] text-[#1B1B19]">{countShown.toLocaleString()} verified</Text></View>
+          <View className="flex-row items-center gap-1.5"><BadgeCheck size={15} color={teal} /><Text className="font-sans-bold text-sm text-text-primary dark:text-text-primary-dark">{countShown.toLocaleString()} verified</Text></View>
         )}
-        <Tap onPress={() => setSheet('sort')}><View className="flex-row items-center gap-1.5 bg-white border border-[#0000001A] rounded-full px-3 py-1.5"><ArrowUpDown size={14} color={INK} /><Text className="font-sans-medium text-[13.5px] text-[#1B1B19]">Sort</Text></View></Tap>
+        <Tap onPress={() => setSheet('sort')}><View className="flex-row items-center gap-1.5 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-full px-3 py-1.5"><ArrowUpDown size={14} color={ink} /><Text className="font-sans-medium text-sm text-text-primary dark:text-text-primary-dark">Sort</Text></View></Tap>
       </View>
-      <Text className="font-sans text-[#A6A39A] text-[11.5px] leading-4 mt-2.5">NPI-registry listings. Information, not a recommendation. Order is not a ranking of quality.</Text>
+      <Text className="font-sans text-text-tertiary dark:text-text-tertiary-dark text-xs leading-4 mt-2.5">NPI-registry listings. Information, not a recommendation. Order is not a ranking of quality.</Text>
       {!loading && headerCount > 0 && headerCount <= 25 ? (
-        <View className="flex-row gap-2 items-start bg-[#FBF1DC] rounded-xl px-3 py-2.5 mt-3">
+        <View className="flex-row gap-2 items-start bg-surface-active dark:bg-surface-active-dark rounded-xl px-3 py-2.5 mt-3">
           <Info size={15} color="#A9791F" />
-          <Text className="font-sans text-[13px] text-[#1B1B19] leading-4 flex-1">Limited coverage in {cityLabel ?? loc} ({headerCount}). {city && city !== 'all' ? <Text onPress={() => setCity('all')} className="font-sans-bold text-[#A9791F] underline">Browse all of {loc}</Text> : "Try a nearby state if you're open to telehealth."}</Text>
+          <Text className="font-sans text-sm text-text-primary dark:text-text-primary-dark leading-4 flex-1">Limited coverage in {cityLabel ?? loc} ({headerCount}). {city && city !== 'all' ? <Text onPress={() => setCity('all')} className="font-sans-bold text-warning dark:text-warning-dark underline">Browse all of {loc}</Text> : "Try a nearby state if you're open to telehealth."}</Text>
         </View>
       ) : null}
     </View>
@@ -457,44 +464,44 @@ export default function FindCareScreen() {
     const place = [p.primary_city, p.primary_state].filter(Boolean).join(', ');
     const dist = p.distance_miles != null ? ` · ${p.distance_miles.toFixed(1)} mi` : '';
     return (
-      <Animated.View entering={enter()} className="flex-row bg-white border border-[#0000001A] rounded-2xl mb-3 overflow-hidden">
+      <Animated.View entering={enter()} className="flex-row bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-2xl mb-4 overflow-hidden shadow-sm dark:shadow-none">
         <Pressable className="flex-1" onPress={() => { recordRecentlyViewed({ id: p.id, name, photoUrl: p.photo_url }); setActiveId(p.id); setStep('profile'); }}>
           <View className="flex-row gap-3 p-[15px]">
             <View style={{ backgroundColor: colorFor(p.id) }} className="w-[46px] h-[46px] rounded-full items-center justify-center"><Text className="font-sans-bold text-white text-base">{initials(name)}</Text></View>
             <View className="flex-1">
-              <View className="flex-row items-center gap-1.5 flex-wrap"><Text className="font-sans-bold text-[#1B1B19] text-base">{name}</Text>{p.credentials_suffix ? <Text className="font-sans text-[#6F6E67] text-[13px]">{p.credentials_suffix}</Text> : null}</View>
-              <Text className="font-sans text-[#6F6E67] text-[13.5px] mt-0.5">{p.provider_type_label}</Text>
+              <View className="flex-row items-center gap-1.5 flex-wrap"><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">{name}</Text>{p.credentials_suffix ? <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm">{p.credentials_suffix}</Text> : null}</View>
+              <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm mt-0.5">{p.provider_type_label}</Text>
               <View className="flex-row items-center gap-2.5 mt-2 flex-wrap">
-                {place ? <View className="flex-row items-center gap-1"><MapPin size={12} color={SOFT} /><Text className="font-sans text-[12.5px] text-[#6F6E67]">{place}{dist}</Text></View> : null}
-                <View className="flex-row items-center gap-1 bg-[#E2F0EC] rounded-full px-2.5 py-0.5"><BadgeCheck size={12} color={TEAL_PRESS} /><Text className="font-sans-bold text-[11.5px] text-[#0F6E5F]">NPI-verified</Text></View>
+                {place ? <View className="flex-row items-center gap-1"><MapPin size={12} color={soft} /><Text className="font-sans text-xs text-text-secondary dark:text-text-secondary-dark">{place}{dist}</Text></View> : null}
+                <View className="flex-row items-center gap-1 bg-surface-accent dark:bg-surface-accent-dark rounded-full px-2.5 py-0.5"><BadgeCheck size={12} color={tealPress} /><Text className="font-sans-bold text-xs text-primary-hover dark:text-primary-hover-dark">NPI-verified</Text></View>
               </View>
             </View>
           </View>
         </Pressable>
-        <Tap onPress={() => toggleSave(p.id)}><View className="px-3.5 h-full justify-center border-l border-[#0000001A]"><Bookmark size={18} color={sv ? TEAL : FAINT} fill={sv ? TEAL : 'transparent'} /></View></Tap>
+        <Tap onPress={() => toggleSave(p.id)}><View className="px-3.5 h-full justify-center border-l border-border dark:border-border-dark"><Bookmark size={18} color={sv ? teal : faint} fill={sv ? teal : 'transparent'} /></View></Tap>
       </Animated.View>
     );
   };
 
   const Empty = (
     <View className="items-center px-6 pt-12">
-      <View className="w-14 h-14 rounded-full bg-[#ECE8DC] items-center justify-center mb-4"><Search size={24} color={SOFT} /></View>
-      <Text className="font-display text-xl text-[#1B1B19] mb-2 text-center">No providers match</Text>
-      <Text className="font-sans text-[#6F6E67] text-[14.5px] leading-5 text-center mb-5">{debounced ? `Nothing matches “${debounced}” in ${cityLabel ?? locLabel}.` : `No providers of this type are listed in ${cityLabel ?? locLabel}.`}</Text>
+      <View className="w-14 h-14 rounded-full bg-surface-active dark:bg-surface-active-dark items-center justify-center mb-4"><Search size={24} color={soft} /></View>
+      <Text className="font-display text-xl text-text-primary dark:text-text-primary-dark mb-2 text-center">No providers match</Text>
+      <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5 text-center mb-5">{debounced ? `Nothing matches “${debounced}” in ${cityLabel ?? locLabel}.` : `No providers of this type are listed in ${cityLabel ?? locLabel}.`}</Text>
       <View className="w-full gap-2.5">
         <Primary label={debounced ? 'Clear search' : 'Show all types'} onPress={() => (debounced ? setQuery('') : startType(null))} />
-        {loc ? <Tap onPress={() => setCity('all')}><View className="py-3.5 items-center"><Text className="font-sans-bold text-[15px] text-[#16897A]">Browse all of {loc}</Text></View></Tap> : null}
+        {loc ? <Tap onPress={() => setCity('all')}><View className="py-4 items-center"><Text className="font-sans-bold text-base text-primary dark:text-primary-dark">Browse all of {loc}</Text></View></Tap> : null}
       </View>
     </View>
   );
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-[#F4F1E9]">
+    <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
       <Header back={() => setStep('type')} />
       {/* Fixed header (chips + search + sort) — kept OUT of the list so the search
           box does not lose focus on every keystroke as the list re-renders. */}
-      <View className="px-[18px]">{ListHeader}</View>
-      <View className="px-[18px] flex-1">
+      <View className="px-5">{ListHeader}</View>
+      <View className="px-5 flex-1">
         {loading ? (
           <View className="pt-3">{[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} />)}</View>
         ) : (
@@ -509,18 +516,18 @@ export default function FindCareScreen() {
             ListHeaderComponent={<View className="h-3" />}
             ListFooterComponent={
               providers.length ? (
-                <Text className="font-sans text-center py-2 text-[#6F6E67] text-[12.5px]">{search.hasNextPage ? 'Loading more…' : `That's everyone — ${providers.length} loaded.`}</Text>
+                <Text className="font-sans text-center py-2 text-text-secondary dark:text-text-secondary-dark text-xs">{search.hasNextPage ? 'Loading more…' : `That's everyone — ${providers.length} loaded.`}</Text>
               ) : null
             }
-            contentContainerStyle={{ paddingBottom: 28 }}
+            contentContainerStyle={{ paddingBottom: Math.max(insets.bottom + 80, 28) }}
             showsVerticalScrollIndicator={false}
           />
         )}
       </View>
 
       {savedIds.length >= 2 && !loading ? (
-        <Animated.View entering={enter()} className="absolute left-[18px] right-[18px] bottom-[18px]">
-          <Tap onPress={() => setStep('compare')}><View className="bg-[#16897A] rounded-[13px] py-4 flex-row items-center justify-center gap-1.5"><Text className="font-sans-bold text-white text-[15px]">Compare {Math.min(savedIds.length, 3)} selected</Text><ChevronRight size={18} color="#fff" /></View></Tap>
+        <Animated.View entering={enter()} className="absolute left-[18px] right-[18px] bottom-[24px]">
+          <Tap onPress={() => setStep('compare')}><View className="bg-[#16897A] rounded-[13px] py-4 flex-row items-center justify-center gap-1.5"><Text className="font-sans-bold text-white text-base">Compare {Math.min(savedIds.length, 3)} selected</Text><ChevronRight size={18} color="#fff" /></View></Tap>
         </Animated.View>
       ) : null}
 
@@ -532,19 +539,27 @@ export default function FindCareScreen() {
 
 /* ----------------------------- profile step ----------------------------- */
 function Row({ icon: Icon, label, value }: { icon: typeof Hash; label: string; value: string }) {
+  const { colorScheme } = useColorScheme();
+  const soft = colorScheme === 'dark' ? colors.text.secondary.dark : colors.text.secondary.light;
   return (
-    <View className="flex-row items-center gap-3"><Icon size={17} color={SOFT} /><Text className="font-sans text-sm text-[#6F6E67] w-[104px]">{label}</Text><Text className="font-sans-medium text-[14.5px] text-[#1B1B19] flex-1">{value}</Text></View>
+    <View className="flex-row items-center gap-3"><Icon size={17} color={soft} /><Text className="font-sans text-sm text-text-secondary dark:text-text-secondary-dark w-[104px]">{label}</Text><Text className="font-sans-medium text-sm text-text-primary dark:text-text-primary-dark flex-1">{value}</Text></View>
   );
 }
 function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: string; onBack: () => void; saved: boolean; onToggleSave: () => void; fireHaptic: (e: 'affirm') => void }) {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const ink = isDark ? colors.text.primary.dark : colors.text.primary.light;
+  const soft = isDark ? colors.text.secondary.dark : colors.text.secondary.light;
+  const faint = isDark ? colors.text.tertiary.dark : colors.text.tertiary.light;
+  const teal = isDark ? colors.teal[400] : colors.teal[600];
   const { data, isLoading } = useQuery({ queryKey: ['providers', 'detail', id], queryFn: () => getProviderById(id), enabled: !!id });
   const Shell = ({ children }: { children: React.ReactNode }) => (
-    <SafeAreaView edges={['top']} className="flex-1 bg-[#F4F1E9]">
-      <View className="flex-row items-center px-5 pt-1 pb-2"><Tap onPress={onBack}><View className="p-1"><ChevronLeft size={24} color={INK} /></View></Tap></View>
+    <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
+      <View className="flex-row items-center px-5 pt-1 pb-2"><Tap onPress={onBack}><View className="p-2.5"><ChevronLeft size={24} color={ink} /></View></Tap></View>
       {children}
     </SafeAreaView>
   );
-  if (isLoading || !data) return <Shell><View className="flex-1 items-center justify-center"><Text className="font-sans text-[#6F6E67]">{isLoading ? 'Loading…' : 'This listing could not be loaded.'}</Text></View></Shell>;
+  if (isLoading || !data) return <Shell><View className="flex-1 items-center justify-center"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark">{isLoading ? 'Loading…' : 'This listing could not be loaded.'}</Text></View></Shell>;
 
   const p: ProviderWithDetails = data;
   const name = cleanDisplayName(p.display_name) || p.display_name;
@@ -554,14 +569,14 @@ function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: stri
 
   return (
     <Shell>
-      <ScrollView className="px-[22px]" showsVerticalScrollIndicator={false}>
+      <ScrollView className="px-5" showsVerticalScrollIndicator={false}>
         <View className="flex-row gap-3.5 items-center">
           <View style={{ backgroundColor: colorFor(p.id) }} className="w-[60px] h-[60px] rounded-full items-center justify-center"><Text className="font-sans-bold text-white text-xl">{initials(name)}</Text></View>
-          <View className="flex-1"><Text className="font-display text-[23px] text-[#1B1B19]">{name}</Text><Text className="font-sans text-[#6F6E67] text-sm mt-0.5">{[p.provider_type?.label, p.credentials_suffix].filter(Boolean).join(' · ')}</Text></View>
-          <Tap onPress={onToggleSave}><View className="pl-3"><Bookmark size={20} color={saved ? TEAL : FAINT} fill={saved ? TEAL : 'transparent'} /></View></Tap>
+          <View className="flex-1"><Text className="font-display text-2xl text-text-primary dark:text-text-primary-dark">{name}</Text><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm mt-0.5">{[p.provider_type?.label, p.credentials_suffix].filter(Boolean).join(' · ')}</Text></View>
+          <Tap onPress={onToggleSave}><View className="pl-3"><Bookmark size={20} color={saved ? teal : faint} fill={saved ? teal : 'transparent'} /></View></Tap>
         </View>
         {verified && (badge === 'verified') ? (
-          <View className="flex-row items-center gap-2 bg-[#E2F0EC] rounded-[10px] px-3 py-2.5 mt-3.5"><BadgeCheck size={16} color={TEAL} /><Text className="font-sans text-[13.5px] text-[#1B1B19]">NPI-verified · last confirmed {verified}</Text></View>
+          <View className="flex-row items-center gap-2 bg-surface-accent dark:bg-surface-accent-dark rounded-[10px] px-3 py-2.5 mt-3.5"><BadgeCheck size={16} color={teal} /><Text className="font-sans text-sm text-text-primary dark:text-text-primary-dark">NPI-verified · last confirmed {verified}</Text></View>
         ) : null}
         <View className="mt-4 gap-3">
           {p.npi_number ? <Row icon={Hash} label="NPI number" value={p.npi_number} /> : null}
@@ -570,18 +585,18 @@ function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: stri
           {locrow?.city ? <Row icon={Building2} label="Practice city" value={[locrow.city, locrow.state_province].filter(Boolean).join(', ')} /> : null}
           {p.phone ? <Row icon={Phone} label="Phone" value={p.phone} /> : null}
         </View>
-        {p.bio ? <View className="mt-4"><Text className="font-sans text-[#6F6E67] text-sm leading-5">{p.bio}</Text></View> : null}
-        <View className="bg-[#ECE8DC] rounded-2xl p-4 mt-4 mb-2"><Text className="font-sans text-[#6F6E67] text-[13px] leading-5">This listing is drawn from the NPI registry. It's information, not a recommendation or endorsement by Psychage. Confirm license, availability, and fit directly with the provider.</Text></View>
+        {p.bio ? <View className="mt-4"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5">{p.bio}</Text></View> : null}
+        <View className="bg-surface-active dark:bg-surface-active-dark rounded-2xl p-4 mt-4 mb-2"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5">This listing is drawn from the NPI registry. It's information, not a recommendation or endorsement by Psychage. Confirm license, availability, and fit directly with the provider.</Text></View>
         <View className="h-24" />
       </ScrollView>
-      <View className="px-[18px] py-3 border-t border-[#0000001A] gap-2">
+      <View className="px-5 py-3 border-t border-border dark:border-border-dark gap-2">
         {p.phone ? (
           <Tap onPress={() => { fireHaptic('affirm'); dial(telUrl(p.phone as string)); }}>
-            <View style={{ backgroundColor: TEAL }} className="rounded-[13px] py-4 flex-row items-center justify-center gap-2"><Phone size={17} color="#fff" /><Text className="font-sans-bold text-white text-base">Call {p.phone}</Text></View>
+            <View style={{ backgroundColor: teal }} className="rounded-[13px] py-4 flex-row items-center justify-center gap-2"><Phone size={17} color="#fff" /><Text className="font-sans-bold text-white text-base">Call {p.phone}</Text></View>
           </Tap>
         ) : null}
         <Tap onPress={() => router.push({ pathname: '/add-provider', params: { name, ...(p.phone || p.email || p.website_url ? { contact: (p.phone ?? p.email ?? p.website_url) as string } : {}) } })}>
-          <View className="rounded-[13px] py-3.5 items-center border border-[#0000001A]"><Text className="font-sans-bold text-[15px] text-[#1B1B19]">Use in my therapist record</Text></View>
+          <View className="rounded-[13px] py-4 items-center border border-border dark:border-border-dark"><Text className="font-sans-bold text-base text-text-primary dark:text-text-primary-dark">Use in my therapist record</Text></View>
         </Tap>
       </View>
     </Shell>
@@ -590,32 +605,34 @@ function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: stri
 
 /* ----------------------------- compare step ----------------------------- */
 function CompareStep({ ids, onBack, onRemove }: { ids: string[]; onBack: () => void; onRemove: (id: string) => void }) {
+  const { colorScheme } = useColorScheme();
+  const ink = colorScheme === 'dark' ? colors.text.primary.dark : colors.text.primary.light;
   const { data } = useQuery({
     queryKey: ['providers', 'compare', ids],
     queryFn: async () => (await Promise.all(ids.map((id) => getProviderById(id)))).filter((r): r is ProviderWithDetails => r != null),
     enabled: ids.length > 0,
   });
   const C = ({ l, v }: { l: string; v: string }) => (
-    <View className="py-2 border-t border-[#0000001A]"><Text className="font-sans-bold text-[11px] text-[#A6A39A] uppercase tracking-wide">{l}</Text><Text className="font-sans text-[13.5px] text-[#1B1B19] mt-0.5">{v}</Text></View>
+    <View className="py-2 border-t border-border dark:border-border-dark"><Text className="font-sans-bold text-[11px] text-text-tertiary dark:text-text-tertiary-dark uppercase tracking-wide">{l}</Text><Text className="font-sans text-sm text-text-primary dark:text-text-primary-dark mt-0.5">{v}</Text></View>
   );
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-[#F4F1E9]">
-      <View className="flex-row items-center justify-between px-5 pt-1 pb-2"><Tap onPress={onBack}><View className="p-1"><ChevronLeft size={24} color={INK} /></View></Tap><Text className="font-sans-bold text-base text-[#1B1B19]">Compare</Text><View className="w-8" /></View>
+    <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
+      <View className="flex-row items-center justify-between px-5 pt-1 pb-2"><Tap onPress={onBack}><View className="p-2.5"><ChevronLeft size={24} color={ink} /></View></Tap><Text className="font-sans-bold text-base text-text-primary dark:text-text-primary-dark">Compare</Text><View className="w-8" /></View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 12 }}>
         {(data ?? []).map((p) => {
           const name = cleanDisplayName(p.display_name) || p.display_name;
           const locrow = p.locations.find((l) => l.is_primary) ?? p.locations[0] ?? null;
           return (
-            <View key={p.id} className="w-[180px] bg-white border border-[#0000001A] rounded-2xl p-3.5">
+            <View key={p.id} className="w-[180px] bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-2xl p-3.5">
               <View style={{ backgroundColor: colorFor(p.id) }} className="w-[46px] h-[46px] rounded-full items-center justify-center self-center mb-2"><Text className="font-sans-bold text-white">{initials(name)}</Text></View>
-              <Text className="font-sans-bold text-[#1B1B19] text-[15px] text-center">{name}</Text>
-              <Text className="font-sans text-[#6F6E67] text-[12.5px] text-center mb-3">{p.credentials_suffix ?? ' '}</Text>
+              <Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base text-center">{name}</Text>
+              <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-xs text-center mb-3">{p.credentials_suffix ?? ' '}</Text>
               <C l="Type" v={p.provider_type?.label ?? '—'} />
               <C l="Location" v={locrow?.city ? [locrow.city, locrow.state_province].filter(Boolean).join(', ') : '—'} />
               <C l="NPI" v={p.npi_number ?? '—'} />
               <C l="License" v={[p.license_number, p.license_state].filter(Boolean).join(' · ') || '—'} />
               <C l="Verified" v={formatVerified(p.verified_at) ?? '—'} />
-              <Tap onPress={() => onRemove(p.id)}><View className="py-2 mt-1.5 items-center"><Text className="font-sans-bold text-[#16897A] text-[13px]">Remove</Text></View></Tap>
+              <Tap onPress={() => onRemove(p.id)}><View className="py-2 mt-1.5 items-center"><Text className="font-sans-bold text-primary dark:text-primary-dark text-sm">Remove</Text></View></Tap>
             </View>
           );
         })}
@@ -626,17 +643,20 @@ function CompareStep({ ids, onBack, onRemove }: { ids: string[]; onBack: () => v
 
 /* ----------------------------- sheets ----------------------------- */
 function SortSheet({ visible, value, geo, onSelect, onClose }: { visible: boolean; value: string; geo: boolean; onSelect: (v: 'relevance' | 'name' | 'distance') => void; onClose: () => void }) {
+  const { colorScheme } = useColorScheme();
+  const ink = colorScheme === 'dark' ? colors.text.primary.dark : colors.text.primary.light;
+  const teal = colorScheme === 'dark' ? colors.teal[400] : colors.teal[600];
   const opts: [string, string][] = [['relevance', 'Relevance'], ...(geo ? ([['distance', 'Nearest']] as [string, string][]) : []), ['name', 'Name A–Z']];
   return (
     <Modal visible={visible} transparent animationType="slide" statusBarTranslucent onRequestClose={onClose}>
       <Pressable className="flex-1 bg-black/35 justify-end" onPress={onClose}>
-        <Pressable onPress={() => {}} className="bg-[#F4F1E9] rounded-t-[20px]">
-          <View className="flex-row items-center justify-between px-[18px] pt-4 pb-2.5 border-b border-[#0000001A]"><View className="w-14" /><Text className="font-sans-bold text-[#1B1B19] text-base">Sort</Text><Tap onPress={onClose}><X size={20} color={INK} /></Tap></View>
-          <View className="px-[22px] pb-6 pt-1">
-            <Text className="font-sans text-[#6F6E67] text-[13px] leading-5 mb-1">Sorting changes order only. It is not a ranking of quality.</Text>
+        <Pressable onPress={() => {}} className="bg-background dark:bg-background-dark rounded-t-[20px]">
+          <View className="flex-row items-center justify-between px-5 pt-4 pb-2.5 border-b border-border dark:border-border-dark"><View className="w-14" /><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">Sort</Text><Tap onPress={onClose}><X size={20} color={ink} /></Tap></View>
+          <View className="px-5 pb-6 pt-1">
+            <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5 mb-1">Sorting changes order only. It is not a ranking of quality.</Text>
             {opts.map(([v, l]) => (
               <Tap key={v} onPress={() => onSelect(v as 'relevance' | 'name' | 'distance')}>
-                <View className="flex-row items-center justify-between py-4 border-b border-[#0000001A]"><Text className="font-sans text-[15px] text-[#1B1B19]">{l}</Text>{value === v ? <Check size={18} color={TEAL} /> : null}</View>
+                <View className="flex-row items-center justify-between py-4 border-b border-border dark:border-border-dark"><Text className="font-sans text-base text-text-primary dark:text-text-primary-dark">{l}</Text>{value === v ? <Check size={18} color={teal} /> : null}</View>
               </Tap>
             ))}
           </View>
@@ -646,6 +666,9 @@ function SortSheet({ visible, value, geo, onSelect, onClose }: { visible: boolea
   );
 }
 function CrisisSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { colorScheme } = useColorScheme();
+  const ink = colorScheme === 'dark' ? colors.text.primary.dark : colors.text.primary.light;
+  const red = colorScheme === 'dark' ? colors.crisis.dark : colors.crisis.light;
   const rows = [
     { t: '988 Suicide & Crisis Lifeline', s: 'Call or text 988 (U.S.)', I: Phone },
     { t: 'Crisis Text Line', s: 'Text HOME to 741741', I: MessageSquare },
@@ -654,14 +677,14 @@ function CrisisSheet({ visible, onClose }: { visible: boolean; onClose: () => vo
   return (
     <Modal visible={visible} transparent animationType="slide" statusBarTranslucent onRequestClose={onClose}>
       <Pressable className="flex-1 bg-black/35 justify-end" onPress={onClose}>
-        <Pressable onPress={() => {}} className="bg-[#F4F1E9] rounded-t-[20px]">
-          <View className="flex-row items-center justify-between px-[18px] pt-4 pb-2.5 border-b border-[#0000001A]"><View className="w-14" /><Text className="font-sans-bold text-[#1B1B19] text-base">Get help now</Text><Tap onPress={onClose}><X size={20} color={INK} /></Tap></View>
-          <View className="px-[22px] pb-6 pt-1">
-            <Text className="font-sans text-[#6F6E67] text-sm leading-5 mb-1">If you're in immediate danger, call your local emergency number now.</Text>
+        <Pressable onPress={() => {}} className="bg-background dark:bg-background-dark rounded-t-[20px]">
+          <View className="flex-row items-center justify-between px-5 pt-4 pb-2.5 border-b border-border dark:border-border-dark"><View className="w-14" /><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">Get help now</Text><Tap onPress={onClose}><X size={20} color={ink} /></Tap></View>
+          <View className="px-5 pb-6 pt-1">
+            <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5 mb-1">If you're in immediate danger, call your local emergency number now.</Text>
             {rows.map((r) => (
-              <View key={r.t} className="flex-row items-center gap-3.5 py-3.5 border-b border-[#0000001A]">
-                <View className="w-10 h-10 rounded-[10px] bg-[#FBE9E7] items-center justify-center"><r.I size={18} color={RED} /></View>
-                <View><Text className="font-sans-bold text-[#1B1B19] text-[15px]">{r.t}</Text><Text className="font-sans text-[#6F6E67] text-[13px]">{r.s}</Text></View>
+              <View key={r.t} className="flex-row items-center gap-3.5 py-4 border-b border-border dark:border-border-dark">
+                <View className="w-10 h-10 rounded-[10px] bg-[#FBE9E7] dark:bg-[#3D2523] items-center justify-center"><r.I size={18} color={red} /></View>
+                <View><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">{r.t}</Text><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm">{r.s}</Text></View>
               </View>
             ))}
           </View>

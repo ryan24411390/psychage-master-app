@@ -14,6 +14,12 @@ import { createSupabaseAuthService } from './supabase-auth-service';
 interface AuthContextValue {
   readonly session: AuthSession | null;
   readonly service: AuthService;
+  /**
+   * True once the initial getSession() has resolved (boot hydration complete). The
+   * splash screen holds until this flips so the app never paints signed-out then
+   * snaps to signed-in. Defaults true with no provider mounted (nothing to hydrate).
+   */
+  readonly hydrated: boolean;
   setSession(session: AuthSession | null): void;
 }
 
@@ -28,6 +34,7 @@ const defaultService: AuthService = isSupabaseConfigured()
 const AuthContext = createContext<AuthContextValue>({
   session: null,
   service: defaultService,
+  hydrated: true,
   setSession: () => {},
 });
 
@@ -39,6 +46,7 @@ export function AuthProvider({
   service?: AuthService;
 }) {
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   // Boot hydration + reactivity (web parity: AuthContext getSession + onAuthStateChange).
   // Without this the context boots null forever — the token persists in secure-store,
@@ -48,7 +56,9 @@ export function AuthProvider({
   useEffect(() => {
     let active = true;
     void service.getSession().then((restored) => {
-      if (active) setSession(restored);
+      if (!active) return;
+      setSession(restored);
+      setHydrated(true);
     });
     const unsubscribe = service.onAuthChange((next) => {
       if (active) setSession(next);
@@ -60,8 +70,8 @@ export function AuthProvider({
   }, [service]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ session, service, setSession }),
-    [session, service],
+    () => ({ session, service, hydrated, setSession }),
+    [session, service, hydrated],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

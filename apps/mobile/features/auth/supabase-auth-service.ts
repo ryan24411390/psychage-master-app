@@ -20,12 +20,25 @@
 import type { Session, SupabaseClient } from '@supabase/supabase-js';
 
 import { getOrCreateDeviceId } from '@/lib/device-id';
+import { EMAIL_VERIFY_REDIRECT, PASSWORD_RESET_REDIRECT } from '@/lib/auth/redirects';
 import { getSupabaseAuthClient } from '@/lib/supabase/client';
 import { isNetworkError } from '@/lib/supabase/is-network-error';
 
-import type { AuthResult, AuthService, AuthSession, VerificationStatus } from './auth-service';
+import type {
+  AuthResult,
+  AuthService,
+  AuthSession,
+  SocialProvider,
+  VerificationStatus,
+} from './auth-service';
 
 type AuthEventType = 'sign_up' | 'sign_in' | 'sign_out';
+
+/** Native id-token acquisition seam — see lib/auth/social.ts. Injected in tests. */
+type ProviderCredential =
+  | { readonly cancelled: true }
+  | { readonly provider: SocialProvider; readonly idToken: string; readonly nonce: string };
+type GetProviderCredential = (provider: SocialProvider) => Promise<ProviderCredential>;
 
 // Map a supabase-js Session to the lightweight AuthSession the UI reads. The same
 // {email, verified} shape signUp/signIn already return — so boot-hydration and the
@@ -41,11 +54,20 @@ export interface SupabaseAuthServiceDeps {
   readonly client?: SupabaseClient;
   /** Defaults to the stable per-install id; injected in tests. */
   readonly deviceId?: string;
+  /**
+   * Defaults to a LAZY import of lib/auth/social (keeps its native modules out of
+   * the Vitest graph — only loaded the first time a social sign-in actually runs).
+   * Injected with a fake in tests.
+   */
+  readonly getProviderCredential?: GetProviderCredential;
 }
 
 export function createSupabaseAuthService(deps: SupabaseAuthServiceDeps = {}): AuthService {
   const client = deps.client ?? getSupabaseAuthClient();
   const deviceId = deps.deviceId ?? getOrCreateDeviceId();
+  const getProviderCredential: GetProviderCredential =
+    deps.getProviderCredential ??
+    ((provider) => import('@/lib/auth/social').then((m) => m.getProviderCredential(provider)));
 
   // Best-effort audit. Never throws into the auth UX; a failed audit write must
   // not block sign-in. Requires an authenticated session (auth.uid()).
@@ -62,13 +84,18 @@ export function createSupabaseAuthService(deps: SupabaseAuthServiceDeps = {}): A
   }
 
   return {
-    async signUp(email, password) {
+    async signUp(email, password, fullName) {
       try {
         const { data, error } = await client.auth.signUp({
           email,
           password,
-          // platform claim source — lifted to a top-level JWT claim by the hook.
-          options: { data: { platform: 'mobile' } },
+          options: {
+            // platform claim source — lifted to a top-level JWT claim by the hook.
+            // full_name (optional) is a display alias only (rules/auth.md §9).
+            data: { platform: 'mobile', ...(fullName ? { full_name: fullName.trim() } : {}) },
+            // Deep-link the confirmation email back into the app (WS-B).
+            emailRedirectTo: EMAIL_VERIFY_REDIRECT,
+          },
         });
         if (error) {
           // Generic only: do NOT distinguish "already registered" (existence leak).
@@ -78,6 +105,66 @@ export function createSupabaseAuthService(deps: SupabaseAuthServiceDeps = {}): A
         return {
           ok: true,
           session: { email, verified: Boolean(data.user?.email_confirmed_at) },
+        };
+      } catch (error) {
+        return { ok: false, error: isNetworkError(error) ? 'offline' : 'unknown' };
+      }
+    },
+
+    async signInWithProvider(provider) {
+      try {
+        const credential = await getProviderCredential(provider);
+        // User dismissed the OS sheet — not an error, no toast.
+        if ('cancelled' in credential) return { ok: false, error: 'cancelled' };
+        const { data, error } = await client.auth.signInWithIdToken({
+          provider,
+          token: credential.idToken,
+          nonce: credential.nonce,
+        });
+        if (error) {
+          return { ok: false, error: isNetworkError(error) ? 'offline' : 'invalid-credentials' };
+        }
+        const session = toAuthSession(data.session);
+        if (!session) return { ok: false, error: 'unknown' };
+        await recordEvent('sign_in', true);
+        return { ok: true, session };
+      } catch (error) {
+        return { ok: false, error: isNetworkError(error) ? 'offline' : 'unknown' };
+      }
+    },
+
+    async requestPasswordReset(email) {
+      // ANTI-ENUMERATION: resolve ok regardless of whether the email exists. Only a
+      // network failure returns ok:false (so the UI can be honestly "you're offline").
+      try {
+        const { error } = await client.auth.resetPasswordForEmail(email, {
+          redirectTo: PASSWORD_RESET_REDIRECT,
+        });
+        if (error && isNetworkError(error)) return { ok: false };
+        return { ok: true };
+      } catch (error) {
+        return { ok: !isNetworkError(error) };
+      }
+    },
+
+    async updatePassword(newPassword) {
+      // Operates on the PASSWORD_RECOVERY session established by the deep-link.
+      try {
+        const { data, error } = await client.auth.updateUser({ password: newPassword });
+        if (error) {
+          if (isNetworkError(error)) return { ok: false, error: 'offline' };
+          // The server rejecting on length/strength is not an existence leak.
+          if (/password/i.test(error.message) && /(weak|short|least|character|6)/i.test(error.message)) {
+            return { ok: false, error: 'weak-password' };
+          }
+          return { ok: false, error: 'unknown' };
+        }
+        return {
+          ok: true,
+          session: {
+            email: data.user?.email ?? '',
+            verified: Boolean(data.user?.email_confirmed_at),
+          },
         };
       } catch (error) {
         return { ok: false, error: isNetworkError(error) ? 'offline' : 'unknown' };

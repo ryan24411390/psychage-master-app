@@ -16,7 +16,7 @@ import { Text } from '@/components/ui/Text';
 export function GlobalHeader() {
   return (
     <SafeAreaView edges={['top']} className="bg-background dark:bg-background-dark">
-      <View className="flex-row items-center justify-between border-b border-border/20 px-4 py-3 dark:border-border-dark/20">
+      <View className="flex-row items-center justify-between border-b border-border/20 px-5 py-3 dark:border-border-dark/20">
         <Text variant="heading" accessibilityRole="header">
           Psychage
         </Text>

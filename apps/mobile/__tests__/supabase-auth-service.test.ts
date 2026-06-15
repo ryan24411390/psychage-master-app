@@ -15,6 +15,9 @@ function makeFakeClient(overrides: {
   signOut?: unknown;
   getSession?: unknown;
   resend?: unknown;
+  resetPasswordForEmail?: unknown;
+  updateUser?: unknown;
+  signInWithIdToken?: unknown;
 } = {}) {
   // Captured onAuthStateChange callbacks + an unsubscribe spy, so tests can drive
   // the listener and assert teardown.
@@ -32,6 +35,20 @@ function makeFakeClient(overrides: {
       async () => overrides.getSession ?? { data: { session: null }, error: null },
     ),
     resend: vi.fn(async (_args: unknown) => overrides.resend ?? { error: null }),
+    resetPasswordForEmail: vi.fn(
+      async (_email: string, _opts?: unknown) => overrides.resetPasswordForEmail ?? { error: null },
+    ),
+    updateUser: vi.fn(
+      async (_args: unknown) =>
+        overrides.updateUser ?? { data: { user: { email: 'a@b.co', email_confirmed_at: '2026-01-01T00:00:00Z' } }, error: null },
+    ),
+    signInWithIdToken: vi.fn(
+      async (_args: unknown) =>
+        overrides.signInWithIdToken ?? {
+          data: { session: { user: { email: 'a@b.co', email_confirmed_at: '2026-01-01T00:00:00Z' } } },
+          error: null,
+        },
+    ),
     onAuthStateChange: vi.fn((cb: (event: string, session: unknown) => void) => {
       authStateListeners.push(cb);
       return { data: { subscription: { unsubscribe } } };
@@ -183,6 +200,104 @@ describe('supabase auth service — onAuthChange (runtime state updater)', () =>
 
     stop();
     expect(unsubscribe).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('supabase auth service — signUp full name (Amendment 2026-06-16)', () => {
+  it('carries full_name in options.data alongside platform', async () => {
+    const { client, calls } = makeFakeClient();
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    await svc.signUp('a@b.co', 'password123', 'John Doe');
+
+    const arg = calls.signUp.mock.calls[0]?.[0] as {
+      options?: { data?: { platform?: string; full_name?: string }; emailRedirectTo?: string };
+    };
+    expect(arg.options?.data?.platform).toBe('mobile');
+    expect(arg.options?.data?.full_name).toBe('John Doe');
+    expect(arg.options?.emailRedirectTo).toContain('psychage');
+  });
+});
+
+describe('supabase auth service — requestPasswordReset (anti-enumeration)', () => {
+  it('resolves ok even when the address is unknown (no existence leak)', async () => {
+    const { client } = makeFakeClient({
+      // A real "user not found" still must look like success.
+      resetPasswordForEmail: { error: { message: 'User not found' } },
+    });
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    expect(await svc.requestPasswordReset('a@b.co')).toEqual({ ok: true });
+  });
+
+  it('returns ok:false only on a network failure', async () => {
+    const { client } = makeFakeClient({
+      resetPasswordForEmail: { error: { name: 'AuthRetryableFetchError', message: 'fetch failed' } },
+    });
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    expect(await svc.requestPasswordReset('a@b.co')).toEqual({ ok: false });
+  });
+});
+
+describe('supabase auth service — updatePassword (recovery session)', () => {
+  it('returns ok with the mapped session on success', async () => {
+    const { client } = makeFakeClient();
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    const result = await svc.updatePassword('a-new-strong-password');
+
+    expect(result.ok).toBe(true);
+    expect(result.session).toEqual({ email: 'a@b.co', verified: true });
+  });
+
+  it('maps a length/strength rejection to weak-password (not an existence leak)', async () => {
+    const { client } = makeFakeClient({
+      updateUser: { data: { user: null }, error: { message: 'Password should be at least 6 characters' } },
+    });
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    const result = await svc.updatePassword('short');
+
+    expect(result.error).toBe('weak-password');
+  });
+});
+
+describe('supabase auth service — signInWithProvider (social)', () => {
+  it('exchanges the id-token and records the audit event on success', async () => {
+    const { client, rpc } = makeFakeClient();
+    const svc = createSupabaseAuthService({
+      client,
+      deviceId: 'dev-1',
+      getProviderCredential: async () => ({ provider: 'apple', idToken: 'tok', nonce: 'n' }),
+    });
+
+    const result = await svc.signInWithProvider('apple');
+
+    expect(client.auth.signInWithIdToken).toHaveBeenCalledWith({
+      provider: 'apple',
+      token: 'tok',
+      nonce: 'n',
+    });
+    expect(result.ok).toBe(true);
+    expect(rpc).toHaveBeenCalledWith(
+      'record_auth_event',
+      expect.objectContaining({ p_event_type: 'sign_in', p_success: true }),
+    );
+  });
+
+  it('returns cancelled (no error toast) when the user dismisses the sheet', async () => {
+    const { client } = makeFakeClient();
+    const svc = createSupabaseAuthService({
+      client,
+      deviceId: 'dev-1',
+      getProviderCredential: async () => ({ cancelled: true }),
+    });
+
+    const result = await svc.signInWithProvider('google');
+
+    expect(result).toEqual({ ok: false, error: 'cancelled' });
+    expect(client.auth.signInWithIdToken).not.toHaveBeenCalled();
   });
 });
 

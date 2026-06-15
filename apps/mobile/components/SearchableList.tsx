@@ -1,10 +1,20 @@
 import { FlashList } from '@shopify/flash-list';
 import { Check, Search } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useColorScheme } from 'nativewind';
+import { useMemo, useState, useEffect } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, {
+  FadeInDown,
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
+import { useReducedMotion } from '@/lib/motion';
 
 // C-SEARCH-LIST (Wave A2, wave-owned). A searchable, filter-as-you-type list of
 // name-only rows. The focus accent is PARAMETERIZED: the crisis region picker (S12)
@@ -44,6 +54,9 @@ export function SearchableList<T>({
 }: SearchableListProps<T>) {
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
+  const { colorScheme } = useColorScheme();
+  const reduced = useReducedMotion();
+  const insets = useSafeAreaInsets();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -51,11 +64,29 @@ export function SearchableList<T>({
     return items.filter((item) => getLabel(item).toLowerCase().includes(q));
   }, [items, query, getLabel]);
 
+  // Focus color transition
+  const focusAnim = useSharedValue(0);
+  const defaultBorder = colorScheme === 'dark' ? '#3f3f46' : '#e7e5e4';
+
+  useEffect(() => {
+    focusAnim.value = withTiming(focused ? 1 : 0, { duration: 150 });
+  }, [focused, focusAnim]);
+
+  const animatedContainerStyle = useAnimatedStyle(() => {
+    return {
+      borderColor: interpolateColor(
+        focusAnim.value,
+        [0, 1],
+        [defaultBorder, accentColor]
+      ),
+    };
+  });
+
   return (
     <View className="flex-1">
-      <View
-        className="mb-3 flex-row items-center gap-2 rounded-lg border border-border bg-surface px-3 dark:border-border-dark dark:bg-surface-dark"
-        style={focused ? { borderColor: accentColor } : undefined}
+      <Animated.View
+        className="mb-3 flex-row items-center gap-2 rounded-lg border bg-surface px-3 dark:bg-surface-dark"
+        style={animatedContainerStyle}
       >
         <Search size={18} color={colors.charcoal[400]} strokeWidth={1.75} />
         <TextInput
@@ -70,30 +101,38 @@ export function SearchableList<T>({
           autoCapitalize="none"
           className="min-h-[44px] flex-1 font-sans text-base text-text-primary dark:text-text-primary-dark"
         />
-      </View>
+      </Animated.View>
 
       <FlashList
         data={filtered}
         keyExtractor={getKey}
         keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         ListEmptyComponent={
           <Text variant="body" className="px-1 py-3 text-text-secondary dark:text-text-secondary-dark">
             {noMatchLabel}
           </Text>
         }
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const selected = selectedKey !== undefined && getKey(item) === selectedKey;
+          const entering =
+            !reduced && index < 8
+              ? FadeInDown.delay(index * 35).duration(200)
+              : undefined;
+
           return (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-              onPress={() => onSelect(item)}
-              className="min-h-[44px] flex-row items-center justify-between border-b border-border py-2 dark:border-border-dark"
-              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-            >
-              <Text variant={selected ? 'bodyMedium' : 'body'}>{getLabel(item)}</Text>
-              {selected ? <Check size={18} color={accentColor} strokeWidth={2} /> : null}
-            </Pressable>
+            <Animated.View entering={entering}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                onPress={() => onSelect(item)}
+                className="min-h-[44px] flex-row items-center justify-between border-b border-border py-2 dark:border-border-dark"
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+              >
+                <Text variant={selected ? 'bodyMedium' : 'body'}>{getLabel(item)}</Text>
+                {selected ? <Check size={18} color={accentColor} strokeWidth={2} /> : null}
+              </Pressable>
+            </Animated.View>
           );
         }}
       />

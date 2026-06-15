@@ -1,105 +1,131 @@
 import type { ElementType } from 'react';
-import { Pressable, View, StyleSheet } from 'react-native';
-import Svg, { Defs, LinearGradient as SvgLinearGradient, Rect, Stop } from 'react-native-svg';
-
+import { View, Pressable } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { Text } from '@/components/ui/Text';
 
+export type CompassTileVariant = 'action' | 'feature' | 'list';
 export type CompassTileTint = 'now' | 'patterns' | 'understand';
-export type CompassTileVariant = 'hero' | 'standard';
 
 type CompassTileProps = {
   title: string;
   subLabel: string;
   onPress: () => void;
-  tint: CompassTileTint;
+  tint?: CompassTileTint;
   icon: ElementType;
   variant?: CompassTileVariant;
-  index: number;
-  total: number;
   testID?: string;
 };
 
-function hexToRgb(hex: string) {
-  const h = hex.replace('#', '');
-  return {
-    r: parseInt(h.substring(0, 2), 16),
-    g: parseInt(h.substring(2, 4), 16),
-    b: parseInt(h.substring(4, 6), 16),
-  };
-}
-
-function rgbToHex(r: number, g: number, b: number) {
-  return '#' + [r, g, b].map(x => Math.round(x).toString(16).padStart(2, '0')).join('');
-}
-
-function interpolateColor(color1: string, color2: string, factor: number) {
-  const c1 = hexToRgb(color1);
-  const c2 = hexToRgb(color2);
-  const r = c1.r + factor * (c2.r - c1.r);
-  const g = c1.g + factor * (c2.g - c1.g);
-  const b = c1.b + factor * (c2.b - c1.b);
-  return rgbToHex(r, g, b);
-}
-
-const ANCHORS = {
-  now: { light: '#EAF4F1', deep: '#D6EAE5' },
-  patterns: { light: '#F0EDF6', deep: '#E2DCEF' },
-  understand: { light: '#EAEFF4', deep: '#D8E2EC' },
+// Tints mapping for soft backgrounds or icon wrappers.
+// These use standard Psychage tailwind classes and hexes.
+const TINTS = {
+  now: { bg: 'bg-[#F0FDFA] dark:bg-[#0D5C54]', iconColor: '#1A9B8C' }, // teal (brand)
+  patterns: { bg: 'bg-[#F5F3FF] dark:bg-[#4C1D95]', iconColor: '#7C3AED' }, // violet
+  understand: { bg: 'bg-[#F0F9FF] dark:bg-[#0C4A6E]', iconColor: '#0284C7' }, // sky blue
 };
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function CompassTile({
   title,
   subLabel,
   onPress,
-  tint,
+  tint = 'now',
   icon: Icon,
-  variant = 'standard',
-  index,
-  total,
+  variant = 'list',
   testID,
 }: CompassTileProps) {
-  const isHero = variant === 'hero';
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
 
-  const { light, deep } = ANCHORS[tint];
-  const topColor = interpolateColor(light, deep, index / total);
-  const bottomColor = interpolateColor(light, deep, (index + 1) / total);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
 
+  const handlePressIn = () => {
+    scale.value = withSpring(0.96, { damping: 20, stiffness: 300 });
+    opacity.value = withTiming(0.8, { duration: 100 });
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 20, stiffness: 300 });
+    opacity.value = withTiming(1, { duration: 150 });
+  };
+
+  const colors = TINTS[tint];
+
+  if (variant === 'action') {
+    return (
+      <AnimatedPressable
+        accessibilityRole="button"
+        accessibilityLabel={title}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        testID={testID}
+        className="flex-1 rounded-2xl bg-surface dark:bg-surface-dark p-4 shadow-sm border border-border-hairline"
+        style={animatedStyle}
+      >
+        <View className={`h-10 w-10 items-center justify-center rounded-full mb-3 ${colors.bg}`}>
+          <Icon size={20} color={colors.iconColor} />
+        </View>
+        <Text variant="bodyBold" className="mb-1" numberOfLines={2}>{title}</Text>
+        <Text variant="caption" numberOfLines={1}>{subLabel}</Text>
+      </AnimatedPressable>
+    );
+  }
+
+  if (variant === 'feature') {
+    return (
+      <AnimatedPressable
+        accessibilityRole="button"
+        accessibilityLabel={title}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        testID={testID}
+        className="w-full overflow-hidden rounded-3xl bg-surface dark:bg-surface-dark shadow-sm border border-border-hairline mb-4"
+        style={animatedStyle}
+      >
+        <View className={`absolute -right-6 -top-6 p-6 opacity-5 dark:opacity-10`} pointerEvents="none">
+           <Icon size={140} color={colors.iconColor} />
+        </View>
+        <View className="p-5">
+          <View className={`h-12 w-12 items-center justify-center rounded-2xl mb-4 ${colors.bg}`}>
+            <Icon size={24} color={colors.iconColor} />
+          </View>
+          <Text variant="heading" className="mb-1">{title}</Text>
+          <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">{subLabel}</Text>
+        </View>
+      </AnimatedPressable>
+    );
+  }
+
+  // default 'list' variant
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={title}
       onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       testID={testID}
-      className={`rounded-xl border border-border-hairline ${isHero ? 'w-full' : 'flex-1'} p-5 shadow-sm`}
-      style={({ pressed }) => ({
-        opacity: pressed ? 0.9 : 1,
-        transform: [{ scale: pressed ? 0.98 : 1 }],
-      })}
+      className="w-full flex-row items-center rounded-2xl bg-surface dark:bg-surface-dark p-4 shadow-sm border border-border-hairline mb-3"
+      style={animatedStyle}
     >
-      <View style={StyleSheet.absoluteFill} pointerEvents="none" className="overflow-hidden rounded-xl">
-        <Svg height="100%" width="100%">
-          <Defs>
-            <SvgLinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor={topColor} stopOpacity="1" />
-              <Stop offset="1" stopColor={bottomColor} stopOpacity="1" />
-            </SvgLinearGradient>
-          </Defs>
-          <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
-        </Svg>
+      <View className={`h-12 w-12 items-center justify-center rounded-full mr-4 ${colors.bg}`}>
+        <Icon size={24} color={colors.iconColor} />
       </View>
-      
-      <View className="absolute bottom-[-20px] right-[-20px]" style={{ opacity: 0.08 }} pointerEvents="none">
-        <Icon size={120} color={deep} />
+      <View className="flex-1 justify-center">
+        <Text variant="bodyBold" className="mb-1">{title}</Text>
+        <Text variant="caption">{subLabel}</Text>
       </View>
-
-      <View className={`relative z-10 gap-3 ${isHero ? 'flex-row items-center' : 'flex-col'}`}>
-        <View className="flex-1 justify-center">
-          <Text variant="heading">{title}</Text>
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark mt-1">
-            {subLabel}
-          </Text>
-        </View>
-      </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

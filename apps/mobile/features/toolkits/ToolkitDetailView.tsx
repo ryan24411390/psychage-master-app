@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { SettingsToggleRow } from '@/components/settings/SettingsToggleRow';
+import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
 
@@ -98,7 +99,7 @@ export function ToolkitDetailView({ id, store }: ToolkitDetailViewProps) {
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center" testID="toolkit-detail-loading">
-          <ActivityIndicator color={colors.primary.default.light} />
+          <AppLoader />
         </View>
       ) : !toolkit ? (
         <View className="flex-1 items-center justify-center px-6" testID="toolkit-detail-missing">

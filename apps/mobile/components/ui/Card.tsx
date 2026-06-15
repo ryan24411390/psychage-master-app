@@ -1,5 +1,8 @@
 import { type ReactNode } from 'react';
 import { View, type ViewProps } from 'react-native';
+import Animated, { FadeInUp } from 'react-native-reanimated';
+import { AnimatedPressable } from './AnimatedPressable';
+import { useReducedMotion, DURATION, easingFn } from '@/lib/motion';
 
 // Surface primitive — mobile port of web components/ui/Card.tsx (parity remediation).
 // Web anatomy kept 1:1 (rounded-xl, p-6, Header/Body/Footer/Icon sub-components),
@@ -17,6 +20,8 @@ type CardProps = ViewProps & {
   variant?: CardVariant;
   children: ReactNode;
   className?: string;
+  onPress?: () => void;
+  animateEntrance?: boolean;
 };
 
 // Variants match the mobile app's established inline card grammar so adoption is
@@ -34,8 +39,48 @@ const variantClasses: Record<CardVariant, string> = {
   ghost: 'bg-transparent',
 };
 
-export function Card({ variant = 'default', children, className, ...props }: CardProps) {
+export function Card({
+  variant = 'default',
+  children,
+  className,
+  onPress,
+  animateEntrance = false,
+  ...props
+}: CardProps) {
+  const reduced = useReducedMotion();
   const composed = ['rounded-xl p-5', variantClasses[variant], className].filter(Boolean).join(' ');
+
+  const entering =
+    animateEntrance && !reduced
+      ? FadeInUp.springify().damping(18).stiffness(150).mass(0.8)
+      : undefined;
+
+  if (onPress) {
+    return (
+      <AnimatedPressable
+        onPress={onPress}
+        entering={entering}
+        scaleTo={0.97}
+        className={composed}
+        style={({ pressed }: { pressed: boolean }) => ({
+          opacity: pressed ? 0.95 : 1,
+        })}
+        accessibilityRole="button"
+        {...(props as any)}
+      >
+        {children}
+      </AnimatedPressable>
+    );
+  }
+
+  if (animateEntrance && !reduced) {
+    return (
+      <Animated.View entering={entering} className={composed} {...props}>
+        {children}
+      </Animated.View>
+    );
+  }
+
   return (
     <View className={composed} {...props}>
       {children}

@@ -1,0 +1,70 @@
+import React, { useEffect } from 'react';
+import { View, type ViewProps } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+  Easing,
+  FadeInUp,
+} from 'react-native-reanimated';
+import { Text } from './Text';
+import { useReducedMotion } from '@/lib/motion';
+import { Search } from 'lucide-react-native';
+
+export interface AnimatedEmptyStateProps extends ViewProps {
+  title: string;
+  description?: string;
+  icon?: React.ReactNode;
+}
+
+export function AnimatedEmptyState({
+  title,
+  description,
+  icon,
+  className,
+  ...props
+}: AnimatedEmptyStateProps) {
+  const reduced = useReducedMotion();
+  const floatAnim = useSharedValue(0);
+
+  useEffect(() => {
+    if (!reduced) {
+      floatAnim.value = withRepeat(
+        withSequence(
+          withTiming(-8, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0, { duration: 1500, easing: Easing.inOut(Easing.ease) })
+        ),
+        -1,
+        true
+      );
+    }
+  }, [reduced, floatAnim]);
+
+  const animatedIconStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: floatAnim.value }],
+    };
+  });
+
+  return (
+    <Animated.View
+      entering={!reduced ? FadeInUp.springify().damping(16).stiffness(150) : undefined}
+      className={['flex-1 items-center justify-center p-8', className].filter(Boolean).join(' ')}
+      {...props}
+    >
+      <Animated.View style={animatedIconStyle} className="mb-6 opacity-80">
+        {icon || <Search size={64} color="#A8A29E" strokeWidth={1.5} />}
+      </Animated.View>
+      <Text variant="heading" className="text-center mb-2 text-text-primary dark:text-text-primary-dark">
+        {title}
+      </Text>
+      {description && (
+        <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
+          {description}
+        </Text>
+      )}
+    </Animated.View>
+  );
+}

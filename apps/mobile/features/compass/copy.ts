@@ -6,14 +6,15 @@ const FIXTURE = 'FIXTURE — not final copy' as const;
 export const CT4_COMPASS = {
   _fixture: 'CT4' as const,
   _marker: FIXTURE,
-  heading: 'When you need something now',
+  headingImmediate: 'Immediate Actions',
+  headingReflection: 'Reflection',
+  headingExplore: 'Deep Dives',
   toolkit: { title: 'Steady yourself right now', sub: 'Toolkit' },
   navigator: { title: 'Make sense of what you feel', sub: 'Symptom Navigator' },
   relationship: { title: 'Take stock of your connections', sub: 'Relationship Health' },
   mindmate: { title: 'Talk something through', sub: 'MindMate' },
   clarity: { title: 'See how things have felt lately', sub: 'Clarity Score' },
-  reflectHeading: 'Notice your patterns',
   moodJournal: { title: 'Notice what comes up', sub: 'Mood Journal' },
-  exploreHeading: 'When you want to understand a pattern',
   sleep: { title: 'Understand your sleep', sub: 'Sleep Architect' },
+  toolkits: { title: 'Explore self-help toolkits', sub: 'Toolkits Library' },
 } as const;

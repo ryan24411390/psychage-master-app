@@ -1,57 +1,29 @@
 import { router } from 'expo-router';
-import { Image, Pressable, View } from 'react-native';
+import { memo } from 'react';
+import { Pressable } from 'react-native';
 
-import { Text } from '@/components/ui/Text';
+import { ArtPanel } from '@/features/learn/ArtPanel';
 import type { ArticleListItem } from '@/lib/articles';
 
-// One row in the category article list. Thumbnail (hero, when present) + title +
-// summary + a meta line. Tapping opens the native reader (S22). No invented art:
-// a missing hero renders a neutral token-tinted placeholder, never a stand-in image.
-export function ArticleListCard({ article }: { article: ArticleListItem }) {
-  const meta = [article.categoryName, article.readTime ? `${article.readTime} min read` : null]
-    .filter(Boolean)
-    .join(' · ');
+// One row in the category/search article list — image-only: a full-width 16:9
+// hero card (real image, blur-filled and uncropped via ArtPanel; token gradient
+// as fallback), styled with the mobile card grammar (rounded + border + light
+// shadow). No title or meta text; the article is announced via accessibilityLabel.
+// Tapping opens the native reader (S22). memo'd — FlashList re-renders rows on scroll.
+export const ArticleListCard = memo(function ArticleListCard({ article }: { article: ArticleListItem }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={article.title}
       testID={`article-card-${article.slug}`}
       onPress={() => router.push(`/article/${article.slug}`)}
-      className="flex-row gap-3 rounded-xl border border-border bg-surface p-3 dark:border-border-dark dark:bg-surface-dark"
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+      style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
     >
-      {article.heroImageUrl ? (
-        <Image
-          source={{ uri: article.heroImageUrl }}
-          accessibilityIgnoresInvertColors
-          resizeMode="cover"
-          style={{ width: 56, height: 56, borderRadius: 10 }}
-        />
-      ) : (
-        <View
-          className="rounded-lg bg-surface-active dark:bg-surface-active-dark"
-          style={{ width: 56, height: 56 }}
-        />
-      )}
-      <View className="flex-1 gap-1">
-        <Text variant="bodyMedium" numberOfLines={2}>
-          {article.title}
-        </Text>
-        {article.seoDescription ? (
-          <Text
-            variant="bodySm"
-            numberOfLines={2}
-            className="text-text-secondary dark:text-text-secondary-dark"
-          >
-            {article.seoDescription}
-          </Text>
-        ) : null}
-        {meta ? (
-          <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
-            {meta}
-          </Text>
-        ) : null}
-      </View>
+      <ArtPanel
+        artKey={article.slug}
+        imageUrl={article.heroImageUrl}
+        className="aspect-[16/9] rounded-2xl border border-border shadow-sm dark:border-border-dark dark:shadow-none"
+      />
     </Pressable>
   );
-}
+});

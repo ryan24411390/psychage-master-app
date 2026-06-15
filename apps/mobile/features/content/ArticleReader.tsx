@@ -1,19 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import {
-  ActivityIndicator,
-  Image,
-  Pressable,
-  ScrollView,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
 import { ArticleBody } from '@/features/content/blocks/ArticleBody';
+import { ArtPanel } from '@/features/learn/ArtPanel';
 import { Citations } from '@/features/content/Citations';
 import { CT4_CONTENT } from '@/features/content/copy';
 import { MedicalDisclaimer } from '@/features/content/MedicalDisclaimer';
@@ -35,7 +30,6 @@ import { useThemeColors } from '@/lib/use-theme-colors';
 export function ArticleReader({ slug }: { slug: string }) {
   const t = CT4_CONTENT;
   const tc = useThemeColors();
-  const { width } = useWindowDimensions();
 
   const { data: article, isLoading } = useQuery({
     queryKey: ['article', slug],
@@ -67,7 +61,7 @@ export function ArticleReader({ slug }: { slug: string }) {
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center" testID="article-loading">
-          <ActivityIndicator color={tc.primary} />
+          <AppLoader />
         </View>
       ) : !article ? (
         <View className="flex-1 items-center justify-center px-8">
@@ -85,11 +79,10 @@ export function ArticleReader({ slug }: { slug: string }) {
             showsVerticalScrollIndicator={false}
           >
             {article.heroImageUrl ? (
-              <Image
-                source={{ uri: article.heroImageUrl }}
-                accessibilityIgnoresInvertColors
-                resizeMode="cover"
-                style={{ width: width - 40, height: (width - 40) / 1.78, borderRadius: 12 }}
+              <ArtPanel
+                artKey={article.slug}
+                imageUrl={article.heroImageUrl}
+                className="aspect-[16/9] rounded-xl"
               />
             ) : null}
 

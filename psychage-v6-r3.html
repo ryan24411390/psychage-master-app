@@ -1,0 +1,2206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psychage — v6 · Design Library, slice 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ================= TOKENS ================= */
+:root{
+  --paper-base:#F7F3EC; --paper-raised:#FBF8F2;
+  --ink:#2E2C28; --ink-2:#6B6760; --ink-3:#8A857C;
+  --teal:#1A9B8C; --teal-deep:#0E6E62;
+  --crisis:#A8412C;
+  --m-vlow:#5B6B7A; --m-low:#7C8B97; --m-ok:#9C9588; --m-good:#5FAE9E; --m-vgood:#1A9B8C;
+  --clay:#E7DFCE; --clay-2:color-mix(in srgb,#E7DFCE 86%,#2E2C28 14%); --clay-ink:#3A3833;
+  --border:rgba(46,44,40,.10); --border-strong:rgba(46,44,40,.22);
+  --btn-bg:#0E6E62; --btn-text:#FFF; --link:#0E6E62;
+  --press-bg:color-mix(in srgb, #F7F3EC 95%, #2E2C28 5%);
+  --press-shadow:inset 0 1.5px 4px rgba(46,44,40,.10), inset 0 0 0 1px rgba(46,44,40,.05);
+  --raise-shadow:0 1px 2px rgba(46,44,40,.05), 0 6px 18px rgba(46,44,40,.06);
+  --ease:cubic-bezier(0.37,0,0.63,1);
+  --dot-ring:#2E2C28;  /* JC-4: ring = ink in light; strong exactly where the dot is weak vs ground */
+  --r1:8px; --r2:12px; --r3:16px; --r4:24px; --r5:32px;
+}
+.phone[data-theme="night"]{
+  --paper-base:#18172A; --paper-raised:#232238; --paper-raised-2:#2D2A44;
+  --ink:#F1ECE2; --ink-2:rgba(241,236,226,.72); --ink-3:rgba(241,236,226,.52);
+  --teal:#3FC9B5; --teal-deep:#3FC9B5; --crisis:#C97A60;
+  --m-vgood:#3FC9B5;
+  --clay:#33304E; --clay-2:#403C60; --clay-ink:#F1ECE2;
+  --border:rgba(241,236,226,.12); --border-strong:rgba(241,236,226,.26);
+  --btn-bg:#3FC9B5; --btn-text:#18172A; --link:#3FC9B5;
+  --dot-ring:#131226;  /* JC-4: register-aware ring (= pressBg tone); clears all 5 night tints, min 3.35 */
+  --press-bg:#131226;
+  --press-shadow:inset 0 1.5px 4px rgba(0,0,0,.35), inset 0 0 0 1px rgba(241,236,226,.04);
+  --raise-shadow:none;
+}
+.phone[data-theme="night"] .tile:hover{box-shadow:none;background:var(--paper-raised-2);}
+
+/* ================= SHELL ================= */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#E7E2D8;font-family:"IBM Plex Sans",sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:28px 12px 60px;}
+.demo-bar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;justify-content:center;}
+.demo-bar span{font-size:13px;color:#6B6760;letter-spacing:.04em;}
+.demo-toggle{font-family:inherit;font-size:13px;font-weight:600;padding:10px 18px;border-radius:999px;border:1px solid rgba(46,44,40,.25);background:#FBF8F2;color:#2E2C28;cursor:pointer;}
+.demo-toggle[aria-pressed="true"]{background:#2E2C28;color:#F1ECE2;border-color:#2E2C28;}
+
+.phone{width:390px;height:844px;background:var(--paper-base);border-radius:46px;border:10px solid #1c1b18;overflow:hidden;position:relative;display:flex;flex-direction:column;transition:background .3s var(--ease);}
+.phone::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:50;opacity:.05;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");}
+.phone[data-theme="night"]::after{opacity:.06;mix-blend-mode:screen;}
+.statusbar{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;padding:14px 28px 6px;font-size:13px;font-weight:600;color:var(--ink);}
+.viewport{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;scrollbar-width:none;}
+.viewport::-webkit-scrollbar{display:none;}
+.screen{display:none;min-height:100%;padding:8px 20px 28px;}
+.screen.active{display:block;}
+
+/* ================= TYPE ================= */
+.f-display{font-family:"Fraunces",serif;font-weight:600;font-size:34px;line-height:1.08;color:var(--ink);letter-spacing:-.015em;}
+.f-title{font-family:"Fraunces",serif;font-weight:600;font-size:22px;line-height:1.2;color:var(--ink);}
+.f-heading{font-family:"Fraunces",serif;font-weight:600;font-size:20px;line-height:1.22;color:var(--ink);}
+.f-voice{font-family:"Fraunces",serif;font-style:italic;font-weight:500;font-size:17px;line-height:1.4;color:var(--ink-2);}
+.t-body{font-size:15px;line-height:1.45;color:var(--ink);}
+.t-sub{font-size:15px;line-height:1.45;color:var(--ink-2);}
+.t-label{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);}
+.t-cap{font-size:13px;line-height:1.4;color:var(--ink-2);}
+.t-hint{font-size:12px;color:var(--ink-3);}
+
+/* ================= LOAD ================= */
+@keyframes settle{from{opacity:0;transform:translateY(10px) scale(.992);}to{opacity:1;transform:none;}}
+.anim [data-settle]{opacity:0;animation:settle .42s var(--ease) forwards;}
+.anim [data-settle="1"]{animation-delay:.05s;}
+.anim [data-settle="2"]{animation-delay:.14s;}
+.anim [data-settle="3"]{animation-delay:.23s;}
+.anim [data-settle="4"]{animation-delay:.32s;}
+.anim [data-settle="5"]{animation-delay:.41s;}
+
+/* ================= v6 R3 · MOTION COHESION ================= */
+/* Forward navigation used an instant display swap while everything else in the app
+   settles. Reuse the SAME settle verb on screen entry (no new motion verb) so moving
+   between screens reads as intentional, not a hard cut — re-triggered per nav in go().
+   Sheets: the scrim now fades in under the rising sheet instead of snapping on.
+   All gated by .anim, so reduced-motion disables every bit of this. */
+.anim .screen.nav-in{animation:settle .34s var(--ease);}
+@keyframes veilIn{from{opacity:0;}to{opacity:1;}}
+.anim .sheet-veil.open{animation:veilIn .2s var(--ease);}
+
+/* ================= HEADER ================= */
+.home-head{display:flex;justify-content:space-between;align-items:center;padding:8px 0 2px;}
+.wordmark{font-family:"Fraunces",serif;font-weight:600;font-size:20px;}
+.wordmark .wm-a{color:var(--teal);}
+.wordmark .wm-b{color:var(--ink);}
+.head-actions{display:flex;align-items:center;gap:8px;}
+.iconbtn{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:var(--ink-2);cursor:pointer;border-radius:50%;}
+.iconbtn:hover{background:var(--border);}
+.help-pill{display:flex;align-items:center;gap:7px;min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid var(--crisis);background:transparent;color:var(--crisis);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s var(--ease);}
+.help-pill:hover{background:rgba(168,65,44,.07);}
+.help-pill:active{transform:scale(.97);}
+.avatar{width:44px;height:44px;border-radius:50%;border:1px solid var(--border-strong);background:var(--clay);color:var(--clay-ink);font-family:"Fraunces",serif;font-weight:600;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.avatar:active{transform:scale(.95);}
+
+/* ================= STATE ZONE ================= */
+.state-zone{padding:18px 0 4px;}
+.greet-row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;}
+.greet-text{flex:1;}
+.greet-text .f-voice{margin-top:10px;}
+.mascot{flex:0 0 78px;display:flex;justify-content:flex-end;}
+.mascot svg{transform-origin:50% 85%;}
+@keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.02);}}
+.anim .mascot svg{animation:breathe 4.5s var(--ease) infinite;}
+@keyframes ack{0%{transform:rotate(0);}35%{transform:rotate(-5deg);}70%{transform:rotate(-5deg);}100%{transform:rotate(0);}}
+.anim .mascot.acking svg{animation:ack .6s var(--ease) 1, breathe 4.5s var(--ease) .6s infinite;}
+
+.record-well{margin-top:20px;background:var(--press-bg);box-shadow:var(--press-shadow);border-radius:var(--r3);padding:12px 16px 8px;transition:background .3s var(--ease);}
+.record-head{display:flex;justify-content:space-between;align-items:center;}
+.link{background:none;border:none;font-family:inherit;font-size:14px;font-weight:600;color:var(--link);cursor:pointer;padding:10px 0 10px 10px;min-height:44px;}
+.link:hover{text-decoration:underline;}
+#terrain{display:block;width:100%;height:auto;}
+
+.cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;margin-top:16px;border:none;border-radius:999px;background:var(--btn-bg);color:var(--btn-text);font-family:inherit;font-size:17px;font-weight:600;cursor:pointer;box-shadow:var(--raise-shadow);transition:transform .15s var(--ease),opacity .15s var(--ease);}
+.cta:hover{opacity:.92;}
+.cta:active{transform:scale(.98);}
+.cta.checked{background:transparent;color:var(--link);border:1.5px solid var(--border-strong);box-shadow:none;}
+@keyframes imprint{0%{transform:scale(.985);box-shadow:var(--press-shadow), inset 0 0 0 2px var(--teal);}100%{transform:scale(1);box-shadow:var(--press-shadow);}}
+.anim .imprinting{animation:imprint .32s var(--ease);}
+
+/* the bridge — quiet offer after a low entry */
+.bridge{display:none;margin-top:12px;background:var(--paper-raised);border:1px solid var(--border);border-radius:var(--r3);padding:16px;box-shadow:var(--raise-shadow);}
+.bridge.show{display:block;}
+.anim .bridge.show{animation:settle .42s var(--ease);}
+.bridge .f-voice{}  /* V13: voice is one size (17) */
+.bridge-row{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;}
+.bridge-crisis{margin-top:12px;font-size:13px;color:var(--ink-2);line-height:1.45;}
+
+/* ================= v6 R3.1 · PICK UP WHERE YOU LEFT OFF — resume rail ================= */
+/* The single Continue row, evolved into a cover-card rail (reuses the .toprail scroller).
+   Covers are the ONE place this otherwise-flat system carries a tonal field — the way a
+   book cover does. The mascot ovoid sits on a deep mood ground; brand + title over it.
+   Progress bar + "% · min left" live below the cover, on the page, in tokens. The whole
+   section hides on first open (renderContinue). */
+.cont-card{flex:0 0 84%;scroll-snap-align:start;scroll-margin:0 20px;display:flex;flex-direction:column;background:none;border:none;padding:0;font-family:inherit;text-align:left;cursor:pointer;transition:transform .15s var(--ease);}
+.cont-card:active{transform:scale(.985);}
+.cont-cover{position:relative;width:100%;aspect-ratio:16/10;border-radius:var(--r3);overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:14px 16px;box-shadow:var(--raise-shadow);}
+.cont-cover.mood-a{background:radial-gradient(125% 95% at 64% 14%, #2C6357 0%, #173E37 56%, #0F2E2A 100%);}
+.cont-cover.mood-b{background:radial-gradient(125% 95% at 64% 14%, #3E4D72 0%, #242D49 56%, #161C30 100%);}
+.cont-cover.mood-c{background:radial-gradient(125% 95% at 64% 14%, #6A4A52 0%, #43282F 56%, #2C181D 100%);}
+.cont-blob{position:absolute;right:-4%;bottom:-16%;width:52%;height:120%;}
+.cont-brand{position:relative;font-size:12px;font-weight:600;letter-spacing:.02em;color:rgba(255,255,255,.82);}
+.cont-title{position:relative;font-family:"Fraunces",serif;font-weight:600;font-size:21px;line-height:1.16;color:#fff;max-width:76%;}
+.cont-foot{display:flex;align-items:center;gap:10px;margin-top:11px;}
+.cont-bar{flex:1;height:3px;border-radius:2px;background:var(--border);overflow:hidden;}
+.cont-fill{display:block;height:100%;background:var(--teal);border-radius:2px;}
+.cont-meta{flex:0 0 auto;font-size:13px;color:var(--ink-2);}
+
+/* ================= v6 R3.1 · MOST READ THIS MONTH — ranked list ================= */
+/* Social proof, no personalization — what the whole community is reading. Ghost serif
+   rank numerals (clay-2), serif title, category · time, hairline dividers. */
+.mostread{display:flex;flex-direction:column;}
+.mr-row{display:flex;align-items:center;gap:16px;width:100%;padding:15px 2px;border:none;border-top:1px solid var(--border);background:none;font-family:inherit;text-align:left;cursor:pointer;transition:transform .15s var(--ease);}
+.mr-row:first-of-type{border-top:none;}
+.mr-row:active{transform:scale(.99);}
+.mr-num{flex:0 0 46px;font-family:"Fraunces",serif;font-weight:500;font-size:32px;line-height:1;color:var(--clay-2);}
+.mr-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
+.mr-title{font-family:"Fraunces",serif;font-weight:600;font-size:18px;line-height:1.2;color:var(--ink);}
+.mr-meta{font-size:13px;color:var(--ink-2);}
+.mr-meta .dot{margin:0 7px;color:var(--ink-3);}
+
+/* ================= v6 R3.1 · FIND CARE — location/state gate ================= */
+/* The Find tab opens on a calm gate: NPI-verified, state-licensed, "information not a
+   recommendation." Licensing is state-bound, so location/state is set before the list.
+   Reuses the app's own verified mark (the provider-profile shield) as the trust badge. */
+.fg-lead{padding:2px 0 0;}
+.fg-badge{margin-top:22px;height:142px;border-radius:var(--r3);background:color-mix(in srgb, var(--teal) 13%, var(--paper-raised));display:flex;align-items:center;justify-content:center;color:var(--teal-deep);}
+.fg-cta{margin-top:24px;display:flex;flex-direction:column;gap:2px;align-items:center;}
+.fg-cta .link{padding:14px;}
+
+/* ================= SECTIONS & BENTO ================= */
+.sect{margin-top:32px;}
+.sect-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.sect-head .t-label{flex:0 0 auto;}
+.sect-head::after{content:"";flex:1;height:1px;background:var(--border);}
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.tile{grid-column:span 1;display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:left;background:var(--paper-raised);border:1px solid var(--border);border-radius:var(--r4);padding:18px;font-family:inherit;cursor:pointer;box-shadow:var(--raise-shadow);transition:transform .15s var(--ease),box-shadow .15s var(--ease);min-height:44px;}
+.tile:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgba(46,44,40,.05),0 10px 24px rgba(46,44,40,.08);}
+.tile:active{transform:scale(.985);}
+.tile.wide{grid-column:1/-1;}
+.tile-name{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);}
+.tile .f-heading{font-size:19px;}
+.tile.compact .detail{display:none;}
+.pict{width:52px;height:52px;flex:0 0 auto;}
+.pict.sm{width:40px;height:40px;}
+.tile-top{display:flex;width:100%;align-items:flex-start;justify-content:space-between;gap:10px;}
+
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;margin-top:6px;}
+.mini-card{display:flex;flex-direction:column;align-items:flex-start;gap:7px;background:var(--paper-base);border:1px solid var(--border-strong);border-radius:var(--r2);padding:12px 10px 10px;min-height:108px;cursor:pointer;transition:border-color .15s var(--ease),transform .15s var(--ease);}
+.mini-card:hover{border-color:var(--teal-deep);}
+.mini-card:active{transform:scale(.96);}
+.mini-card svg{width:34px;height:34px;}
+.mini-name{font-size:13px;font-weight:600;color:var(--ink);line-height:1.2;}
+.mini-min{font-size:12px;color:var(--ink-2);}
+
+.chiprow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;width:100%;}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 15px;border-radius:999px;border:1px solid var(--border-strong);background:var(--paper-base);color:var(--ink);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:border-color .15s var(--ease),transform .15s var(--ease);}
+.chip:hover{border-color:var(--teal-deep);}
+.chip:active{transform:scale(.96);}
+.chip.ghost{border-style:dashed;color:var(--link);}
+
+.tile.slim{flex-direction:row;align-items:center;justify-content:space-between;gap:12px;}
+.tile.slim .stack{display:flex;flex-direction:column;gap:5px;flex:1;}
+
+.read-card{width:100%;background:var(--paper-raised);box-shadow:var(--raise-shadow);border:1px solid var(--border);border-radius:var(--r2);padding:15px;margin-top:6px;display:flex;flex-direction:column;gap:7px;cursor:pointer;}
+.read-card.readdone{background:var(--press-bg);box-shadow:var(--press-shadow);border:none;}
+.read-meta{display:flex;gap:8px;align-items:center;}
+.tag{font-size:12px;font-weight:600;color:var(--teal-deep);border:1px solid var(--teal-deep);border-radius:999px;padding:4px 10px;}
+.read-title{font-family:"Fraunces",serif;font-weight:600;font-size:19px;line-height:1.25;color:var(--ink);}
+.credit{font-size:12px;color:var(--ink-2);line-height:1.4;}
+
+.mission{margin:36px 0 6px;text-align:center;font-size:13px;color:var(--ink-2);}
+
+/* ================= v6 R2 · LEARN part 1 — top-reads rail ================= */
+/* A new component family (C-TOPRAIL, proposed): a horizontal scroll-snap rail. NOT scroll-jacking
+   (native scroll), NOT a 5th motion verb (NO auto-advance — moving content has no place in this app).
+   The ~14% peek of the next card IS the affordance. Snap is instant (no smooth-scroll set) so there is
+   nothing for reduced-motion to disable. Cards reuse the read-card grammar so the rail isn't foreign. */
+.toprail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -20px;padding:4px 20px 8px;scroll-padding:0 20px;}
+.toprail::-webkit-scrollbar{display:none;}
+.tread{flex:0 0 86%;scroll-snap-align:start;scroll-margin:0 20px;display:flex;flex-direction:column;background:var(--paper-raised);border:1px solid var(--border);border-radius:var(--r3);box-shadow:var(--raise-shadow);overflow:hidden;cursor:pointer;font-family:inherit;text-align:left;min-height:44px;transition:transform .15s var(--ease);}
+.tread:active{transform:scale(.985);}
+/* cover slot — illustrated article cover in the clay grammar, one teal dot. NOT photo/stock (hard refusal). */
+.tread-cover{position:relative;display:block;width:100%;aspect-ratio:5/2;background:var(--clay);border-bottom:1px solid var(--border);}
+.tread-cover svg{display:block;width:100%;height:100%;}
+/* category + read-time as pills ON the cover — frees the body to the title alone. Neutral (paper fill,
+   ink text) so the cover keeps its single teal accent and the pills stay legible over any cover art. */
+.tread-tag,.tread-time{position:absolute;top:8px;display:inline-flex;align-items:center;height:23px;padding:0 11px;border-radius:999px;background:var(--paper-raised);border:1px solid var(--border-strong);font-size:11px;letter-spacing:.02em;}
+.tread-tag{left:8px;color:var(--ink);font-weight:600;}
+.tread-time{right:8px;color:var(--ink-2);font-weight:500;}
+.tread-body{padding:10px 16px 13px;}
+.tread .read-title{font-size:18px;}
+
+/* library topic rails — text-forward cards (Atoms pattern); reuses .toprail scroller.
+   Deliberately NOT cover-led like the home .tread: in the Library you're already browsing, so
+   the title leads. Uniform card height, read-time + arrow pinned to the foot. */
+.lsec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.lsec-head .link{padding:6px 0 6px 10px;min-height:0;}
+.lsec-why{margin-top:-6px;margin-bottom:12px;}
+.lread{flex:0 0 78%;scroll-snap-align:start;scroll-margin:0 20px;display:flex;flex-direction:column;gap:10px;background:var(--paper-raised);border:1px solid var(--border);border-radius:var(--r3);box-shadow:var(--raise-shadow);padding:16px;cursor:pointer;font-family:inherit;text-align:left;min-height:128px;transition:transform .15s var(--ease);}
+.lread:active{transform:scale(.985);}
+.lread .read-title{font-size:18px;flex:1;}
+.lread-foot{display:flex;align-items:center;justify-content:space-between;}
+.lread-foot .t-hint{font-size:12px;}
+.lread-foot .chev{color:var(--ink-3);flex:0 0 auto;}
+.lread.readdone{opacity:.72;}
+.lread.readdone .read-title{color:var(--ink-2);}
+
+/* ================= v6 R2 · CARE & LEARNING — two quiet doorways ================= */
+/* Not furniture: search and topics live on the destination screens; home just needs a clear, calm
+   doorway each (JC-5 philosophy). The top-reads rail above carries the richness; these stay flat. */
+.destlist{display:flex;flex-direction:column;gap:10px;}
+.dest-row{display:flex;align-items:center;gap:14px;width:100%;min-height:64px;padding:14px 16px;background:var(--paper-raised);border:1px solid var(--border);border-radius:var(--r3);box-shadow:var(--raise-shadow);cursor:pointer;font-family:inherit;text-align:left;transition:transform .15s var(--ease);}
+.dest-row:active{transform:scale(.99);}
+.dest-row svg.pict{width:34px;height:34px;flex:0 0 auto;}
+.dest-stack{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.dest-sub{font-size:13px;color:var(--ink-2);line-height:1.3;}
+.dest-row .chev{flex:0 0 auto;color:var(--ink-3);}
+
+/* ================= v6 R2 · FIND CARE — guided match ================= */
+/* Not a raw directory: a few gentle questions (Navigator acute-chip grammar) that end in "here's who fits."
+   Lower cognitive load for someone anxious. No progress bar (meters refused) — a quiet "1 of 3" instead.
+   Result rows stay CALM: avatar · name · credential · one why-line. No photos — clay-initial avatars. */
+.fc-step{display:none;}
+.fc-step.active{display:block;}
+.fc-stepnum{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);margin-top:4px;}
+.fc-q{margin-top:10px;}
+.fc-chips{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
+.fc-intro{text-align:center;padding:18px 6px 0;}
+.fc-intro .pict{width:72px;height:72px;margin:0 auto;}
+.fc-intro h2{margin-top:18px;}
+.fc-intro .t-sub{margin-top:10px;}
+.fc-cta-wrap{margin-top:26px;display:flex;flex-direction:column;gap:6px;align-items:center;}
+/* calm matched-provider rows (reused for results) */
+.fc-list{margin-top:14px;}
+.fc-prov{display:flex;align-items:center;gap:14px;width:100%;padding:16px 2px;border:none;border-top:1px solid var(--border);background:none;font-family:inherit;cursor:pointer;text-align:left;}
+.fc-prov:first-of-type{border-top:none;}
+.fc-prov:active{transform:scale(.99);}
+.fc-ava{flex:0 0 50px;width:50px;height:50px;border-radius:50%;border:1px solid var(--border-strong);background:var(--clay);color:var(--clay-ink);font-family:"Fraunces",serif;font-weight:600;font-size:19px;display:flex;align-items:center;justify-content:center;}
+.fc-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.fc-name{font-family:"Fraunces",serif;font-weight:600;font-size:17px;color:var(--ink);line-height:1.2;}
+.fc-cred{font-size:13px;color:var(--ink-2);}
+.fc-why{font-size:12px;color:var(--ink-2);line-height:1.35;margin-top:2px;}
+.fc-why .vmark{color:var(--teal-deep);font-weight:600;}
+.fc-prov .chev{flex:0 0 auto;color:var(--ink-3);}
+
+/* ================= v6 R2 · FIND tab — personal directory ================= */
+/* The browse door (distinct from the home card's guided match). Personalized: it leads with what Amara
+   has been tracking and pre-filters to it, then offers the full searchable/filterable list. Rows reuse
+   the calm fc-prov style (avatar · name · credential · one why-line) — no busy fact clusters. */
+.fd-lead .t-sub{margin-top:8px;}
+.fd-search{display:flex;align-items:center;gap:10px;min-height:50px;padding:0 14px;margin-top:16px;border:1.5px solid var(--border-strong);border-radius:var(--r2);background:var(--paper-raised);}
+.fd-search svg{flex:0 0 auto;color:var(--ink-3);}
+.fd-search input{flex:1;border:none;background:none;font-family:inherit;font-size:15px;color:var(--ink);outline:none;}
+.fd-filters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:12px -20px 0;padding:0 20px;}
+.fd-filters::-webkit-scrollbar{display:none;}
+.fd-filter{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--border-strong);background:var(--paper-base);color:var(--ink);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;}
+.fd-filter[aria-pressed="true"]{border-color:var(--teal-deep);background:var(--press-bg);box-shadow:var(--press-shadow);}
+.fd-filter .fd-x{color:var(--ink-3);font-size:12px;}
+.fd-seclabel{display:flex;align-items:baseline;justify-content:space-between;margin-top:26px;}
+.fd-empty{display:none;margin-top:22px;color:var(--ink-2);font-size:14px;}
+.fc-why .vmark{color:var(--teal-deep);font-weight:600;}
+.fd-guided{margin-top:22px;padding:16px;border:1px dashed var(--border-strong);border-radius:var(--r3);background:none;width:100%;font-family:inherit;text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;}
+.fd-guided .fd-g-txt{flex:1;min-width:0;}
+.fd-guided .fd-g-q{font-family:"Fraunces",serif;font-weight:600;font-size:15px;color:var(--ink);}
+.fd-guided .fd-g-sub{font-size:12px;color:var(--ink-2);margin-top:2px;}
+.fd-guided .chev{flex:0 0 auto;color:var(--ink-3);}
+
+/* ================= v6 R2 · PROVIDER PROFILE ================= */
+/* Alan's anatomy in-grammar: clay-initial hero, name + credential + verified, a few scannable facts,
+   a calm crisis bridge (a booked session isn't immediate help — name that), short bio, specialties,
+   then "See availability" with price + cancellation terms. No photos. */
+.pp-hero{display:flex;align-items:center;gap:16px;margin-top:8px;}
+.pp-ava{flex:0 0 72px;width:72px;height:72px;border-radius:50%;border:1px solid var(--border-strong);background:var(--clay);color:var(--clay-ink);font-family:"Fraunces",serif;font-weight:600;font-size:28px;display:flex;align-items:center;justify-content:center;}
+.pp-id{flex:1;min-width:0;}
+.pp-cred{font-size:14px;color:var(--ink-2);margin-top:2px;}
+.pp-verified{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:12px;font-weight:600;color:var(--teal-deep);}
+.pp-facts{display:flex;flex-direction:column;gap:12px;margin-top:22px;}
+.pp-fact{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--ink);}
+.pp-fact svg{flex:0 0 auto;color:var(--ink-3);}
+.pp-bridge{display:flex;gap:12px;margin-top:22px;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r3);background:var(--paper-raised);}
+.pp-bridge svg{flex:0 0 auto;color:var(--crisis);margin-top:1px;}
+.pp-bridge .pp-bridge-txt{flex:1;min-width:0;font-size:13px;color:var(--ink-2);line-height:1.45;}
+.pp-bridge .link{font-size:13px;padding:0;min-height:0;}
+.pp-sec{margin-top:24px;}
+.pp-sec .t-label{display:block;margin-bottom:8px;}
+.pp-sec .t-body{margin-top:0;}
+.pp-specs{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.pp-spec{display:inline-flex;align-items:center;min-height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--border-strong);background:var(--paper-base);font-size:13px;color:var(--ink);}
+.pp-book{margin-top:28px;}
+.pp-terms{text-align:center;margin-top:10px;}
+
+/* ================= LIBRARY PAGE ================= */
+.lib-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:2px 0 6px;}
+.art{width:100%;background:var(--paper-raised);border:1px solid var(--border);box-shadow:var(--raise-shadow);border-radius:var(--r2);padding:15px;display:flex;flex-direction:column;gap:7px;cursor:pointer;font-family:inherit;text-align:left;transition:transform .15s var(--ease);}
+.art:hover{transform:translateY(-1px);}
+.art:active{transform:scale(.985);}
+.art.readdone{background:var(--press-bg);box-shadow:var(--press-shadow);border:none;}
+.art .read-title{font-size:18px;}
+.artlist{display:flex;flex-direction:column;gap:10px;}
+
+/* ================= SHEETS ================= */
+.sheet-veil{position:absolute;inset:0;background:rgba(46,44,40,.35);display:none;align-items:flex-end;z-index:60;}
+/* V1 · the Help-now pill stays reachable above every veil (layers: header 70 > sheetVeil 60). */
+.persistent-help{position:absolute;top:14px;right:20px;z-index:70;display:none;align-items:center;gap:7px;min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid var(--crisis);background:var(--paper-base);color:var(--crisis);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;box-shadow:var(--raise-shadow);}
+.phone.sheet-open .persistent-help{display:flex;}
+.persistent-help:active{transform:scale(.97);}
+.sheet-veil.open{display:flex;}
+.phone[data-theme="night"] .sheet-veil{background:rgba(0,0,0,.5);}
+.sheet{width:100%;background:var(--paper-raised);border-radius:var(--r5) var(--r5) 0 0;padding:22px 20px 22px;}
+/* V4 · no 5th verb: the sheet arrives on the settle verb (the one motion that means "a surface arriving"), un-staggered. */
+.anim .sheet.open-anim{animation:settle .42s var(--ease);}
+.sheet-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.moods{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+.mood{display:flex;align-items:center;gap:14px;min-height:54px;padding:8px 14px;border:1.5px solid var(--border);border-radius:var(--r2);background:var(--paper-base);font-family:inherit;font-size:17px;color:var(--ink);cursor:pointer;text-align:left;transition:border-color .15s var(--ease);}
+.mood:hover{border-color:var(--border-strong);}
+.mood[aria-pressed="true"]{border-color:var(--teal-deep);background:var(--press-bg);box-shadow:var(--press-shadow);}
+.mood .check{margin-left:auto;visibility:hidden;color:var(--teal-deep);}
+.mood[aria-pressed="true"] .check{visibility:visible;}
+.glyph{width:22px;height:32px;border-radius:7px;border:1px solid var(--border-strong);position:relative;overflow:hidden;flex:0 0 auto;background:var(--paper-raised);}
+.glyph i{position:absolute;left:0;right:0;bottom:0;display:block;}
+.sheet .cta{margin-top:14px;min-height:52px;}
+.sheet .cta:disabled{opacity:.4;cursor:default;}
+.sheet-privacy{margin-top:10px;text-align:center;font-size:12px;color:var(--ink-2);}
+
+.field{margin-top:14px;}
+.field label{display:block;margin-bottom:8px;}
+.textin{width:100%;min-height:50px;padding:0 16px;border-radius:var(--r2);border:1.5px solid var(--border-strong);background:var(--paper-base);font-family:inherit;font-size:16px;color:var(--ink);}
+.textin:focus{outline:2px solid var(--teal-deep);outline-offset:1px;border-color:transparent;}
+.pin-opts{display:flex;flex-wrap:wrap;gap:8px;}
+.pin-opts .chip[aria-pressed="true"]{border-color:var(--teal-deep);background:var(--press-bg);box-shadow:var(--press-shadow);}
+
+/* ================= STUB / CRISIS / PROFILE ================= */
+.stub-head{display:flex;align-items:center;gap:4px;padding:6px 0 14px;margin-left:-12px;}
+.backbtn{display:flex;align-items:center;gap:4px;min-height:44px;min-width:44px;padding:0 12px;background:none;border:none;color:var(--link);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;}
+.backbtn:active{transform:scale(.97);}
+.stub-body .t-sub{margin-top:10px;}
+.stub-note{margin-top:26px;font-size:12px;color:var(--ink-3);}
+.crisis-call{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;margin-top:24px;border-radius:var(--r2);border:1.5px solid var(--crisis);background:transparent;color:var(--crisis);font-family:inherit;font-size:17px;font-weight:600;cursor:pointer;text-decoration:none;}
+.crisis-call:active{transform:scale(.98);}
+.profile-top{display:flex;align-items:center;gap:14px;padding:6px 0 4px;}
+.avatar.big{width:64px;height:64px;font-size:26px;}
+.prof-list{margin-top:22px;display:flex;flex-direction:column;gap:8px;}
+.prof-item{display:flex;align-items:center;justify-content:space-between;min-height:56px;padding:8px 16px;background:var(--paper-raised);border:1px solid var(--border);border-radius:var(--r2);font-family:inherit;font-size:15px;font-weight:500;color:var(--ink);cursor:pointer;box-shadow:var(--raise-shadow);}
+.prof-item:active{transform:scale(.985);}
+.prof-item .t-hint{font-weight:400;}
+
+/* ================= v6 · TAB BAR (C0.2) ================= */
+.tabbar{flex:0 0 auto;display:flex;justify-content:center;border-top:1px solid var(--border);background:var(--paper-base);padding:6px 8px 16px;transition:background .3s var(--ease);}
+.tab{display:flex;align-items:center;justify-content:center;min-height:56px;background:none;border:none;font-family:inherit;cursor:pointer;padding:2px;}
+.tab-pill{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 14px 5px;border-radius:var(--r2);transition:background .2s var(--ease),box-shadow .2s var(--ease);}
+.tab[aria-current="page"] .tab-pill{background:var(--press-bg);box-shadow:var(--press-shadow);}
+.tab-lbl{font-size:11px;font-weight:500;color:var(--ink-2);letter-spacing:.01em;}
+.tab[aria-current="page"] .tab-lbl{color:var(--ink);font-weight:600;}
+.tab svg{display:block;}
+
+/* v6 · reflection-ready row (S3 record well / S7 continuum head) */
+.refl-row{display:none;width:100%;align-items:center;gap:9px;min-height:44px;margin-top:4px;padding:8px 2px 4px;border:none;border-top:1px solid var(--border);background:none;font-family:inherit;cursor:pointer;text-align:left;}
+.refl-row.show{display:flex;}
+.refl-dot{flex:0 0 7px;width:7px;height:7px;border-radius:50%;background:var(--teal);}
+.refl-txt{flex:1;font-size:14px;font-weight:500;color:var(--ink-2);}
+.refl-row svg{flex:0 0 auto;color:var(--ink-3);}
+.refl-row:hover .refl-txt{color:var(--ink);}
+
+/* v6 · design-library specimens */
+.spec{margin-top:26px;}
+.spec-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.spec-box{background:var(--paper-raised);border:1px solid var(--border);border-radius:var(--r3);padding:16px;box-shadow:var(--raise-shadow);}
+.spec-note{margin-top:9px;font-size:12px;line-height:1.55;color:var(--ink-3);}
+.jc-row{display:flex;gap:10px;padding:11px 0;border-top:1px solid var(--border);font-size:13px;line-height:1.5;color:var(--ink-2);}
+.jc-row:first-of-type{border-top:none;padding-top:2px;}
+.jc-row b{color:var(--ink);font-weight:600;}
+.jc-tag{flex:0 0 52px;font-size:10.5px;font-weight:600;letter-spacing:.08em;color:var(--teal-deep);padding-top:2px;}
+.crail{display:flex;gap:8px;align-items:stretch;}
+.crail-rows{flex:1;}
+.crow{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.crow:first-child{margin-top:0;}
+.crow-lbl{flex:0 0 46px;font-size:10px;font-weight:500;color:var(--ink-3);text-align:right;}
+.crow svg{display:block;flex:1;}
+.mrail{flex:0 0 36px;display:flex;flex-direction:column;border-left:1px solid var(--border);}
+.mrail button{flex:1 1 auto;min-height:44px;min-width:36px;background:none;border:none;font-family:inherit;font-size:10.5px;font-weight:600;letter-spacing:.1em;color:var(--ink-3);cursor:pointer;border-radius:var(--r1);}
+.mrail button[aria-current="true"]{color:var(--ink-2);}
+.mrail button:hover{background:var(--border);}
+
+/* ================= v6 · SLICE 2 ================= */
+/* exercise screen (S20) */
+.exer{padding-top:2px;}
+.screen.active.exer{display:flex;flex-direction:column;min-height:100%;}
+.phone.exer-open .tabbar{display:none;}  /* chrome-minimal: the pill remains, the tab bar does not */
+.exer-head{display:flex;justify-content:flex-end;padding:6px 0 0;}
+.exer-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:10px 0 20px;}
+.breath-svg{display:block;}
+.breath-form{transform-origin:130px 130px;transform:scale(.52);}
+.breath-phase{font-family:"Fraunces",serif;font-weight:600;font-size:28px;line-height:1.25;color:var(--ink);text-align:center;}
+.breath-cues{display:flex;gap:8px;font-size:17px;font-weight:500;color:var(--ink-2);}
+.breath-cues b{color:var(--ink);font-weight:600;}
+.exer-stop{align-self:center;margin-bottom:18px;}
+/* grounding prompt scale specimen */
+.ground-prompt{font-family:"Fraunces",serif;font-weight:600;font-size:28px;line-height:1.25;color:var(--ink);}
+/* helpline rows (S11) */
+.hl-row{display:flex;align-items:center;gap:12px;min-height:56px;padding:10px 0;border-top:1px solid var(--border);}
+.hl-row:first-of-type{border-top:none;}
+.hl-info{flex:1;min-width:0;}
+.hl-name{font-size:15px;font-weight:600;color:var(--ink);line-height:1.3;}
+.hl-desc{font-size:13px;color:var(--ink-2);line-height:1.35;margin-top:1px;}
+.hl-act{flex:0 0 auto;display:flex;align-items:center;justify-content:center;min-height:44px;min-width:64px;padding:0 16px;border-radius:999px;border:1.5px solid var(--crisis);background:transparent;color:var(--crisis);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;}
+.hl-act:active{transform:scale(.97);}
+.crisis-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:60px;border:none;border-radius:var(--r3);background:var(--crisis);color:#fff;font-family:inherit;font-size:17px;font-weight:600;cursor:pointer;}
+.phone[data-theme="night"] .crisis-primary{color:#18172A;}
+/* searchable list (S12 / Navigator search) */
+.slist-field{display:flex;align-items:center;gap:9px;min-height:48px;padding:0 14px;border:1px solid var(--border-strong);border-radius:var(--r2);background:var(--paper-raised);}
+.slist-field svg{flex:0 0 auto;color:var(--ink-3);}
+.slist-field input{flex:1;border:none;background:none;font-family:inherit;font-size:15px;color:var(--ink);outline:none;}
+.slist-field:focus-within{border-color:var(--ink-2);}
+.slist-row{display:flex;align-items:center;width:100%;min-height:44px;padding:10px 4px;border:none;border-top:1px solid var(--border);background:none;font-family:inherit;font-size:15px;color:var(--ink);cursor:pointer;text-align:left;}
+.slist-row:first-of-type{border-top:none;}
+.slist-row:hover{background:var(--border);}
+/* mascot size step specimen */
+.msizes{display:flex;align-items:flex-end;gap:30px;justify-content:center;padding:6px 0 2px;}
+.msizes figure{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.msizes figcaption{font-size:11px;color:var(--ink-3);}
+
+/* ================= v6 · SLICE 3 ================= */
+/* oversized acute chip (Navigator) */
+.xchip{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:60px;padding:0 20px;margin-top:10px;border-radius:999px;border:1.5px solid var(--border-strong);background:var(--paper-raised);color:var(--ink);font-family:inherit;font-size:17px;font-weight:600;cursor:pointer;text-align:left;box-shadow:var(--raise-shadow);}
+.xchip:active{transform:scale(.985);}
+.xchip .xcheck{display:none;color:var(--teal-deep);}
+.xchip[aria-pressed="true"]{border-color:var(--teal-deep);background:var(--press-bg);box-shadow:var(--press-shadow);}
+.xchip[aria-pressed="true"] .xcheck{display:block;}
+/* relevance phrase (S18) — text only, ever */
+.rel-phrase{font-size:13px;font-weight:600;color:var(--ink-2);letter-spacing:.02em;}
+/* 6-digit code field (S35) */
+.codefield{display:flex;gap:8px;justify-content:flex-start;}
+.codefield input{width:44px;height:54px;border:1.5px solid var(--border-strong);border-radius:var(--r2);background:var(--paper-raised);font-family:inherit;font-size:22px;font-weight:600;color:var(--ink);text-align:center;outline:none;}
+.codefield input:focus{border-color:var(--ink-2);}
+.codefield.err input{border-color:var(--crisis);}
+/* skeleton terrain (S35 sign-in sync) — static in both motion modes */
+.skel-dot{fill:var(--clay);}
+.skel-lbl{fill:var(--clay);}
+/* checkbox row (S37) */
+.cb-row{display:flex;align-items:flex-start;gap:12px;width:100%;min-height:52px;padding:12px 2px;border:none;background:none;font-family:inherit;cursor:pointer;text-align:left;}
+.cb-box{flex:0 0 24px;width:24px;height:24px;margin-top:1px;border:1.5px solid var(--border-strong);border-radius:6px;background:var(--paper-raised);display:flex;align-items:center;justify-content:center;color:transparent;}
+.cb-row[aria-checked="true"] .cb-box{background:var(--ink);border-color:var(--ink);color:var(--paper-base);}
+.cb-lbl{flex:1;font-size:15px;line-height:1.4;color:var(--ink);}
+.cb-sub{display:block;font-size:13px;color:var(--ink-2);margin-top:2px;}
+/* radio row (S45 / S47) */
+.rd-row{display:flex;align-items:flex-start;gap:12px;width:100%;min-height:52px;padding:12px 2px;border:none;background:none;font-family:inherit;cursor:pointer;text-align:left;}
+.rd-dot{flex:0 0 22px;width:22px;height:22px;margin-top:1px;border:1.5px solid var(--border-strong);border-radius:50%;background:var(--paper-raised);display:flex;align-items:center;justify-content:center;}
+.rd-dot::after{content:"";width:10px;height:10px;border-radius:50%;background:transparent;}
+.rd-row[aria-checked="true"] .rd-dot{border-color:var(--ink);}
+.rd-row[aria-checked="true"] .rd-dot::after{background:var(--ink);}
+/* destructive style (S47/S48) — rust outline, never filled; siblings always equal geometry */
+.btn-pair{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+.btn-eq{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:999px;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;background:transparent;}
+.btn-eq.destruct{border:1.5px solid var(--crisis);color:var(--crisis);}
+.btn-eq.keep{border:1.5px solid var(--border-strong);color:var(--ink);}
+.btn-eq:active{transform:scale(.985);}
+
+/* ================= v6 · SLICE 4 ================= */
+/* WV loading treatment (C0.6) — static page skeleton, settle on entry, no spinner ever */
+.wvskel{padding:6px 2px;}
+.wvskel .wv-bar{height:18px;border-radius:6px;background:var(--clay-2);width:62%;}
+.wvskel .wv-line{height:9px;border-radius:4.5px;background:var(--clay);margin-top:10px;}
+.wvskel .wv-card{height:64px;border-radius:var(--r3);background:var(--clay);margin-top:14px;}
+.wvskel .wv-slow{margin-top:12px;font-size:13px;color:var(--ink-2);}
+.anim .wv-loaded{opacity:0;animation:settle .42s var(--ease) forwards;}  /* D-18: one settle, no stagger */
+/* PDF template specimen — paper is white, ink only; the app's paper tint stays on screens */
+.pdfpage{background:#FFFFFF;border:1px solid var(--border-strong);border-radius:4px;padding:22px 20px;box-shadow:var(--raise-shadow);color:#2E2C28;}
+.phone[data-theme="night"] .pdfpage{color:#2E2C28;}  /* the document does not have a night mode */
+.pdf-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(46,44,40,.18);padding-bottom:8px;}
+.pdf-name{font-family:"Fraunces",serif;font-weight:600;font-size:17px;}
+.pdf-range{font-size:10px;color:#6B6760;margin-top:2px;}
+.pdf-mark{font-family:"Fraunces",serif;font-weight:600;font-size:11px;color:#6B6760;}
+.pdf-sect{font-size:8.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#6B6760;margin:14px 0 6px;}
+.pdf-entry{display:flex;gap:10px;font-size:10px;line-height:1.5;padding:4px 0;border-top:1px solid rgba(46,44,40,.10);}
+.pdf-entry:first-of-type{border-top:none;}
+.pdf-date{flex:0 0 64px;color:#6B6760;}
+.pdf-state{flex:0 0 60px;font-weight:600;}
+.pdf-note{flex:1;color:#6B6760;font-style:italic;}
+.pdf-foot{margin-top:16px;padding-top:8px;border-top:1px solid rgba(46,44,40,.18);display:flex;justify-content:space-between;font-size:8.5px;color:#6B6760;}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;}
+  [data-settle]{opacity:1 !important;}
+}
+:focus-visible{outline:2px solid var(--teal-deep);outline-offset:2px;}
+/* V8 · focusRing token, register/context-aware: crisis = ink (zero teal in crisis), auth = ink2 (teal out of state marks) */
+#view-crisis :focus-visible,.hl-act:focus-visible,.crisis-call:focus-visible,.crisis-primary:focus-visible,.slist-row:focus-visible,.slist-field:focus-within{outline-color:var(--ink);}
+.codefield input:focus-visible{outline-color:var(--ink-2);}
+</style>
+</head>
+<body>
+
+<div class="phone anim" id="phone" data-theme="light">
+  <div class="statusbar">
+    <span>9:41</span>
+    <svg width="46" height="12" viewBox="0 0 46 12" fill="currentColor" aria-hidden="true"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/><rect x="24" y="1" width="19" height="10" rx="3" fill="none" stroke="currentColor"/><rect x="26" y="3" width="13" height="6" rx="1.5"/></svg>
+  </div>
+
+  <div class="viewport" id="viewport">
+
+    <!-- ================= HOME ================= -->
+    <section class="screen active" id="view-home">
+      <header class="home-head">
+        <span class="wordmark"><span class="wm-a">Psy</span><span class="wm-b">chage</span></span>
+        <div class="head-actions">
+          <button class="help-pill" onclick="go('crisis')">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="2.6"/><path d="M8 1.5v4M8 10.5v4M1.5 8h4M10.5 8h4" opacity=".9"/></svg>
+            Help now
+          </button>
+          <button class="avatar" id="avatarBtn" onclick="go('profile')" aria-label="Your profile">A</button>
+        </div>
+      </header>
+
+      <!-- STATE ZONE -->
+      <div class="state-zone">
+        <div class="greet-row">
+          <div class="greet-text">
+            <h1 class="f-display" id="greeting">Good evening,<br>Amara</h1>
+            <p class="f-voice" id="statusLine">Not yet checked in today.</p>
+          </div>
+          <div class="mascot" id="mascot" aria-hidden="true">
+            <svg width="76" height="88" viewBox="0 0 80 92">
+              <ellipse cx="40" cy="86" rx="20" ry="4" fill="rgba(46,44,40,.08)"/>
+              <rect x="26" y="52" width="28" height="34" rx="13" fill="var(--clay)" stroke="var(--border)"/>
+              <circle cx="40" cy="30" r="26" fill="var(--clay)" stroke="var(--border)"/>
+              <circle cx="32" cy="30" r="2.6" fill="var(--clay-ink)"/>
+              <circle cx="48" cy="30" r="2.6" fill="var(--clay-ink)"/>
+              <circle cx="40" cy="62" r="3.4" fill="var(--teal)"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="record-well" id="stateZone">
+          <div class="record-head">
+            <span class="t-label" id="recordLabel">Your last 7 days</span>
+            <button class="link" onclick="stub('History','Your full check-in record, week by week — yours to look back on, never graded.')">History</button>
+          </div>
+          <svg id="terrain" viewBox="0 0 318 86" aria-label="Seven day check-in record"></svg>
+          <button class="refl-row" id="reflRow" onclick="openReflection()">
+            <span class="refl-dot" aria-hidden="true"></span>
+            <span class="refl-txt">This week's reflection is ready.</span>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+          </button>
+        </div>
+
+        <button class="cta" id="checkinBtn" onclick="openSheet()">Check in — 30 seconds</button>
+
+        <!-- the bridge: appears only after a Low / Very low entry -->
+        <div class="bridge" id="bridge">
+          <p class="f-voice">Would something steadying help right now?</p>
+          <div class="bridge-row">
+            <span class="chip" role="button" tabindex="0" onclick="openBreath('home')">Breathing <span style="color:var(--ink-3);font-weight:400;">· 1 min</span></span>
+            <button class="link" onclick="hideBridge()" style="padding:10px 12px;">Not now</button>
+          </div>
+          <p class="bridge-crisis" id="bridgeCrisis" style="display:none;">If it feels like too much, <strong>Help now</strong> at the top of this page is always there — people you can reach, right away.</p>
+        </div>
+
+      </div>
+
+      <!-- RIGHT NOW -->
+      <div class="sect">
+        <div class="sect-head"><span class="t-label">When you need something now</span></div>
+        <div class="bento" id="rightNow">
+
+          <button class="tile wide" id="tile-toolkit" onclick="stub('Toolkit','Short guided exercises to steady yourself — breathing, grounding, and gentle body practices. Nothing to set up; press start.')">
+            <span class="tile-top">
+              <span>
+                <span class="f-heading">Steady yourself right now</span><br>
+                <span class="tile-name">Toolkit</span>
+              </span>
+              <svg class="pict sm" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="24" r="8" fill="var(--clay)"/><circle cx="11" cy="13" r="5.5" fill="var(--clay-2)"/><circle cx="22.5" cy="11" r="4" fill="var(--clay)"/><circle cx="17" cy="24" r="2" fill="var(--teal)"/></svg>
+            </span>
+            <span class="mini detail">
+              <span class="mini-card" role="button" tabindex="0" onclick="event.stopPropagation();openBreath('home')">
+                <svg viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="13" fill="none" stroke="var(--clay-2)" stroke-width="2"/><circle cx="17" cy="17" r="8" fill="none" stroke="var(--clay-2)" stroke-width="2" opacity=".55"/><circle cx="17" cy="17" r="3" fill="var(--teal)"/></svg>
+                <span class="mini-name" id="exer1Name">Breathing</span>
+                <span class="mini-min" id="exer1Min">1 min</span>
+              </span>
+              <span class="mini-card" role="button" tabindex="0" onclick="event.stopPropagation();stub('Grounding — 2 minutes','A simple noticing exercise: what you can see, touch, and hear, to bring you back to the room.')">
+                <svg viewBox="0 0 34 34" aria-hidden="true"><path d="M4 26h26" stroke="var(--clay-2)" stroke-width="2" stroke-linecap="round"/><ellipse cx="17" cy="20" rx="8" ry="6.5" fill="var(--clay)"/><circle cx="17" cy="20" r="2" fill="var(--teal)"/></svg>
+                <span class="mini-name">Grounding</span>
+                <span class="mini-min">2 min</span>
+              </span>
+              <span class="mini-card" role="button" tabindex="0" onclick="event.stopPropagation();stub('Body scan — 3 minutes','A slow pass through the body to find and soften tension. Lying down or sitting, either works.')">
+                <svg viewBox="0 0 34 34" aria-hidden="true"><rect x="11" y="4" width="12" height="26" rx="6" fill="var(--clay)"/><rect x="11" y="14" width="12" height="5" rx="2.5" fill="var(--clay-2)"/><circle cx="17" cy="16.5" r="2" fill="var(--teal)"/></svg>
+                <span class="mini-name">Body scan</span>
+                <span class="mini-min">3 min</span>
+              </span>
+            </span>
+          </button>
+
+          <button class="tile" id="tile-navigator" onclick="stub('Symptom Navigator','Pick what you\u2019re feeling — in plain words — and see what those experiences commonly mean. Common, not \u201cwrong.\u201d')">
+            <svg class="pict" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="13" fill="var(--clay)"/><path d="M17 17l5.5-6.5" stroke="var(--clay-ink)" stroke-width="1.8" stroke-linecap="round"/><circle cx="17" cy="17" r="2" fill="var(--teal)"/></svg>
+            <span class="f-heading">Make sense of what you feel</span>
+            <span class="tile-name">Symptom Navigator</span>
+          </button>
+
+          <button class="tile" id="tile-mindmate" onclick="stub('MindMate','A companion that listens and explains in plain language. It never diagnoses, and it will always point you to people when people are what you need.')">
+            <svg class="pict" viewBox="0 0 34 34" aria-hidden="true"><path d="M5 9a6 6 0 016-6h12a6 6 0 016 6v8a6 6 0 01-6 6H14l-6 5v-5a6 6 0 01-3-5.2z" fill="var(--clay)"/><circle cx="12" cy="13" r="1.7" fill="var(--clay-ink)"/><circle cx="17.5" cy="13" r="1.7" fill="var(--clay-ink)"/><circle cx="23" cy="13" r="1.7" fill="var(--teal)"/></svg>
+            <span class="f-heading">Talk it through</span>
+            <span class="tile-name">MindMate</span>
+          </button>
+
+          <button class="tile wide slim" id="tile-clarity" onclick="stub('Clarity Score','A 5-minute, science-based snapshot of how you\u2019re doing right now. Your answers stay on your phone.')">
+            <span class="stack">
+              <span class="f-heading">Understand how you're doing</span>
+              <span class="tile-name">Clarity Score · 5 min · stays on your phone</span>
+            </span>
+            <svg class="pict" viewBox="0 0 34 34" aria-hidden="true"><path d="M4 24a13 13 0 0126 0z" fill="var(--clay)"/><path d="M17 24l6-7" stroke="var(--clay-ink)" stroke-width="1.8" stroke-linecap="round"/><circle cx="17" cy="24" r="2" fill="var(--teal)"/></svg>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- v6 R3.1 · PICK UP WHERE YOU LEFT OFF — resume rail (replaces the single Continue row) -->
+      <div class="sect" id="pickup">
+        <div class="sect-head"><span class="t-label">Pick up where you left off</span></div>
+        <div class="toprail" role="group" aria-label="Pick up where you left off — scroll sideways for more">
+          <button class="cont-card" onclick="stub('Building Your Anxiety Management Toolkit','Pick up where you left off — practical tools for steadying anxiety, one step at a time.')">
+            <span class="cont-cover mood-a">
+              <svg class="cont-blob" viewBox="0 0 120 140" aria-hidden="true"><ellipse cx="64" cy="82" rx="44" ry="54" fill="#fff" opacity=".9"/></svg>
+              <span class="cont-brand">Psychage</span>
+              <span class="cont-title">Building Your Anxiety Management Toolkit</span>
+            </span>
+            <span class="cont-foot">
+              <span class="cont-bar"><span class="cont-fill" style="width:62%"></span></span>
+              <span class="cont-meta">62% · 3 min left</span>
+            </span>
+          </button>
+          <button class="cont-card" onclick="stub('Meaning After a Hard Year','Pick up where you left off — small, real ways to rebuild a sense of meaning, at your own pace.')">
+            <span class="cont-cover mood-b">
+              <svg class="cont-blob" viewBox="0 0 120 140" aria-hidden="true"><ellipse cx="64" cy="82" rx="44" ry="54" fill="#fff" opacity=".9"/></svg>
+              <span class="cont-brand">Psychage</span>
+              <span class="cont-title">Meaning after a hard year</span>
+            </span>
+            <span class="cont-foot">
+              <span class="cont-bar"><span class="cont-fill" style="width:28%"></span></span>
+              <span class="cont-meta">28% · 4 min left</span>
+            </span>
+          </button>
+          <button class="cont-card" onclick="stub('Alexithymia: When You Can’t Name a Feeling','Pick up where you left off — why some feelings are hard to name, and what helps.')">
+            <span class="cont-cover mood-c">
+              <svg class="cont-blob" viewBox="0 0 120 140" aria-hidden="true"><ellipse cx="64" cy="82" rx="44" ry="54" fill="#fff" opacity=".9"/></svg>
+              <span class="cont-brand">Psychage</span>
+              <span class="cont-title">When you can’t name a feeling</span>
+            </span>
+            <span class="cont-foot">
+              <span class="cont-bar"><span class="cont-fill" style="width:45%"></span></span>
+              <span class="cont-meta">45% · 5 min left</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- LEARN · part 1 — top read from each niche (horizontal rail, user-scrolled) -->
+      <div class="sect" data-settle="1">
+        <div class="sect-head"><span class="t-label">Top reads by topic</span></div>
+        <div class="toprail" role="group" aria-label="Top reads by topic — scroll sideways for more">
+          <button class="tread" onclick="stub('What a panic attack is — and isn\u2019t','The body\u2019s alarm system, why it misfires, and what helps in the moment.')">
+            <span class="tread-cover"><svg aria-hidden="true" viewBox="0 0 100 62"><circle cx="50" cy="31" r="20" fill="none" stroke="var(--clay-2)" stroke-width="3.5"/><circle cx="50" cy="31" r="12" fill="none" stroke="var(--clay-2)" stroke-width="3.5" opacity=".55"/><circle cx="50" cy="31" r="4.5" fill="var(--teal)"/></svg><span class="tread-tag">Anxiety &amp; stress</span><span class="tread-time">4 min</span></span>
+            <span class="tread-body"><span class="read-title">What a panic attack is — and isn't</span></span>
+          </button>
+          <button class="tread" onclick="stub('Why worry gets louder at night','What happens in the mind at night, why it\u2019s common, and what gently helps.')">
+            <span class="tread-cover"><svg aria-hidden="true" viewBox="0 0 100 62"><circle cx="47" cy="31" r="18" fill="var(--clay-2)"/><circle cx="56" cy="26" r="15" fill="var(--clay)"/><circle cx="40" cy="20" r="2.8" fill="var(--teal)"/></svg><span class="tread-tag">Sleep</span><span class="tread-time">4 min</span></span>
+            <span class="tread-body"><span class="read-title">Why worry gets louder at night</span></span>
+          </button>
+          <button class="tread" onclick="stub('Low days are common. Here\u2019s what they are','What a low day is, how common it is, and when it\u2019s worth talking to someone.')">
+            <span class="tread-cover"><svg aria-hidden="true" viewBox="0 0 100 62"><path d="M24 24 Q50 50 76 38" fill="none" stroke="var(--clay-2)" stroke-width="3.5" stroke-linecap="round"/><circle cx="76" cy="38" r="4.5" fill="var(--teal)"/></svg><span class="tread-tag">Low mood</span><span class="tread-time">6 min</span></span>
+            <span class="tread-body"><span class="read-title">Low days are common. Here's what they are</span></span>
+          </button>
+          <button class="tread" onclick="stub('How to say what you need without a fight','A short, practical read on asking for things in close relationships — scripts included.')">
+            <span class="tread-cover"><svg aria-hidden="true" viewBox="0 0 100 62"><circle cx="42" cy="31" r="14" fill="var(--clay-2)"/><circle cx="58" cy="31" r="14" fill="var(--clay-ink)" opacity=".22"/><circle cx="50" cy="31" r="4" fill="var(--teal)"/></svg><span class="tread-tag">Relationships</span><span class="tread-time">5 min</span></span>
+            <span class="tread-body"><span class="read-title">How to say what you need without a fight</span></span>
+          </button>
+          <button class="tread" onclick="stub('Living alongside a loss','What grief does over time, why it has no schedule, and what helps you carry it.')">
+            <span class="tread-cover"><svg aria-hidden="true" viewBox="0 0 100 62"><path d="M50 13 A18 18 0 1 1 41 15" fill="none" stroke="var(--clay-2)" stroke-width="3.5" stroke-linecap="round"/><circle cx="50" cy="31" r="4.5" fill="var(--teal)"/></svg><span class="tread-tag">Grief</span><span class="tread-time">5 min</span></span>
+            <span class="tread-body"><span class="read-title">Living alongside a loss</span></span>
+          </button>
+          <button class="tread" onclick="stub('When work stops switching off','Burnout, pressure, and boundaries — what they are and where to start.')">
+            <span class="tread-cover"><svg aria-hidden="true" viewBox="0 0 100 62"><rect x="33" y="24" width="9" height="20" rx="3" fill="var(--clay-2)"/><rect x="46" y="18" width="9" height="26" rx="3" fill="var(--clay-ink)" opacity=".22"/><rect x="59" y="28" width="9" height="16" rx="3" fill="var(--clay-2)"/><circle cx="50" cy="50" r="4" fill="var(--teal)"/></svg><span class="tread-tag">Stress at work</span><span class="tread-time">5 min</span></span>
+            <span class="tread-body"><span class="read-title">When work stops switching off</span></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- v6 R3.1 · MOST READ THIS MONTH — ranked social proof (community-wide, not personalized) -->
+      <div class="sect" data-settle="2">
+        <div class="sect-head"><span class="t-label">Most read this month</span></div>
+        <div class="mostread">
+          <button class="mr-row" onclick="stub('Gender Identity Development','What the research says about how gender identity develops — in plain, respectful language.')">
+            <span class="mr-num" aria-hidden="true">01</span>
+            <span class="mr-body"><span class="mr-title">Gender Identity Development</span><span class="mr-meta">Men's mental health<span class="dot" aria-hidden="true">·</span>5 min</span></span>
+          </button>
+          <button class="mr-row" onclick="stub('Building Your Anxiety Management Toolkit','Practical tools for steadying anxiety, one step at a time.')">
+            <span class="mr-num" aria-hidden="true">02</span>
+            <span class="mr-body"><span class="mr-title">Building Your Anxiety Management Toolkit</span><span class="mr-meta">Anxiety &amp; stress<span class="dot" aria-hidden="true">·</span>5 min</span></span>
+          </button>
+          <button class="mr-row" onclick="stub('Alexithymia: When You Can’t Name a Feeling','Why some feelings are hard to name, how common it is, and what gently helps.')">
+            <span class="mr-num" aria-hidden="true">03</span>
+            <span class="mr-body"><span class="mr-title">Alexithymia: When You Can't Name a Feeling</span><span class="mr-meta">Emotional regulation<span class="dot" aria-hidden="true">·</span>8 min</span></span>
+          </button>
+          <button class="mr-row" onclick="stub('Animal-Assisted Therapy and Dementia','How animals support wellbeing in later life, and what the evidence shows.')">
+            <span class="mr-num" aria-hidden="true">04</span>
+            <span class="mr-body"><span class="mr-title">Animal-Assisted Therapy and Dementia</span><span class="mr-meta">Aging &amp; late-life<span class="dot" aria-hidden="true">·</span>6 min</span></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- CARE AND LEARNING -->
+      <div class="sect" data-settle="2">
+        <div class="sect-head"><span class="t-label">Care and learning</span></div>
+        <div class="destlist">
+
+          <button class="dest-row" onclick="go('findcare')">
+            <svg class="pict" viewBox="0 0 34 34" aria-hidden="true"><path d="M13 5h8v8h8v8h-8v8h-8v-8H5v-8h8z" fill="var(--clay)" stroke="var(--border)" stroke-linejoin="round"/><circle cx="17" cy="17" r="2" fill="var(--teal)"/></svg>
+            <span class="dest-stack">
+              <span class="f-heading">Find professional care</span>
+              <span class="dest-sub">400,000+ verified providers</span>
+            </span>
+            <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+          </button>
+
+          <button class="dest-row" onclick="go('library')">
+            <svg class="pict" viewBox="0 0 34 34" aria-hidden="true"><rect x="5" y="7" width="13" height="22" rx="3" fill="var(--clay-2)"/><rect x="17" y="5" width="12" height="24" rx="3" fill="var(--clay)" stroke="var(--border)"/><circle cx="23" cy="11" r="1.7" fill="var(--teal)"/></svg>
+            <span class="dest-stack">
+              <span class="f-heading">Browse the Library</span>
+              <span class="dest-sub">Plain answers, reviewed by clinicians</span>
+            </span>
+            <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+          </button>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================= CRISIS ================= -->
+    <section class="screen" id="view-crisis">
+      <div class="stub-head">
+        <button class="backbtn" onclick="go('home')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+          Back
+        </button>
+      </div>
+      <div class="stub-body">
+        <h2 class="f-title">Help now</h2>
+        <p class="t-body" style="margin-top:12px;">If you are in danger, or thinking about ending your life, you deserve help right now. You are not alone in this.</p>
+        <a class="crisis-primary" href="tel:" style="margin-top:24px;text-decoration:none;">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 2.5l2.5 1 .8 3-1.8 1.6a11 11 0 004.4 4.4l1.6-1.8 3 .8 1 2.5-1.6 1.6c-5.5.6-12.2-6.1-11.6-11.6z" stroke-linejoin="round"/></svg>
+          Call your local emergency number
+        </a>
+        <p class="t-sub" style="margin-top:20px;">Free, confidential helplines are also available in most countries. We can show you the ones for where you are.</p>
+        <p class="stub-note">Mockup stub — production screen lists localized hotlines and text lines.</p>
+      </div>
+    </section>
+
+    <!-- ================= FIND CARE (guided match) ================= -->
+    <section class="screen" id="view-findcare">
+      <div class="exer-head" style="display:flex;align-items:center;justify-content:space-between;">
+        <button class="backbtn" onclick="fcBack()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+          Back
+        </button>
+        <button class="help-pill" onclick="go('crisis')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="2.6"/><path d="M8 1.5v4M8 10.5v4M1.5 8h4M10.5 8h4" opacity=".9"/></svg>
+          Help now
+        </button>
+      </div>
+
+      <!-- STEP 0 — intro -->
+      <div class="fc-step active" data-step="0">
+        <div class="fc-intro">
+          <svg class="pict" viewBox="0 0 34 34" aria-hidden="true"><path d="M13 5h8v8h8v8h-8v8h-8v-8H5v-8h8z" fill="var(--clay)" stroke="var(--border)" stroke-linejoin="round"/><circle cx="17" cy="17" r="2" fill="var(--teal)"/></svg>
+          <h2 class="f-title">Let's find someone right for you</h2>
+          <p class="t-sub">A few quick questions, then we'll show who fits. Your answers stay on your phone.</p>
+        </div>
+        <div class="fc-cta-wrap">
+          <button class="cta" onclick="fcGo(1)">Start</button>
+          <button class="link" onclick="go('finddir')">Prefer to browse? See all providers</button>
+        </div>
+      </div>
+
+      <!-- STEP 1 — focus areas (multi-select) -->
+      <div class="fc-step" data-step="1">
+        <span class="fc-stepnum">1 of 3</span>
+        <p class="f-heading fc-q">What would you like support with?</p>
+        <p class="t-hint">Choose any that fit, or skip if you're not sure.</p>
+        <div class="fc-chips">
+          <button class="xchip" aria-pressed="true" onclick="togglePress(this)">Anxiety &amp; stress <svg class="xcheck" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3.5 9.5l4 4 7-8"/></svg></button>
+          <button class="xchip" aria-pressed="false" onclick="togglePress(this)">Low mood <svg class="xcheck" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3.5 9.5l4 4 7-8"/></svg></button>
+          <button class="xchip" aria-pressed="false" onclick="togglePress(this)">Relationships <svg class="xcheck" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3.5 9.5l4 4 7-8"/></svg></button>
+          <button class="xchip" aria-pressed="false" onclick="togglePress(this)">Sleep <svg class="xcheck" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3.5 9.5l4 4 7-8"/></svg></button>
+          <button class="xchip" data-acuity="high" aria-pressed="false" onclick="togglePress(this)">Trauma <svg class="xcheck" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3.5 9.5l4 4 7-8"/></svg></button>
+        </div>
+        <!-- acuity trapdoor: a heavy focus reveals a soft bridge before advancing (reuses the Navigator .bridge) -->
+        <div class="bridge" id="fcBridge">
+          <p class="f-voice">That can be a lot to carry.</p>
+          <p class="bridge-crisis" style="display:block;">Finding the right person matters, and it can take a little time. If you need someone before then, they're here now.</p>
+          <div class="bridge-row">
+            <span class="chip" role="button" tabindex="0" onclick="go('crisis')">Reach someone now</span>
+            <span class="chip" role="button" tabindex="0" onclick="openBreath('findcare')">Breathing <span style="color:var(--ink-3);font-weight:400;">· 1 min</span></span>
+          </div>
+        </div>
+        <div class="fc-cta-wrap"><button class="cta" onclick="fcGo(2)">Continue</button></div>
+      </div>
+
+      <!-- STEP 2 — modality (single-select, advance on tap; no selected state per D-16) -->
+      <div class="fc-step" data-step="2">
+        <span class="fc-stepnum">2 of 3</span>
+        <p class="f-heading fc-q">How would you like to meet?</p>
+        <div class="fc-chips">
+          <button class="xchip" onclick="fcGo(3)">By video</button>
+          <button class="xchip" onclick="fcGo(3)">In person</button>
+          <button class="xchip" onclick="fcGo(3)">Either is fine</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 — timing (single-select, advance on tap) -->
+      <div class="fc-step" data-step="3">
+        <span class="fc-stepnum">3 of 3</span>
+        <p class="f-heading fc-q">When would you like to start?</p>
+        <div class="fc-chips">
+          <button class="xchip" onclick="fcGo(4)">As soon as I can</button>
+          <button class="xchip" onclick="fcGo(4)">In the next few weeks</button>
+          <button class="xchip" onclick="fcGo(4)">Just exploring for now</button>
+        </div>
+      </div>
+
+      <!-- STEP 4 — matched results (calm rows: avatar · name · credential · one why-line) -->
+      <div class="fc-step" data-step="4">
+        <h2 class="f-title">People who fit what you said</h2>
+        <p class="t-sub">Each one is verified. You can change your answers any time.</p>
+        <div class="fc-list">
+          <button class="fc-prov" onclick="openProvider('amina','findcare')">
+            <span class="fc-ava" aria-hidden="true">A</span>
+            <span class="fc-body">
+              <span class="fc-name">Dr. Amina Rahman</span>
+              <span class="fc-cred">Clinical Psychologist, Ph.D.</span>
+              <span class="fc-why">Works with anxiety · By video · <span class="vmark">Verified</span> · Opens Thursday</span>
+            </span>
+            <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+          </button>
+          <button class="fc-prov" onclick="openProvider('daniel','findcare')">
+            <span class="fc-ava" aria-hidden="true">D</span>
+            <span class="fc-body">
+              <span class="fc-name">Daniel O'Connor</span>
+              <span class="fc-cred">Licensed Therapist, LCSW</span>
+              <span class="fc-why">Works with anxiety · By video · <span class="vmark">Verified</span> · Opens next week</span>
+            </span>
+            <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+          </button>
+          <button class="fc-prov" onclick="openProvider('maya','findcare')">
+            <span class="fc-ava" aria-hidden="true">M</span>
+            <span class="fc-body">
+              <span class="fc-name">Maya Feldman</span>
+              <span class="fc-cred">Marriage &amp; Family Therapist, LMFT</span>
+              <span class="fc-why">Works with stress · By video · <span class="vmark">Verified</span> · Opens this week</span>
+            </span>
+            <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+          </button>
+        </div>
+        <div class="fc-cta-wrap">
+          <button class="link" onclick="go('finddir')">See all 284 verified providers</button>
+        </div>
+        <p class="t-cap" style="margin-top:18px;">Every provider is verified before they appear. Listings aren't ranked by payment.</p>
+      </div>
+    </section>
+
+    <!-- ================= v6 R3.1 · FIND CARE — location / state gate ================= -->
+    <section class="screen" id="view-find">
+      <div class="exer-head" style="display:flex;align-items:center;justify-content:flex-end;">
+        <button class="help-pill" onclick="go('crisis')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="2.6"/><path d="M8 1.5v4M8 10.5v4M1.5 8h4M10.5 8h4" opacity=".9"/></svg>
+          Help now
+        </button>
+      </div>
+      <div class="fg-lead">
+        <h2 class="f-display" style="font-size:30px;">Find care</h2>
+        <p class="t-sub" style="margin-top:8px;">Browse NPI-verified providers licensed in your state. A listing is information, not a recommendation.</p>
+      </div>
+      <div class="fg-badge" aria-hidden="true">
+        <svg width="50" height="50" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 1.7l5.2 2v3.4c0 3.2-2.2 5.4-5.2 6.5-3-1.1-5.2-3.3-5.2-6.5V3.7z" stroke-linejoin="round"/><path d="M5.8 8l1.6 1.6L10.4 6"/></svg>
+      </div>
+      <div class="fg-cta">
+        <button class="cta" onclick="go('finddir')">Use my location</button>
+        <button class="link" onclick="stub('Enter your state','Choose your state so Psychage only shows providers who can legally see you. You can change it anytime.')">Enter my state instead</button>
+      </div>
+      <p class="t-cap" style="text-align:center;margin-top:14px;">State sets who can legally see you. Change it anytime.</p>
+    </section>
+
+    <!-- ================= FIND tab — personal directory ================= -->
+    <section class="screen" id="view-finddir">
+      <div class="exer-head" style="display:flex;align-items:center;justify-content:space-between;">
+        <button class="backbtn" onclick="go('find')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+          Back
+        </button>
+        <button class="help-pill" onclick="go('crisis')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="2.6"/><path d="M8 1.5v4M8 10.5v4M1.5 8h4M10.5 8h4" opacity=".9"/></svg>
+          Help now
+        </button>
+      </div>
+
+      <div class="fd-lead">
+        <span class="t-label">For you, Amara</span>
+        <h2 class="f-title" style="margin-top:6px;">People who work with what you've been carrying</h2>
+        <p class="t-sub">You've been checking in about anxiety and stress, so we've put those people first. Matching stays on your phone.</p>
+      </div>
+
+      <div class="fd-search">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.6 10.6L14 14"/></svg>
+        <input type="text" id="fdSearch" placeholder="Name, specialty, or place" aria-label="Search providers">
+      </div>
+
+      <div class="fd-filters" role="group" aria-label="Filters">
+        <button class="fd-filter" aria-pressed="true">Anxiety &amp; stress <span class="fd-x" aria-hidden="true">×</span></button>
+        <button class="fd-filter" aria-pressed="false">By video</button>
+        <button class="fd-filter" aria-pressed="false">In person</button>
+        <button class="fd-filter" aria-pressed="false">Near me</button>
+        <button class="fd-filter" aria-pressed="false">Evenings</button>
+      </div>
+
+      <div class="fd-seclabel"><span class="t-label">Recommended for you</span></div>
+      <div class="fc-list fd-group" id="fdRecs">
+        <button class="fc-prov" onclick="openProvider('amina','finddir')">
+          <span class="fc-ava" aria-hidden="true">A</span>
+          <span class="fc-body">
+            <span class="fc-name">Dr. Amina Rahman</span>
+            <span class="fc-cred">Clinical Psychologist, Ph.D.</span>
+            <span class="fc-why">Because you track anxiety · By video · <span class="vmark">Verified</span></span>
+          </span>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+        <button class="fc-prov" onclick="openProvider('maya','finddir')">
+          <span class="fc-ava" aria-hidden="true">M</span>
+          <span class="fc-body">
+            <span class="fc-name">Maya Feldman</span>
+            <span class="fc-cred">Marriage &amp; Family Therapist, LMFT</span>
+            <span class="fc-why">Works with stress · Evenings free · <span class="vmark">Verified</span></span>
+          </span>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+      </div>
+
+      <div class="fd-seclabel"><span class="t-label">All verified providers</span><span class="t-hint">284</span></div>
+      <div class="fc-list fd-group" id="fdAll">
+        <button class="fc-prov" onclick="openProvider('daniel','finddir')">
+          <span class="fc-ava" aria-hidden="true">D</span>
+          <span class="fc-body">
+            <span class="fc-name">Daniel O'Connor</span>
+            <span class="fc-cred">Licensed Therapist, LCSW</span>
+            <span class="fc-why">Low mood &amp; life transitions · By video · <span class="vmark">Verified</span></span>
+          </span>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+        <button class="fc-prov" onclick="openProvider('priya','finddir')">
+          <span class="fc-ava" aria-hidden="true">P</span>
+          <span class="fc-body">
+            <span class="fc-name">Dr. Priya Nair</span>
+            <span class="fc-cred">Psychiatrist, M.D.</span>
+            <span class="fc-why">Anxiety &amp; sleep · In person · <span class="vmark">Verified</span></span>
+          </span>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+        <button class="fc-prov" onclick="openProvider('james','finddir')">
+          <span class="fc-ava" aria-hidden="true">J</span>
+          <span class="fc-body">
+            <span class="fc-name">James Okafor</span>
+            <span class="fc-cred">Licensed Professional Counselor, LPC</span>
+            <span class="fc-why">Trauma &amp; grief · By video · <span class="vmark">Verified</span></span>
+          </span>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+      </div>
+
+      <p class="fd-empty" id="fdEmpty">No one matches that search. Try a name, a specialty, or clear the box.</p>
+
+      <button class="fd-guided" onclick="go('findcare')">
+        <svg class="pict sm" viewBox="0 0 34 34" aria-hidden="true" style="width:30px;height:30px;flex:0 0 auto;"><path d="M13 5h8v8h8v8h-8v8h-8v-8H5v-8h8z" fill="var(--clay)" stroke="var(--border)" stroke-linejoin="round"/><circle cx="17" cy="17" r="2" fill="var(--teal)"/></svg>
+        <span class="fd-g-txt">
+          <span class="fd-g-q">Not sure who fits?</span>
+          <span class="fd-g-sub">Answer three quick questions and we'll match you.</span>
+        </span>
+        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+      </button>
+
+      <p class="t-cap" style="margin-top:18px;">Every provider is verified before they appear. Listings aren't ranked by payment.</p>
+    </section>
+
+    <!-- ================= PROVIDER PROFILE ================= -->
+    <section class="screen" id="view-provider">
+      <div class="exer-head" style="display:flex;align-items:center;justify-content:space-between;">
+        <button class="backbtn" onclick="ppBack()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+          Back
+        </button>
+        <button class="help-pill" onclick="go('crisis')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="2.6"/><path d="M8 1.5v4M8 10.5v4M1.5 8h4M10.5 8h4" opacity=".9"/></svg>
+          Help now
+        </button>
+      </div>
+
+      <div class="pp-hero">
+        <span class="pp-ava" id="ppAva" aria-hidden="true">A</span>
+        <span class="pp-id">
+          <h2 class="f-title" id="ppName">Dr. Amina Rahman</h2>
+          <span class="pp-cred" id="ppCred">Clinical Psychologist, Ph.D.</span>
+          <span class="pp-verified">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 1.7l5.2 2v3.4c0 3.2-2.2 5.4-5.2 6.5-3-1.1-5.2-3.3-5.2-6.5V3.7z" stroke-linejoin="round"/><path d="M5.8 8l1.6 1.6L10.4 6"/></svg>
+            Verified provider
+          </span>
+        </span>
+      </div>
+
+      <div class="pp-facts">
+        <span class="pp-fact">
+          <svg width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="2.5" y="3.5" width="13" height="12" rx="2"/><path d="M5.5 1.5v3M12.5 1.5v3M2.5 7h13"/></svg>
+          <span id="ppAvail">Next opening Thursday</span>
+        </span>
+        <span class="pp-fact">
+          <svg width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="2.5" y="3.5" width="13" height="10" rx="1.8"/><path d="M5.5 1.5v3.5M12.5 1.5v3.5"/></svg>
+          <span id="ppMode">Video &amp; in person · 50-min sessions</span>
+        </span>
+        <span class="pp-fact">
+          <svg width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 9a7 7 0 0014 0 7 7 0 00-14 0zM9 2v14M2.4 6.5h13.2M2.4 11.5h13.2"/></svg>
+          <span id="ppLang">English &amp; Spanish</span>
+        </span>
+      </div>
+
+      <!-- crisis bridge: a booked session isn't immediate help — name it -->
+      <div class="pp-bridge">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5l7.5 13.5h-15z" stroke-linejoin="round"/><path d="M9 7v3.5M9 12.6v.1"/></svg>
+        <span class="pp-bridge-txt">A session may be a few days away. If you need support before then, <button class="link" onclick="go('crisis')">reach someone now</button>.</span>
+      </div>
+
+      <div class="pp-sec">
+        <span class="t-label">About</span>
+        <p class="t-body" id="ppBio">Amina has worked with anxiety and stress for over a decade, with a warm, practical style. She blends evidence-based approaches with space to go at your own pace.</p>
+      </div>
+
+      <div class="pp-sec">
+        <span class="t-label">Works with</span>
+        <span class="pp-specs" id="ppSpecs">
+          <span class="pp-spec">Anxiety</span><span class="pp-spec">Panic</span><span class="pp-spec">Stress</span>
+        </span>
+      </div>
+
+      <div class="pp-book">
+        <button class="cta" onclick="ppBook()">See availability</button>
+        <p class="t-cap pp-terms" id="ppTerms">From $90 per session · Free cancellation up to 24 hours ahead</p>
+      </div>
+    </section>
+
+    <!-- ================= PROFILE ================= -->
+    <section class="screen" id="view-profile">
+      <div class="stub-head">
+        <button class="backbtn" onclick="go('home')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+          Back
+        </button>
+      </div>
+      <div class="profile-top">
+        <span class="avatar big" id="avatarBig">A</span>
+        <div>
+          <h2 class="f-title" id="profileName">Amara</h2>
+          <p class="f-voice">Your record belongs to you.</p>
+        </div>
+      </div>
+      <div class="prof-list">
+        <button class="prof-item" onclick="openPersonalize()"><span>Make it yours</span><span class="t-hint">name · pinned tool</span></button>
+        <button class="prof-item" onclick="stub('Language','Psychage is available in 5 languages. Choose the one that feels like home.')"><span>Language</span><span class="t-hint">English</span></button>
+        <button class="prof-item" onclick="stub('Privacy & your data','What stays on your phone, what doesn\u2019t exist at all, and how to export or erase your record.')"><span>Privacy & your data</span></button>
+        <button class="prof-item" onclick="stub('About Psychage','Free mental health education for everyone, in 190+ countries. Mental health is just health.')"><span>About Psychage</span></button>
+      </div>
+    </section>
+
+    <!-- ================= LIBRARY (inner page — system extension proof) ================= -->
+    <section class="screen" id="view-library">
+      <div class="stub-head">
+        <button class="backbtn" onclick="go('home')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+          Back
+        </button>
+      </div>
+
+      <div class="lib-hero">
+        <div>
+          <h2 class="f-display" style="font-size:30px;">Library</h2>
+          <p class="t-sub" style="margin-top:8px;">Plain answers, reviewed by clinicians.</p>
+        </div>
+        <svg width="84" height="76" viewBox="0 0 84 76" aria-hidden="true">
+          <ellipse cx="42" cy="71" rx="26" ry="4" fill="rgba(46,44,40,.08)"/>
+          <rect x="16" y="46" width="52" height="14" rx="6" fill="var(--clay)" stroke="var(--border)"/>
+          <rect x="22" y="30" width="44" height="14" rx="6" fill="var(--clay-2)"/>
+          <rect x="28" y="14" width="34" height="14" rx="6" fill="var(--clay)" stroke="var(--border)"/>
+          <circle cx="45" cy="21" r="2.6" fill="var(--teal)"/>
+        </svg>
+      </div>
+
+      <span class="read-card" role="button" tabindex="0" onclick="openRead()" style="margin-top:10px;">
+        <span class="read-meta"><span class="tag" id="libReadTag">Anxiety & stress</span><span class="t-hint" id="libReadMeta">Today's read · 4 min</span></span>
+        <span class="read-title" id="libReadTitle">Why your chest gets tight when you worry</span>
+        <span class="credit">Reviewed by Dr. Lena Dobson, Ph.D. in Clinical Neuropsychology</span>
+      </span>
+
+      <div class="sect">
+        <div class="sect-head lsec-head">
+          <span class="t-label">Anxiety &amp; stress</span>
+          <button class="link" onclick="stub('Anxiety &amp; stress','Articles on worry, stress, and panic — what they are, why they\u2019re common, what helps.')">See all</button>
+        </div>
+        <p class="t-hint lsec-why">Because you've been checking in about this</p>
+        <div class="toprail">
+          <button class="lread" onclick="stub('What a panic attack is — and isn\u2019t','The body\u2019s alarm system, why it misfires, and what helps in the moment.')">
+            <span class="read-title">What a panic attack is — and isn't</span>
+            <span class="lread-foot"><span class="t-hint">4 min read</span><svg class="chev" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></span>
+          </button>
+          <button class="lread" onclick="stub('When worry gets louder at night','What happens in the mind at night, why it\u2019s common, and what gently helps.')">
+            <span class="read-title">When worry gets louder at night</span>
+            <span class="lread-foot"><span class="t-hint">5 min read</span><svg class="chev" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></span>
+          </button>
+          <button class="lread" onclick="stub('A three-minute reset for a racing mind','A short, do-it-now practice for when your thoughts won\u2019t slow down.')">
+            <span class="read-title">A three-minute reset for a racing mind</span>
+            <span class="lread-foot"><span class="t-hint">3 min read</span><svg class="chev" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sect">
+        <div class="sect-head lsec-head">
+          <span class="t-label">Sleep</span>
+          <button class="link" onclick="stub('Sleep','Articles on rest, insomnia, and night-time worry.')">See all</button>
+        </div>
+        <div class="toprail">
+          <button class="lread" onclick="stub('Can\u2019t switch your brain off at bedtime?','Why the mind speeds up when the lights go out, and what helps it slow.')">
+            <span class="read-title">Can't switch your brain off at bedtime?</span>
+            <span class="lread-foot"><span class="t-hint">5 min read</span><svg class="chev" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></span>
+          </button>
+          <button class="lread" onclick="stub('What actually helps you fall back asleep','The 3am wake-up, why it happens, and what to do instead of watching the clock.')">
+            <span class="read-title">What actually helps you fall back asleep</span>
+            <span class="lread-foot"><span class="t-hint">4 min read</span><svg class="chev" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></span>
+          </button>
+          <button class="lread" onclick="stub('Caffeine, naps, and the myths about rest','What helps you rest and what quietly works against it.')">
+            <span class="read-title">Caffeine, naps, and the myths about rest</span>
+            <span class="lread-foot"><span class="t-hint">6 min read</span><svg class="chev" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sect">
+        <div class="sect-head lsec-head">
+          <span class="t-label">Low mood</span>
+          <button class="link" onclick="stub('Low mood','Articles on low days, sadness, and depression — in plain words.')">See all</button>
+        </div>
+        <div class="toprail">
+          <button class="lread" onclick="stub('Low days are common. Here\u2019s what they are','What a low day is, how common it is, and when it\u2019s worth talking to someone.')">
+            <span class="read-title">Low days are common. Here's what they are</span>
+            <span class="lread-foot"><span class="t-hint">6 min read</span><svg class="chev" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></span>
+          </button>
+          <button class="lread" onclick="stub('When low mood is worth talking to someone','The line between a low patch and something more, in plain words.')">
+            <span class="read-title">When low mood is worth talking to someone</span>
+            <span class="lread-foot"><span class="t-hint">5 min read</span><svg class="chev" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></span>
+          </button>
+          <button class="lread" onclick="stub('Small things that lift a heavy day','Tiny, doable steps for the days that feel like too much.')">
+            <span class="read-title">Small things that lift a heavy day</span>
+            <span class="lread-foot"><span class="t-hint">4 min read</span><svg class="chev" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sect">
+        <div class="sect-head"><span class="t-label">More topics</span></div>
+        <div class="chiprow" style="margin-top:0;">
+          <span class="chip" role="button" tabindex="0" onclick="stub('Relationships','Articles on connection, conflict, and being with other people.')">Relationships</span>
+          <span class="chip" role="button" tabindex="0" onclick="stub('Grief','Articles on loss and what living with it is like.')">Grief</span>
+          <span class="chip" role="button" tabindex="0" onclick="stub('Stress at work','Articles on pressure, burnout, and boundaries.')">Stress at work</span>
+          <span class="chip ghost" role="button" tabindex="0" onclick="stub('All topics','Every Library topic — anxiety, sleep, low mood, relationships, grief, and more.')">All topics</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================= GENERIC STUB ================= -->
+    <section class="screen" id="view-stub">
+      <div class="stub-head">
+        <button class="backbtn" onclick="go('home')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+          Back
+        </button>
+      </div>
+      <div class="stub-body">
+        <h2 class="f-title" id="stubTitle">Destination</h2>
+        <p class="t-sub" id="stubLine">What lives here.</p>
+        <p class="stub-note">Mockup stub — tap Back to return home.</p>
+      </div>
+    </section>
+
+    <!-- ================= v6 · DESIGN LIBRARY (slice 1) ================= -->
+    <section class="screen" id="view-dslib">
+      <div class="stub-head">
+        <button class="backbtn" onclick="go('home')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+          Back
+        </button>
+      </div>
+      <h2 class="f-title" style="margin-top:6px;">Design library — slice 1</h2>
+      <p class="t-sub" style="margin-top:6px;">The A1-critical components, proven in pixels. Toggle Night register above — every specimen must hold in both.</p>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-TAB · Tab bar</span><span class="t-hint">live below, every screen</span></div>
+        <p class="spec-note" style="margin-top:0;">Four fixed tabs, labels always visible, no badges ever. Active = the pill pressed into the paper (where you are is yours): press-bg + inset shadow, radius 12. Bar 78px incl. safe-area pad; tab target 90×56; pictogram 24px, one teal dot each (tokenized — follows the night register); label Plex 11 — inactive ink-2 (5.08:1), active ink 600 (12.6:1). ink-3 rejected for labels: 3.32:1 fails the text floor. Reduced motion: instant swap, no transition.</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-REFL · Reflection-ready row</span><span class="t-hint">S3 · S7</span></div>
+        <div class="spec-box" style="background:var(--press-bg);box-shadow:var(--press-shadow);border:none;">
+          <span class="t-label">Your last 7 days</span>
+          <button class="refl-row show" onclick="openReflection()" style="margin-top:10px;">
+            <span class="refl-dot" aria-hidden="true"></span>
+            <span class="refl-txt">This week's reflection is ready.</span>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+          </button>
+        </div>
+        <p class="spec-note">A row, not a banner: lives inside the record well under the terrain, above a 1px hairline. Plex 14/500 ink-2 — deliberately <em>not</em> the italic voice register: the line announces an artifact, it does not speak about the person. 7px teal dot marker, chevron ink-3, target ≥44px. One-time: opening it removes it. Simulate from the controls above to see it on Home.</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-RAIL + C-TICK · Continuum, month rail, note ticks</span><span class="t-hint">S7</span></div>
+        <div class="spec-box">
+          <div class="crail">
+            <div class="crail-rows" id="specCont"></div>
+            <div class="mrail" aria-label="Jump to month">
+              <button aria-current="true">JUN</button>
+              <button>MAY</button>
+              <button>APR</button>
+            </div>
+          </div>
+        </div>
+        <p class="spec-note">Continuum: week rows, most recent at top, the home terrain component parameterized — same dot radii, same broken-line gap rule, hollow circles identical in weight. Note tick: 6px vertical stroke, 1.5px, border-strong, rounded caps, in a fixed lane 4px under the baseline at the dot's x — a mark in the margin, not a second data channel. Month rail: 36px column on the trailing edge behind a hairline, ≥44px targets, caps 10.5px; current month ink-2, others ink-3 (non-text floor 3:1 ✓ at 3.32:1); VoiceOver: adjustable control. Reduced motion: rail jumps are instant.</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">§4 Judgment-call register</span><span class="t-hint">ratify at this checkpoint</span></div>
+        <div class="spec-box" style="padding:6px 16px 10px;">
+          <div class="jc-row"><span class="jc-tag">RATIFY</span><span><b>Night rust #C97A60</b> — 5.39:1 on night base, 4.74:1 on night raised; passes the text floor outright, not just the 3:1 non-text bar. Visible: Night register → Help-now pill.</span></div>
+          <div class="jc-row"><span class="jc-tag">RATIFY</span><span><b>Paper grain overlay</b> — 5% light / 6% night, the material without the metaphor. Visible: everywhere.</span></div>
+          <div class="jc-row"><span class="jc-tag">RATIFY</span><span><b>Pressed-well derived bg</b> — paper mixed 5% toward ink keeps press/raise one formula in both registers. Visible: record well, read cards.</span></div>
+          <div class="jc-row"><span class="jc-tag">RATIFY</span><span><b>1px mood-dot ring</b> — the okay tint alone reads 2.69:1; the ring is what keeps the terrain legible. Visible: every terrain dot.</span></div>
+          <div class="jc-row"><span class="jc-tag">RATIFY</span><span><b>Trust lines demoted</b> — claims live where they're proven (sheet whisper, settings), not as half-tile furniture.</span></div>
+          <div class="jc-row"><span class="jc-tag">RATIFY</span><span><b>Sixth-day hollow dot</b> — absence recorded at equal weight is the honest-record rule made visible; the brief's 5+today reading hid gaps.</span></div>
+        </div>
+      </div>
+
+      <h2 class="f-title" style="margin-top:34px;">Slice 2 — A2 path</h2>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-BREATH · Breathing form</span><span class="t-hint">S20</span></div>
+        <div class="spec-box" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+          <button class="chip" onclick="openBreath('dslib')">Open the breathing form — live</button>
+        </div>
+        <p class="spec-note">The pictogram made full-screen: one static boundary ring (clay-2, 2px, r110), a filled clay circle breathing between r54 and r104 inside it, the teal dot still at center — the still point the breath moves around. Pacing 4-4-6 (In grows · Hold rests at full · Out releases), eased on the system curve — cubic-bezier(.37,0,.63,1) <em>is</em> the sine breath curve; no new easing exists. Cue line persists, active phase ink/600, others ink-3 (non-text emphasis; the words repeat in the phase word above at 4.5:1+). Reduced motion: the form is gone entirely — phase word at the exercise-prompt scale + the cue line, same pacing. The exercise is the breath, not the circle. Toggle "Reduced motion" above, then open it.</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-GROUND-TYPE · Exercise prompt scale</span><span class="t-hint">S20 grounding · breath fallback</span></div>
+        <div class="spec-box">
+          <span class="t-label">See · 5</span>
+          <p class="ground-prompt" style="margin-top:8px;">Five things you can see, right where you are.</p>
+          <p class="t-sub" style="margin-top:10px;">Tap when ready.</p>
+        </div>
+        <p class="spec-note">One new type step — exercisePrompt: Fraunces 28/600, lh 1.25 — between title 22 and display 34, sized to hold a ~9-word prompt one-handed at Dynamic Type 1.5×. Not the voice register: prompts instruct, they don't speak about the person. Count lives in the label line (SEE · 5), never as a progress meter. Prompt copy here is DRAFT → CT4.</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-HELP-ROW · Helpline row</span><span class="t-hint">S11 · crisis register</span></div>
+        <div class="spec-box" style="border-style:solid;">
+          <button class="crisis-primary">Call your local emergency number</button>
+          <p class="t-cap" style="margin:14px 0 6px;">Free, confidential helplines are also available in most countries.</p>
+          <div class="hl-row">
+            <span class="hl-info"><span class="hl-name">Kaan Pete Roi</span><br><span class="hl-desc">Emotional support by phone, Bangla</span></span>
+            <button class="hl-act" aria-label="Call Kaan Pete Roi">Call</button>
+          </div>
+          <div class="hl-row">
+            <span class="hl-info"><span class="hl-name">988 Suicide &amp; Crisis Lifeline</span><br><span class="hl-desc">24/7 support, United States</span></span>
+            <button class="hl-act" aria-label="Call 988 Suicide and Crisis Lifeline">Call</button>
+            <button class="hl-act" aria-label="Text 988 Suicide and Crisis Lifeline">Text</button>
+          </div>
+          <div class="hl-row">
+            <span class="hl-info"><span class="hl-name">Samaritans</span><br><span class="hl-desc">Someone to listen, UK &amp; Ireland</span></span>
+            <button class="hl-act" aria-label="Call Samaritans">Call</button>
+          </div>
+        </div>
+        <p class="spec-note">Row grid: name 15/600 + five-word description 13 ink-2, actions trailing — Call always, Text only where the service supports it (the CT3 text-capable flag). Rows ≥56px, actions ≥44px, hairline-separated. Crisis register: zero teal anywhere; actions are rust-outline pills so the one rust-filled emergency button stays the loudest thing in the app. Night swaps to the derived rust (4.74:1 on raised ✓). Row content is CT3 dataset, not app copy — names here are shape samples. No animation exists on this surface in either motion mode.</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-SEARCH-LIST · Searchable list</span><span class="t-hint">S12 · Navigator "Something else"</span></div>
+        <div class="spec-box">
+          <div class="slist-field">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.6 10.6L14 14"/></svg>
+            <input type="text" id="slistIn" placeholder="Search countries" aria-label="Search countries">
+          </div>
+          <div style="margin-top:8px;" id="slistRows">
+            <button class="slist-row">Bangladesh</button>
+            <button class="slist-row">Belgium</button>
+            <button class="slist-row">Benin</button>
+            <button class="slist-row">Bhutan</button>
+          </div>
+          <p class="t-cap" id="slistEmpty" style="display:none;margin-top:8px;">No match. Check the spelling, or pick the nearest country.</p>
+        </div>
+        <p class="spec-note">First instance: the S12 region picker; the Navigator's "Something else" search reuses it verbatim. Field 48px, raised, border-strong; focus moves the border to ink-2 — in the crisis register the accent is ink, never teal (parameterized: accent = tealDeep by default, ink in crisis contexts). Rows ≥44px, name only, hairline-separated, filter-as-you-type, no highlighting of matched substrings (a highlight is a flourish this register refuses). Empty result: "No match. Check the spelling, or pick the nearest country." (DRAFT → CT4).</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-MASCOT-L · Mascot size step</span><span class="t-hint">S1 host</span></div>
+        <div class="spec-box">
+          <div class="msizes">
+            <figure>
+              <svg width="76" height="88" viewBox="0 0 80 92" aria-hidden="true"><ellipse cx="40" cy="86" rx="20" ry="4" fill="rgba(46,44,40,.08)"/><rect x="26" y="52" width="28" height="34" rx="13" fill="var(--clay)" stroke="var(--border)"/><circle cx="40" cy="30" r="26" fill="var(--clay)" stroke="var(--border)"/><circle cx="32" cy="30" r="2.6" fill="var(--clay-ink)"/><circle cx="48" cy="30" r="2.6" fill="var(--clay-ink)"/><circle cx="40" cy="62" r="3.4" fill="var(--teal)"/></svg>
+              <figcaption>standard · 76</figcaption>
+            </figure>
+            <figure>
+              <svg width="130" height="150" viewBox="0 0 80 92" aria-hidden="true"><ellipse cx="40" cy="86" rx="20" ry="4" fill="rgba(46,44,40,.08)"/><rect x="26" y="52" width="28" height="34" rx="13" fill="var(--clay)" stroke="var(--border)"/><circle cx="40" cy="30" r="26" fill="var(--clay)" stroke="var(--border)"/><circle cx="32" cy="30" r="2.6" fill="var(--clay-ink)"/><circle cx="48" cy="30" r="2.6" fill="var(--clay-ink)"/><circle cx="40" cy="62" r="3.4" fill="var(--teal)"/></svg>
+              <figcaption>host · 130</figcaption>
+            </figure>
+          </div>
+        </div>
+        <p class="spec-note">Exactly one new step: host, 130×150 (1.7×), uniform vector scale — same geometry, same two dot eyes, same one chest dot; nothing is redrawn, so the character cannot drift. S1 uses host, centered, leading; S2 uses standard in the upper third (the "smaller" the Screen Book names is the existing size, not a third step). Breathing and tilt scale with it; reduced motion: still at either size.</p>
+      </div>
+
+      <h2 class="f-title" style="margin-top:34px;">Slice 3 — B1 path</h2>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-CHIP-XL · Oversized acute chip</span><span class="t-hint">S13–S16</span></div>
+        <div class="spec-box" style="border-style:solid;">
+          <p class="f-heading">What are you noticing?</p>
+          <p class="t-hint" style="margin-top:4px;">This stays on your phone.</p>
+          <div style="margin-top:6px;">
+            <button class="xchip" aria-pressed="true" onclick="togglePress(this)">Racing heart <svg class="xcheck" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3.5 9.5l4 4 7-8"/></svg></button>
+            <button class="xchip" aria-pressed="false" onclick="togglePress(this)">Tight chest <svg class="xcheck" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3.5 9.5l4 4 7-8"/></svg></button>
+            <button class="xchip" aria-pressed="false" onclick="togglePress(this)">Can't settle <svg class="xcheck" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3.5 9.5l4 4 7-8"/></svg></button>
+          </div>
+        </div>
+        <p class="spec-note">v5's .chip is browse-weight (44px); the acute variant is a full-width pill row — 60px, Plex 17/600, the whole width is the target (acute = fewer words, bigger targets). Single-select screens advance on tap and never show a selected state. Multi-select (S14): selection = teal-deep border + check + pressed fill — your choice is pressed into the paper, never color alone. Tap the rows: live toggle. Reduced motion: nothing to reduce — the cluster has no transitions in any mode.</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-REL-PHRASE · Relevance phrase</span><span class="t-hint">S18</span></div>
+        <div class="spec-box">
+          <p class="f-heading">Panic attack</p>
+          <p class="rel-phrase" style="margin-top:3px;">Strong match (75%)</p>
+          <p class="t-sub" style="margin-top:8px;">Panic attacks are common. They are intense, and they pass.</p>
+        </div>
+        <p class="spec-note">Text only, by rule — this spec exists so no one builds a bar. Plex 13/600 ink-2, one line under the condition name. Vocabulary capped at three phrases (Possible · Likely · Strong match) and the figure is hard-capped at 75% — the sacred cap lives in the token (relevancePhrase.cap), not in anyone's judgment. No meter, no dots, no color scale, no per-card tinting. The cap's honesty line renders once per screen, not per card.</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-CODE · 6-digit code field</span><span class="t-hint">S35</span></div>
+        <div class="spec-box">
+          <p class="t-body" style="margin-bottom:10px;">Or enter the 6-digit code from the email.</p>
+          <div class="codefield" id="codeDemo" aria-label="6-digit code">
+            <input inputmode="numeric" maxlength="1" aria-label="Digit 1"><input inputmode="numeric" maxlength="1" aria-label="Digit 2"><input inputmode="numeric" maxlength="1" aria-label="Digit 3"><input inputmode="numeric" maxlength="1" aria-label="Digit 4"><input inputmode="numeric" maxlength="1" aria-label="Digit 5"><input inputmode="numeric" maxlength="1" aria-label="Digit 6">
+          </div>
+          <p class="t-cap" id="codeErr" style="display:none;margin-top:8px;color:var(--crisis);">That code didn't match. Check the email and try again.</p>
+          <p class="t-hint" style="margin-top:6px;">Demo: 123456 passes; any other 6 digits shows the no-shake error.</p>
+        </div>
+        <p class="spec-note">Six cells 44×54 (≥44 ✓), radius 12, raised, border-strong; focus moves the border to ink-2 — auth is a calm surface, teal stays out of state marks. Digits Plex 22/600. Auto-advance, backspace steps back, paste fills all six (live — try it). Error: cells border-rust + one plain line beneath; the cells never shake (a shake is a scold). VoiceOver: one group, per-cell digit labels.</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-SKEL · Skeleton terrain</span><span class="t-hint">S35 sign-in sync</span></div>
+        <div class="spec-box" style="background:var(--press-bg);box-shadow:var(--press-shadow);border:none;">
+          <span class="t-label">Your last 7 days</span>
+          <svg viewBox="0 0 318 86" style="display:block;width:100%;height:auto;margin-top:4px;" aria-label="Record loading">
+            <line x1="6" y1="60" x2="312" y2="60" stroke="var(--border)" stroke-width="1"/>
+            <circle class="skel-dot" cx="22.7" cy="33" r="6.5"/><circle class="skel-dot" cx="68.1" cy="33" r="6.5"/><circle class="skel-dot" cx="113.6" cy="33" r="6.5"/><circle class="skel-dot" cx="159" cy="33" r="6.5"/><circle class="skel-dot" cx="204.4" cy="33" r="6.5"/><circle class="skel-dot" cx="249.9" cy="33" r="6.5"/><circle class="skel-dot" cx="295.3" cy="33" r="6.5"/>
+            <rect class="skel-lbl" x="14" y="72" width="17" height="7" rx="3.5"/><rect class="skel-lbl" x="60" y="72" width="17" height="7" rx="3.5"/><rect class="skel-lbl" x="105" y="72" width="17" height="7" rx="3.5"/><rect class="skel-lbl" x="151" y="72" width="17" height="7" rx="3.5"/><rect class="skel-lbl" x="196" y="72" width="17" height="7" rx="3.5"/><rect class="skel-lbl" x="241" y="72" width="17" height="7" rx="3.5"/><rect class="skel-lbl" x="287" y="72" width="17" height="7" rx="3.5"/>
+          </svg>
+          <p class="t-cap" style="margin-top:6px;">Bringing your record in…</p>
+        </div>
+        <p class="spec-note">Skeletons over spinners (locked rule) — but this skeleton is static in both motion modes: a shimmer would be a fifth motion verb, and the vocabulary is closed. Clay-filled dots at midline, no rings, no thread, clay dashes for day labels — deliberately unlike both the entry glyph (tinted + ringed) and the no-entry glyph (hollow at baseline), so loading can never be misread as data or as absence. The text line carries the honesty the shimmer would have faked. Line is DRAFT → CT4.</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-CHECK + C-RADIO · Choice rows</span><span class="t-hint">S37 · S45 · S47</span></div>
+        <div class="spec-box">
+          <button class="cb-row" role="checkbox" aria-checked="false" onclick="toggleCheck(this)">
+            <span class="cb-box"><svg width="15" height="15" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M3.5 9.5l4 4 7-8"/></svg></span>
+            <span class="cb-lbl">Also remove the record from this phone<span class="cb-sub">Off unless you choose it.</span></span>
+          </button>
+          <div style="border-top:1px solid var(--border);margin-top:4px;padding-top:4px;">
+            <button class="rd-row" role="radio" aria-checked="true" onclick="pickRadio(this)"><span class="rd-dot"></span><span class="cb-lbl">Light</span></button>
+            <button class="rd-row" role="radio" aria-checked="false" onclick="pickRadio(this)"><span class="rd-dot"></span><span class="cb-lbl">Night</span></button>
+            <button class="rd-row" role="radio" aria-checked="false" onclick="pickRadio(this)"><span class="rd-dot"></span><span class="cb-lbl">Match system</span></button>
+          </div>
+        </div>
+        <p class="spec-note">Full-width rows ≥52px, label 15 + optional sub-line 13 ink-2. Checkbox: 24px box, radius 6; checked = ink fill, paper check — state marks are charcoal, never teal, so the same component sits safely next to destructive choices (S37's erase row) and neutral ones. Radio: 22px ring, selected = ink ring + 10px ink dot. Both live — tap them. Proper role/aria-checked semantics; reduced motion: state changes are instant always.</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-DESTRUCT · Destructive style</span><span class="t-hint">S47 · S48</span></div>
+        <div class="spec-box">
+          <p class="t-body" style="margin-bottom:12px;">Delete your account? This can't be undone.</p>
+          <div class="btn-pair">
+            <button class="btn-eq destruct">Delete my account</button>
+            <button class="btn-eq keep">Keep my account</button>
+          </div>
+        </div>
+        <p class="spec-note">Rust outline, never filled — the only filled rust in the app remains the emergency call button, so "serious" and "danger" stay distinguishable at a glance. No new red exists (red urgency is a hard refusal); rust is already the app's one serious color and an outline borrows its gravity without its alarm. The sibling rule is geometric: "Keep my account" is the identical button in border-strong/ink — same size, same weight, never a ghost, never smaller. Sign-out's primary (S37) is NOT this style; only the erase path is. Night: derived rust (4.74:1 ✓).</p>
+      </div>
+
+      <h2 class="f-title" style="margin-top:34px;">Slice 4 — B2 path · close</h2>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-WV-LOAD · WebView loading</span><span class="t-hint">C0.6 · S23–S32</span></div>
+        <div class="spec-box">
+          <div class="wvskel" id="wvSkel">
+            <div class="wv-bar"></div>
+            <div class="wv-line" style="width:96%;"></div>
+            <div class="wv-line" style="width:88%;"></div>
+            <div class="wv-line" style="width:64%;"></div>
+            <div class="wv-card"></div>
+            <p class="wv-slow" id="wvSlow" style="display:none;">Still loading…</p>
+          </div>
+          <div id="wvErr" style="display:none;padding:6px 2px;">
+            <p class="t-body">We couldn't load this.</p>
+            <button class="chip" style="margin-top:10px;">Try again</button>
+          </div>
+          <p class="t-sub wv-loaded" id="wvDone" style="display:none;font-size:15px;padding:6px 2px;">The page is here.</p>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          <button class="chip" onclick="wvDemo('skel')">Loading</button>
+          <button class="chip" onclick="wvDemo('slow')">Slow (4s line)</button>
+          <button class="chip" onclick="wvDemo('done')">Page arrives</button>
+          <button class="chip" onclick="wvDemo('err')">Error</button>
+        </div>
+        <p class="spec-note">No spinner exists anywhere in this app. The treatment: nothing for the first 400ms (no flash), then a static clay page-skeleton — title bar (clay-2), text lines, one card silhouette — entering with the settle verb, the one motion that already means "a page arriving" (reduced motion: appears in place). Past 4s, one quiet line ("Still loading…" — DRAFT → CT4). Error swaps the whole frame for "We couldn't load this. Try again" + retry (Flow 16 verbatim). The loaded page replaces the skeleton with one settle — no stagger; staggering an unknown page would fake a structure we don't know. Static per the skeleton precedent (D-13): the vocabulary stays closed. Beneath all of it, the theming handshake: the WV background is paper-base/night-base <em>before</em> the page attaches — the white flash is the one spinner everyone forgets they ship. Night: clay tokens carry it. The four states are live above.</p>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head"><span class="t-label">C-PDF · Therapist PDF template</span><span class="t-hint">S41 · print artifact</span></div>
+        <div class="pdfpage">
+          <div class="pdf-head">
+            <div><div class="pdf-name">Amara Hossain</div><div class="pdf-range">Check-in record · 25 May – 11 June 2026 · 18 days, 14 entries</div></div>
+            <div class="pdf-mark">Psychage</div>
+          </div>
+          <div class="pdf-sect">Record</div>
+          <svg viewBox="0 0 318 64" style="display:block;width:100%;height:auto;" aria-label="Printed record terrain">
+            <line x1="4" y1="46" x2="284" y2="46" stroke="rgba(46,44,40,.18)" stroke-width="1"/>
+            <polyline points="24,24.5 64,17 104,17" fill="none" stroke="rgba(46,44,40,.55)" stroke-width="1.2"/>
+            <polyline points="184,32 224,24.5 264,24.5" fill="none" stroke="rgba(46,44,40,.55)" stroke-width="1.2"/>
+            <circle cx="24" cy="24.5" r="5.5" fill="#9C9588" stroke="#2E2C28" stroke-width="1"/>
+            <circle cx="64" cy="17" r="5.5" fill="#5FAE9E" stroke="#2E2C28" stroke-width="1"/>
+            <circle cx="104" cy="17" r="5.5" fill="#5FAE9E" stroke="#2E2C28" stroke-width="1"/>
+            <circle cx="144" cy="46" r="3.5" fill="none" stroke="rgba(46,44,40,.6)" stroke-width="1.1"/>
+            <circle cx="184" cy="32" r="5.5" fill="#7C8B97" stroke="#2E2C28" stroke-width="1"/>
+            <circle cx="224" cy="24.5" r="5.5" fill="#9C9588" stroke="#2E2C28" stroke-width="1"/>
+            <circle cx="264" cy="24.5" r="5.5" fill="#9C9588" stroke="#2E2C28" stroke-width="1"/>
+            <text x="316" y="13" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="8.5" fill="#6B6760">Very good</text>
+            <text x="316" y="48" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="8.5" fill="#6B6760">Very low</text>
+          </svg>
+          <div class="pdf-sect">Entries</div>
+          <div class="pdf-entry"><span class="pdf-date">Mon 8 Jun</span><span class="pdf-state">Okay</span><span class="pdf-note">"tired"</span></div>
+          <div class="pdf-entry"><span class="pdf-date">Tue 9 Jun</span><span class="pdf-state">Good</span><span class="pdf-note"></span></div>
+          <div class="pdf-entry"><span class="pdf-date">Wed 10 Jun</span><span class="pdf-state">Good</span><span class="pdf-note">"slept"</span></div>
+          <div class="pdf-entry"><span class="pdf-date">Thu 11 Jun</span><span class="pdf-state" style="color:#6B6760;font-weight:400;">No entry</span><span class="pdf-note"></span></div>
+          <div class="pdf-foot"><span>Created with Psychage. This is a personal record, not a clinical assessment.</span><span>1 of 1</span></div>
+        </div>
+        <p class="spec-note">A print artifact, not an app screen — so the rules shift where paper demands it. The page is white, ink-led: the app's warm paper tint wastes toner and muddies photocopies, and the document has no night mode. The print terrain survives grayscale by design — height carries the data, every dot keeps its ink ring, and two quiet edge labels (Very good / Very low) appear here only: a clinician reading a fax-grade copy must not have to guess the axis. This is a print-exclusive affordance — on-screen terrain never grows labels. Entries: date · state 10pt/600 · note italic, hairline rows; no-entry days listed at hint weight (the honest record prints its gaps). Name is the user-editable field, Fraunces 17; footer verbatim with page count. Type floor on paper: 8.5pt. No mascot, no pictograms, no clay — the document is the record speaking to a professional, undecorated.</p>
+      </div>
+
+      <p class="spec-note" style="margin-top:22px;"><b style="color:var(--ink);">Library complete — 18/18 DEFERs closed.</b> Downstream consumers: the wave A1 work orders (next) and the CT3 compilation order (schema inherited from C-HELP-ROW).</p>
+    </section>
+
+    <!-- ================= v6 · S20 BREATHING (slice-2 proof) ================= -->
+    <section class="screen exer" id="view-breath">
+      <div class="exer-head">
+        <button class="help-pill" onclick="go('crisis')">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="2.6"/><path d="M8 1.5v4M8 10.5v4M1.5 8h4M10.5 8h4" opacity=".9"/></svg>
+          Help now
+        </button>
+      </div>
+      <div class="exer-stage">
+        <svg class="breath-svg" id="breathSvg" width="260" height="260" viewBox="0 0 260 260" aria-hidden="true">
+          <circle cx="130" cy="130" r="110" fill="none" stroke="var(--clay-2)" stroke-width="2"/>
+          <g class="breath-form" id="breathForm"><circle cx="130" cy="130" r="104" fill="var(--clay)"/></g>
+          <circle cx="130" cy="130" r="7" fill="var(--teal)"/>
+        </svg>
+        <p class="breath-phase" id="breathPhase" aria-live="polite">In</p>
+        <p class="breath-cues" id="breathCues"><span data-ph="0"><b>In… 4</b></span><span>·</span><span data-ph="1">Hold… 4</span><span>·</span><span data-ph="2">Out… 6</span></p>
+      </div>
+      <button class="link exer-stop" onclick="stopBreath()">Stop</button>
+    </section>
+
+  </div>
+
+  <!-- ================= v6 · TAB BAR (C0.2) ================= -->
+  <nav class="tabbar" aria-label="Main">
+    <button class="tab" data-tab="today" aria-current="page">
+      <span class="tab-pill">
+        <svg width="24" height="24" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="16" r="11.5" fill="none" stroke="var(--clay-2)" stroke-width="2.4" stroke-dasharray="4.4 3.4" stroke-linecap="round"/><circle cx="17" cy="16" r="3" fill="var(--teal)"/></svg>
+        <span class="tab-lbl">Today</span>
+      </span>
+    </button>
+  </nav>
+
+  <!-- V1 · persistent Help-now — sits above every sheet veil, per the layers token -->
+  <button class="persistent-help" id="persistentHelp" aria-label="Help now">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="2.6"/><path d="M8 1.5v4M8 10.5v4M1.5 8h4M10.5 8h4" opacity=".9"/></svg>
+    Help now
+  </button>
+
+  <!-- ================= CHECK-IN SHEET ================= -->
+  <div class="sheet-veil" id="veil" onclick="if(event.target===this)closeSheet()">
+    <div class="sheet" id="sheet" role="dialog" aria-label="Daily check-in">
+      <div class="sheet-head">
+        <div>
+          <h2 class="f-title">How are you right now?</h2>
+          <p class="f-voice" style="margin-top:4px;">There's no wrong answer.</p>
+        </div>
+        <button class="iconbtn" onclick="closeSheet()" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg>
+        </button>
+      </div>
+      <div class="moods" id="moods"></div>
+      <div class="field">
+        <input class="textin" id="noteIn" type="text" placeholder="A word about it — optional" maxlength="24">
+      </div>
+      <button class="cta" id="saveBtn" disabled onclick="saveCheckin()">Save today's entry</button>
+      <p class="sheet-privacy">Stays on your phone.</p>
+    </div>
+  </div>
+
+  <!-- ================= PERSONALIZE SHEET ================= -->
+  <div class="sheet-veil" id="pVeil" onclick="if(event.target===this)closePersonalize()">
+    <div class="sheet" role="dialog" aria-label="Personalize">
+      <div class="sheet-head">
+        <div>
+          <h2 class="f-title">Make it yours</h2>
+          <p class="t-sub" style="margin-top:4px;">The page molds to what you reach for.</p>
+        </div>
+        <button class="iconbtn" onclick="closePersonalize()" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg>
+        </button>
+      </div>
+      <div class="field">
+        <label class="t-cap" for="nameIn">What should we call you?</label>
+        <input class="textin" id="nameIn" type="text" value="Amara" maxlength="20">
+      </div>
+      <div class="field">
+        <label class="t-cap">Which tool should lead "When you need something now"?</label>
+        <div class="pin-opts" id="pinOpts">
+          <button class="chip" data-pin="toolkit" aria-pressed="true">Toolkit</button>
+          <button class="chip" data-pin="mindmate" aria-pressed="false">MindMate</button>
+          <button class="chip" data-pin="navigator" aria-pressed="false">Symptom Navigator</button>
+        </div>
+      </div>
+      <button class="cta" style="margin-top:22px;min-height:52px;" onclick="applyPersonalize()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var phone = document.getElementById('phone');
+  if(reduce){ phone.classList.remove('anim'); }
+
+  window.state = { night:false, away:false, first:false, nightContent:false };
+
+  /* ---- content registers ---- */
+  var reads = {
+    day:   {tag:'Anxiety & stress', meta:"Today's read · 4 min", title:'Why your chest gets tight when you worry',
+            line:'Today\u2019s read — what the body does when the mind worries, why it\u2019s common, and what gently helps.'},
+    night: {tag:'Sleep', meta:"Tonight's read · 4 min", title:'Why worry gets louder at night',
+            line:'Tonight\u2019s read — what happens in the mind at night, why it\u2019s common, and what gently helps.'}
+  };
+
+  /* ---- v6 R3.1 · "pick up where you left off" rail ----
+     Resume reads as a rail of cover cards (was a single Continue row). The whole section
+     hides on first open — nothing begun yet. Content is static here; wire each card's
+     width/% to real reading progress when the data exists. */
+  function renderContinue(){
+    var sec = document.getElementById('pickup');
+    if(!sec) return;
+    sec.style.display = state.first ? 'none' : '';
+  }
+  function applyRegister(){
+    var nightRead = state.night || state.nightContent;
+    var r = nightRead ? reads.night : reads.day;
+    ['', 'lib'].forEach(function(p){
+      var tag = document.getElementById(p ? 'libReadTag' : 'readTag');
+      var meta = document.getElementById(p ? 'libReadMeta' : 'readMeta');
+      var title = document.getElementById(p ? 'libReadTitle' : 'readTitle');
+      if(tag){ tag.textContent = r.tag; meta.textContent = r.meta; title.textContent = r.title; }
+    });
+    document.getElementById('exer1Name').textContent = nightRead ? 'Night breathing' : 'Breathing';
+    document.getElementById('exer1Min').textContent = nightRead ? '2 min' : '1 min';
+  }
+  window.openRead = function(){
+    var r = (state.night || state.nightContent) ? reads.night : reads.day;
+    stub(r.title, r.line);
+  };
+
+  /* ---- theme ---- */
+  var themeBtn = document.getElementById('themeBtn');
+  if(themeBtn){ themeBtn.addEventListener('click', function(){
+    state.night = !state.night;
+    phone.setAttribute('data-theme', state.night ? 'night' : 'light');
+    themeBtn.setAttribute('aria-pressed', String(state.night));
+    themeBtn.textContent = state.night ? 'Light register' : 'Night register';
+    applyRegister();
+  }); }
+  /* clock-based night CONTENT on load — one flag, applied everywhere applyRegister reaches (theme stays user-chosen) */
+  var hour = new Date().getHours();
+  state.nightContent = (hour >= 21 || hour < 5);
+  applyRegister();
+
+  /* ---- identity / greeting ---- */
+  var userName = 'Amara';
+  function renderIdentity(){
+    var h = new Date().getHours();
+    var part = h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
+    var greet = state.first ? 'Welcome,<br>' + userName
+              : state.away ? 'Welcome back,<br>' + userName
+              : 'Good ' + part + ',<br>' + userName;
+    document.getElementById('greeting').innerHTML = greet;
+    var initial = userName.charAt(0).toUpperCase();
+    document.getElementById('avatarBtn').textContent = initial;
+    document.getElementById('avatarBig').textContent = initial;
+    document.getElementById('profileName').textContent = userName;
+    document.getElementById('recordLabel').textContent = state.first ? 'Your record' : 'Your last 7 days';
+    renderStatus();
+    renderContinue();
+  }
+
+  /* ---- record data ---- */
+  var tints = ['var(--m-vlow)','var(--m-low)','var(--m-ok)','var(--m-good)','var(--m-vgood)'];
+  var labels = ['Very low','Low','Okay','Good','Very good'];
+  var weekNormal = [
+    {d:'Th', v:3},{d:'Fr', v:2},{d:'Sa', v:1},{d:'Su', v:null},{d:'Mo', v:2},{d:'Tu', v:3},{d:'We', v:'today'}
+  ];
+  var weekAway = [
+    {d:'Th', v:2},{d:'Fr', v:null},{d:'Sa', v:null},{d:'Su', v:null},{d:'Mo', v:null},{d:'Tu', v:null},{d:'We', v:'today'}
+  ];
+  var weekFirst = [
+    {d:'Th', v:null},{d:'Fr', v:null},{d:'Sa', v:null},{d:'Su', v:null},{d:'Mo', v:null},{d:'Tu', v:null},{d:'We', v:'today'}
+  ];
+  var week = weekNormal.map(function(x){return Object.assign({},x);});
+  var todayEntry = null; /* {v, note} */
+
+  function lastEntryBeforeToday(){
+    for(var i=5;i>=0;i--){ if(typeof week[i].v === 'number') return week[i]; }
+    return null;
+  }
+  function renderStatus(){
+    var el = document.getElementById('statusLine');
+    if(todayEntry){
+      var t = 'Checked in · ' + labels[todayEntry.v];
+      if(todayEntry.note) t += ' · \u201C' + todayEntry.note + '\u201D';
+      var prior = lastEntryBeforeToday();
+      el.textContent = t + (prior ? '. It\u2019s on your record.' : '. Your record has begun.');
+      return;
+    }
+    if(state.first){
+      el.textContent = 'This is your space. It starts whenever you\u2019re ready.';
+      return;
+    }
+    if(state.away){
+      el.textContent = 'Your record waited. Nothing was lost.';
+      return;
+    }
+    var last = lastEntryBeforeToday();
+    el.textContent = last
+      ? 'Not yet checked in today · Yesterday: ' + labels[last.v] + '.'
+      : 'Not yet checked in today.';
+  }
+
+  /* ---- terrain ---- */
+  var W=318, TOP=10, BOT=56, BASE=60, LBL=78;
+  function yFor(v){ return BOT - (v/4)*(BOT-TOP); }
+  function xFor(i){ return (i+0.5)/7*W; }
+  function renderTerrain(){
+    var s = '<line x1="6" y1="'+BASE+'" x2="'+(W-6)+'" y2="'+BASE+'" stroke="var(--border)" stroke-width="1"/>';
+    var seg = [];
+    function flush(){
+      if(seg.length > 1){
+        s += '<polyline points="'+seg.map(function(p){return p.join(',');}).join(' ')+'" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/>';
+      }
+      seg = [];
+    }
+    week.forEach(function(day, i){
+      if(typeof day.v === 'number'){ seg.push([xFor(i), yFor(day.v)]); } else { flush(); }
+    });
+    flush();
+    week.forEach(function(day, i){
+      var x = xFor(i);
+      if(typeof day.v === 'number'){
+        s += '<circle cx="'+x+'" cy="'+yFor(day.v)+'" r="6.5" fill="'+tints[day.v]+'" stroke="var(--dot-ring)" stroke-width="1"><title>'+labels[day.v]+'</title></circle>';
+      } else if(day.v === null){
+        s += '<circle cx="'+x+'" cy="'+BASE+'" r="4" fill="none" stroke="var(--ink-3)" stroke-width="1.2"><title>No entry</title></circle>';
+      } else {
+        s += '<circle cx="'+x+'" cy="'+yFor(2)+'" r="8" fill="none" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="3 3"><title>Today — not yet</title></circle>';
+      }
+      var today = i === 6;
+      s += '<text x="'+x+'" y="'+LBL+'" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" font-weight="'+(today?'600':'400')+'" fill="var(--ink-2)">'+day.d+'</text>';
+    });
+    document.getElementById('terrain').innerHTML = s;
+  }
+
+  /* ---- scenario simulations ---- */
+  var awayBtn = document.getElementById('awayBtn');
+  var firstBtn = document.getElementById('firstBtn');
+  function setScenario(kind){
+    state.away = (kind === 'away');
+    state.first = (kind === 'first');
+    awayBtn.setAttribute('aria-pressed', String(state.away));
+    awayBtn.textContent = state.away ? 'Simulate: regular week' : 'Simulate: away 5 days';
+    firstBtn.setAttribute('aria-pressed', String(state.first));
+    firstBtn.textContent = state.first ? 'Simulate: regular week' : 'Simulate: first open';
+    var src = state.first ? weekFirst : state.away ? weekAway : weekNormal;
+    week = src.map(function(x){ return Object.assign({}, x); });
+    todayEntry = null;
+    hideBridge();
+    var cta = document.getElementById('checkinBtn');
+    cta.classList.remove('checked');
+    cta.textContent = 'Check in — 30 seconds';
+    renderTerrain();
+    renderIdentity();
+  }
+  if(awayBtn){ awayBtn.addEventListener('click', function(){ setScenario(state.away ? 'normal' : 'away'); }); }
+  if(firstBtn){ firstBtn.addEventListener('click', function(){ setScenario(state.first ? 'normal' : 'first'); }); }
+
+  /* ---- views ---- */
+  window.go = function(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    var s = document.getElementById('view-' + id);
+    s.classList.add('active');
+    document.getElementById('viewport').scrollTop = 0;
+    /* v6 R3 · screen entry borrows the settle verb (no new verb); re-trigger each nav */
+    s.classList.remove('nav-in'); void s.offsetWidth; s.classList.add('nav-in');
+    /* a11y · land screen-reader focus on the new screen's heading, in context */
+    var h = s.querySelector('h1, h2');
+    if(h){ h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); }
+  };
+  window.stub = function(title, line){
+    document.getElementById('stubTitle').textContent = title;
+    document.getElementById('stubLine').textContent = line;
+    go('stub');
+  };
+
+  /* ---- check-in ---- */
+  var states = [{fill:.12},{fill:.32},{fill:.52},{fill:.74},{fill:.95}];
+  var moodsEl = document.getElementById('moods');
+  var saveBtn = document.getElementById('saveBtn');
+  var selected = null;
+
+  labels.forEach(function(lb, i){
+    var b = document.createElement('button');
+    b.className = 'mood';
+    b.setAttribute('aria-pressed','false');
+    b.innerHTML =
+      '<span class="glyph"><i style="height:' + (states[i].fill*100) + '%;background:' + tints[i] + ';"></i></span>' +
+      '<span>' + lb + '</span>' +
+      '<span class="check"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3.5 9.5l4 4 7-8"/></svg></span>';
+    b.addEventListener('click', function(){
+      selected = i;
+      moodsEl.querySelectorAll('.mood').forEach(function(m){ m.setAttribute('aria-pressed','false'); });
+      b.setAttribute('aria-pressed','true');
+      saveBtn.disabled = false;
+    });
+    moodsEl.appendChild(b);
+  });
+
+  var veil = document.getElementById('veil');
+  var sheet = document.getElementById('sheet');
+  window.openSheet = function(){ veil.classList.add('open'); sheet.classList.add('open-anim'); phone.classList.add('sheet-open'); };
+  window.closeSheet = function(){ veil.classList.remove('open'); sheet.classList.remove('open-anim'); phone.classList.remove('sheet-open'); };
+  /* V1 · the persistent Help-now reaches crisis from above any veil */
+  document.getElementById('persistentHelp').addEventListener('click', function(){
+    closeSheet(); closePersonalize(); go('crisis');
+  });
+
+  window.hideBridge = function(){
+    document.getElementById('bridge').classList.remove('show');
+    document.getElementById('bridgeCrisis').style.display = 'none';
+  };
+
+  window.saveCheckin = function(){
+    if(selected === null) return;
+    var note = document.getElementById('noteIn').value.trim();
+    todayEntry = { v:selected, note:note };
+    closeSheet();
+    week[6] = { d:'We', v:selected };
+    renderTerrain();
+    renderStatus();
+    var zone = document.getElementById('stateZone');
+    var mascot = document.getElementById('mascot');
+    if(!reduce){
+      zone.classList.remove('imprinting'); void zone.offsetWidth; zone.classList.add('imprinting');
+      mascot.classList.remove('acking'); void mascot.offsetWidth; mascot.classList.add('acking');
+      setTimeout(function(){ mascot.classList.remove('acking'); }, 700);
+    }
+    var cta = document.getElementById('checkinBtn');
+    cta.classList.add('checked');
+    cta.textContent = 'Update today\u2019s check-in';
+    /* the bridge — only for Low / Very low */
+    if(selected <= 1){
+      document.getElementById('bridge').classList.add('show');
+      document.getElementById('bridgeCrisis').style.display = (selected === 0) ? 'block' : 'none';
+    } else {
+      hideBridge();
+    }
+  };
+
+  /* ---- personalize ---- */
+  var pVeil = document.getElementById('pVeil');
+  var pinned = 'toolkit';
+  window.openPersonalize = function(){ pVeil.classList.add('open'); phone.classList.add('sheet-open'); };
+  window.closePersonalize = function(){ pVeil.classList.remove('open'); phone.classList.remove('sheet-open'); };
+  document.querySelectorAll('#pinOpts .chip').forEach(function(c){
+    c.addEventListener('click', function(){
+      document.querySelectorAll('#pinOpts .chip').forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+      c.setAttribute('aria-pressed','true');
+      pinned = c.getAttribute('data-pin');
+    });
+  });
+  window.applyPersonalize = function(){
+    var v = document.getElementById('nameIn').value.trim();
+    if(v){ userName = v; }
+    ['toolkit','mindmate','navigator'].forEach(function(k){
+      var t = document.getElementById('tile-' + k);
+      var isFirst = (k === pinned);
+      t.classList.toggle('wide', isFirst);
+      t.style.order = isFirst ? '-1' : '';
+      if(k === 'toolkit'){ t.classList.toggle('compact', !isFirst); }
+    });
+    renderIdentity();
+    closePersonalize();
+    go('home');
+  };
+
+  /* ---- v6: tab bar ---- */
+  function syncTab(name){
+    document.querySelectorAll('.tab').forEach(function(t){
+      if(name && t.getAttribute('data-tab') === name){ t.setAttribute('aria-current','page'); }
+      else { t.removeAttribute('aria-current'); }
+    });
+  }
+  var _go = window.go;
+  window.go = function(id){
+    _go(id);
+    phone.classList.toggle('exer-open', id === 'breath');
+    if(id === 'home'){ syncTab('today'); }
+    else if(id === 'findcare'){ syncTab('find'); if(window.fcGo) fcGo(0); }
+    else if(id === 'find'){ syncTab('find'); }
+    else if(id === 'finddir'){ syncTab('find'); }
+    else if(id === 'library'){ syncTab('learn'); }
+    else if(id === 'dslib'){ syncTab(null); }
+  };
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      var k = t.getAttribute('data-tab');
+      if(k === 'today'){ go('home'); }
+      else if(k === 'learn'){ go('library'); }
+      else if(k === 'compass'){ stub('Compass','Make sense of what you feel, or steady yourself right now — the Symptom Navigator and the Toolkit live here. (S5 — built in wave B2.)'); syncTab('compass'); }
+      else if(k === 'find'){ go('find'); }
+    });
+  });
+
+  /* ---- v6: reflection-ready row ---- */
+  var reflBtn = document.getElementById('reflBtn');
+  var reflRow = document.getElementById('reflRow');
+  if(reflBtn){ reflBtn.addEventListener('click', function(){
+    var on = reflRow.classList.toggle('show');
+    reflBtn.setAttribute('aria-pressed', String(on));
+  }); }
+  window.openReflection = function(){
+    reflRow.classList.remove('show');
+    if(reflBtn){ reflBtn.setAttribute('aria-pressed','false'); }
+    stub('Weekly Reflection', 'The week\u2019s terrain and one descriptive line in the record\u2019s voice \u2014 never graded. Opening the row dismisses it: one-time, then gone. (S9 \u2014 built in wave B1.)');
+  };
+
+  /* ---- v6: design library ---- */
+  var dslibBtn = document.getElementById('dslibBtn');
+  if(dslibBtn){ dslibBtn.addEventListener('click', function(){ go('dslib'); }); }
+  function renderSpecimen(){
+    var el = document.getElementById('specCont'); if(!el) return;
+    var W2 = 236, TOP2 = 8, BOT2 = 38, BASE2 = 44, H2 = 60;
+    function x2(i){ return (i + 0.5) / 7 * W2; }
+    function y2(v){ return BOT2 - (v / 4) * (BOT2 - TOP2); }
+    var rows = [
+      {lbl:'8\u201314 Jun', days:[{v:1,n:1},{v:2},{v:3,n:1},{t:1},{},{},{}]},
+      {lbl:'1\u20137 Jun',  days:[{v:2},{v:3},{v:3,n:1},{e:1},{v:1},{v:2,n:1},{v:2}]},
+      {lbl:'25\u201331 May',days:[{v:3},{v:4},{v:3,n:1},{v:3},{e:1},{v:2},{v:3}]}
+    ];
+    var html = '';
+    rows.forEach(function(row){
+      var s = '<line x1="4" y1="' + BASE2 + '" x2="' + (W2-4) + '" y2="' + BASE2 + '" stroke="var(--border)" stroke-width="1"/>';
+      var seg = [];
+      function flush2(){
+        if(seg.length > 1){ s += '<polyline points="' + seg.map(function(p){return p.join(',');}).join(' ') + '" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/>'; }
+        seg = [];
+      }
+      row.days.forEach(function(d, i){
+        if(typeof d.v === 'number'){ seg.push([x2(i), y2(d.v)]); } else { flush2(); }
+      });
+      flush2();
+      row.days.forEach(function(d, i){
+        var x = x2(i);
+        if(typeof d.v === 'number'){
+          s += '<circle cx="' + x + '" cy="' + y2(d.v) + '" r="6.5" fill="' + tints[d.v] + '" stroke="var(--dot-ring)" stroke-width="1"><title>' + labels[d.v] + '</title></circle>';
+          if(d.n){ s += '<line x1="' + x + '" y1="' + (BASE2+4) + '" x2="' + x + '" y2="' + (BASE2+10) + '" stroke="var(--border-strong)" stroke-width="1.5" stroke-linecap="round"><title>Has a note</title></line>'; }
+        } else if(d.e){
+          s += '<circle cx="' + x + '" cy="' + BASE2 + '" r="4" fill="none" stroke="var(--ink-3)" stroke-width="1.2"><title>No entry</title></circle>';
+        } else if(d.t){
+          s += '<circle cx="' + x + '" cy="' + y2(2) + '" r="8" fill="none" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="3 3"><title>Today \u2014 not yet</title></circle>';
+        }
+      });
+      html += '<div class="crow"><span class="crow-lbl">' + row.lbl + '</span><svg viewBox="0 0 ' + W2 + ' ' + H2 + '" aria-label="Week of ' + row.lbl + '">' + s + '</svg></div>';
+    });
+    el.innerHTML = html;
+  }
+
+  /* ---- v6 slice 2: reduced-motion demo toggle ---- */
+  var rmBtn = document.getElementById('rmBtn');
+  var rmDemo = reduce;
+  if(rmBtn){
+    if(reduce){ rmBtn.setAttribute('aria-pressed','true'); }
+    rmBtn.addEventListener('click', function(){
+      rmDemo = !rmDemo;
+      rmBtn.setAttribute('aria-pressed', String(rmDemo));
+      phone.classList.toggle('anim', !rmDemo);
+    });
+  }
+
+  /* ---- v6 slice 2: breathing form (S20) ---- */
+  var breathTimer = null, breathOrigin = 'home';
+  var PHASES = [
+    { word:'In',   secs:4, scale:1.0  },
+    { word:'Hold', secs:4, scale:1.0  },
+    { word:'Out',  secs:6, scale:0.52 }
+  ];
+  function setCue(idx){
+    document.querySelectorAll('#breathCues [data-ph]').forEach(function(sp){
+      var on = sp.getAttribute('data-ph') == String(idx);
+      sp.innerHTML = on ? '<b>' + sp.textContent.replace(/<[^>]+>/g,'') + '</b>' : sp.textContent;
+    });
+  }
+  function runPhase(idx){
+    var ph = PHASES[idx];
+    var form = document.getElementById('breathForm');
+    var word = document.getElementById('breathPhase');
+    word.textContent = ph.word;
+    setCue(idx);
+    if(rmDemo){
+      form.parentElement.style.display = 'none';      // the form is gone entirely
+      word.style.fontSize = '34px';                    // phase word carries the exercise
+    } else {
+      form.parentElement.style.display = '';
+      word.style.fontSize = '';
+      form.style.transition = (idx === 1) ? 'none' : 'transform ' + ph.secs + 's ' + 'cubic-bezier(0.37,0,0.63,1)';
+      form.style.transform = 'scale(' + ph.scale + ')';
+    }
+    breathTimer = setTimeout(function(){ runPhase((idx + 1) % PHASES.length); }, ph.secs * 1000);
+  }
+  window.openBreath = function(origin){
+    breathOrigin = origin || 'home';
+    go('breath'); syncTab(null);
+    var form = document.getElementById('breathForm');
+    form.style.transition = 'none';
+    form.style.transform = 'scale(0.52)';
+    clearTimeout(breathTimer);
+    setTimeout(function(){ runPhase(0); }, 60);
+  };
+  window.stopBreath = function(){
+    clearTimeout(breathTimer);
+    go(breathOrigin);                                  // straight to the return path, no "you were almost there"
+  };
+
+  /* ---- v6 slice 3: specimen interactions ---- */
+  window.togglePress = function(el){
+    el.setAttribute('aria-pressed', el.getAttribute('aria-pressed') !== 'true');
+  };
+  window.toggleCheck = function(el){
+    el.setAttribute('aria-checked', el.getAttribute('aria-checked') !== 'true');
+  };
+  window.pickRadio = function(el){
+    el.parentElement.querySelectorAll('.rd-row').forEach(function(r){ r.setAttribute('aria-checked','false'); });
+    el.setAttribute('aria-checked','true');
+  };
+  (function(){
+    var cf = document.getElementById('codeDemo'); if(!cf) return;
+    var cells = Array.prototype.slice.call(cf.querySelectorAll('input'));
+    cells.forEach(function(c, i){
+      c.addEventListener('input', function(){
+        c.value = c.value.replace(/\D/g,'').slice(0,1);
+        cf.classList.remove('err');                       // clear error on edit
+        var errLine = document.getElementById('codeErr'); if(errLine) errLine.style.display = 'none';
+        if(c.value && i < 5){ cells[i+1].focus(); }
+        if(i === 5 && c.value){                            // full entry — validate (demo: 123456 passes)
+          var entered = cells.map(function(x){ return x.value; }).join('');
+          if(entered.length === 6 && entered !== '123456'){
+            cf.classList.add('err');                       // rust borders only — the cells never shake (a shake is a scold)
+            if(errLine) errLine.style.display = '';
+          }
+        }
+      });
+      c.addEventListener('keydown', function(e){
+        if(e.key === 'Backspace' && !c.value && i > 0){ cells[i-1].focus(); }
+      });
+      c.addEventListener('paste', function(e){
+        e.preventDefault();
+        var d = (e.clipboardData.getData('text') || '').replace(/\D/g,'').slice(0,6);
+        d.split('').forEach(function(ch, j){ if(cells[j]){ cells[j].value = ch; } });
+        cells[Math.min(d.length, 5)].focus();
+      });
+    });
+  })();
+
+  /* ---- v6 slice 4: WV loading states ---- */
+  var wvTimer = null;
+  window.wvDemo = function(mode){
+    var sk = document.getElementById('wvSkel'), sl = document.getElementById('wvSlow'),
+        er = document.getElementById('wvErr'), dn = document.getElementById('wvDone');
+    clearTimeout(wvTimer);
+    sk.style.display = (mode === 'skel' || mode === 'slow') ? '' : 'none';
+    sl.style.display = (mode === 'slow') ? '' : 'none';
+    er.style.display = (mode === 'err') ? '' : 'none';
+    dn.style.display = (mode === 'done') ? '' : 'none';
+    if(mode === 'done'){ dn.classList.remove('wv-loaded'); void dn.offsetWidth; dn.classList.add('wv-loaded'); }
+    /* the real timing is now walkable: Loading auto-surfaces the 4s line (D-18) */
+    if(mode === 'skel'){ sl.style.display = 'none'; wvTimer = setTimeout(function(){ sl.style.display = ''; }, 4000); }
+  };
+
+  /* ---- v6: searchable list — filter-as-you-type + empty state (S12 / Navigator) ---- */
+  (function(){
+    var input = document.getElementById('slistIn'); if(!input) return;
+    var rowsWrap = document.getElementById('slistRows'), empty = document.getElementById('slistEmpty');
+    var rows = Array.prototype.slice.call(rowsWrap.querySelectorAll('.slist-row'));
+    input.addEventListener('input', function(){
+      var q = input.value.trim().toLowerCase(), shown = 0;
+      rows.forEach(function(r){
+        var hit = r.textContent.toLowerCase().indexOf(q) !== -1;  /* no match HIGHLIGHTING — refused; visibility only */
+        r.style.display = hit ? '' : 'none'; if(hit) shown++;
+      });
+      empty.style.display = shown ? 'none' : '';
+    });
+  })();
+
+  /* ---- v6: Find Care — guided match step flow ---- */
+  var fcStep = 0;
+  function fcShow(n){
+    fcStep = n;
+    document.querySelectorAll('#view-findcare .fc-step').forEach(function(s){
+      s.classList.toggle('active', Number(s.getAttribute('data-step')) === n);
+    });
+    if(n === 1) fcAcuityCheck();
+    try{ window.scrollTo(0,0); }catch(e){}
+    var sc = document.querySelector('.app-scroll') || document.querySelector('.screen.active');
+    if(sc && sc.scrollTo){ sc.scrollTo(0,0); }
+  }
+  /* acuity trapdoor: a heavy focus (e.g. Trauma) reveals the soft crisis bridge before advancing */
+  function fcAcuityCheck(){
+    var b = document.getElementById('fcBridge'); if(!b) return;
+    var hot = document.querySelector('#view-findcare .fc-step[data-step="1"] .xchip[data-acuity="high"][aria-pressed="true"]');
+    b.classList.toggle('show', !!hot);
+  }
+  document.querySelectorAll('#view-findcare .fc-step[data-step="1"] .xchip').forEach(function(c){
+    c.addEventListener('click', fcAcuityCheck);
+  });
+  window.fcGo = function(n){ fcShow(n); };
+  window.fcBack = function(){
+    if(fcStep <= 0){ go('home'); return; }
+    if(fcStep === 4){ fcShow(3); return; }   /* results step back to last question */
+    fcShow(fcStep - 1);
+  };
+
+  /* ---- v6: Find tab personal directory — filter chips + search ---- */
+  (function(){
+    document.querySelectorAll('#view-finddir .fd-filter').forEach(function(f){
+      f.addEventListener('click', function(){
+        f.setAttribute('aria-pressed', f.getAttribute('aria-pressed') !== 'true');
+      });
+    });
+    var s = document.getElementById('fdSearch'); if(!s) return;
+    var rows = Array.prototype.slice.call(document.querySelectorAll('#view-finddir .fc-prov'));
+    var groups = Array.prototype.slice.call(document.querySelectorAll('#view-finddir .fd-group'));
+    var labels = Array.prototype.slice.call(document.querySelectorAll('#view-finddir .fd-seclabel'));
+    var empty = document.getElementById('fdEmpty');
+    s.addEventListener('input', function(){
+      var q = s.value.trim().toLowerCase(), shown = 0;
+      rows.forEach(function(r){
+        var hit = r.textContent.toLowerCase().indexOf(q) !== -1;  /* visibility only, no highlight */
+        r.style.display = hit ? '' : 'none'; if(hit) shown++;
+      });
+      /* hide a section's label when all its rows are filtered out */
+      groups.forEach(function(g, i){
+        var any = g.querySelector('.fc-prov:not([style*="none"])');
+        if(labels[i]) labels[i].style.display = any ? '' : 'none';
+      });
+      empty.style.display = shown ? 'none' : 'block';
+    });
+  })();
+
+  /* ---- v6: Provider profile — data-driven, opens from match results + directory ---- */
+  var PROVIDERS = {
+    amina:  {ini:'A', name:'Dr. Amina Rahman', cred:'Clinical Psychologist, Ph.D.',
+             avail:'Next opening Thursday', mode:'Video &amp; in person · 50-min sessions', lang:'English &amp; Spanish',
+             bio:'Amina has worked with anxiety and stress for over a decade, with a warm, practical style. She blends evidence-based approaches with space to go at your own pace.',
+             specs:['Anxiety','Panic','Stress'], terms:'From $90 per session · Free cancellation up to 24 hours ahead'},
+    daniel: {ini:'D', name:"Daniel O'Connor", cred:'Licensed Therapist, LCSW',
+             avail:'Next opening next week', mode:'Video · 50-min sessions', lang:'English',
+             bio:'Daniel supports people through low mood and life transitions. He works collaboratively, at a steady pace, and is direct without being clinical.',
+             specs:['Low mood','Life transitions','Grief'], terms:'From $80 per session · Free cancellation up to 24 hours ahead'},
+    maya:   {ini:'M', name:'Maya Feldman', cred:'Marriage &amp; Family Therapist, LMFT',
+             avail:'Opens this week · evening sessions', mode:'Video &amp; in person · 50-min sessions', lang:'English',
+             bio:'Maya focuses on stress and burnout, especially for people carrying a lot at once. Evening sessions are available for tighter schedules.',
+             specs:['Stress','Burnout','Relationships'], terms:'From $85 per session · Free cancellation up to 24 hours ahead'},
+    priya:  {ini:'P', name:'Dr. Priya Nair', cred:'Psychiatrist, M.D.',
+             avail:'Waitlist open', mode:'In person · 30-min sessions', lang:'English &amp; Bangla',
+             bio:'Priya is a psychiatrist working with anxiety and sleep, including medication where it helps. She takes a careful, unhurried approach to first visits.',
+             specs:['Anxiety','Sleep','Medication review'], terms:'From $140 per visit · Free cancellation up to 48 hours ahead'},
+    james:  {ini:'J', name:'James Okafor', cred:'Licensed Professional Counselor, LPC',
+             avail:'Opens in two weeks', mode:'Video · 50-min sessions', lang:'English',
+             bio:'James works with trauma and grief, holding a calm, steady space. He moves at the pace that feels safe for you, never faster.',
+             specs:['Trauma','Grief','Loss'], terms:'From $80 per session · Free cancellation up to 24 hours ahead'}
+  };
+  var ppFrom = 'finddir';
+  window.openProvider = function(id, from){
+    var p = PROVIDERS[id]; if(!p) return;
+    ppFrom = from || 'finddir';
+    document.getElementById('ppAva').textContent  = p.ini;
+    document.getElementById('ppName').textContent = p.name.replace(/&amp;/g,'&');
+    document.getElementById('ppCred').innerHTML   = p.cred;
+    document.getElementById('ppAvail').textContent= p.avail.replace(/&amp;/g,'&');
+    document.getElementById('ppMode').innerHTML   = p.mode;
+    document.getElementById('ppLang').innerHTML   = p.lang;
+    document.getElementById('ppBio').textContent  = p.bio;
+    document.getElementById('ppTerms').textContent= p.terms;
+    document.getElementById('ppSpecs').innerHTML  = p.specs.map(function(s){ return '<span class="pp-spec">'+s+'</span>'; }).join('');
+    go('provider');
+  };
+  window.ppBack = function(){ go(ppFrom); };
+  window.ppBook = function(){
+    var nm = document.getElementById('ppName').textContent;
+    stub('Request a session', 'Pick a time with ' + nm + '. You can hold a slot now and confirm later. (Booking lives in the production app.)');
+  };
+
+  /* ---- init ---- */
+  renderTerrain();
+  renderIdentity();
+  renderSpecimen();
+})();
+</script>
+</body>
+</html>

@@ -29,7 +29,12 @@ export function TopicTile({ label, count, artKey, onPress, className }: TopicTil
       style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
     >
       <ArtPanel artKey={artKey} className="aspect-[4/3] rounded-xl" />
-      <Text variant="heading" numberOfLines={2} className="mt-2 px-0.5 text-[15px] leading-[19px]">
+      <Text
+        variant="heading"
+        numberOfLines={1}
+        ellipsizeMode="tail"
+        className="mt-2 px-0.5 text-[15px] leading-[19px]"
+      >
         {label}
       </Text>
       {count ? (

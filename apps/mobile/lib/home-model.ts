@@ -2,6 +2,8 @@ import type { CheckInEntry, CheckInState } from '@psychage/shared/check-in';
 
 import type { HomeCard } from '@/components/home/home-card';
 import type { TerrainDay, TerrainValue } from '@/components/terrain/terrain-geometry';
+import { type Tool, TOOLS, toolUsageStore } from '@/lib/tool-usage-store';
+import { readingProgressStore } from '@/lib/reading-progress-store';
 
 // Pure S3 view-model derivation — greeting, status line, record label, CTA label,
 // the day/night read, and the 7-day terrain mapping. React-free so it is unit-
@@ -22,6 +24,9 @@ export type HomeViewModel = {
   readonly read: Read;
   readonly ctaLabel: string;
   readonly card: HomeCard | null;
+  readonly dormantTool: { tool: Tool; sinceDays: number } | null;
+  readonly insight: { headline: string; consistency: string } | null;
+  readonly inProgressReads: { id: string; progress: number; lastAt: number }[];
 };
 
 export function partOfDay(hour: number): 'morning' | 'afternoon' | 'evening' {
@@ -65,9 +70,9 @@ export function statusLine(kind: HomeStateKind, opts: StatusOptions = {}): strin
   }
 }
 
-/** "Your record" until a 2nd recorded day exists, then "Your last 7 days". */
+/** "Your record" until a 2nd recorded day exists, then "Your last 14 days". */
 export function recordLabel(distinctRecordedDays: number): string {
-  return distinctRecordedDays >= 2 ? 'Your last 7 days' : 'Your record';
+  return distinctRecordedDays >= 2 ? 'Your last 14 days' : 'Your record';
 }
 
 export function ctaLabel(checkedInToday: boolean): string {
@@ -118,13 +123,64 @@ export function lastNDayLabels(today: Date, n: number): { short: string; full: s
   return out;
 }
 
-/** Map a 7-slot value array (oldest first) to terrain days with real weekday labels. */
+/** Map a 14-slot value array (oldest first) to terrain days with real weekday labels. */
 export function toTerrainDays(values: readonly TerrainValue[], today: Date): TerrainDay[] {
   const labels = lastNDayLabels(today, values.length);
   return values.map((value, i) => {
     const label = labels[i];
     return { label: label?.short ?? '', fullLabel: label?.full, value };
   });
+}
+
+const DAY_MS = 86400000;
+
+export function calculateDormantTool(): { tool: Tool; sinceDays: number } | null {
+  const data = toolUsageStore.getUsage();
+  const now = Date.now();
+  const candidates = Object.values(TOOLS).filter((t) => t.reEngage);
+  
+  let best: { tool: Tool; sinceDays: number } | null = null;
+  for (const t of candidates) {
+    const last = data.usage[t.id];
+    const since = Math.floor((now - (last ?? data.installedAt)) / DAY_MS);
+    if (since >= (t.thresholdDays ?? 14) && (!best || since > best.sinceDays)) {
+      best = { tool: t, sinceDays: since };
+    }
+  }
+  return best;
+}
+
+const MOOD_LABELS = ["Very low", "Low", "Okay", "Good", "Very good"];
+
+export function generateMoodInsight(days: TerrainDay[]): { headline: string; consistency: string } | null {
+  // Extract logged days from the terrain days
+  const logged = days.filter(d => typeof d.value === 'number') as { value: number; fullLabel?: string }[];
+  if (logged.length === 0) return null;
+  
+  const consistency = `${logged.length} check-ins · 14 days`;
+  if (logged.length < 3) return { headline: "Your record is just beginning.", consistency };
+
+  const avg = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+  // Terrain days are chronological, so the end of the array is "this week"
+  const thisWeek = days.slice(-7).filter(d => typeof d.value === 'number').map(d => d.value as number);
+  const lastWeek = days.slice(0, days.length - 7).filter(d => typeof d.value === 'number').map(d => d.value as number);
+  
+  const wknd = logged.filter(d => d.fullLabel === 'Sunday' || d.fullLabel === 'Saturday').map(d => d.value);
+  const week = logged.filter(d => d.fullLabel !== 'Sunday' && d.fullLabel !== 'Saturday').map(d => d.value);
+
+  if (thisWeek.length >= 2 && lastWeek.length >= 2) {
+    const delta = avg(thisWeek) - avg(lastWeek);
+    if (delta >= 0.6) return { headline: "Steadier this week than last.", consistency };
+    if (delta <= -0.6) return { headline: "A little lower this week. That's allowed.", consistency };
+  }
+  if (wknd.length >= 2 && week.length >= 2 && avg(wknd) - avg(week) >= 0.7) {
+    return { headline: "You tend to feel calmer on weekends.", consistency };
+  }
+
+  const counts = [0, 0, 0, 0, 0];
+  logged.forEach((d) => counts[d.value]++);
+  const dom = counts.indexOf(Math.max(...counts));
+  return { headline: `Mostly ${MOOD_LABELS[dom].toLowerCase()} these two weeks.`, consistency };
 }
 
 // --- Live derivation from the RecordStore (sub-slice E) --------------------------
@@ -169,11 +225,11 @@ export function bridgeCardFor(todayState: CheckInState | undefined, hour: number
   };
 }
 
-/** Build the 7-day terrain from RecordStore entries: entry → state, today gap → 'today', else null. */
+/** Build the terrain from RecordStore entries: entry → state, today gap → 'today', else null. */
 export function buildTerrainDaysFromEntries(
   entries: readonly CheckInEntry[],
   today: Date,
-  n = 7,
+  n = 14,
 ): TerrainDay[] {
   const byDate = new Map<string, CheckInState>();
   for (const e of entries) byDate.set(e.date, e.state);

@@ -11,17 +11,21 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { colorScheme, useColorScheme } from 'nativewind';
 import { useEffect } from 'react';
+import { View } from 'react-native';
 import '../global.css';
 
 // Side-effect import: loading featureFlags.ts executes loadTierFlags(storage)
 // at module init, which runs the SR-13 migrator before any consumer reads isTierEnabled.
 import '@/lib/adapters/featureFlags';
 
-import { AuthProvider } from '@/features/auth';
+import { AuthProvider, useAuth } from '@/features/auth';
+import { useAuthDeepLinks } from '@/lib/auth/deep-link';
+import { useSessionRevalidation } from '@/lib/auth/session-revalidate';
 import { HapticProvider } from '@/lib/haptic-context';
 import { queryClient } from '@/lib/query';
 import { useAppearance } from '@/lib/use-appearance';
 import { resolveColorScheme } from '@/lib/theme';
+import { useReducedMotion } from '@/lib/motion';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -44,7 +48,23 @@ function ThemedStatusBar() {
   return <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />;
 }
 
+// App-root auth wiring (mounted inside AuthProvider, under the navigator):
+//   • deep links — verification + password-reset emails (WS-B)
+//   • foreground >24h session revalidation (WS-C / rules/auth.md §6)
+//   • splash gate — hold the native splash until session hydration completes (fonts are
+//     already loaded by the time this mounts), so the app never flashes signed-out.
+function AuthEffects() {
+  const { hydrated } = useAuth();
+  useAuthDeepLinks();
+  useSessionRevalidation();
+  useEffect(() => {
+    if (hydrated) void SplashScreen.hideAsync();
+  }, [hydrated]);
+  return null;
+}
+
 export default function RootLayout() {
+  const reduced = useReducedMotion();
   // DD-001 typography lock: IBM Plex Sans (OFL) body/UI, Fraunces (OFL) display.
   // Each cut registers under its expo-google-fonts export name; NativeWind's
   // `font-sans` → IBMPlexSans_400Regular and `font-display` → Fraunces_600SemiBold
@@ -58,12 +78,8 @@ export default function RootLayout() {
     Fraunces_600SemiBold,
   });
 
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
+  // Splash now hides on session hydration (AuthEffects), not on fonts alone — but we
+  // still hold the tree until fonts load so AuthProvider mounts with type ready.
   if (!fontsLoaded) return null;
 
   return (
@@ -76,9 +92,18 @@ export default function RootLayout() {
             the former (auth)-group-local provider that left the rest of the app
             seeing session:null. */}
         <AuthProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-          </Stack>
+          <AuthEffects />
+          <View className="flex-1 w-full max-w-[600px] mx-auto overflow-hidden bg-background dark:bg-background-dark sm:border-x sm:border-border/20 dark:sm:border-border-dark/20">
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: reduced ? 'fade' : 'slide_from_right',
+                fullScreenGestureEnabled: true,
+              }}
+            >
+              <Stack.Screen name="(tabs)" />
+            </Stack>
+          </View>
         </AuthProvider>
       </HapticProvider>
     </QueryClientProvider>

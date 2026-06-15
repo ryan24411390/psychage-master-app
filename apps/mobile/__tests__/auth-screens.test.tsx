@@ -33,7 +33,8 @@ describe('WhyAccount (S33)', () => {
 describe('SignUpForm (S34)', () => {
   it('shows inline empty-field lines and does not submit', () => {
     const onSubmit = jest.fn();
-    renderWithProviders(<SignUpForm onSubmit={onSubmit} />, { haptics: true });
+    const onProvider = jest.fn();
+    renderWithProviders(<SignUpForm onSubmit={onSubmit} onProvider={onProvider} />, { haptics: true });
 
     fireEvent.press(screen.getByRole('button', { name: AUTH_COPY.signUpPrimary }));
 
@@ -44,7 +45,8 @@ describe('SignUpForm (S34)', () => {
 
   it('shows the calm invalid/too-short lines and does not submit', () => {
     const onSubmit = jest.fn();
-    renderWithProviders(<SignUpForm onSubmit={onSubmit} />, { haptics: true });
+    const onProvider = jest.fn();
+    renderWithProviders(<SignUpForm onSubmit={onSubmit} onProvider={onProvider} />, { haptics: true });
 
     fireEvent.changeText(screen.getByLabelText(AUTH_COPY.emailLabel), 'nope');
     fireEvent.changeText(screen.getByLabelText(AUTH_COPY.passwordLabel), 'short');
@@ -57,13 +59,20 @@ describe('SignUpForm (S34)', () => {
 
   it('submits the trimmed email + password when both validate', () => {
     const onSubmit = jest.fn();
-    renderWithProviders(<SignUpForm onSubmit={onSubmit} />, { haptics: true });
+    const onProvider = jest.fn();
+    renderWithProviders(<SignUpForm onSubmit={onSubmit} onProvider={onProvider} />, { haptics: true });
 
+    fireEvent.changeText(screen.getByLabelText(AUTH_COPY.nameLabel), 'John Doe');
     fireEvent.changeText(screen.getByLabelText(AUTH_COPY.emailLabel), '  person@example.com ');
     fireEvent.changeText(screen.getByLabelText(AUTH_COPY.passwordLabel), 'a-good-password');
+    fireEvent.changeText(screen.getByLabelText(AUTH_COPY.confirmLabel), 'a-good-password');
+    
+    // Press checkbox
+    fireEvent.press(screen.getByRole('checkbox'));
+
     fireEvent.press(screen.getByRole('button', { name: AUTH_COPY.signUpPrimary }));
 
-    expect(onSubmit).toHaveBeenCalledWith('person@example.com', 'a-good-password');
+    expect(onSubmit).toHaveBeenCalledWith('person@example.com', 'a-good-password', 'John Doe');
   });
 });
 

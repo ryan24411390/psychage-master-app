@@ -11,8 +11,11 @@ import Animated, {
 import { HomeCardSlot } from '@/components/home/HomeCardSlot';
 import { Mascot } from '@/components/home/Mascot';
 import { ReflectionRow } from '@/components/home/ReflectionRow';
-import { Terrain } from '@/components/terrain/Terrain';
-import { Button } from '@/components/ui/Button';
+import { RecordChart } from '@/components/home/RecordChart';
+import { PrimaryAction } from '@/components/home/PrimaryAction';
+import { PickUpRail } from '@/components/home/PickUpRail';
+import { ToolsBento } from '@/components/home/ToolsBento';
+import { MostRead } from '@/components/home/MostRead';
 import { Text } from '@/components/ui/Text';
 import { type HomeViewModel, READ_CREDIT } from '@/lib/home-model';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
@@ -25,8 +28,7 @@ import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 // · mission footer. The page-load SETTLE fires on the content; reduced motion = in
 // place. Bento/read/rail tiles are static placeholders (their tools are later waves).
 
-// Article rail — verbatim v5 Library chiprow, fixed order.
-const ARTICLE_RAIL = ['Anxiety & stress', 'Sleep', 'Relationships', 'More topics'];
+// S3 presentational view. Takes a derived HomeViewModel + handlers.
 
 type HomeViewProps = {
   model: HomeViewModel;
@@ -75,14 +77,14 @@ export function HomeView({
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
       <ScrollView
-        contentContainerClassName="px-4 pb-10 pt-3"
+        contentContainerClassName="px-5 pb-10 pt-3"
         showsVerticalScrollIndicator={false}
       >
         <Animated.View
           entering={
             reduced ? undefined : FadeInUp.duration(DURATION.base).easing(easingFn('standard'))
           }
-          className="gap-6"
+          className="gap-8"
         >
           {/* STATE ZONE */}
           <View className="flex-row items-start justify-between gap-3 bg-surface-accent/30 border border-border-accent/50 dark:bg-surface-accent-dark/15 dark:border-border-accent-dark/30 p-5 rounded-xl shadow-sm">
@@ -132,89 +134,30 @@ export function HomeView({
               className="mt-1"
               onLayout={(e) => setTerrainWidth(e.nativeEvent.layout.width)}
             >
-              <Terrain days={model.terrainDays} width={terrainWidth} />
+              <RecordChart days={model.terrainDays} insight={model.insight} width={terrainWidth} />
             </View>
             {/* Reflection-ready row — in place, no settle (consistent with S3) */}
             {reflectionReady && <ReflectionRow onOpen={onReflectionOpen} />}
           </Animated.View>
 
-          {/* CHECK-IN CTA */}
-          <Button variant="primary" onPress={onCheckIn}>
-            {model.ctaLabel}
-          </Button>
+          {/* CHECK-IN CTA / ADAPTIVE ACTION */}
+          <PrimaryAction 
+            checkedInToday={model.ctaLabel !== 'Check in'} 
+            dormantTool={model.dormantTool} 
+            onCheckIn={onCheckIn} 
+          />
 
           {/* HOME CARD SLOT (bridge > reminder) */}
           <HomeCardSlot card={model.card} />
 
-          {/* WHEN YOU NEED SOMETHING NOW */}
-          <View className="gap-3">
-            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider ml-1">
-              When you need something now
-            </Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => {}}
-              className="rounded-xl border border-border/40 bg-surface p-5 shadow-sm active:scale-[0.98] dark:border-border-dark/40 dark:bg-surface-dark"
-            >
-              <Text variant="heading" className="mb-1">Steady yourself right now</Text>
-              <Text variant="bodySm" className="font-sans-medium text-text-secondary dark:text-text-secondary-dark">
-                Toolkit
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => {}}
-              className="rounded-xl border border-border/40 bg-surface p-5 shadow-sm active:scale-[0.98] dark:border-border-dark/40 dark:bg-surface-dark"
-            >
-              <Text variant="heading" className="mb-1">Make sense of what you feel</Text>
-              <Text variant="bodySm" className="font-sans-medium text-text-secondary dark:text-text-secondary-dark">
-                Symptom Navigator
-              </Text>
-            </Pressable>
-          </View>
+          {/* IN-PROGRESS READS */}
+          <PickUpRail reads={model.inProgressReads} />
 
-          {/* CARE AND LEARNING */}
-          <View className="gap-3">
-            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider ml-1">
-              Care and learning
-            </Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => {}}
-              className="gap-2 rounded-xl border border-border/40 bg-surface p-5 shadow-sm active:scale-[0.98] dark:border-border-dark/40 dark:bg-surface-dark"
-            >
-              <View className="flex-row items-center gap-2 mb-1">
-                <Text
-                  variant="caption"
-                  className="rounded-full bg-surface-active px-2.5 py-1 font-sans-medium text-text-secondary dark:bg-surface-active-dark dark:text-text-secondary-dark"
-                >
-                  {model.read.tag}
-                </Text>
-                <Text
-                  variant="caption"
-                  className="text-text-tertiary dark:text-text-tertiary-dark"
-                >
-                  {model.read.meta}
-                </Text>
-              </View>
-              <Text variant="bodyBold" className="text-lg">{model.read.title}</Text>
-              <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark mt-1">
-                {READ_CREDIT}
-              </Text>
-            </Pressable>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4 px-4" contentContainerClassName="gap-3">
-              {ARTICLE_RAIL.map((topic) => (
-                <Pressable
-                  key={topic}
-                  accessibilityRole="button"
-                  onPress={() => {}}
-                  className="min-h-[44px] items-center justify-center rounded-full border border-border/40 bg-surface px-5 py-2 shadow-sm active:scale-[0.96] dark:border-border-dark/40 dark:bg-surface-dark"
-                >
-                  <Text variant="bodySm" className="font-sans-medium">{topic}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
+          {/* TOOLS BENTO */}
+          <ToolsBento />
+
+          {/* EDITORIAL MOST READ */}
+          <MostRead />
 
           {/* MISSION FOOTER */}
           <Text

@@ -2,9 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useMemo } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { useBookmarkedIds, useToggleBookmark } from '@/features/bookmarks/hooks';
 import { colors } from '@/lib/colors';
@@ -177,7 +178,7 @@ export function CompareView() {
     return (
       <Chrome>
         <View className="flex-1 items-center justify-center" testID="compare-loading">
-          <ActivityIndicator color={colors.primary.default.light} />
+          <AppLoader />
         </View>
       </Chrome>
     );

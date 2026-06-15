@@ -14,3 +14,9 @@
 // FlashList. The mock lives in a module file (not a jest.mock factory here) to stay
 // clear of babel-plugin-jest-hoist's out-of-scope-variable rule.
 jest.mock('@shopify/flash-list');
+
+// lottie-react-native's native animation view has no react-test-renderer
+// implementation. The manual mock in __mocks__/lottie-react-native.js renders a
+// plain View that re-exposes AppLoader's props so its animation + reduced-motion
+// wiring is assertable. No test mounts a real LottieView.
+jest.mock('lottie-react-native');
