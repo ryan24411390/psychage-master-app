@@ -12,6 +12,7 @@ import {
 
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { Text } from '@/components/ui/Text';
+import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
 import { ArticleBody } from '@/features/content/blocks/ArticleBody';
 import { CT4_CONTENT } from '@/features/content/copy';
 import { ReviewedByCredit } from '@/features/content/ReviewedByCredit';
@@ -41,7 +42,7 @@ export function ArticleReader({ slug }: { slug: string }) {
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
-      <View className="flex-row items-center px-2">
+      <View className="flex-row items-center justify-between px-2">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t.back}
@@ -55,6 +56,8 @@ export function ArticleReader({ slug }: { slug: string }) {
             {t.back}
           </Text>
         </Pressable>
+        {/* Save this article — resource_id is the slug (T-007). */}
+        <BookmarkSaveSlot resourceType="article" resourceId={slug} testID="article-save" />
       </View>
 
       {isLoading ? (
