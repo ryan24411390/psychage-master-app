@@ -28,6 +28,23 @@ const ARTICLE = {
   contentFormat: 'html' as const,
   authorName: 'Psychage Team',
   authorRole: 'Editor',
+  citations: [],
+};
+
+const CITED = {
+  ...ARTICLE,
+  citations: [
+    {
+      title: 'Anxiety and the autonomic nervous system: a review',
+      authors: ['Smith, J.', 'Lee, K.'],
+      year: 2022,
+      url: 'https://example.org/anxiety-ans',
+      doi: null,
+      journalName: 'Journal of Anxiety',
+      tier: 1,
+      sortOrder: 1,
+    },
+  ],
 };
 
 const INITIAL_METRICS = {
@@ -76,5 +93,32 @@ describe('S22 ArticleReader', () => {
     (getArticleBySlug as jest.Mock).mockResolvedValue(null);
     renderReader(<ArticleReader slug="does-not-exist" />);
     expect(await screen.findByText('This article isn’t available.')).toBeTruthy();
+  });
+
+  it('shows the educational, non-diagnostic disclaimer (SR-3)', async () => {
+    (getArticleBySlug as jest.Mock).mockResolvedValue(ARTICLE);
+    renderReader(<ArticleReader slug={ARTICLE.slug} />);
+    expect(await screen.findByTestId('article-disclaimer')).toBeTruthy();
+    expect(
+      screen.getByText(
+        'Psychage is educational and does not diagnose or treat. If you need help now, tap Help now at the top.',
+      ),
+    ).toBeTruthy();
+  });
+
+  it('renders the verbatim References from article_citations, with a source link', async () => {
+    (getArticleBySlug as jest.Mock).mockResolvedValue(CITED);
+    renderReader(<ArticleReader slug={CITED.slug} />);
+    expect(await screen.findByTestId('article-references')).toBeTruthy();
+    expect(screen.getByText('References')).toBeTruthy();
+    expect(screen.getByText('Anxiety and the autonomic nervous system: a review')).toBeTruthy();
+    expect(screen.getByText('View source')).toBeTruthy();
+  });
+
+  it('omits the References section when the article cites nothing', async () => {
+    (getArticleBySlug as jest.Mock).mockResolvedValue(ARTICLE);
+    renderReader(<ArticleReader slug={ARTICLE.slug} />);
+    await screen.findByText('Why your chest gets tight');
+    expect(screen.queryByTestId('article-references')).toBeNull();
   });
 });
