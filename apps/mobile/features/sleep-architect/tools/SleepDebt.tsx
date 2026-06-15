@@ -7,6 +7,7 @@ import {
   type SleepSettings,
 } from '@psychage/shared/sleep';
 
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
 
@@ -35,12 +36,12 @@ export function SleepDebt({ entries, settings }: SleepDebtProps) {
 
   return (
     <View className="gap-3">
-      <View className="gap-1 rounded-xl border border-border bg-surface px-4 py-4 dark:border-border-dark dark:bg-surface-dark">
+      <Card className="gap-1 px-4 py-4">
         <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {t.debtTotal}
         </Text>
         <Text variant="headingLg">{formatDuration(debt.total_debt_minutes)}</Text>
-      </View>
+      </Card>
       {debt.total_debt_minutes > 0 ? (
         <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
           {t.debtRecovery}

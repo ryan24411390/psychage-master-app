@@ -7,6 +7,7 @@ import { detectCrisisContent } from '@psychage/shared/sleep';
 
 import { Button } from '@/components/ui/Button';
 import { CrisisPill } from '@/components/CrisisPill';
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
 import { colors } from '@/lib/colors';
@@ -30,7 +31,7 @@ export function WindDown() {
         {t.intro}
       </Text>
 
-      <View className="gap-2 rounded-xl border border-border bg-surface px-4 py-4 dark:border-border-dark dark:bg-surface-dark">
+      <Card className="gap-2 px-4 py-4">
         <Text variant="bodyBold">{t.breathingTitle}</Text>
         <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
           {t.breathingBody}
@@ -42,9 +43,9 @@ export function WindDown() {
         >
           {t.breathingCta}
         </Button>
-      </View>
+      </Card>
 
-      <View className="gap-2 rounded-xl border border-border bg-surface px-4 py-4 dark:border-border-dark dark:bg-surface-dark">
+      <Card className="gap-2 px-4 py-4">
         <Text variant="bodyBold">{t.brainDumpTitle}</Text>
         <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
           {t.brainDumpBody}
@@ -70,7 +71,7 @@ export function WindDown() {
             {t.brainDumpClear}
           </Button>
         ) : null}
-      </View>
+      </Card>
 
       <Text
         variant="caption"
@@ -79,15 +80,12 @@ export function WindDown() {
         {t.cbtiTitle}
       </Text>
       {CT4_SLEEP.cbtiCards.map((card) => (
-        <View
-          key={card.id}
-          className="gap-1 rounded-xl border border-border bg-surface px-4 py-4 dark:border-border-dark dark:bg-surface-dark"
-        >
+        <Card key={card.id} className="gap-1 px-4 py-4">
           <Text variant="bodyBold">{card.title}</Text>
           <Text variant="bodySm" className="leading-5 text-text-secondary dark:text-text-secondary-dark">
             {card.body}
           </Text>
-        </View>
+        </Card>
       ))}
     </View>
   );

@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 import { type ChronotypeResult, scoreChronotype } from '@psychage/shared/sleep';
 
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
 
@@ -37,14 +38,14 @@ export function ChronotypeQuiz({ onSaveTargets }: ChronotypeQuizProps) {
         <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
           {result.description}
         </Text>
-        <View className="gap-1 rounded-xl border border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark">
+        <Card className="gap-1 px-4 py-3">
           <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {t.chronotypeIdeal}
           </Text>
           <Text variant="bodyBold">
             {result.ideal_bedtime} – {result.ideal_wake_time}
           </Text>
-        </View>
+        </Card>
         <Button variant="primary" className="w-full" onPress={() => onSaveTargets(result)}>
           {t.chronotypeSave}
         </Button>

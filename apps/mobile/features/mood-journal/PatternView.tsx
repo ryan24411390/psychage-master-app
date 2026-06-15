@@ -8,6 +8,7 @@ import {
 } from '@psychage/shared/mood-journal';
 import { View } from 'react-native';
 
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { CT4_MOOD_JOURNAL } from '@/features/mood-journal/copy';
 
@@ -103,10 +104,7 @@ function TimelineSection({ heading, days }: { heading: string; days: readonly Da
       <SectionHeading>{heading}</SectionHeading>
       <View className="gap-3">
         {days.map((day) => (
-          <View
-            key={day.date}
-            className="rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
-          >
+          <Card key={day.date}>
             <Text variant="bodyMedium">{formatDay(day.date)}</Text>
             <View className="mt-2 gap-2">
               {day.moments.map((moment) => (
@@ -132,7 +130,7 @@ function TimelineSection({ heading, days }: { heading: string; days: readonly Da
                 </View>
               ))}
             </View>
-          </View>
+          </Card>
         ))}
       </View>
     </View>

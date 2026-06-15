@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { Mascot } from '@/components/home/Mascot';
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 
 // S2 record + trust (Flow 1). GlobalHeader, the STANDARD mascot (76×88, reused from A1 —
@@ -31,11 +32,11 @@ export function RecordTrustView({ onCheckIn, onLookAround }: RecordTrustViewProp
         <View className="items-center mt-4 mb-2">
           <Mascot />
         </View>
-        <View className="gap-4 p-5 rounded-xl border border-border/50 bg-surface shadow-sm dark:border-border-dark/50 dark:bg-surface-dark">
+        <Card variant="elevated" className="gap-4 p-5">
           <Text variant="body">{L1}</Text>
           <Text variant="body">{L2}</Text>
           <Text variant="body">{L3}</Text>
-        </View>
+        </Card>
       </View>
       <SafeAreaView edges={['bottom']} className="gap-3 px-6 pb-2">
         <Button variant="primary" className="w-full" onPress={onCheckIn}>

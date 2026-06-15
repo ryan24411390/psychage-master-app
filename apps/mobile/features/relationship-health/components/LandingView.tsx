@@ -2,6 +2,7 @@ import { ScrollView, View } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 
@@ -43,17 +44,14 @@ export function LandingView({ onStart, onViewHistory, historyCount }: LandingVie
       {/* Info cards */}
       <View className="gap-3">
         {t.info.map((card) => (
-          <View
-            key={card.title}
-            className="rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
-          >
+          <Card key={card.title}>
             <Text variant="bodyMedium" className="mb-1">
               {card.title}
             </Text>
             <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark leading-5">
               {card.body}
             </Text>
-          </View>
+          </Card>
         ))}
       </View>
 
@@ -104,7 +102,7 @@ export function LandingView({ onStart, onViewHistory, historyCount }: LandingVie
       ) : null}
 
       {/* Disclaimer */}
-      <View className="rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+      <Card>
         <Text variant="bodySm" className="mb-2 font-sans-medium">
           {t.disclaimerHeading}
         </Text>
@@ -120,7 +118,7 @@ export function LandingView({ onStart, onViewHistory, historyCount }: LandingVie
             </View>
           ))}
         </View>
-      </View>
+      </Card>
     </ScrollView>
   );
 }
