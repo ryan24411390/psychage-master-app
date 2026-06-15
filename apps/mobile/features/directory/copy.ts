@@ -34,6 +34,19 @@ export const DIRECTORY_COPY = {
 
   // Specialty quick-suggestions under the search box.
   searchSpecialtyHint: (label: string) => `Search ${label}`,
+
+  // Compare (saved providers, side by side). Up to 3. CT-pending.
+  compareTitle: 'Compare',
+  compareCta: (n: number) => `Compare ${n} saved`,
+  compareEmptyTitle: 'Nothing to compare yet',
+  compareEmptyBody: 'Save two or three providers to compare them side by side.',
+  compareRemove: 'Remove',
+  compareCap: 'Comparing your 3 most recently saved.',
+  fieldType: 'Type',
+  fieldLocation: 'Location',
+  fieldModality: 'Modality',
+  fieldVerified: 'Verified',
+  none: '—',
   noResults: 'No providers match these filters.',
   droppedState: 'No match in that state — showing the city instead.',
   resultCount: (n: number) => `${n.toLocaleString()} ${n === 1 ? 'provider' : 'providers'}`,

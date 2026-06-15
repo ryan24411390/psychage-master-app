@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
+import { useBookmarkedIds } from '@/features/bookmarks/hooks';
 import { OfflineFallback } from '@/features/offline/OfflineFallback';
 import { useIsOnline } from '@/features/offline/useIsOnline';
 import { colors } from '@/lib/colors';
@@ -75,6 +77,8 @@ export function DirectoryView({
   const [sort, setSort] = useState<SortOption>('relevance');
   const [searchFocused, setSearchFocused] = useState(false);
   const specialties = useSpecialties();
+  const savedProviderIds = useBookmarkedIds('provider');
+  const savedCount = savedProviderIds.data?.size ?? 0;
 
   // Debounce the text query so we don't fire a request per keystroke.
   useEffect(() => {
@@ -375,6 +379,19 @@ export function DirectoryView({
           }
         />
       )}
+
+      {/* Floating compare — appears once 2+ providers are saved. */}
+      {savedCount >= 2 ? (
+        <View className="absolute inset-x-4 bottom-4">
+          <Button
+            variant="primary"
+            onPress={() => router.push('/find/compare')}
+            testID="directory-compare"
+          >
+            {t.compareCta(Math.min(savedCount, 3))}
+          </Button>
+        </View>
+      ) : null}
 
       <DirectoryFilters
         visible={sheetOpen}
