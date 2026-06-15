@@ -1,9 +1,34 @@
 # Icon-Usage Audit — Psychage Mobile
 
-**Status:** read-only audit. No library chosen, no icon names proposed, no component changed.
+**Status:** read-only audit (Slice 1). No icon names proposed, no component changed.
+Library + §5 ambiguities **DECIDED 2026-06-15** — see §0.
 **Purpose:** map every surface where an icon could appear, classify each slot
 DECORATIVE vs LOAD-BEARING, and count the distinct *concepts* (library-agnostic)
 that an icon must carry. This count drives the icon-library decision that follows.
+
+---
+
+## 0. Decisions (2026-06-15)
+
+- **Library:** keep `lucide-react-native` (^1.16.0) for **all common-UI + decorative**
+  glyphs. **No new icon library** (Phosphor/Lucide-swap rejected — an off-the-shelf set
+  can't carry the clinical concepts anyway). **Custom SVG only for the clinical/emotional
+  concepts**, extending the app's existing custom-SVG pattern (`FillGlyph`,
+  `components/pictograms/*`, `Terrain`, `BodyScanGlyph`). No emoji.
+- **§5 ambiguities resolved** (principle: route to Dr. Lena Dobson only what makes a
+  mental-health claim or could mislead a non-reader; neutral wayfinding stays lucide):
+  - `Moon` (Sleep tile) → **common-UI** (universal "sleep", no claim).
+  - `Book` (Mood Journal tile) → **common-UI**; emotion representation *inside* reuses the
+    mood-scale set, not a separate glyph.
+  - Credential rows (`Hash`/`FileText`/`Building`) → **common-UI**, low priority.
+  - `Search` → **common-UI**, both contexts (field affordance + empty-state; pair text on
+    empty state).
+  - `Compass` → **clinical / VERIFY**, but *review the existing pictogram*, do not build new.
+- **Revised split: 24 common-UI (lucide) · 13 clinical/emotional (custom SVG + VERIFY).**
+  Total distinct load-bearing concepts unchanged at **37**.
+- **Gate:** all 13 clinical icons require Dr. Lena Dobson sign-off before any live wire-in.
+  Low-literacy comprehension piloting deferred to V2 (V1 internal-only); clinical sign-off
+  substitutes for now.
 
 **Scope note:** the `app/*` route files are mostly thin Expo-Router wrappers; the
 real UI (and therefore the real icon slots) lives in `features/*` and `components/*`.
@@ -149,6 +174,8 @@ all `ActivityIndicator` loaders (native spinner, not an icon), `app/library/*` a
 | Tab bar | `Learn` pictogram → **tab: learn / articles** | paired (label) | LOAD-BEARING |
 | Tab bar | `Find` pictogram → **tab: find care** | paired (label) | LOAD-BEARING |
 | ReflectionRow | teal dot → **new / ready status** | paired | LOAD-BEARING |
+| Compass: Sleep tile | `Moon` → **sleep** (universal, no clinical claim — §0) | paired | LOAD-BEARING |
+| Compass: Mood Journal tile | `Book` → **mood journal** (tile identity; emotion repr. inside reuses the mood-scale set — §0) | paired | LOAD-BEARING |
 | Sparkline · RadarChart · ScoreRing | data charts → **factual data viz** (sleep trend, relationship profile) | paired | LOAD-BEARING (data, not a glyph concept) |
 
 ### 3c. Load-bearing slots — clinical / emotional (all VERIFY)
@@ -161,12 +188,10 @@ all `ActivityIndicator` loaders (native spinner, not an icon), `app/library/*` a
 | StateRows `FillGlyph` · Terrain dots · EntryDetailSheet | proportional bar / colored dot → **mood / feeling level (5-point: very low → very good)** | mixed; Terrain dots icon-alone | LOAD-BEARING · **VERIFY** · `needs validation` |
 | SymptomChip (Navigator) | `Check` on chip → **symptom (selected)** | icon-alone | LOAD-BEARING · **VERIFY** · `needs validation` |
 | ConditionsLibrary / Detail | per-condition representation slot (no icon today; slot exists) | n/a | LOAD-BEARING · **VERIFY** |
-| Compass tab pictogram · Navigator tile | `Compass` → **navigator / orientation (symptom exploration)** | paired | LOAD-BEARING · **VERIFY** |
+| Compass tab pictogram · Navigator tile | `Compass` → **navigator / orientation (symptom exploration)** — review existing pictogram, do not build new | paired | LOAD-BEARING · **VERIFY** |
 | Compass: Relationship Health tile | `HeartHandshake` → **relationship health** | paired | LOAD-BEARING · **VERIFY** |
 | Compass: MindMate tile · MindMate | `MessageCircle` → **supportive chat (must read educational, not therapy)** | paired | LOAD-BEARING · **VERIFY** |
 | Compass: Clarity tile | `Sparkles` → **clarity / cognitive check (NOT a score badge)** | paired | LOAD-BEARING · **VERIFY** |
-| Compass: Mood Journal tile | `Book` → **mood journal (emotion logging)** | paired | LOAD-BEARING · **VERIFY** |
-| Compass: Sleep tile | `Moon` → **sleep** (likely non-clinical, confirm) | paired | LOAD-BEARING · **VERIFY** |
 | Compass: Steadying tile · Toolkit | `LifeBuoy` hero → **grounding / steadying toolkit** (overlaps crisis) | paired | LOAD-BEARING · **VERIFY** |
 | BodyScanGlyph (toolkit) | custom glyph → **body awareness / body scan** | paired | LOAD-BEARING · **VERIFY** |
 | FindCareScreen provider tiles | `Stethoscope`/`BookOpen`/`MessageSquare`/`Users` → **clinician role / specialty** (psychiatrist · psychologist · therapist-counselor · social worker — 4 variants) | mixed | LOAD-BEARING · **VERIFY** |
@@ -181,7 +206,7 @@ concept-family with 4 variants (not 4 concepts). Data-viz charts and article-emb
 SVG diagrams are content/visualization, not glyph concepts, so they are excluded from
 the glyph counts below (called out separately).
 
-### Common-UI load-bearing concepts — **22**
+### Common-UI load-bearing concepts (lucide) — **24**
 1. Selected / chosen
 2. Saved item (toggle)
 3. No results / empty state
@@ -204,25 +229,25 @@ the glyph counts below (called out separately).
 20. Tab: Learn
 21. Tab: Find care
 22. New / ready status
+23. Sleep (Moon — §0)
+24. Mood journal tile identity (Book — §0; emotion repr. inside reuses the mood-scale set)
 
-### Clinical / emotional load-bearing concepts (all VERIFY) — **15**
+### Clinical / emotional load-bearing concepts (custom SVG, all VERIFY) — **13**
 1. Crisis help / lifeline
 2. Emergency call
 3. Crisis text line
 4. Mood / feeling level (5-point scale)
 5. Symptom (selected)
 6. Mental-health condition (per-condition slot)
-7. Navigator / orientation (symptom exploration) — also the Compass tab
+7. Navigator / orientation (symptom exploration) — also the Compass tab (review existing pictogram)
 8. Relationship health
 9. Supportive chat (MindMate)
 10. Clarity / cognitive check
-11. Mood journal (emotion logging)
-12. Sleep
-13. Grounding / steadying toolkit
-14. Body awareness / body scan
-15. Clinician role / specialty (1 family, 4 variants: psychiatrist · psychologist · therapist-counselor · social worker)
+11. Grounding / steadying toolkit
+12. Body awareness / body scan
+13. Clinician role / specialty (1 family, 4 variants: psychiatrist · psychologist · therapist-counselor · social worker)
 
-> **TOTAL distinct load-bearing concepts: 37** — **22 common-UI** + **15 clinical/emotional**.
+> **TOTAL distinct load-bearing concepts: 37** — **24 common-UI** + **13 clinical/emotional**.
 > Plus a "navigation/decorative" set (~9: back, forward chevron, close, dropdown caret,
 > search-field glyph, mascot, terrain connector, account avatar, loading) that any general
 > icon library covers trivially and that needs no clinical review.
@@ -238,23 +263,19 @@ app already does for mood (`FillGlyph`/Terrain) and tab pictograms.
 
 ---
 
-## 5. Ambiguous classifications (flagged for reviewer)
+## 5. Ambiguous classifications — RESOLVED 2026-06-15 (see §0)
 
-- **`Moon` (Sleep tile):** read as clinical/emotional and VERIFY-flagged to be safe, but
-  sleep is arguably a neutral common-UI concept. Two readings: (a) clinical (sits among
-  wellness tools) → keep VERIFY; (b) common-UI (universal "night/sleep") → move to common set.
-  Recommend (a) until Dr. Dobson rules.
-- **`Book` (Mood Journal):** the glyph (a book) is generic common-UI, but the *concept it
-  labels* (logging emotions) is emotional → VERIFY on the concept, not the glyph.
-- **Credential rows (`Hash` NPI, `FileText` license, `Building` practice):** load-bearing in
-  the provider-detail context but each is paired with text and could be argued decorative
-  row-affordances. Counted as common-UI load-bearing; low priority.
-- **`Search` glyph:** decorative inside a live search field, but load-bearing as the
-  empty-state "no results" marker. Same glyph, two classifications by context — both recorded.
-- **Tab pictogram `Compass`:** doubles as common-UI tab identity *and* the clinical Navigator
-  tool concept. Counted once, under clinical.
-- **`User` avatar:** treated decorative (neutral anonymous placeholder); becomes a non-icon
-  initial once a name exists.
+- **`Moon` (Sleep tile):** → **common-UI**. Universal "sleep", no mental-health claim.
+- **`Book` (Mood Journal):** → **common-UI** tile identity. The emotional concept (logging
+  feelings) is carried *inside* by the mood-scale set, not by this glyph.
+- **Credential rows (`Hash` NPI, `FileText` license, `Building` practice):** → **common-UI**,
+  low priority. Paired with text; arguably decorative row-affordances.
+- **`Search` glyph:** → **common-UI** in both contexts (live-field affordance + empty-state
+  "no results"; pair visible text on the empty state).
+- **Tab pictogram `Compass`:** → **clinical / VERIFY**, counted once under clinical. Review the
+  existing pictogram for sign-off; do not build a new glyph.
+- **`User` avatar:** decorative (neutral anonymous placeholder); becomes a non-icon initial
+  once a name exists.
 
 ## 6. Icon-alone slots (`needs validation` — fail the default pairing rule)
 Crisis emergency `Phone`; `Check` selection marks; `Bookmark`/`BookmarkPlus` save toggle;
