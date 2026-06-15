@@ -5,7 +5,11 @@ export {
   getFeatured,
   getRelatedArticles,
   listArticlesByCategorySlug,
+  listArticlesByCategorySlugs,
+  listArticlesBySlugs,
   listPopulatedCategories,
+  listRecentArticles,
+  searchArticles,
 } from './repo';
 export {
   ARTICLE_AUTHOR_NAME,
