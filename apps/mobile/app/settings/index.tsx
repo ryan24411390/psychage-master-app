@@ -5,6 +5,7 @@ import { SettingsRow } from '@/components/settings/SettingsRow';
 import { SettingsSection } from '@/components/settings/SettingsSection';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
+import { useAuth } from '@/features/auth';
 import { CT4_SETTINGS } from '@/features/settings/copy';
 import { storage } from '@/lib/adapters/storage';
 import { loadPersonalization } from '@/lib/persistence/personalization';
@@ -13,6 +14,7 @@ import { loadPersonalization } from '@/lib/persistence/personalization';
 // the shell only guards the bottom.
 export default function SettingsHubScreen() {
   const { name } = loadPersonalization(storage);
+  const { session } = useAuth();
   const t = CT4_SETTINGS;
 
   return (
@@ -58,6 +60,16 @@ export default function SettingsHubScreen() {
           />
         </SettingsSection>
 
+        <SettingsSection title={t.hub.crisisLabel}>
+          <SettingsRow
+            label={t.hub.rows.crisis}
+            // SR-2: crisis access is always reachable. This is one more entry point
+            // to the always-on /crisis surface (also on the GlobalHeader Help-now pill).
+            onPress={() => router.push('/crisis')}
+            testID="settings-row-crisis"
+          />
+        </SettingsSection>
+
         <SettingsSection>
           <SettingsRow
             label={t.hub.rows.supporter}
@@ -66,17 +78,27 @@ export default function SettingsHubScreen() {
           />
         </SettingsSection>
 
-        <SettingsSection>
+        <SettingsSection title={t.hub.accountLabel}>
+          <SettingsRow
+            label={t.hub.rows.account}
+            value={session ? session.email : t.hub.notSignedIn}
+            chevron={false}
+            testID="settings-row-account-status"
+          />
           <SettingsRow
             label={t.hub.rows.signOut}
-            chevron={false}
-            // STUB(B1): sign-out → S37, gated on rules/auth.md. The row renders so
-            // the hub is complete; B1 wires the destination + the audit_events row.
-            // Sign-out is NOT destructive — no rust/error tint here.
-            onPress={() => {
-              /* STUB(B1) — no-op until the auth slice lands */
-            }}
+            // Sign-out is NOT destructive — no rust/error tint. Routes to the wired
+            // S37 confirm sheet (app/(auth)/sign-out.tsx), which calls the auth
+            // service + clears the session. Navigation only — no auth model built here.
+            onPress={() => router.push('/sign-out')}
             testID="settings-row-sign-out"
+          />
+          <SettingsRow
+            label={t.hub.rows.deleteAccount}
+            destructive
+            // The hard-immediate, no-recovery delete flow (S47 → S48).
+            onPress={() => router.push('/settings/delete')}
+            testID="settings-row-delete-account"
           />
         </SettingsSection>
 

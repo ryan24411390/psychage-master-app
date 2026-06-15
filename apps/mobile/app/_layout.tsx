@@ -16,7 +16,7 @@ import '../global.css';
 import '@/lib/adapters/featureFlags';
 
 import { HapticProvider } from '@/lib/haptic-context';
-import { queryClient } from '@/lib/query-client';
+import { queryClient } from '@/lib/query';
 
 SplashScreen.preventAutoHideAsync();
 
