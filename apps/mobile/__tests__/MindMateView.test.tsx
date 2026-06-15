@@ -18,7 +18,9 @@ describe('MindMateView', () => {
     const noop = jest.fn() as unknown as typeof sendMessage;
     renderWithProviders(<MindMateView region="US" sendImpl={noop} />, { haptics: true });
     expect(screen.getByTestId('mindmate-intro')).toBeTruthy();
-    expect(screen.getByTestId('mindmate-mascot')).toBeTruthy();
+    // The mascot is decorative and accessibilityElementsHidden; RNTL excludes
+    // hidden elements from queries by default, so opt in to assert it rendered.
+    expect(screen.getByTestId('mindmate-mascot', { includeHiddenElements: true })).toBeTruthy();
   });
 
   it('SR-2: a crisis-style message routes to crisis and never calls the backend', async () => {
