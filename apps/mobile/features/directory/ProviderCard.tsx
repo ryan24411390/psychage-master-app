@@ -2,14 +2,19 @@ import { memo } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
+import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
 
+import { Avatar } from './Avatar';
 import { DIRECTORY_COPY } from './copy';
+import { cleanDisplayName } from './mapping';
 import { getTrustBadge } from './trust';
 import type { ProviderCardData } from './types';
 
 // One directory result row. Renders REAL, verbatim provider fields — null fields
 // are simply omitted, never filled. Framing is informational: a badge reflects the
 // provider's own DB status, not a Psychage endorsement.
+
+const t = DIRECTORY_COPY;
 
 function Tag({ label }: { label: string }) {
   return (
@@ -20,8 +25,6 @@ function Tag({ label }: { label: string }) {
     </View>
   );
 }
-
-const t = DIRECTORY_COPY;
 
 function badgeLabel(status: string, verifiedAt: string | null): string | null {
   const badge = getTrustBadge({ status, verified_at: verifiedAt });
@@ -38,46 +41,80 @@ export const ProviderCard = memo(function ProviderCard({
   provider: ProviderCardData;
   onPress: (id: string) => void;
 }) {
+  const name = cleanDisplayName(provider.display_name) || provider.display_name;
   const place = [provider.primary_city, provider.primary_state].filter(Boolean).join(', ');
-  const typeLine = [provider.provider_type_label, place].filter(Boolean).join(' · ');
+  const distance =
+    provider.distance_miles != null ? `${provider.distance_miles.toFixed(1)} mi` : null;
+  const typeLine = [provider.provider_type_label, place, distance].filter(Boolean).join(' · ');
   const badge = badgeLabel(provider.status, provider.verified_at);
   const specialties = provider.specialty_tags.slice(0, 3);
 
+  // One node for the screen reader — name, creds, type/place, badge, accepting.
+  const a11y = [
+    name,
+    provider.credentials_suffix,
+    typeLine,
+    badge,
+    provider.is_accepting_patients ? t.acceptingPatients : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={provider.display_name}
-      onPress={() => onPress(provider.id)}
-      className="min-h-[44px] gap-1.5 border-b border-border py-3 dark:border-border-dark"
-      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-    >
-      <View className="flex-row items-start justify-between gap-2">
-        <View className="flex-1 flex-row flex-wrap items-baseline">
-          <Text variant="bodyMedium">{provider.display_name}</Text>
-          {provider.credentials_suffix ? (
+    <View className="flex-row items-center gap-2 border-b border-border py-3 dark:border-border-dark">
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={a11y}
+        onPress={() => onPress(provider.id)}
+        testID={`provider-card-${provider.id}`}
+        className="min-h-[44px] flex-1 flex-row items-center gap-3"
+        style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+      >
+        <Avatar name={name} photoUrl={provider.photo_url} />
+
+        <View className="flex-1 gap-1">
+          <View className="flex-row items-start justify-between gap-2">
+            <View className="flex-1 flex-row flex-wrap items-baseline">
+              <Text variant="bodyMedium">{name}</Text>
+              {provider.credentials_suffix ? (
+                <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                  {`, ${provider.credentials_suffix}`}
+                </Text>
+              ) : null}
+            </View>
+            {badge ? <Tag label={badge} /> : null}
+          </View>
+
+          {typeLine ? (
             <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
-              {`, ${provider.credentials_suffix}`}
+              {typeLine}
             </Text>
           ) : null}
-        </View>
-        {badge ? <Tag label={badge} /> : null}
-      </View>
 
-      {typeLine ? (
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
-          {typeLine}
-        </Text>
-      ) : null}
-
-      {(specialties.length > 0 || provider.telehealth_available || provider.in_person_available) && (
-        <View className="flex-row flex-wrap gap-1.5 pt-0.5">
-          {provider.telehealth_available ? <Tag label={t.telehealth} /> : null}
-          {provider.in_person_available ? <Tag label={t.inPerson} /> : null}
-          {specialties.map((s) => (
-            <Tag key={s.slug} label={s.label} />
-          ))}
+          {(specialties.length > 0 ||
+            provider.telehealth_available ||
+            provider.in_person_available ||
+            provider.is_accepting_patients) && (
+            <View className="flex-row flex-wrap items-center gap-1.5 pt-0.5">
+              {provider.is_accepting_patients ? (
+                <View className="rounded-full bg-surface-accent px-2 py-0.5 dark:bg-surface-accent-dark">
+                  <Text variant="caption" className="text-primary dark:text-primary-dark">
+                    {t.acceptingPatients}
+                  </Text>
+                </View>
+              ) : null}
+              {provider.telehealth_available ? <Tag label={t.telehealth} /> : null}
+              {provider.in_person_available ? <Tag label={t.inPerson} /> : null}
+              {specialties.map((s) => (
+                <Tag key={s.slug} label={s.label} />
+              ))}
+            </View>
+          )}
         </View>
-      )}
-    </Pressable>
+      </Pressable>
+
+      {/* Save from the list — anon tap opens the sign-in sheet (BookmarkSaveSlot). */}
+      <BookmarkSaveSlot resourceType="provider" resourceId={provider.id} testID={`provider-card-save-${provider.id}`} />
+    </View>
   );
 });

@@ -28,6 +28,15 @@ export const DIRECTORY_COPY = {
   badgeUnclaimed: 'Listed',
   telehealth: 'Telehealth',
   inPerson: 'In person',
+  acceptingPatients: 'Accepting new patients',
+
+  // Provenance / credentials (detail). Informational — provider's own registry
+  // data, not a Psychage endorsement. CT-pending.
+  credentialsTitle: 'Credentials & verification',
+  npiLabel: 'NPI',
+  licenseLabel: 'License',
+  npiSource: 'Listed from the NPI registry',
+  lastConfirmed: (when: string) => `Last confirmed ${when}`,
 
   // Detail (S27)
   about: 'About',
