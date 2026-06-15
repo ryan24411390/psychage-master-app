@@ -20,6 +20,8 @@ export const KNOWN_LOCAL_KEYS = [
   'mobile:reminder-settings', // B2 lib/persistence/reminder-settings
   'mobile:appearance', // B2 lib/persistence/appearance
   'mobile:personalization', // B2 lib/persistence/personalization
+  'mobile:sync-consent', // settings lib/persistence/sync-consent (check-in backup consent)
+  'mobile:reading-text-size', // settings lib/persistence/reading-text-size
 ] as const;
 
 // KNOWN GAP (out of B2 scope to close): the check-in store quarantines a corrupt
