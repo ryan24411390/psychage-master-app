@@ -1,12 +1,15 @@
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
+import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
+import { CRISIS_DATASET } from '@/features/crisis/helplines.fixtures';
 import {
   defaultDeviceRegionHint,
+  getHelplines,
   loadRegionOverride,
   resolveRegion,
 } from '@/features/crisis/region';
@@ -16,9 +19,10 @@ import { colors } from '@/lib/colors';
 
 import { MINDMATE_COPY } from '../copy';
 import type { sendMessage } from '../mindmate-service';
-import { useMindMateChat } from '../useMindMateChat';
+import { type UseMindMateChatOptions, useMindMateChat } from '../useMindMateChat';
 import { ChatInput } from './ChatInput';
-import { CrisisCard } from './CrisisCard';
+import { ConsentBanner } from './ConsentBanner';
+import { type CrisisHotline, CrisisCard } from './CrisisCard';
 import { MessageList } from './MessageList';
 
 // S-MM MindMate screen. NATIVE chat (message list + composer), mascot-fronted.
@@ -36,6 +40,14 @@ function resolveActiveRegion() {
   });
 }
 
+/** The region's first voice-capable bundled hotline (name + number), or null. Read
+ *  from the crisis lane's offline dataset — no network — so the inline Call action
+ *  works with the network off. */
+function resolvePrimaryHotline(region: string): CrisisHotline | null {
+  const withCall = getHelplines(CRISIS_DATASET, region).find((r) => r.callNumber);
+  return withCall?.callNumber ? { name: withCall.name, callNumber: withCall.callNumber } : null;
+}
+
 type MindMateViewProps = {
   region?: string;
   onRequestCrisis?: () => void;
@@ -43,6 +55,8 @@ type MindMateViewProps = {
   onBack?: () => void;
   /** Injectable streaming impl for tests; defaults to the real service. */
   sendImpl?: typeof sendMessage;
+  /** Injectable consent-gated persister for tests; defaults to the real writer. */
+  persistImpl?: UseMindMateChatOptions['persistImpl'];
 };
 
 export function MindMateView({
@@ -51,11 +65,17 @@ export function MindMateView({
   onSignIn = () => router.push(AUTH_SIGN_IN_ROUTE),
   onBack = () => router.back(),
   sendImpl,
+  persistImpl,
 }: MindMateViewProps) {
+  const activeRegion = region ?? resolveActiveRegion();
+  const hotline = resolvePrimaryHotline(activeRegion);
+  const [consentDismissed, setConsentDismissed] = useState(false);
+
   const { messages, status, error, crisisActive, needsSignIn, send } = useMindMateChat({
-    region: region ?? resolveActiveRegion(),
+    region: activeRegion,
     onCrisis: onRequestCrisis,
     sendImpl,
+    persistImpl,
   });
 
   return (
@@ -83,7 +103,11 @@ export function MindMateView({
       >
         <MessageList messages={messages} />
 
-        {crisisActive ? <CrisisCard onGetSupport={onRequestCrisis} /> : null}
+        {crisisActive ? <CrisisCard onGetSupport={onRequestCrisis} hotline={hotline} /> : null}
+
+        {!crisisActive && !needsSignIn && !consentDismissed ? (
+          <ConsentBanner onDismiss={() => setConsentDismissed(true)} />
+        ) : null}
 
         {needsSignIn ? (
           <View
