@@ -1,6 +1,6 @@
 {
   "name": "@psychage/shared",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "description": "Psychage shared logic — Symptom Navigator scoring, PEAF validators, person-first sensitivity filter.",

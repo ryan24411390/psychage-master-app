@@ -8,11 +8,9 @@ Ordered by priority. See [roadmap.md](roadmap.md) for sequencing.
 
 ## A. Critical / safety
 
-### A1. Guard the mobile crisis-keyword copy against drift — **free**
-- **Files:** `apps/mobile/features/mindmate/safety/crisis-keywords.ts` → lift to `packages/shared/safety/crisis-keywords.ts`; add `packages/shared/safety/__tests__/crisis-keywords.snapshot.test.ts`.
-- **Change:** Single shared source for mobile; snapshot test asserting the 11 CRISIS regexes match a committed copy of web `src/lib/ai/safety.ts:49-61`. Add a `// SYNC SOURCE` comment with the web path + last-verified date.
-- **Why:** Lists are byte-identical today but hand-maintained; a web edit would silently diverge a safety-critical path. (Cross-repo single-source impossible until web joins the monorepo.)
-- **Effort:** S.
+### A1. Guard the mobile crisis-keyword copy against drift — **DONE (2026-06-16)**
+- **Done:** Lifted the CRISIS list into `packages/shared/safety/crisis-keywords.ts` (exported via the already-reserved `./safety` barrel); deleted the duplicate `apps/mobile/features/mindmate/safety/crisis-keywords.ts`; re-pointed `useMindMateChat.ts` + the mobile behavior test at `@psychage/shared/safety`. Added `packages/shared/safety/__tests__/crisis-keywords.snapshot.test.ts` pinning the 11 regex sources+flags to a committed verbatim copy of web `src/lib/ai/safety.ts:49-61` (last verified 2026-06-16) — any edit now fails CI and forces a re-verify against web. Shared 0.7.0 → 0.8.0.
+- **Note:** True cross-repo single-source still impossible until web joins the monorepo; the snapshot reference is the contract bridging the two repos.
 
 ### A2. Forward-looking guard: free-text crisis detection requirement — **SR-3 / doc**
 - **Files:** add `docs/parity-audit/PORTING-GUARDRAILS.md` (or a `rules/` note).

@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { precheckCrisis } from '@/features/mindmate/safety/crisis-keywords';
+import { precheckCrisis } from '@psychage/shared/safety';
 
-// SR-2 client pre-check. Mirrors psychage-v2 CRISIS_KEYWORDS — the instant,
-// offline crisis route. These assertions pin the behavior the safety layer depends
-// on; a regression here is a safety regression.
+// SR-2 client pre-check. Now single-sourced in @psychage/shared/safety (mirrors
+// psychage-v2 CRISIS_KEYWORDS) — the instant, offline crisis route. These
+// assertions pin the behavior the safety layer depends on; a regression here is a
+// safety regression. The shared drift guard
+// (packages/shared/safety/__tests__/crisis-keywords.snapshot.test.ts) pins the list
+// itself to the committed web reference.
 describe('precheckCrisis (SR-2 client pre-check)', () => {
   it('flags explicit self-harm / suicidal ideation', () => {
     for (const phrase of [

@@ -1,9 +1,10 @@
 import { useCallback, useRef, useState } from 'react';
 
+import { precheckCrisis } from '@psychage/shared/safety';
+
 import { MindMateUnavailableError, SafetyReplacementError } from './errors';
 import { sendMessage as defaultSendMessage } from './mindmate-service';
 import { persistExchange as defaultPersistExchange } from './persistence/chat-store';
-import { precheckCrisis } from './safety/crisis-keywords';
 import type { ChatMessage, ChatTurnMeta } from './types';
 
 // In-memory conversation controller. By DEFAULT messages live ONLY here — never
