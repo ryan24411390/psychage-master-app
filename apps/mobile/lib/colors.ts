@@ -8,10 +8,15 @@
 // Single source = the JSON. Defends rules/conventions.md #1 (cross-platform
 // color sync) by ensuring no second source can drift.
 //
-// Dark-mode caveat: values exported here are mode-static (light-mode). Lucide
-// icon `color` and tab-bar tint do not auto-flip with OS color scheme. Slice 6+
-// will introduce `useColorScheme()` reactivity at the call sites when the
-// settings toggle + MMKV persistence land.
+// Reactivity: this module exports BOTH light and dark for themed leaves. Call
+// sites that need a JS color string (lucide `color`, Switch `trackColor`,
+// `placeholderTextColor`, SVG `fill`) must pick the active value by color scheme
+// — either inline (`colorScheme === 'dark' ? colors.X.dark : colors.X.light`) or
+// via the canonical `useThemeColors()` hook (lib/use-theme-colors.ts). Passing a
+// `.light` value unconditionally leaves that surface stuck in light on the
+// true-black canvas (a dark glyph on #000000 is ~invisible). Non-themed scales
+// (charcoal, teal) carry one value per step and do NOT flip — pick a step that
+// reads in both registers, or map to a themed leaf at the call site.
 
 import tokens from '../../../tokens/mobile.tokens.json';
 
@@ -54,5 +59,5 @@ export const colors = {
     700: c.teal['700'],
     900: c.teal['900'],
   },
-  crisis: c.crisis.red,
+  crisis: { light: c.crisis.red, dark: c.crisis.redDark },
 } as const;

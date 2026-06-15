@@ -32,7 +32,10 @@ const sizeClasses: Record<ButtonSize, string> = {
 };
 
 const textVariantClasses: Record<ButtonVariant, string> = {
-  primary: 'text-white',
+  // Light: white on teal #1A9B8C (AA-large). Dark: the fill brightens to teal
+  // #20B8A6 where white drops to 2.5:1 (fails AA) — so the label flips to near-black
+  // ink (#0C0A09 on #20B8A6 = 8.0:1, AA-body). Light mode is unchanged.
+  primary: 'text-white dark:text-charcoal-950',
   secondary: 'text-text-primary dark:text-text-primary-dark',
   ghost: 'text-primary dark:text-primary-dark',
 };

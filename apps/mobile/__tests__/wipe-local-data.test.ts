@@ -2,7 +2,7 @@ import { CheckInRecordStore } from '@psychage/shared/check-in';
 import { describe, expect, it } from 'vitest';
 
 import type { Storage } from '@/lib/adapters/storage';
-import { KNOWN_LOCAL_KEYS } from '@/lib/persistence/known-keys';
+import { CHECK_IN_STORAGE_KEY, KNOWN_LOCAL_KEYS } from '@/lib/persistence/known-keys';
 import { wipeLocalData } from '@/lib/persistence/wipe-local-data';
 
 function memStorage(): Storage {
@@ -15,6 +15,7 @@ function memStorage(): Storage {
     remove: (k) => {
       m.delete(k);
     },
+    getAllKeys: () => Array.from(m.keys()),
   };
 }
 
@@ -54,5 +55,19 @@ describe('wipeLocalData (S48 local delete)', () => {
     const fresh = new CheckInRecordStore({ storage, now: () => clock, generateId: () => 'x' });
     expect(fresh.getRecent(50)).toEqual([]);
     expect(fresh.getToday()).toBeUndefined();
+  });
+
+  it('sweeps dynamic :quarantine: keys that have no static registry entry', () => {
+    const storage = memStorage();
+    // A corrupt-blob quarantine key — dynamically suffixed, not in KNOWN_LOCAL_KEYS.
+    const quarantineKey = `${CHECK_IN_STORAGE_KEY}:quarantine:2026-06-15T00:00:00.000Z-abc123`;
+    storage.set(quarantineKey, JSON.stringify({ corrupt: true }));
+    storage.set('mobile:appearance', JSON.stringify({ version: 1, mode: 'night' }));
+
+    wipeLocalData(storage);
+
+    expect(storage.get(quarantineKey)).toBeNull(); // reached via getAllKeys enumeration
+    expect(storage.get('mobile:appearance')).toBeNull();
+    expect(storage.getAllKeys?.()).toEqual([]);
   });
 });

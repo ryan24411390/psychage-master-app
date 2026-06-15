@@ -4,7 +4,7 @@ import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/Text';
-import { colors } from '@/lib/colors';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
 // Chrome-minimal exercise surface (D-10). The flow is a pushed route OUTSIDE the tabs,
 // so there is no tab bar; the only persistent chrome is the Help-now pill (crisis stays
@@ -18,6 +18,9 @@ export interface ExerciseChromeProps {
 }
 
 export function ExerciseChrome({ children, onHelp, onClose }: ExerciseChromeProps) {
+  // Close glyph → secondary ink (flips to a visible light grey on black); crisis
+  // ink/outline → crisis-dark on the true-black canvas (legible + urgent).
+  const tc = useThemeColors();
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <View className="flex-row items-center justify-between px-4 pt-1">
@@ -29,7 +32,7 @@ export function ExerciseChrome({ children, onHelp, onClose }: ExerciseChromeProp
             hitSlop={8}
             className="min-h-[44px] w-11 justify-center"
           >
-            <X size={22} color={colors.charcoal[600]} strokeWidth={1.75} />
+            <X size={22} color={tc.inkSecondary} strokeWidth={1.75} />
           </Pressable>
         ) : (
           <View className="w-11" />
@@ -40,10 +43,10 @@ export function ExerciseChrome({ children, onHelp, onClose }: ExerciseChromeProp
           accessibilityLabel="Help now"
           onPress={onHelp}
           hitSlop={4}
-          className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-3"
+          className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-3 dark:border-crisis-dark"
         >
-          <LifeBuoy size={18} color={colors.crisis} strokeWidth={1.75} />
-          <Text variant="bodyMedium" className="text-[13px] text-crisis">
+          <LifeBuoy size={18} color={tc.crisis} strokeWidth={1.75} />
+          <Text variant="bodyMedium" className="text-[13px] text-crisis dark:text-crisis-dark">
             Help now
           </Text>
         </Pressable>

@@ -10,4 +10,8 @@ export const CT4_COMPASS = {
   toolkit: { title: 'Steady yourself right now', sub: 'Toolkit' },
   navigator: { title: 'Make sense of what you feel', sub: 'Symptom Navigator' },
   relationship: { title: 'Take stock of your connections', sub: 'Relationship Health' },
+  mindmate: { title: 'Talk something through', sub: 'MindMate' },
+  clarity: { title: 'See how things have felt lately', sub: 'Clarity Score' },
+  reflectHeading: 'Notice your patterns',
+  moodJournal: { title: 'Notice what comes up', sub: 'Mood Journal' },
 } as const;

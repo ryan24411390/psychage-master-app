@@ -23,7 +23,6 @@ import { WV_ORIGIN, type WvTheme, buildWebViewUrl } from '@/features/webview/wv-
 import { OfflineFallback } from '@/features/offline/OfflineFallback';
 import { useIsOnline } from '@/features/offline/useIsOnline';
 import { colorForScheme, resolveColorRef } from '@/lib/a1-tokens';
-import { colors } from '@/lib/colors';
 
 // SYS-S8 WebView chrome (reduced template — NATIVE CHROME ONLY; the embedded /m/
 // page is the web workstream's). ONE component parameterized per surface: Global
@@ -115,7 +114,11 @@ export function WebViewSurface({ surface, params, issuer = stubWvtIssuer }: WebV
           testID="wv-back"
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
-          <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
+          <ChevronLeft
+            size={20}
+            color={colorForScheme(resolveColorRef('color.text.secondary'), colorScheme)}
+            strokeWidth={2}
+          />
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             {CT4_WEBVIEW.back}
           </Text>

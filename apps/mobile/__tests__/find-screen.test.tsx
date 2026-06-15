@@ -16,14 +16,14 @@ describe('S28 Find', () => {
     (router.push as jest.Mock).mockClear();
   });
 
-  it('online: opens the directory (S26 WebView)', () => {
+  it('online: opens the directory (S26 native list)', () => {
     onlineMock.mockReturnValue(true);
     renderWithProviders(<FindScreen />, { haptics: true });
     fireEvent.press(screen.getByTestId('find-open-directory'));
     expect(router.push as jest.Mock).toHaveBeenCalledWith('/find/directory');
   });
 
-  it('offline: shows the honest fallback instead of a dead WebView', () => {
+  it('offline: shows the honest fallback instead of a dead directory', () => {
     onlineMock.mockReturnValue(false);
     renderWithProviders(<FindScreen />, { haptics: true });
     expect(screen.getByTestId('find-offline')).toBeTruthy();
