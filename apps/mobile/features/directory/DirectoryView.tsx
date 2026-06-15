@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { ChevronDown, ChevronLeft, MapPin, Search, SlidersHorizontal } from 'lucide-react-native';
+import { ArrowUpDown, ChevronDown, ChevronLeft, MapPin, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
 
@@ -14,11 +14,15 @@ import { useRecentlyViewed } from '@/lib/use-recently-viewed';
 
 import { DirectoryFilters, type FilterDraft } from './DirectoryFilters';
 import { DIRECTORY_COPY } from './copy';
-import { hasActiveSearch, useFeaturedProviders, useProviderSearch } from './hooks';
+import { hasActiveSearch, useFeaturedProviders, useProviderSearch, useSpecialties } from './hooks';
 import { DEFAULT_RADIUS_MILES, requestAndGetCoords, type Coords } from './location';
 import { ProviderCard } from './ProviderCard';
 import { RecentlyViewedRail } from './RecentlyViewedRail';
+import { SortSheet, type SortOption } from './SortSheet';
 import type { ProviderSearchParams } from './types';
+
+// Below this result count a scope is "thin" — we nudge the user to widen.
+const COVERAGE_MIN = 25;
 
 // S26 Provider Directory — NATIVE list (replaces the WebView wrapper). Reads REAL
 // providers live from the shared Supabase. Filter-first: the paginated search runs
@@ -67,7 +71,10 @@ export function DirectoryView({
   const [coords, setCoords] = useState<Coords | null>(null);
   const [locNotice, setLocNotice] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+  const [sort, setSort] = useState<SortOption>('relevance');
   const [searchFocused, setSearchFocused] = useState(false);
+  const specialties = useSpecialties();
 
   // Debounce the text query so we don't fire a request per keystroke.
   useEffect(() => {
@@ -87,10 +94,10 @@ export function DirectoryView({
       latitude: coords?.latitude,
       longitude: coords?.longitude,
       radius_miles: coords ? DEFAULT_RADIUS_MILES : undefined,
-      sort_by: coords ? 'distance' : 'relevance',
+      sort_by: sort,
       per_page: 20,
     }),
-    [debounced, filters, city, coords],
+    [debounced, filters, city, coords, sort],
   );
 
   const active = hasActiveSearch(params);
@@ -110,17 +117,36 @@ export function DirectoryView({
     if (coords) {
       setCoords(null);
       setLocNotice(false);
+      if (sort === 'distance') setSort('relevance');
       return;
     }
     const res = await requestAndGetCoords();
     if (res.status === 'granted') {
       setCoords(res.coords);
       setLocNotice(false);
+      setSort('distance'); // a geo search defaults to nearest-first
     } else {
       // Coords are used only for the query; nothing is persisted or logged.
       setLocNotice(true);
     }
   };
+
+  // Quick specialty suggestions under the search box — tapping one runs a fast
+  // slug-scoped search instead of a free-text scan. Hidden once a specialty is set.
+  const suggestions =
+    text.trim().length >= 2 && !filters.specialtySlugs.length
+      ? (specialties.data ?? [])
+          .filter((s) => s.label.toLowerCase().includes(text.trim().toLowerCase()))
+          .slice(0, 3)
+      : [];
+
+  const applySpecialty = (slug: string) => {
+    setFilters((f) => ({ ...f, specialtySlugs: [slug] }));
+    setText('');
+  };
+
+  const showCoverage =
+    active && !loading && search.total > 0 && search.total <= COVERAGE_MIN && !!filters.state;
 
   const onEndReached = () => {
     if (active && search.hasNextPage && !search.isFetchingNextPage) {
@@ -236,7 +262,41 @@ export function DirectoryView({
               {filterCount > 0 ? `${t.filtersButton} (${filterCount})` : t.filtersButton}
             </Text>
           </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t.sortButton}
+            onPress={() => setSortOpen(true)}
+            testID="directory-sort"
+            className="min-h-[36px] flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5 dark:border-border-dark"
+          >
+            <ArrowUpDown size={16} color={colors.charcoal[500]} strokeWidth={1.75} />
+            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              {t.sortButton}
+            </Text>
+          </Pressable>
         </View>
+
+        {/* Specialty quick-suggestions */}
+        {suggestions.length > 0 ? (
+          <View className="flex-row flex-wrap gap-2">
+            {suggestions.map((s) => (
+              <Pressable
+                key={s.slug}
+                accessibilityRole="button"
+                accessibilityLabel={t.searchSpecialtyHint(s.label)}
+                onPress={() => applySpecialty(s.slug)}
+                testID={`suggest-${s.slug}`}
+                className="min-h-[36px] flex-row items-center gap-1.5 rounded-full border border-primary px-3 py-1.5 dark:border-primary-dark"
+              >
+                <Search size={14} color={colors.primary.default.light} strokeWidth={1.75} />
+                <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+                  {s.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
 
         {locNotice ? (
           <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
@@ -254,6 +314,24 @@ export function DirectoryView({
           <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
             {t.resultCount(search.total)}
           </Text>
+        ) : null}
+
+        {showCoverage ? (
+          <View className="flex-row flex-wrap items-center gap-1.5 rounded-lg bg-surface-accent px-3 py-2 dark:bg-surface-accent-dark">
+            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              {t.coverageNote(scopeLabel || filters.state, search.total)}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t.coverageAction}
+              onPress={() => setFilters((f) => ({ ...f, state: '' }))}
+              testID="directory-coverage-widen"
+            >
+              <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+                {t.coverageAction}
+              </Text>
+            </Pressable>
+          </View>
         ) : null}
       </View>
 
@@ -306,6 +384,17 @@ export function DirectoryView({
           setSheetOpen(false);
         }}
         onClose={() => setSheetOpen(false)}
+      />
+
+      <SortSheet
+        visible={sortOpen}
+        value={sort}
+        geoEnabled={!!coords}
+        onSelect={(next) => {
+          setSort(next);
+          setSortOpen(false);
+        }}
+        onClose={() => setSortOpen(false)}
       />
     </View>
   );

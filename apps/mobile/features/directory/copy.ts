@@ -19,6 +19,21 @@ export const DIRECTORY_COPY = {
   recentlyViewed: 'Recently viewed',
   scopeAllStates: 'All states',
   editScope: 'Change location',
+
+  // Sort (order, not a ranking of quality). Maps to search_providers_v3 sort_by.
+  sortButton: 'Sort',
+  sortTitle: 'Sort',
+  sortNote: 'Sorting changes order only. It is not a ranking of quality.',
+  sortRelevance: 'Relevance',
+  sortName: 'Name (A–Z)',
+  sortNearest: 'Nearest',
+
+  // Thin-coverage banner (real total). CT-pending.
+  coverageNote: (place: string, n: number) => `Limited coverage in ${place} (${n}).`,
+  coverageAction: 'Browse all states',
+
+  // Specialty quick-suggestions under the search box.
+  searchSpecialtyHint: (label: string) => `Search ${label}`,
   noResults: 'No providers match these filters.',
   droppedState: 'No match in that state — showing the city instead.',
   resultCount: (n: number) => `${n.toLocaleString()} ${n === 1 ? 'provider' : 'providers'}`,
