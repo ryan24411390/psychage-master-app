@@ -13,6 +13,7 @@ import {
   toLocalCalendarDate,
 } from '@psychage/shared/sleep';
 
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
 import { colors } from '@/lib/colors';
@@ -43,12 +44,12 @@ export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
 
   if (entries.length === 0) {
     return (
-      <View className="gap-1 rounded-xl border border-border bg-surface px-4 py-6 dark:border-border-dark dark:bg-surface-dark">
+      <Card className="gap-1 px-4 py-6">
         <Text variant="bodyBold">{CT4_SLEEP.dashboard.emptyTitle}</Text>
         <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
           {CT4_SLEEP.dashboard.emptyBody}
         </Text>
-      </View>
+      </Card>
     );
   }
 
@@ -88,12 +89,12 @@ export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
       </View>
 
       {trend.length >= 2 ? (
-        <View className="gap-2 rounded-xl border border-border bg-surface px-4 py-4 dark:border-border-dark dark:bg-surface-dark">
+        <Card className="gap-2 px-4 py-4">
           <Text variant="caption" className="uppercase tracking-wider text-text-secondary dark:text-text-secondary-dark">
             {t.trendTitle}
           </Text>
           <Sparkline values={trend} width={Math.max(0, width - 64)} color={strokeTint} />
-        </View>
+        </Card>
       ) : null}
 
       <View className="gap-2">
@@ -115,11 +116,11 @@ export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <View className="min-w-[44%] flex-1 gap-1 rounded-xl border border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark">
+    <Card className="min-w-[44%] flex-1 gap-1 px-4 py-3">
       <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
         {label}
       </Text>
       <Text variant="bodyBold">{value}</Text>
-    </View>
+    </Card>
   );
 }

@@ -3,6 +3,7 @@ import { useColorScheme } from 'nativewind';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
 
@@ -91,7 +92,7 @@ export function ResultsView({
         </View>
 
         {shown.map((r) => (
-          <View key={r.condition_id} className="gap-2 p-5 rounded-xl border border-border/50 bg-surface shadow-sm dark:border-border-dark/50 dark:bg-surface-dark">
+          <Card key={r.condition_id} variant="elevated" className="gap-2 p-5">
             <RelevancePhrase phrase={r.relevance_label} />
             <Text variant="heading">{r.name}</Text>
             <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
@@ -100,7 +101,7 @@ export function ResultsView({
             <View className="mt-2">
               <OnwardLink label="Read about this" onPress={() => onReadAbout(r.condition_id)} />
             </View>
-          </View>
+          </Card>
         ))}
 
         <View className="gap-1 border-t border-border pt-4 dark:border-border-dark">

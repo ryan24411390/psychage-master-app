@@ -6,6 +6,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import type { ContinuumWeek } from '@/features/history/continuum';
 import { Terrain } from '@/components/terrain/Terrain';
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
 import { DURATION, easingFn } from '@/lib/motion';
@@ -80,7 +81,7 @@ export function HistoryView({
           ) : null}
 
           {weeks.map((week) => (
-            <View key={week.weekStartIso} className="relative rounded-xl border border-border/50 bg-surface py-4 px-0 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark">
+            <Card key={week.weekStartIso} variant="elevated" className="relative py-4 px-0">
               <Terrain days={week.days.map((d) => d.day)} width={terrainWidth} />
               {/* className-only column overlay: 7 flex-1 cells align to the terrain's
                   centered columns; each entry day gets a centered ≥44px hit-target. */}
@@ -104,7 +105,7 @@ export function HistoryView({
                   </View>
                 ))}
               </View>
-            </View>
+            </Card>
           ))}
         </ScrollView>
       </Settle>

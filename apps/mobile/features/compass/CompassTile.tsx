@@ -1,9 +1,11 @@
 import { Pressable } from 'react-native';
 
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 
 // The Compass bento tile — same grammar as the home "When you need something now"
-// group (rounded-xl border surface card, heading + sub-label). Reused per tile.
+// group (elevated surface card, heading + sub-label). Reused per tile. The raised
+// surface is the shared Card `elevated` variant; Pressable owns press + a11y.
 
 type CompassTileProps = {
   title: string;
@@ -19,13 +21,14 @@ export function CompassTile({ title, subLabel, onPress, testID }: CompassTilePro
       accessibilityLabel={title}
       onPress={onPress}
       testID={testID}
-      className="rounded-xl border border-border/50 bg-surface p-4 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
-      <Text variant="heading">{title}</Text>
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
-        {subLabel}
-      </Text>
+      <Card variant="elevated">
+        <Text variant="heading">{title}</Text>
+        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          {subLabel}
+        </Text>
+      </Card>
     </Pressable>
   );
 }

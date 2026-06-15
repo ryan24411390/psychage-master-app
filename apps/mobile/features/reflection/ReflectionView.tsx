@@ -5,6 +5,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Terrain } from '@/components/terrain/Terrain';
+import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
 import { DURATION, easingFn } from '@/lib/motion';
@@ -67,7 +68,7 @@ export function ReflectionView({
           </View>
 
           {week.notes.length > 0 ? (
-            <View className="gap-3 p-5 rounded-xl border border-border/50 bg-surface shadow-sm dark:border-border-dark/50 dark:bg-surface-dark">
+            <Card variant="elevated" className="gap-3 p-5">
               {week.notes.map((n) => (
                 <Text
                   key={`${n.day}:${n.note}`}
@@ -77,7 +78,7 @@ export function ReflectionView({
                   {`${n.day} — ‘${n.note}’`}
                 </Text>
               ))}
-            </View>
+            </Card>
           ) : null}
 
           <View className="gap-1 border-t border-border pt-4 dark:border-border-dark">
