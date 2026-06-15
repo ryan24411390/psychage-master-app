@@ -27,5 +27,15 @@ export default function FindScreen() {
     return <LocationSetup />;
   }
 
-  return <DirectoryView embedded initialState={loc.stateAbbr} initialCity={loc.city} />;
+  const scopeLabel = loc.stateName ? [loc.stateName, loc.city].filter(Boolean).join(' · ') : undefined;
+
+  return (
+    <DirectoryView
+      embedded
+      initialState={loc.stateAbbr}
+      initialCity={loc.city}
+      scopeLabel={scopeLabel}
+      onEditLocation={loc.resetLocation}
+    />
+  );
 }

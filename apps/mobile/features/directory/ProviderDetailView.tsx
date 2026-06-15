@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { CalendarCheck, ChevronLeft, Globe, Mail, MapPin, Navigation, Phone } from 'lucide-react-native';
+import { useEffect } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
@@ -10,6 +11,7 @@ import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
 import { dial } from '@/features/crisis/dialer';
 import { colors } from '@/lib/colors';
 import { useHaptics } from '@/lib/haptic-context';
+import { useRecentlyViewed } from '@/lib/use-recently-viewed';
 
 import { Avatar } from './Avatar';
 import { directionsUrl, formatAddress, mailtoUrl, telUrl, webUrl } from './contact';
@@ -135,6 +137,17 @@ export function ProviderDetailView({ id }: { id: string }) {
     queryFn: () => getProviderById(id),
     enabled: !!id,
   });
+
+  // Record this view for the directory's "recently viewed" rail (local, capped).
+  const { record } = useRecentlyViewed();
+  useEffect(() => {
+    if (!data) return;
+    record({
+      id: data.id,
+      name: cleanDisplayName(data.display_name) || data.display_name,
+      photoUrl: data.photo_url,
+    });
+  }, [data, record]);
 
   if (isLoading) {
     return (

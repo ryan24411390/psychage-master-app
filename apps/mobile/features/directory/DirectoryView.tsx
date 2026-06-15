@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { ChevronLeft, MapPin, Search, SlidersHorizontal } from 'lucide-react-native';
+import { ChevronDown, ChevronLeft, MapPin, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
 
@@ -10,11 +10,14 @@ import { OfflineFallback } from '@/features/offline/OfflineFallback';
 import { useIsOnline } from '@/features/offline/useIsOnline';
 import { colors } from '@/lib/colors';
 
+import { useRecentlyViewed } from '@/lib/use-recently-viewed';
+
 import { DirectoryFilters, type FilterDraft } from './DirectoryFilters';
 import { DIRECTORY_COPY } from './copy';
 import { hasActiveSearch, useFeaturedProviders, useProviderSearch } from './hooks';
 import { DEFAULT_RADIUS_MILES, requestAndGetCoords, type Coords } from './location';
 import { ProviderCard } from './ProviderCard';
+import { RecentlyViewedRail } from './RecentlyViewedRail';
 import type { ProviderSearchParams } from './types';
 
 // S26 Provider Directory — NATIVE list (replaces the WebView wrapper). Reads REAL
@@ -41,12 +44,19 @@ export function DirectoryView({
   embedded = false,
   initialState = null,
   initialCity = null,
+  scopeLabel,
+  onEditLocation,
 }: {
   embedded?: boolean;
   initialState?: string | null;
   initialCity?: string | null;
+  /** Human label for the current home scope (e.g. "California · San Francisco"). */
+  scopeLabel?: string;
+  /** Re-open the one-time location setup (tapping the scope chip). */
+  onEditLocation?: () => void;
 } = {}) {
   const online = useIsOnline();
+  const recent = useRecentlyViewed();
   const [text, setText] = useState('');
   const [debounced, setDebounced] = useState('');
   const [filters, setFilters] = useState<FilterDraft>(() => ({
@@ -152,6 +162,23 @@ export function DirectoryView({
       <View className="gap-3 px-4 pb-2">
         <Text variant="headingLg">{t.title}</Text>
 
+        {/* Scope chip — shows the home location and re-opens setup on tap. */}
+        {embedded && onEditLocation ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t.editScope}
+            onPress={onEditLocation}
+            testID="directory-scope"
+            className="min-h-[36px] flex-row items-center gap-1.5 self-start rounded-full border border-border px-3 py-1.5 dark:border-border-dark"
+          >
+            <MapPin size={16} color={colors.primary.default.light} strokeWidth={1.75} />
+            <Text variant="bodySm" className="text-text-primary dark:text-text-primary-dark">
+              {scopeLabel || t.scopeAllStates}
+            </Text>
+            <ChevronDown size={14} color={colors.charcoal[500]} strokeWidth={2} />
+          </Pressable>
+        ) : null}
+
         {/* Search */}
         <View
           className="flex-row items-center gap-2 rounded-lg border border-border bg-surface px-3 dark:border-border-dark dark:bg-surface-dark"
@@ -244,9 +271,17 @@ export function DirectoryView({
           onEndReached={onEndReached}
           renderItem={({ item }) => <ProviderCard provider={item} onPress={(id) => router.push(`/find/provider/${id}`)} />}
           ListHeaderComponent={
-            <Text variant="caption" className="pb-2 text-text-tertiary dark:text-text-tertiary-dark">
-              {t.disclaimer}
-            </Text>
+            <View>
+              {!active ? (
+                <RecentlyViewedRail
+                  items={recent.items}
+                  onPress={(id) => router.push(`/find/provider/${id}`)}
+                />
+              ) : null}
+              <Text variant="caption" className="pb-2 text-text-tertiary dark:text-text-tertiary-dark">
+                {t.disclaimer}
+              </Text>
+            </View>
           }
           ListEmptyComponent={
             <Text variant="body" className="py-6 text-center text-text-secondary dark:text-text-secondary-dark">
