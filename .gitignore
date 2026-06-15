@@ -29,6 +29,8 @@ gk/
 .claude/projects/
 .claude/history/
 .claude/sessions/
+# Linked git worktrees created inside the repo — never commit (nested repos)
+.claude/worktrees/
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Environment & secrets — never commit
