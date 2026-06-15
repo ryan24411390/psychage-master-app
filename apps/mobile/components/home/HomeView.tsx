@@ -85,7 +85,7 @@ export function HomeView({
           className="gap-6"
         >
           {/* STATE ZONE */}
-          <View className="flex-row items-start justify-between gap-3 bg-teal-50/30 border border-teal-100/50 dark:bg-neutral-900/30 dark:border-teal-800/30 p-5 rounded-xl shadow-sm">
+          <View className="flex-row items-start justify-between gap-3 bg-surface-accent/30 border border-border-accent/50 dark:bg-surface-accent-dark/15 dark:border-border-accent-dark/30 p-5 rounded-xl shadow-sm">
             <View className="flex-1 gap-1">
               <Text variant="headingLg">{model.greeting}</Text>
               <Text

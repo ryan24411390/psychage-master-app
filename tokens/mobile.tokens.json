@@ -26,7 +26,9 @@
       "default": { "light": "#F9F7F3", "dark": "#121212" },
       "hover":   { "light": "#f5f5f4", "dark": "#1F1F1F" },
       "active":  { "light": "#e7e5e4", "dark": "#262626" },
-      "_source": { "_note": "Light values verbatim from tokens/web.tokens.json color.surface.*. Dark values DIVERGE (mobile-only true-black register, see color.background._divergence): elevated surfaces step #121212 → #1F1F1F → #262626 above the #000000 canvas so layering stays visible (pure-black-on-pure-black has no hierarchy). 'hover' has no native-touch analog; consume on long-press / focused states." }
+      "accent":  { "light": "#F0FDFA", "dark": "#0D5C54" },
+      "_source": { "_note": "Light values verbatim from tokens/web.tokens.json color.surface.*. Dark values DIVERGE (mobile-only true-black register, see color.background._divergence): elevated surfaces step #121212 → #1F1F1F → #262626 above the #000000 canvas so layering stays visible (pure-black-on-pure-black has no hierarchy). 'hover' has no native-touch analog; consume on long-press / focused states." },
+      "_accent": "accent = the teal-tinted callout/quote surface (light teal-50 #F0FDFA, dark teal-900 #0D5C54). Values REUSE the brand teal scale (color.teal.*) — no invented color, no Tailwind-default palette. Consumed at low alpha (bg-surface-accent/20 dark:bg-surface-accent-dark/10) for the Navigator caveat pill, reflection-quote banners, History reflection-ready trigger, and the Home state zone. Both leaves are web+mobile synced (convention #1); the accent surface intentionally does NOT diverge in the dark register because teal-900 reads on both #000000 (mobile) and near-black (web)."
     },
     "primary": {
       "default": { "light": "#1A9B8C", "dark": "#20B8A6" },
@@ -43,7 +45,9 @@
     "border": {
       "default": { "light": "#e7e5e4", "dark": "#3f3f46" },
       "hover":   { "light": "#d6d3d1", "dark": "#52525b" },
-      "_source": { "_note": "Values verbatim from tokens/web.tokens.json color.border.*." }
+      "accent":  { "light": "#E6F5F3", "dark": "#158A7D" },
+      "_source": { "_note": "Values verbatim from tokens/web.tokens.json color.border.*." },
+      "_accent": "accent = the teal-tinted border that pairs with surface.accent (light teal-100 #E6F5F3, dark teal-700 #158A7D, both from color.teal.*). Used on the bordered accent callouts (History reflection-ready trigger, Home state zone) as border-border-accent/60 dark:border-border-accent-dark/40. Web+mobile synced."
     },
     "semantic": {
       "error":   { "light": "#dc2626", "dark": "#f87171" },

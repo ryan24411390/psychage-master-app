@@ -60,7 +60,7 @@ export function ReflectionView({
         <ScrollView contentContainerClassName="gap-6 px-4 pb-10 pt-2">
           <Terrain days={week.days} width={Math.max(0, width - 32)} />
 
-          <View className="border-l-4 border-primary px-4 py-3 rounded-r-xl bg-teal-50/20 dark:bg-teal-900/10">
+          <View className="border-l-4 border-primary px-4 py-3 rounded-r-xl bg-surface-accent/20 dark:bg-surface-accent-dark/10">
             <Text className="font-display text-[20px] italic text-text-primary dark:text-text-primary-dark">
               {week.line}
             </Text>

@@ -35,6 +35,8 @@ module.exports = {
           'hover-dark': c.surface.hover.dark,
           active: c.surface.active.light,
           'active-dark': c.surface.active.dark,
+          accent: c.surface.accent.light,
+          'accent-dark': c.surface.accent.dark,
         },
         primary: {
           DEFAULT: c.primary.default.light,
@@ -57,6 +59,8 @@ module.exports = {
           dark: c.border.default.dark,
           hover: c.border.hover.light,
           'hover-dark': c.border.hover.dark,
+          accent: c.border.accent.light,
+          'accent-dark': c.border.accent.dark,
         },
         error: { DEFAULT: c.semantic.error.light, dark: c.semantic.error.dark },
         success: { DEFAULT: c.semantic.success.light, dark: c.semantic.success.dark },
