@@ -6,4 +6,5 @@
 export const COMPASS_ROUTES = {
   navigator: '/navigator', // A2 S13 — Symptom Navigator
   toolkit: '/toolkit', // A2 S19 — Toolkit
+  moodJournal: '/tools/mood-journal', // Mood Journal — patterns & triggers
 } as const;
