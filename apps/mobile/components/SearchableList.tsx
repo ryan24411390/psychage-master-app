@@ -1,5 +1,5 @@
 import { FlashList } from '@shopify/flash-list';
-import { Check, Search } from 'lucide-react-native';
+import { Check, Search, XCircle } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useMemo, useState, useEffect } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
@@ -32,6 +32,7 @@ export interface SearchableListProps<T> {
   readonly items: readonly T[];
   readonly getKey: (item: T) => string;
   readonly getLabel: (item: T) => string;
+  readonly getSecondaryLabel?: (item: T) => string;
   readonly onSelect: (item: T) => void;
   /** Focus-ring color (resolved string). Crisis = ink; Navigator = tealDeep. */
   readonly accentColor: string;
@@ -51,6 +52,7 @@ export function SearchableList<T>({
   searchAccessibilityLabel,
   noMatchLabel,
   selectedKey,
+  getSecondaryLabel,
 }: SearchableListProps<T>) {
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
@@ -101,6 +103,17 @@ export function SearchableList<T>({
           autoCapitalize="none"
           className="min-h-[44px] flex-1 font-sans text-base text-text-primary dark:text-text-primary-dark"
         />
+        {query.length > 0 && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Clear search"
+            onPress={() => setQuery('')}
+            hitSlop={8}
+            className="p-1"
+          >
+            <XCircle size={18} color={colors.charcoal[400]} strokeWidth={1.75} />
+          </Pressable>
+        )}
       </Animated.View>
 
       <FlashList
@@ -109,9 +122,12 @@ export function SearchableList<T>({
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         ListEmptyComponent={
-          <Text variant="body" className="px-1 py-3 text-text-secondary dark:text-text-secondary-dark">
-            {noMatchLabel}
-          </Text>
+          <View className="items-center justify-center py-10 px-4">
+            <Search size={32} color={colors.charcoal[300]} strokeWidth={1.5} className="mb-3 opacity-50" />
+            <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
+              {noMatchLabel}
+            </Text>
+          </View>
         }
         renderItem={({ item, index }) => {
           const selected = selectedKey !== undefined && getKey(item) === selectedKey;
@@ -126,11 +142,20 @@ export function SearchableList<T>({
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 onPress={() => onSelect(item)}
-                className="min-h-[44px] flex-row items-center justify-between border-b border-border py-2 dark:border-border-dark"
+                className="min-h-[44px] flex-row items-center justify-between border-b border-border py-3 dark:border-border-dark gap-3"
                 style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
               >
-                <Text variant={selected ? 'bodyMedium' : 'body'}>{getLabel(item)}</Text>
-                {selected ? <Check size={18} color={accentColor} strokeWidth={2} /> : null}
+                <View className="flex-1 flex-row items-center justify-between pr-2">
+                  <Text variant={selected ? 'bodyMedium' : 'body'} className="flex-shrink">
+                    {getLabel(item)}
+                  </Text>
+                  {getSecondaryLabel ? (
+                    <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark flex-shrink-0 ml-2">
+                      {getSecondaryLabel(item)}
+                    </Text>
+                  ) : null}
+                </View>
+                {selected ? <Check size={18} color={accentColor} strokeWidth={2} /> : <View style={{ width: 18 }} />}
               </Pressable>
             </Animated.View>
           );

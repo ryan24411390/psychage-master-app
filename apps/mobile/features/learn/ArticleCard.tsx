@@ -39,6 +39,7 @@ export const ArticleCard = memo(function ArticleCard({ article, className }: Art
       <ArtPanel
         artKey={article.slug}
         imageUrl={article.heroImageUrl}
+        readTime={article.readTime}
         className="aspect-[16/10] rounded-2xl border border-border shadow-sm dark:border-border-dark dark:shadow-none"
       />
     </Pressable>

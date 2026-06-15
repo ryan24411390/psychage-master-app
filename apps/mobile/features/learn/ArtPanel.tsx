@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Text } from '@/components/ui/Text';
 import { gradientForKey } from '@/features/learn/art';
 
 // Abstract thumbnail surface for Learn cards. Two modes, one component:
@@ -29,10 +30,19 @@ type ArtPanelProps = {
   className?: string;
   /** Lay a bottom-up dark scrim for legible overlay text. */
   scrim?: boolean;
+  /** When set, a translucent pill in the top-right shows "<n> min" over the art. */
+  readTime?: number | null;
   children?: ReactNode;
 };
 
-export function ArtPanel({ artKey, imageUrl, className, scrim = false, children }: ArtPanelProps) {
+export function ArtPanel({
+  artKey,
+  imageUrl,
+  className,
+  scrim = false,
+  readTime,
+  children,
+}: ArtPanelProps) {
   const g = gradientForKey(artKey);
   const gradId = `g${Math.abs(hash(artKey))}`;
   const [loaded, setLoaded] = useState(false);
@@ -108,6 +118,17 @@ export function ArtPanel({ artKey, imageUrl, className, scrim = false, children 
             </Defs>
             <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${gradId}s)`} />
           </Svg>
+        </View>
+      ) : null}
+
+      {readTime ? (
+        <View
+          pointerEvents="none"
+          className="absolute right-2 top-2 rounded-full bg-black/40 px-2 py-0.5"
+        >
+          <Text variant="caption" className="font-sans-medium text-white">
+            {`${readTime} min`}
+          </Text>
         </View>
       ) : null}
 

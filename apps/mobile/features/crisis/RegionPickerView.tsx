@@ -7,6 +7,7 @@ import { SearchableList } from '@/components/SearchableList';
 import { colors } from '@/lib/colors';
 
 import type { RegionCode, RegionOption } from './helpline-schema';
+import { CRISIS_DATASET } from './helplines.fixtures';
 
 // S12 — the region picker (C-SEARCH-LIST), presentational. Crisis register: the
 // search focus accent is INK, not teal. The choice persists and returns to S11
@@ -39,7 +40,7 @@ export function RegionPickerView({
       edges={['top', 'bottom']}
       className="flex-1 bg-background px-4 dark:bg-background-dark"
     >
-      <View className="pt-1">
+      <View className="pt-1 pb-2">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Back"
@@ -56,6 +57,10 @@ export function RegionPickerView({
           items={regions}
           getKey={(r) => r.code}
           getLabel={(r) => r.name}
+          getSecondaryLabel={(r) => {
+            const count = CRISIS_DATASET.helplinesByRegion[r.code]?.length || 0;
+            return count > 0 ? `${count} service${count === 1 ? '' : 's'}` : 'Emergency only';
+          }}
           onSelect={(r) => onSelect(r.code)}
           accentColor={ink}
           searchPlaceholder={SEARCH_PLACEHOLDER}

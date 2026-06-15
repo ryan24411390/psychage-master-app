@@ -36,7 +36,7 @@ export function EmergencyButton({ emergencyNumber, label, dial = defaultDial }: 
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={handlePress}
-      className="min-h-[60px] w-full items-center justify-center rounded-lg bg-crisis px-5 py-4"
+      className="min-h-[60px] w-full items-center justify-center rounded-xl bg-crisis px-5 py-4"
       style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
     >
       <View className="flex-row items-center gap-2">

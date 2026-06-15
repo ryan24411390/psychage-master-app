@@ -194,7 +194,7 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
       accessibilityState={{ selected: active }}
       accessibilityLabel={label}
       onPress={onPress}
-      className={`min-h-[36px] justify-center rounded-full border px-4 ${
+      className={`min-h-[36px] justify-center rounded-lg border px-4 ${
         active
           ? 'border-charcoal-900 bg-charcoal-900 dark:border-text-primary-dark dark:bg-text-primary-dark'
           : 'border-border dark:border-border-dark'
@@ -218,7 +218,7 @@ function Filter({ label, active, onPress }: { label: string; active: boolean; on
       accessibilityState={{ selected: active }}
       accessibilityLabel={label}
       onPress={onPress}
-      className={`min-h-[36px] justify-center rounded-full border px-3 ${
+      className={`min-h-[36px] justify-center rounded-lg border px-3 ${
         active ? 'border-primary bg-teal-50 dark:border-primary-dark dark:bg-transparent' : 'border-border dark:border-border-dark'
       }`}
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}

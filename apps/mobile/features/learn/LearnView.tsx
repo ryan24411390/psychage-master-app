@@ -5,13 +5,13 @@ import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/Text';
-import { ArticleListCard } from '@/features/content/ArticleListCard';
 import { FeaturedCard } from '@/features/learn/FeaturedCard';
 import { LearnHero } from '@/features/learn/LearnHero';
 import { LEARN_CATEGORIES } from '@/features/learn/categories';
 import { CT4_LEARN } from '@/features/learn/copy';
 import { MostReadList } from '@/features/learn/MostReadList';
 import { PathPickerSheet } from '@/features/learn/PathPickerSheet';
+import { ReadRow } from '@/features/learn/ReadRow';
 import { SavedRail } from '@/features/learn/SavedRail';
 import { SectionHeader } from '@/features/learn/SectionHeader';
 import { TopicRail } from '@/features/learn/TopicRail';
@@ -85,9 +85,9 @@ export function LearnView() {
           {reads.length > 0 ? (
             <View className="px-4 pt-8">
               <SectionHeader title={t.reads} onSeeAll={() => router.push('/learn/browse')} />
-              <View className="gap-3">
+              <View>
                 {reads.map((a) => (
-                  <ArticleListCard key={a.slug} article={a} />
+                  <ReadRow key={a.slug} article={a} />
                 ))}
               </View>
             </View>

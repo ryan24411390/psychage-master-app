@@ -63,18 +63,26 @@ export function CrisisView({
         </Pressable>
       </View>
 
-      <ScrollView contentContainerClassName="gap-6 px-4 pb-10">
-        <Text variant="headingLg" accessibilityRole="header">
-          {CRISIS_COPY.heading}
-        </Text>
+      <ScrollView contentContainerClassName="gap-6 px-4 pb-10 mt-2">
+        <View className="gap-1">
+          <Text variant="headingLg" accessibilityRole="header">
+            {regionName}
+          </Text>
+          <Text variant="bodyMedium" className="text-text-secondary dark:text-text-secondary-dark">
+            {CRISIS_COPY.heading}
+          </Text>
+        </View>
 
-        <Text variant="body">{LEAD}</Text>
-
-        <EmergencyButton emergencyNumber={emergencyNumber} label={EMERGENCY_LABEL} dial={dial} />
+        <View className="rounded-xl border border-border bg-surface p-4 shadow-sm dark:border-border-dark dark:bg-surface-dark">
+          <Text variant="body" className="mb-4">
+            {LEAD}
+          </Text>
+          <EmergencyButton emergencyNumber={emergencyNumber} label={EMERGENCY_LABEL} dial={dial} />
+        </View>
 
         {hasHelp ? (
-          <View className="gap-1">
-            <Text variant="body" className="mb-1">
+          <View className="gap-2">
+            <Text variant="bodyMedium" className="mb-2 text-text-secondary dark:text-text-secondary-dark">
               {HELPLINES_INTRO}
             </Text>
             {helplines.map((row) => (
@@ -82,7 +90,9 @@ export function CrisisView({
             ))}
           </View>
         ) : (
-          <Text variant="body">{CRISIS_COPY.gapState(regionName)}</Text>
+          <View className="rounded-xl border border-border bg-surface p-4 shadow-sm dark:border-border-dark dark:bg-surface-dark">
+            <Text variant="body">{CRISIS_COPY.gapState(regionName)}</Text>
+          </View>
         )}
 
         <Pressable

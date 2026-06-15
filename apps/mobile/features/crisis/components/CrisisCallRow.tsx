@@ -36,7 +36,7 @@ function CrisisActionPill({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
-      className="min-h-[44px] min-w-[64px] items-center justify-center rounded-full border border-crisis px-4 dark:border-crisis-dark"
+      className="min-h-[44px] min-w-[72px] items-center justify-center rounded-xl border border-crisis px-4 dark:border-crisis-dark"
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
       <Text variant="bodyMedium" className="text-crisis dark:text-crisis-dark">
@@ -50,7 +50,7 @@ export function CrisisCallRow({ row, dial = defaultDial }: CrisisCallRowProps) {
   // Destructure so TS narrows each number to a non-null string inside the press handlers.
   const { name, callNumber, textNumber } = row;
   return (
-    <View className="min-h-[56px] flex-row items-center justify-between gap-3 border-b border-border py-3 dark:border-border-dark">
+    <View className="min-h-[72px] flex-row items-center justify-between gap-3 rounded-xl border border-border bg-surface p-4 mb-3 shadow-sm dark:border-border-dark dark:bg-surface-dark">
       <View className="flex-1">
         <Text variant="bodyMedium">{name}</Text>
         <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
