@@ -70,10 +70,13 @@ export function CompassTile({
       accessibilityLabel={title}
       onPress={onPress}
       testID={testID}
-      className={`rounded-xl border border-border-hairline overflow-hidden ${isHero ? 'w-full' : 'flex-1'} p-4`}
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+      className={`rounded-xl border border-border-hairline ${isHero ? 'w-full' : 'flex-1'} p-5 shadow-sm`}
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.9 : 1,
+        transform: [{ scale: pressed ? 0.98 : 1 }],
+      })}
     >
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={StyleSheet.absoluteFill} pointerEvents="none" className="overflow-hidden rounded-xl">
         <Svg height="100%" width="100%">
           <Defs>
             <SvgLinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">

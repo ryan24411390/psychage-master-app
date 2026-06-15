@@ -18,14 +18,14 @@ export function SettingsSection({ title, children }: SettingsSectionProps) {
       {title ? (
         <Text
           variant="caption"
-          className="px-1 pt-2 uppercase tracking-wide text-text-tertiary dark:text-text-tertiary-dark"
+          className="ml-2 uppercase tracking-wider text-text-secondary dark:text-text-secondary-dark"
         >
           {title}
         </Text>
       ) : null}
-      <Card variant="outline" className="px-2">
+      <View className="overflow-hidden rounded-xl border border-border/40 bg-surface dark:border-border-dark/40 dark:bg-surface-dark">
         {children}
-      </Card>
+      </View>
     </View>
   );
 }

@@ -55,7 +55,8 @@ export function HistoryView({
           accessibilityLabel="Back"
           onPress={onBack}
           hitSlop={8}
-          className="min-h-[44px] w-11 justify-center"
+          className="min-h-[44px] w-11 justify-center active:scale-[0.96]"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <ArrowLeft size={24} color={ink} strokeWidth={2} />
         </Pressable>
@@ -71,8 +72,8 @@ export function HistoryView({
               accessibilityRole="button"
               accessibilityLabel="This week’s reflection is ready."
               onPress={onReflection}
-              hitSlop={6}
-              className="min-h-[44px] justify-center p-4 rounded-xl border border-border-accent/60 bg-surface-accent/20 shadow-sm dark:border-border-accent-dark/40 dark:bg-surface-accent-dark/10"
+              hitSlop={8}
+              className="min-h-[52px] justify-center p-5 rounded-xl border border-border-accent/40 bg-surface-accent/20 shadow-sm active:scale-[0.98] dark:border-border-accent-dark/40 dark:bg-surface-accent-dark/10"
             >
               <Text variant="bodyMedium" className="text-primary dark:text-primary-dark font-sans-medium">
                 This week’s reflection is ready.

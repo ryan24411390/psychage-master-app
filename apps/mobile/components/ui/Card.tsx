@@ -25,17 +25,17 @@ type CardProps = ViewProps & {
 // and most tap targets. Padding default is `p-4` (mobile 8pt-grid card density);
 // callers pass px-/py- overrides for the few denser/looser one-offs.
 const variantClasses: Record<CardVariant, string> = {
-  default: 'bg-surface dark:bg-surface-dark border border-border dark:border-border-dark',
+  default: 'bg-surface dark:bg-surface-dark border border-border/40 dark:border-border-dark/40',
   elevated:
-    'bg-surface dark:bg-surface-dark border border-border/50 dark:border-border-dark/50 shadow-sm',
+    'bg-surface dark:bg-surface-dark border border-border/40 dark:border-border-dark/40 shadow-sm',
   accent:
-    'bg-surface-accent dark:bg-surface-accent-dark border border-border dark:border-border-dark',
-  outline: 'bg-transparent border border-border dark:border-border-dark',
+    'bg-surface-accent dark:bg-surface-accent-dark border border-border/40 dark:border-border-dark/40',
+  outline: 'bg-transparent border border-border/40 dark:border-border-dark/40',
   ghost: 'bg-transparent',
 };
 
 export function Card({ variant = 'default', children, className, ...props }: CardProps) {
-  const composed = ['rounded-xl p-4', variantClasses[variant], className].filter(Boolean).join(' ');
+  const composed = ['rounded-xl p-5', variantClasses[variant], className].filter(Boolean).join(' ');
   return (
     <View className={composed} {...props}>
       {children}

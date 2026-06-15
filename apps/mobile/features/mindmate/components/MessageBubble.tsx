@@ -23,7 +23,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
 
   const bubble = isUser
     ? 'bg-primary dark:bg-primary-dark rounded-br-md'
-    : 'bg-surface border border-border/50 dark:bg-surface-dark dark:border-border-dark/50 rounded-bl-md';
+    : 'bg-surface border border-border/40 dark:bg-surface-dark dark:border-border-dark/40 rounded-bl-md shadow-sm';
   const textColor = isUser ? 'text-white' : 'text-text-primary dark:text-text-primary-dark';
 
   return (

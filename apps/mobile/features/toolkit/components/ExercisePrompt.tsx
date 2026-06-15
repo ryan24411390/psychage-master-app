@@ -20,13 +20,14 @@ export function ExercisePrompt({ label, text, glyph, onAdvance }: ExercisePrompt
       accessibilityRole="button"
       accessibilityLabel="Next"
       onPress={onAdvance}
+      style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] })}
       className="flex-1 items-center justify-center gap-5 px-8"
     >
       {glyph ? <View className="mb-2">{glyph}</View> : null}
-      <Text className="font-sans-medium text-sm uppercase tracking-widest text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="caption" className="uppercase tracking-wider text-text-secondary dark:text-text-secondary-dark">
         {label}
       </Text>
-      <Text className="text-center font-display text-[28px] text-text-primary dark:text-text-primary-dark">
+      <Text variant="headingLg" className="text-center text-text-primary dark:text-text-primary-dark">
         {text}
       </Text>
     </Pressable>

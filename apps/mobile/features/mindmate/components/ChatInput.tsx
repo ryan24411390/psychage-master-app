@@ -30,9 +30,9 @@ export function ChatInput({
   };
 
   return (
-    <View className="flex-row items-end gap-2 border-t border-border/50 px-3 py-2 dark:border-border-dark/50">
+    <View className="flex-row items-end gap-3 border-t border-border-hairline px-4 py-3 dark:border-border-dark/30">
       <TextInput
-        className="max-h-32 min-h-[44px] flex-1 rounded-2xl bg-surface px-4 py-2.5 font-sans text-base text-text-primary dark:bg-surface-dark dark:text-text-primary-dark"
+        className="max-h-32 min-h-[44px] flex-1 rounded-2xl bg-surface border border-border/40 px-4 py-2.5 font-sans text-base text-text-primary dark:bg-surface-dark dark:border-border-dark/40 dark:text-text-primary-dark"
         placeholder={MINDMATE_COPY.inputPlaceholder}
         placeholderTextColor={colors.text.tertiary.light}
         value={value}
@@ -49,7 +49,7 @@ export function ChatInput({
         onPress={submit}
         disabled={!canSend}
         className="h-11 w-11 items-center justify-center rounded-full bg-primary dark:bg-primary-dark"
-        style={({ pressed }) => ({ opacity: !canSend ? 0.5 : pressed ? 0.7 : 1 })}
+        style={({ pressed }) => ({ opacity: !canSend ? 0.5 : pressed ? 0.9 : 1, transform: [{ scale: pressed && canSend ? 0.96 : 1 }] })}
         testID="mindmate-send"
       >
         <Send size={20} color={colors.charcoal[50]} strokeWidth={2} />

@@ -10,9 +10,20 @@
 // SECURITY (Procedure-B checklist, item 3): error codes are GENERIC. Sign-in failure
 // is 'invalid-credentials' — it never reveals whether an email is registered.
 
-export type AuthErrorCode = 'invalid-credentials' | 'offline' | 'unknown';
+export type AuthErrorCode =
+  | 'invalid-credentials'
+  | 'offline'
+  // Surfaced only where it's not an existence leak (e.g. updatePassword): the server
+  // rejected a too-weak/too-short password. Sign-in/sign-up never use this code.
+  | 'weak-password'
+  // The OS-level social flow was dismissed by the user (Apple/Google sheet cancelled).
+  | 'cancelled'
+  | 'unknown';
 
 export type VerificationStatus = 'unverified' | 'verified';
+
+/** Third-party identity providers enabled in V1 (rules/auth.md §3). */
+export type SocialProvider = 'apple' | 'google';
 
 export interface AuthSession {
   readonly email: string;
@@ -27,8 +38,30 @@ export interface AuthResult {
 }
 
 export interface AuthService {
-  signUp(email: string, password: string): Promise<AuthResult>;
+  /**
+   * `fullName` (Amendment 2026-06-16) is stored as user metadata (display alias only —
+   * §9 "username display is just an alias"). Optional so existing call sites compile.
+   */
+  signUp(email: string, password: string, fullName?: string): Promise<AuthResult>;
   signIn(email: string, password: string): Promise<AuthResult>;
+  /**
+   * Continue with a third-party provider (Apple / Google). Drives the OS sheet, then
+   * exchanges the returned id-token with Supabase. `cancelled` is returned (not an
+   * error toast) when the user dismisses the sheet.
+   */
+  signInWithProvider(provider: SocialProvider): Promise<AuthResult>;
+  /**
+   * Send a password-reset email (rules/auth.md §3/§9). ANTI-ENUMERATION: resolves
+   * `{ ok: true }` whether or not the address has an account — never reveals existence.
+   * `{ ok: false }` is reserved for offline / transport failure so the UI can say
+   * "you're offline" honestly without leaking account state.
+   */
+  requestPasswordReset(email: string): Promise<{ ok: boolean }>;
+  /**
+   * Set a new password for the session established by the recovery deep-link
+   * (PASSWORD_RECOVERY). Returns `weak-password` if the server rejects the length.
+   */
+  updatePassword(newPassword: string): Promise<AuthResult>;
   /**
    * Resend the signup confirmation email. `email` is the address from the verify
    * screen's route param. When email confirmation is ON, signUp returns NO session
@@ -81,6 +114,23 @@ export function createStubAuthService(options: StubAuthOptions = {}): AuthServic
       // any failure — the same generic code for wrong-password and unknown-email.
       session = { email, verified: true };
       emit();
+      return { ok: true, session };
+    },
+    async signInWithProvider() {
+      if (offline) return { ok: false, error: 'offline' };
+      // Stub admits the social sign-in with a synthetic verified session (Apple/Google
+      // emails are pre-verified). The REAL impl exchanges the provider id-token.
+      session = { email: 'social@stub.local', verified: true };
+      emit();
+      return { ok: true, session };
+    },
+    async requestPasswordReset() {
+      // Anti-enumeration: always ok unless offline (matches the real impl contract).
+      return { ok: !offline };
+    },
+    async updatePassword() {
+      if (offline) return { ok: false, error: 'offline' };
+      if (!session) return { ok: false, error: 'unknown' };
       return { ok: true, session };
     },
     async resendVerification(_email?: string) {

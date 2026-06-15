@@ -41,15 +41,16 @@ export function RecordTrustView({ onCheckIn, onLookAround }: RecordTrustViewProp
         </Card>
       </View>
       <SafeAreaView edges={['bottom']} className="gap-3 px-6 pb-2">
-        <Button variant="primary" className="w-full" onPress={onCheckIn}>
+        <Button variant="primary" size="lg" className="w-full" onPress={onCheckIn}>
           {PRIMARY}
         </Button>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={SECONDARY}
           onPress={onLookAround}
-          hitSlop={6}
-          className="min-h-[44px] items-center justify-center"
+          hitSlop={8}
+          className="min-h-[52px] items-center justify-center active:scale-[0.98]"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
             {SECONDARY}

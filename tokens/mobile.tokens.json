@@ -113,27 +113,93 @@
       "display":    "Fraunces_600SemiBold",
       "_source": { "_note": "DD-001 typography lock (2026-06-10): sans/body/UI = IBM Plex Sans (SIL OFL), display/headlines = Fraunces (SIL OFL). Both bundled as static cuts via @expo-google-fonts/ibm-plex-sans (400/500/700) + @expo-google-fonts/fraunces (600), registered through expo-font useFonts in apps/mobile/app/_layout.tsx. Family strings are the expo-google-fonts export names; NativeWind font-sans/font-display resolve through these values (apps/mobile/tailwind.config.js). The mono family token was dropped (no production use — only the dev-navigator verification screen referenced it, now points at the platform default monospace). The previously bundled brand typeface was removed and is forbidden in the mobile bundle — its Indian Type Foundry / Fontshare EULA does not clearly cover embedding the font binary in a distributed app (see DD-001 / DESIGN.mobile.md §1.2). Cross-platform note: web typography (tokens/web.tokens.json type.family.*) is independent — web keeps Inter / Plus Jakarta Sans / IBM Plex Mono; this divergence is intentional, not drift." }
     },
-    "_omitted": {
-      "_note": "size/weight/leading/tracking omitted in V1 — psychage-mobile has no shipped screen to calibrate against. Skeleton stubs only. Calibrated against the first mobile screen design in Phase 6. Hardcoding a scale before there is a screen to validate it is invented value (see DESIGN.mobile.md §1.2)."
+    "size": {
+      "xs": 12,
+      "sm": 14,
+      "base": 16,
+      "lg": 18,
+      "xl": 20,
+      "2xl": 24,
+      "3xl": 30,
+      "4xl": 36,
+      "5xl": 48
+    },
+    "leading": {
+      "none": 1,
+      "tight": 1.25,
+      "snug": 1.375,
+      "normal": 1.5,
+      "relaxed": 1.625,
+      "loose": 2
+    },
+    "tracking": {
+      "tighter": -0.5,
+      "tight": -0.25,
+      "normal": 0,
+      "wide": 0.25,
+      "wider": 0.5
     }
   },
 
   "spacing": {
-    "_omitted": {
-      "_note": "Omitted in V1 — psychage-mobile has no shipped screen to calibrate against. 8pt grid is the locked baseline per DESIGN.mobile.md §1.3 (iOS HIG / Material default). Specific steps (4, 8, 12, 16, 24, 32, etc.) authored against the first mobile screen design in Phase 6. Hardcoding a scale before there is a screen is invented value."
+    "scale": {
+      "0": 0,
+      "1": 4,
+      "2": 8,
+      "3": 12,
+      "4": 16,
+      "5": 20,
+      "6": 24,
+      "8": 32,
+      "10": 40,
+      "12": 48,
+      "16": 64,
+      "20": 80,
+      "24": 96,
+      "32": 128
     },
     "_baseline": "8pt grid"
   },
 
   "radius": {
-    "lg":   "0.5rem",
-    "xl":   "1rem",
+    "sm": "0.25rem",
+    "md": "0.375rem",
+    "lg": "0.5rem",
+    "xl": "1rem",
+    "2xl": "1.5rem",
     "full": "9999px",
     "_canonical": {
       "surface": "xl",
-      "input":   "lg",
-      "pill":    "full",
-      "_note": "Mobile uses 3 steps vs web's 5. Mobile drops sm/md (negligible visual delta at typical mobile sizes) and 2xl/3xl emphasis tier (mobile emphasis leans on sensorial dimensions per DESIGN.mobile.md §1.4). Card/surface radius = xl matches web (DESIGN.web.md §1.4)."
+      "input": "lg",
+      "pill": "full"
+    }
+  },
+
+  "shadow": {
+    "sm": {
+      "offset": { "width": 0, "height": 1 },
+      "radius": 2,
+      "opacity": 0.05
+    },
+    "base": {
+      "offset": { "width": 0, "height": 2 },
+      "radius": 4,
+      "opacity": 0.07
+    },
+    "md": {
+      "offset": { "width": 0, "height": 4 },
+      "radius": 8,
+      "opacity": 0.08
+    },
+    "lg": {
+      "offset": { "width": 0, "height": 8 },
+      "radius": 16,
+      "opacity": 0.08
+    },
+    "xl": {
+      "offset": { "width": 0, "height": 12 },
+      "radius": 24,
+      "opacity": 0.1
     }
   },
 

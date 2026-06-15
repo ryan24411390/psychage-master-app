@@ -17,8 +17,8 @@ export default function CompassScreen() {
   const t = CT4_COMPASS;
   return (
     <ScreenShell edges={['bottom']} className="bg-paper dark:bg-paper">
-      <ScrollView contentContainerClassName="gap-3 py-4" showsVerticalScrollIndicator={false}>
-        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+      <ScrollView contentContainerClassName="gap-4 px-4 pb-10 pt-3" showsVerticalScrollIndicator={false}>
+        <Text variant="caption" className="ml-1 uppercase tracking-wider text-text-secondary dark:text-text-secondary-dark">
           {t.heading}
         </Text>
         <CompassTile
@@ -82,7 +82,7 @@ export default function CompassScreen() {
         </View>
         <Text
           variant="caption"
-          className="mt-2 text-text-secondary dark:text-text-secondary-dark"
+          className="ml-1 mt-4 uppercase tracking-wider text-text-secondary dark:text-text-secondary-dark"
         >
           {t.reflectHeading}
         </Text>
@@ -99,7 +99,7 @@ export default function CompassScreen() {
         />
         <Text
           variant="caption"
-          className="mt-2 text-text-secondary dark:text-text-secondary-dark"
+          className="ml-1 mt-4 uppercase tracking-wider text-text-secondary dark:text-text-secondary-dark"
         >
           {t.exploreHeading}
         </Text>
@@ -121,7 +121,7 @@ export default function CompassScreen() {
             SR-3: educational framing, no diagnostic language. */}
         <Text
           variant="caption"
-          className="mt-2 text-text-secondary dark:text-text-secondary-dark"
+          className="ml-1 mt-4 uppercase tracking-wider text-text-secondary dark:text-text-secondary-dark"
         >
           When you want tools to lean on
         </Text>

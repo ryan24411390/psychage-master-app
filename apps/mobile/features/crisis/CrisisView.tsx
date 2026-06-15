@@ -63,7 +63,7 @@ export function CrisisView({
         </Pressable>
       </View>
 
-      <ScrollView contentContainerClassName="gap-5 px-4 pb-10">
+      <ScrollView contentContainerClassName="gap-6 px-4 pb-10">
         <Text variant="headingLg" accessibilityRole="header">
           {CRISIS_COPY.heading}
         </Text>
@@ -90,7 +90,8 @@ export function CrisisView({
           accessibilityLabel={CRISIS_COPY.notInRegion(regionName)}
           onPress={onChangeRegion}
           hitSlop={8}
-          className="min-h-[44px] justify-center"
+          className="min-h-[44px] justify-center active:scale-[0.98]"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <Text
             variant="bodySm"

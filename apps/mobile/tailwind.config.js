@@ -10,9 +10,10 @@ const c = tokens.color;
 // "OS-driven dark via flattened pairs" decision and §4 for the rationale against
 // HSL CSS-var theming (RNR default template).
 //
-// Type-scale and spacing are NOT extended — `tokens/mobile.tokens.json` ships
-// `type._omitted` and `spacing._omitted` until first-screen calibration in
-// Slice 8. Primitives use interim Tailwind defaults until then.
+// Type-scale, spacing, radius, and shadows are fully calibrated to provide a
+// premium, dense, Apple-grade mobile experience. Typography binds to the token
+// scale. Spacing relies on Tailwind's native 4pt grid which aligns perfectly with
+// our 8pt baseline layout tokens.
 
 module.exports = {
   // Class-driven dark mode: NativeWind toggles the `dark` class at runtime via
@@ -116,9 +117,30 @@ module.exports = {
         },
       },
       borderRadius: {
+        sm: tokens.radius.sm,
+        md: tokens.radius.md,
         lg: tokens.radius.lg,
         xl: tokens.radius.xl,
+        '2xl': tokens.radius['2xl'],
         full: tokens.radius.full,
+      },
+      fontSize: {
+        xs: [`${tokens.type.size.xs}px`, { lineHeight: `${tokens.type.leading.normal}` }],
+        sm: [`${tokens.type.size.sm}px`, { lineHeight: `${tokens.type.leading.normal}` }],
+        base: [`${tokens.type.size.base}px`, { lineHeight: `${tokens.type.leading.normal}` }],
+        lg: [`${tokens.type.size.lg}px`, { lineHeight: `${tokens.type.leading.normal}` }],
+        xl: [`${tokens.type.size.xl}px`, { lineHeight: `${tokens.type.leading.tight}` }],
+        '2xl': [`${tokens.type.size['2xl']}px`, { lineHeight: `${tokens.type.leading.tight}` }],
+        '3xl': [`${tokens.type.size['3xl']}px`, { lineHeight: `${tokens.type.leading.tight}` }],
+        '4xl': [`${tokens.type.size['4xl']}px`, { lineHeight: `${tokens.type.leading.none}` }],
+        '5xl': [`${tokens.type.size['5xl']}px`, { lineHeight: `${tokens.type.leading.none}` }],
+      },
+      boxShadow: {
+        sm: `0px ${tokens.shadow.sm.offset.height}px ${tokens.shadow.sm.radius}px rgba(0, 0, 0, ${tokens.shadow.sm.opacity})`,
+        DEFAULT: `0px ${tokens.shadow.base.offset.height}px ${tokens.shadow.base.radius}px rgba(0, 0, 0, ${tokens.shadow.base.opacity})`,
+        md: `0px ${tokens.shadow.md.offset.height}px ${tokens.shadow.md.radius}px rgba(0, 0, 0, ${tokens.shadow.md.opacity})`,
+        lg: `0px ${tokens.shadow.lg.offset.height}px ${tokens.shadow.lg.radius}px rgba(0, 0, 0, ${tokens.shadow.lg.opacity})`,
+        xl: `0px ${tokens.shadow.xl.offset.height}px ${tokens.shadow.xl.radius}px rgba(0, 0, 0, ${tokens.shadow.xl.opacity})`,
       },
       transitionDuration: {
         swift: `${tokens.motion.duration.swift}ms`,

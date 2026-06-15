@@ -45,7 +45,7 @@ export function WelcomeView({ reduced, onContinue }: WelcomeViewProps) {
         </Text>
       </Settle>
       <SafeAreaView edges={['bottom']} className="px-6 pb-2">
-        <Button variant="primary" className="w-full" onPress={onContinue}>
+        <Button variant="primary" size="lg" className="w-full" onPress={onContinue}>
           {ONBOARDING_COPY.continue}
         </Button>
       </SafeAreaView>

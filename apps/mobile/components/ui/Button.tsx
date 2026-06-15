@@ -79,7 +79,10 @@ export function Button({
       disabled={disabled}
       onPress={handlePress}
       className={composed}
-      style={({ pressed }) => ({ opacity: disabled ? 0.5 : pressed ? 0.7 : 1 })}
+      style={({ pressed }) => ({
+        opacity: disabled ? 0.5 : pressed ? 0.8 : 1,
+        transform: [{ scale: pressed && !disabled ? 0.98 : 1 }],
+      })}
       {...props}
     >
       {typeof children === 'string' ? (

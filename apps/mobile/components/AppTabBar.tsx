@@ -80,9 +80,9 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
               <Pictogram color={isActive ? activeInk : inactiveInk} />
               <Text
                 variant="caption"
-                className={`text-[11px] leading-[14px] ${
+                className={`text-xs tracking-wide ${
                   isActive
-                    ? 'text-text-primary dark:text-text-primary-dark'
+                    ? 'text-text-primary dark:text-text-primary-dark font-sans-medium'
                     : 'text-text-secondary dark:text-text-secondary-dark'
                 }`}
               >

@@ -30,7 +30,8 @@ export function ExerciseChrome({ children, onHelp, onClose }: ExerciseChromeProp
             accessibilityLabel="Close"
             onPress={onClose}
             hitSlop={8}
-            className="min-h-[44px] w-11 justify-center"
+            className="min-h-[44px] w-11 justify-center active:scale-[0.96]"
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
             <X size={22} color={tc.inkSecondary} strokeWidth={1.75} />
           </Pressable>
@@ -42,8 +43,9 @@ export function ExerciseChrome({ children, onHelp, onClose }: ExerciseChromeProp
           accessibilityRole="button"
           accessibilityLabel="Help now"
           onPress={onHelp}
-          hitSlop={4}
-          className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-3 dark:border-crisis-dark"
+          hitSlop={8}
+          className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-4 active:scale-[0.96] dark:border-crisis-dark"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <LifeBuoy size={18} color={tc.crisis} strokeWidth={1.75} />
           <Text variant="bodyMedium" className="text-[13px] text-crisis dark:text-crisis-dark">

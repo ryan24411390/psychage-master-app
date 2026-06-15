@@ -39,8 +39,7 @@ export function SettingsRow({
       accessibilityLabel={label}
       onPress={onPress}
       testID={testID}
-      className="min-h-[44px] flex-row items-center gap-3 px-1 py-3"
-      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+      className="min-h-[52px] flex-row items-center gap-3 px-4 py-3 active:bg-surface-active dark:active:bg-surface-active-dark border-b border-border-hairline last:border-b-0"
     >
       {icon ? <View>{icon}</View> : null}
       <Text

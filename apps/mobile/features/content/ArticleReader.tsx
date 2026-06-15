@@ -53,7 +53,8 @@ export function ArticleReader({ slug }: { slug: string }) {
           onPress={() => router.back()}
           hitSlop={8}
           testID="article-back"
-          className="min-h-[44px] flex-row items-center gap-1 px-2"
+          className="min-h-[44px] flex-row items-center gap-1 px-2 active:scale-[0.96]"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">

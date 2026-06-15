@@ -92,7 +92,8 @@ export function SleepArchitectView({
               accessibilityLabel="Back"
               onPress={onClose}
               hitSlop={8}
-              className="min-h-[44px] w-9 justify-center"
+              className="min-h-[44px] w-9 justify-center active:scale-[0.96]"
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
               <ArrowLeft size={24} color={ink} strokeWidth={2} />
             </Pressable>
@@ -198,9 +199,10 @@ function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
             onPress={() => onChange(item.key)}
-            className={`min-h-[44px] items-center justify-center border-b-2 px-4 ${
+            className={`min-h-[44px] items-center justify-center border-b-[3px] px-4 active:bg-surface-active/50 dark:active:bg-surface-active-dark/50 ${
               active ? 'border-primary dark:border-primary-dark' : 'border-transparent'
             }`}
+            style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
           >
             <Text
               variant={active ? 'bodyBold' : 'body'}

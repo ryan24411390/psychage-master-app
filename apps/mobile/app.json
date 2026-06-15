@@ -45,7 +45,8 @@
           "isAndroidBackgroundLocationEnabled": false,
           "isIosBackgroundLocationEnabled": false
         }
-      ]
+      ],
+      "expo-web-browser"
     ]
   }
 }

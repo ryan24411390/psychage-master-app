@@ -101,7 +101,7 @@ export function HomeView({
           {/* RECORD WELL — pressed ("it's yours"); Imprint flashes on first save */}
           <Animated.View
             style={wellStyle}
-            className="overflow-hidden rounded-xl bg-surface-active px-4 py-4 dark:bg-surface-active-dark"
+            className="overflow-hidden rounded-xl bg-surface-active p-5 shadow-base dark:bg-surface-active-dark"
           >
             <View className="absolute left-0 right-0 top-0 h-[1.5px] bg-charcoal-950/10" />
             <Animated.View
@@ -147,46 +147,46 @@ export function HomeView({
           <HomeCardSlot card={model.card} />
 
           {/* WHEN YOU NEED SOMETHING NOW */}
-          <View className="gap-2">
-            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+          <View className="gap-3">
+            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider ml-1">
               When you need something now
             </Text>
             <Pressable
               accessibilityRole="button"
               onPress={() => {}}
-              className="rounded-xl border border-border/50 bg-surface p-4 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
+              className="rounded-xl border border-border/40 bg-surface p-5 shadow-sm active:scale-[0.98] dark:border-border-dark/40 dark:bg-surface-dark"
             >
-              <Text variant="heading">Steady yourself right now</Text>
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="heading" className="mb-1">Steady yourself right now</Text>
+              <Text variant="bodySm" className="font-sans-medium text-text-secondary dark:text-text-secondary-dark">
                 Toolkit
               </Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
               onPress={() => {}}
-              className="rounded-xl border border-border/50 bg-surface p-4 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
+              className="rounded-xl border border-border/40 bg-surface p-5 shadow-sm active:scale-[0.98] dark:border-border-dark/40 dark:bg-surface-dark"
             >
-              <Text variant="heading">Make sense of what you feel</Text>
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="heading" className="mb-1">Make sense of what you feel</Text>
+              <Text variant="bodySm" className="font-sans-medium text-text-secondary dark:text-text-secondary-dark">
                 Symptom Navigator
               </Text>
             </Pressable>
           </View>
 
           {/* CARE AND LEARNING */}
-          <View className="gap-2">
-            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+          <View className="gap-3">
+            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider ml-1">
               Care and learning
             </Text>
             <Pressable
               accessibilityRole="button"
               onPress={() => {}}
-              className="gap-1 rounded-xl border border-border/50 bg-surface p-4 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
+              className="gap-2 rounded-xl border border-border/40 bg-surface p-5 shadow-sm active:scale-[0.98] dark:border-border-dark/40 dark:bg-surface-dark"
             >
-              <View className="flex-row items-center gap-2">
+              <View className="flex-row items-center gap-2 mb-1">
                 <Text
                   variant="caption"
-                  className="rounded-full bg-surface-active px-2 py-0.5 text-text-secondary dark:bg-surface-active-dark dark:text-text-secondary-dark"
+                  className="rounded-full bg-surface-active px-2.5 py-1 font-sans-medium text-text-secondary dark:bg-surface-active-dark dark:text-text-secondary-dark"
                 >
                   {model.read.tag}
                 </Text>
@@ -197,23 +197,23 @@ export function HomeView({
                   {model.read.meta}
                 </Text>
               </View>
-              <Text variant="bodyBold">{model.read.title}</Text>
-              <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
+              <Text variant="bodyBold" className="text-lg">{model.read.title}</Text>
+              <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark mt-1">
                 {READ_CREDIT}
               </Text>
             </Pressable>
-            <View className="flex-row flex-wrap gap-2">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4 px-4" contentContainerClassName="gap-3">
               {ARTICLE_RAIL.map((topic) => (
                 <Pressable
                   key={topic}
                   accessibilityRole="button"
                   onPress={() => {}}
-                  className="min-h-[44px] items-center justify-center rounded-full border border-border/50 bg-surface px-4 py-2 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
+                  className="min-h-[44px] items-center justify-center rounded-full border border-border/40 bg-surface px-5 py-2 shadow-sm active:scale-[0.96] dark:border-border-dark/40 dark:bg-surface-dark"
                 >
                   <Text variant="bodySm" className="font-sans-medium">{topic}</Text>
                 </Pressable>
               ))}
-            </View>
+            </ScrollView>
           </View>
 
           {/* MISSION FOOTER */}

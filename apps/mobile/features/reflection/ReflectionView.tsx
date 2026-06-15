@@ -61,8 +61,8 @@ export function ReflectionView({
         <ScrollView contentContainerClassName="gap-6 px-4 pb-10 pt-2">
           <Terrain days={week.days} width={Math.max(0, width - 32)} />
 
-          <View className="border-l-4 border-primary px-4 py-3 rounded-r-xl bg-surface-accent/20 dark:bg-surface-accent-dark/10">
-            <Text className="font-display text-[20px] italic text-text-primary dark:text-text-primary-dark">
+          <View className="border-l-[3px] border-primary px-5 py-4 rounded-r-xl bg-surface-accent/20 dark:bg-surface-accent-dark/10">
+            <Text className="font-display text-xl tracking-tight leading-snug italic text-text-primary dark:text-text-primary-dark">
               {week.line}
             </Text>
           </View>
@@ -86,8 +86,9 @@ export function ReflectionView({
               accessibilityRole="button"
               accessibilityLabel="See the full record"
               onPress={onFullRecord}
-              hitSlop={6}
-              className="min-h-[44px] justify-center"
+              hitSlop={8}
+              className="min-h-[44px] justify-center active:scale-[0.98]"
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
               <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
                 See the full record
@@ -97,8 +98,9 @@ export function ReflectionView({
               accessibilityRole="button"
               accessibilityLabel="Earlier weeks"
               onPress={onEarlier}
-              hitSlop={6}
-              className="min-h-[44px] justify-center"
+              hitSlop={8}
+              className="min-h-[44px] justify-center active:scale-[0.98]"
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
               <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
                 Earlier weeks

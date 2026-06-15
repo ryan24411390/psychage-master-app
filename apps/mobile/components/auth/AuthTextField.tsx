@@ -37,7 +37,7 @@ export function AuthTextField({
     ? 'border-error dark:border-error-dark'
     : focused
       ? 'border-text-secondary dark:border-text-secondary-dark'
-      : 'border-border dark:border-border-dark';
+      : 'border-border/40 dark:border-border-dark/40';
 
   return (
     <View className="gap-1.5">
@@ -54,7 +54,7 @@ export function AuthTextField({
           setFocused(false);
           onBlur?.(event);
         }}
-        className={`min-h-[44px] rounded-lg border px-3 py-2 font-sans text-base text-text-primary dark:text-text-primary-dark ${borderClass}`}
+        className={`min-h-[52px] rounded-xl border bg-surface px-4 py-3 font-sans text-base text-text-primary dark:bg-surface-dark dark:text-text-primary-dark ${borderClass}`}
         {...props}
       />
       {hasError ? (

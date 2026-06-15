@@ -38,9 +38,9 @@ const variantBase: Record<TextVariant, string> = {
   bodyMedium: 'font-sans-medium text-text-primary dark:text-text-primary-dark',
   bodyBold: 'font-sans-bold text-text-primary dark:text-text-primary-dark',
   bodySm: 'font-sans text-text-primary dark:text-text-primary-dark',
-  caption: 'font-sans text-xs text-text-secondary dark:text-text-secondary-dark',
-  heading: 'font-display text-xl text-text-primary dark:text-text-primary-dark',
-  headingLg: 'font-display text-2xl text-text-primary dark:text-text-primary-dark',
+  caption: 'font-sans text-xs tracking-wider text-text-secondary dark:text-text-secondary-dark',
+  heading: 'font-display text-xl tracking-tight text-text-primary dark:text-text-primary-dark',
+  headingLg: 'font-display text-2xl tracking-tighter text-text-primary dark:text-text-primary-dark',
 };
 
 const BODY_VARIANTS: readonly TextVariant[] = ['body', 'bodyMedium', 'bodyBold', 'bodySm'];

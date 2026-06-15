@@ -90,7 +90,7 @@ export function SavedRow({ item }: { item: BookmarkItem }) {
       disabled={unavailable}
       accessibilityRole="button"
       accessibilityLabel={`${display}, ${TYPE_LABEL[item.resource_type]}. Saved.`}
-      className="min-h-[64px] flex-row items-center gap-3 border-b border-border px-1 py-3 dark:border-border-dark"
+      className="min-h-[64px] flex-row items-center gap-4 px-2 py-3 active:bg-surface-active dark:active:bg-surface-active-dark border-b border-border-hairline last:border-b-0"
     >
       <Icon size={20} color={tc.inkSecondary} strokeWidth={1.75} />
       <View className="flex-1">

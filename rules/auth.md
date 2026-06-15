@@ -9,6 +9,31 @@
 
 ---
 
+## Amendment 2026-06-16 — auth-experience pass (⚠ PENDING DR. DOBSON RATIFICATION)
+
+> This amendment records a product-directed change to the auth experience. It is written
+> *before* implementation per the Authority clause above. **The copy and the front-door
+> model change require Dr. Dobson's clinical sign-off before launch** (CLAUDE.md §7). Until
+> then, treat the affected UI copy as `// CT4` placeholder.
+
+Three changes, with the Sacred-Rule invariants they must not break:
+
+1. **Front-door Welcome gate (amends §1).** First launch now opens a branded Welcome screen
+   offering **Continue**, **Log in**, and **Sign up** — *before* the existing product
+   onboarding. **Invariant (non-negotiable):** "Continue" enters the app **anonymously** and
+   gives full Tier-1 access; the gate is never a hard wall. **Crisis is never gated** (Sacred
+   Rule #3) — it stays reachable from every surface including the Welcome screen. Signed-in
+   users skip the gate.
+2. **Social sign-in confirmed V1 (consistent with §3).** Apple + Google ship now. (§3 already
+   lists both as V1; this resolves the open-decision conflict in `PROJECT_CONTEXT.md` §5 in
+   favour of shipping.)
+3. **Sign-up form additions (amends §9).** Sign-up now collects **full name**, a **confirm-
+   password** field, shows a **password-strength meter** (display-only — the min-8 length in §3
+   is still the only *gate*, per NIST), and requires **Terms + Privacy acceptance** (App Store
+   5.1.1). "Remember me" is **still rejected** (§9 unchanged) — sessions persist by default.
+
+---
+
 ## 1. The three tiers
 
 Every feature in the app sits in exactly one of these tiers. No exceptions, no "kinda."
