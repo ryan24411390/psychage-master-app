@@ -60,12 +60,14 @@ export function ReflectionView({
         <ScrollView contentContainerClassName="gap-6 px-4 pb-10 pt-2">
           <Terrain days={week.days} width={Math.max(0, width - 32)} />
 
-          <Text className="font-display text-[20px] italic text-text-primary dark:text-text-primary-dark">
-            {week.line}
-          </Text>
+          <View className="border-l-4 border-primary px-4 py-3 rounded-r-xl bg-teal-50/20 dark:bg-teal-900/10">
+            <Text className="font-display text-[20px] italic text-text-primary dark:text-text-primary-dark">
+              {week.line}
+            </Text>
+          </View>
 
           {week.notes.length > 0 ? (
-            <View className="gap-2">
+            <View className="gap-3 p-5 rounded-xl border border-border/50 bg-surface shadow-sm dark:border-border-dark/50 dark:bg-surface-dark">
               {week.notes.map((n) => (
                 <Text
                   key={`${n.day}:${n.note}`}

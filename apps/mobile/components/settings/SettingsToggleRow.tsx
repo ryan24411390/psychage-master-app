@@ -1,7 +1,7 @@
 import { Switch, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
-import { colors } from '@/lib/colors';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
 // A labelled binary toggle row (S43 reminder on/off, S45 reduce-motion). The
 // Switch is the platform affordance; its "on" track uses the brand primary — this
@@ -23,6 +23,8 @@ export function SettingsToggleRow({
   onValueChange,
   testID,
 }: SettingsToggleRowProps) {
+  // "On" track follows the themed brand primary so it reads on the dark canvas.
+  const tc = useThemeColors();
   return (
     <View className="min-h-[44px] flex-row items-center gap-3 px-1 py-3">
       <View className="flex-1 gap-0.5">
@@ -39,7 +41,7 @@ export function SettingsToggleRow({
         accessibilityState={{ checked: value }}
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ true: colors.primary.default.light }}
+        trackColor={{ true: tc.primary }}
         testID={testID}
       />
     </View>

@@ -6,11 +6,9 @@
 // inject a `SupabaseLike` client (+ provenance) and call the typed read/write
 // wrappers; deep imports into sibling files are not part of the public surface.
 //
-// GATED OUT (deliberately absent from this barrel): the check-in write path lives
-// in `checkin-gate.ts` and is NOT re-exported. `CHECKIN_PERSISTENCE_ENABLED` is
-// false and `writeCheckIn` early-throws until the platform-claim write-flip slice
-// (AC-2.4 / AC-8.4). Reaching it requires a deep import, which the package
-// `exports` map does not resolve.
+// Check-in WRITE path (`checkin-gate.ts`) is exported below. The write-flip slice is
+// live — `CHECKIN_PERSISTENCE_ENABLED` is true and `writeCheckIn` upserts (best-effort,
+// push-only), gated server-side by the mobile-write RLS (ADR-001 Accepted 2026-06-14).
 
 // ── Record types (six tables) + §2 field bases + insert helpers ───────────────
 export type {
@@ -40,6 +38,7 @@ export {
   type PostgrestError,
   type PostgrestResult,
   type InsertValues,
+  type UpsertOptions,
   type PostgrestBuilder,
   type SupabaseLike,
   type Platform,
@@ -49,7 +48,16 @@ export {
   defaultPlatformClaimProvider,
 } from './adapters';
 
-// ── Live read/write wrappers (check-in WRITE is gated — not here) ─────────────
+// ── Check-in WRITE path (write-flip slice — ADR-001 Accepted) ─────────────────
+export {
+  type CheckInInput,
+  CHECKIN_PERSISTENCE_ENABLED,
+  CHECK_IN_DAY_CONFLICT_TARGET,
+  CheckInPersistenceDisabledError,
+  writeCheckIn,
+} from './checkin-gate';
+
+// ── Live read/write wrappers ──────────────────────────────────────────────────
 export {
   type ProfileUpsertInput,
   type NavigatorHistoryInput,

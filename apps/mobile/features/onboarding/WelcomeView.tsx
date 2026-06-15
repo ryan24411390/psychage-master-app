@@ -32,12 +32,14 @@ export function WelcomeView({ reduced, onContinue }: WelcomeViewProps) {
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
-      <Settle {...settleProps} className="flex-1 items-center justify-center gap-5 px-6">
-        <OnboardingMascot testID="onboarding-host-mascot" />
-        <Text variant="headingLg" accessibilityRole="header">
+      <Settle {...settleProps} className="flex-1 items-center justify-center gap-6 px-6 my-4">
+        <View className="mb-4">
+          <OnboardingMascot testID="onboarding-host-mascot" />
+        </View>
+        <Text variant="headingLg" className="text-center" accessibilityRole="header">
           {TITLE}
         </Text>
-        <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark px-4">
           {BODY}
         </Text>
       </Settle>

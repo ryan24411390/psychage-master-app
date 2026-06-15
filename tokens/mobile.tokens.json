@@ -15,17 +15,18 @@
   "color": {
     "background": {
       "light": "#F9F7F3",
-      "dark": "#0F0F0F",
+      "dark": "#000000",
       "_source": {
         "light": "tokens/web.tokens.json color.background.light",
-        "dark":  "tokens/web.tokens.json color.background.dark"
-      }
+        "dark":  "mobile-only true-black OLED canvas — see _divergence"
+      },
+      "_divergence": "DARK VALUES DIVERGE FROM WEB (intentional, user-approved). Convention #1 (cross-platform color sync) is deliberately suspended for the mobile dark register: mobile ships a true-black OLED palette (#000000 canvas, #FFFFFF ink, #121212+ elevated surfaces) where web keeps near-black. Do NOT 'resync' these dark leaves to web — the drift is the design. Light leaves remain web-synced. Precedent: typography already diverges intentionally (type.family._source)."
     },
     "surface": {
-      "default": { "light": "#F9F7F3", "dark": "#171717" },
+      "default": { "light": "#F9F7F3", "dark": "#121212" },
       "hover":   { "light": "#f5f5f4", "dark": "#1F1F1F" },
       "active":  { "light": "#e7e5e4", "dark": "#262626" },
-      "_source": { "_note": "Values verbatim from tokens/web.tokens.json color.surface.* — cross-platform identity (DESIGN.mobile.md §6). 'hover' state has no native-touch analog; consume on long-press / focused states." }
+      "_source": { "_note": "Light values verbatim from tokens/web.tokens.json color.surface.*. Dark values DIVERGE (mobile-only true-black register, see color.background._divergence): elevated surfaces step #121212 → #1F1F1F → #262626 above the #000000 canvas so layering stays visible (pure-black-on-pure-black has no hierarchy). 'hover' has no native-touch analog; consume on long-press / focused states." }
     },
     "primary": {
       "default": { "light": "#1A9B8C", "dark": "#20B8A6" },
@@ -34,10 +35,10 @@
       "_source": { "_note": "Brand teal expression. Values verbatim from tokens/web.tokens.json color.primary.*." }
     },
     "text": {
-      "primary":   { "light": "#0a0a0a", "dark": "#fafaf9" },
-      "secondary": { "light": "#57534e", "dark": "#d6d3d1" },
-      "tertiary":  { "light": "#6d6762", "dark": "#a8a29e" },
-      "_source": { "_note": "Values verbatim from tokens/web.tokens.json color.text.*. text.tertiary.light floors at WCAG AA 5.2:1 — do not lighten without re-checking." }
+      "primary":   { "light": "#0a0a0a", "dark": "#FFFFFF" },
+      "secondary": { "light": "#57534e", "dark": "#B3B3B3" },
+      "tertiary":  { "light": "#6d6762", "dark": "#8A8A8A" },
+      "_source": { "_note": "Light values verbatim from tokens/web.tokens.json color.text.*; text.tertiary.light floors at WCAG AA 5.2:1 — do not lighten without re-checking. Dark values DIVERGE (mobile-only true-black register, see color.background._divergence): pure-white primary #FFFFFF (21:1 on #000000), ~70%-white secondary #B3B3B3 (10.0:1 canvas / 8.9:1 surface), dimmed tertiary #8A8A8A (6.1:1 canvas / 5.4:1 surface). All clear WCAG AA body on the true-black canvas." }
     },
     "border": {
       "default": { "light": "#e7e5e4", "dark": "#3f3f46" },
@@ -52,8 +53,12 @@
     },
     "crisis": {
       "red": "#DC2626",
-      "_source": { "red": "tokens/web.tokens.json color.crisis.red" },
-      "_note": "Non-themed (single value). Crisis surfaces must visually announce regardless of mode."
+      "redDark": "#EF4444",
+      "_source": {
+        "red": "tokens/web.tokens.json color.crisis.red",
+        "redDark": "mobile-only — dark-register crisis ink/outline, see _note"
+      },
+      "_note": "Crisis surfaces must visually announce regardless of mode (SR-2 reachable, safety-critical). FILLED surfaces (EmergencyButton) stay `red` #DC2626 in both modes — white-on-#DC2626 = 4.83:1 AA, urgency intact. OUTLINE / TEXT contexts (CrisisCallRow rust pills, GlobalHeader Help-now pill, ExerciseChrome) consume `redDark` #EF4444 in dark mode via `dark:text-crisis-dark` / `dark:border-crisis-dark`: red-on-true-black at #DC2626 is only 4.35:1 (UI floor, fails the 4.5 body floor), while #EF4444 clears 5.6:1 canvas / 5.0:1 surface AND stays a saturated, urgent red. redDark is mobile-only (true-black register, see color.background._divergence)."
     },
     "relevance": {
       "high":     "#1A9B8C",

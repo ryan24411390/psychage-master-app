@@ -25,6 +25,10 @@
       "types": "./sleep/index.ts",
       "default": "./sleep/index.ts"
     },
+    "./mood-journal": {
+      "types": "./mood-journal/index.ts",
+      "default": "./mood-journal/index.ts"
+    },
     "./mascot": {
       "types": "./mascot/index.ts",
       "default": "./mascot/index.ts"

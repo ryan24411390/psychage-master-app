@@ -71,16 +71,16 @@ export function HistoryView({
               accessibilityLabel="This week’s reflection is ready."
               onPress={onReflection}
               hitSlop={6}
-              className="min-h-[44px] justify-center border-b border-border pb-3 dark:border-border-dark"
+              className="min-h-[44px] justify-center p-4 rounded-xl border border-teal-100/60 bg-teal-50/20 shadow-sm dark:border-teal-800/40 dark:bg-teal-900/10"
             >
-              <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+              <Text variant="bodyMedium" className="text-primary dark:text-primary-dark font-sans-medium">
                 This week’s reflection is ready.
               </Text>
             </Pressable>
           ) : null}
 
           {weeks.map((week) => (
-            <View key={week.weekStartIso} className="relative">
+            <View key={week.weekStartIso} className="relative rounded-xl border border-border/50 bg-surface py-4 px-0 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark">
               <Terrain days={week.days.map((d) => d.day)} width={terrainWidth} />
               {/* className-only column overlay: 7 flex-1 cells align to the terrain's
                   centered columns; each entry day gets a centered ≥44px hit-target. */}

@@ -32,6 +32,36 @@ export default function CompassScreen() {
           onPress={() => router.push(COMPASS_ROUTES.navigator)}
           testID="compass-tile-navigator"
         />
+        <CompassTile
+          title={t.relationship.title}
+          subLabel={t.relationship.sub}
+          onPress={() => router.push(COMPASS_ROUTES.relationship)}
+          testID="compass-tile-relationship"
+        />
+        <CompassTile
+          title={t.mindmate.title}
+          subLabel={t.mindmate.sub}
+          onPress={() => router.push(COMPASS_ROUTES.mindmate)}
+          testID="compass-tile-mindmate"
+        />
+        <CompassTile
+          title={t.clarity.title}
+          subLabel={t.clarity.sub}
+          onPress={() => router.push(COMPASS_ROUTES.clarity)}
+          testID="compass-tile-clarity"
+        />
+        <Text
+          variant="caption"
+          className="mt-2 text-text-secondary dark:text-text-secondary-dark"
+        >
+          {t.reflectHeading}
+        </Text>
+        <CompassTile
+          title={t.moodJournal.title}
+          subLabel={t.moodJournal.sub}
+          onPress={() => router.push(COMPASS_ROUTES.moodJournal)}
+          testID="compass-tile-mood-journal"
+        />
         <Text
           variant="caption"
           className="mt-2 text-text-secondary dark:text-text-secondary-dark"

@@ -11,8 +11,8 @@ import {
   type SupabaseLike,
 } from '../adapters';
 import {
+  CHECK_IN_DAY_CONFLICT_TARGET,
   CHECKIN_PERSISTENCE_ENABLED,
-  CheckInPersistenceDisabledError,
   writeCheckIn,
 } from '../checkin-gate';
 import * as barrel from '../index';
@@ -33,6 +33,7 @@ interface Capture {
   table?: string;
   insert?: Record<string, unknown>;
   upsert?: Record<string, unknown>;
+  upsertOptions?: { onConflict?: string };
   eq: [string, string][];
   rpc?: string;
   rpcArgs?: Record<string, unknown>;
@@ -57,8 +58,9 @@ function makeClient(returns: FakeReturns, capture: Capture): SupabaseLike {
       capture.insert = values;
       return builder;
     },
-    upsert: (values: Record<string, unknown>) => {
+    upsert: (values: Record<string, unknown>, options?: { onConflict?: string }) => {
       capture.upsert = values;
+      capture.upsertOptions = options;
       return builder;
     },
     eq: (column: string, value: string) => {
@@ -89,31 +91,54 @@ function emptyCapture(): Capture {
 
 const ctx: WriteContext = { device_id: 'dev-1', client_version: 'mobile@1.0.0' };
 
-// ── Check-in gate (OFF) ───────────────────────────────────────────────────────
+// ── Check-in gate (ON — write-flip slice, ADR-001 Accepted) ───────────────────
 
 describe('check-in gate', () => {
-  it('CHECKIN_PERSISTENCE_ENABLED is false', () => {
-    expect(CHECKIN_PERSISTENCE_ENABLED).toBe(false);
+  it('CHECKIN_PERSISTENCE_ENABLED is true', () => {
+    expect(CHECKIN_PERSISTENCE_ENABLED).toBe(true);
   });
 
-  it('writeCheckIn throws while the gate is OFF', async () => {
+  it('writeCheckIn upserts the stamped row on the per-day conflict key (idempotent)', async () => {
     const capture = emptyCapture();
-    const client = makeClient({ single: {} }, capture);
+    const client = makeClient({ single: { id: 'ci1' } }, capture);
+    await writeCheckIn(
+      client,
+      { user_id: 'u1', mood_score: 7, experienced_at: '2026-06-15T00:00:00.000Z', context: {} },
+      ctx,
+    );
+    expect(capture.table).toBe('check_ins');
+    expect(capture.upsert).toMatchObject({
+      user_id: 'u1',
+      mood_score: 7,
+      experienced_at: '2026-06-15T00:00:00.000Z',
+      device_id: 'dev-1',
+      client_version: 'mobile@1.0.0',
+      schema_version: DATA_SCHEMA_VERSION,
+    });
+    // Idempotency: a re-push of the same day collides on (user_id, experienced_at).
+    expect(capture.upsertOptions).toEqual({ onConflict: CHECK_IN_DAY_CONFLICT_TARGET });
+    expect(CHECK_IN_DAY_CONFLICT_TARGET).toBe('user_id,experienced_at');
+    // Server-managed columns are NOT sent by the client.
+    expect(capture.upsert).not.toHaveProperty('id');
+    expect(capture.upsert).not.toHaveProperty('created_at');
+  });
+
+  it('propagates a PostgREST error as DataAccessError', async () => {
+    const capture = emptyCapture();
+    const client = makeClient({ single: null, error: { message: 'boom' } }, capture);
     await expect(
       writeCheckIn(
         client,
-        { user_id: 'u1', mood_score: 5, experienced_at: 'now', context: {} },
+        { user_id: 'u1', mood_score: 5, experienced_at: '2026-06-15T00:00:00.000Z', context: {} },
         ctx,
       ),
-    ).rejects.toBeInstanceOf(CheckInPersistenceDisabledError);
-    // It throws BEFORE touching the client — no insert reached the seam.
-    expect(capture.table).toBeUndefined();
-    expect(capture.insert).toBeUndefined();
+    ).rejects.toBeInstanceOf(DataAccessError);
   });
 
-  it('writeCheckIn is NOT on the public barrel surface', () => {
-    expect('writeCheckIn' in barrel).toBe(false);
-    expect('CHECKIN_PERSISTENCE_ENABLED' in barrel).toBe(false);
+  it('writeCheckIn IS on the public barrel surface (write-flip)', () => {
+    expect('writeCheckIn' in barrel).toBe(true);
+    expect('CHECKIN_PERSISTENCE_ENABLED' in barrel).toBe(true);
+    expect('CHECK_IN_DAY_CONFLICT_TARGET' in barrel).toBe(true);
   });
 });
 

@@ -39,6 +39,10 @@ export function Mascot({ testID, tiltSignal = 0 }: MascotProps) {
   const stroke = pick(resolveColorRef('color.border.hover'));
   const eyes = pick(resolveColorRef('color.text.tertiary'));
   const teal = pick(resolveColorRef('color.primary.default'));
+  // Grounding ellipse: a warm-dark drop-shadow reads on the light canvas but is
+  // invisible on true black, so dark mode uses a faint light halo instead. (The
+  // clay placeholder swaps for the founder asset — see header.)
+  const shadowFill = colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(46,44,40,0.08)';
 
   const scale = useSharedValue(1);
   useEffect(() => {
@@ -75,7 +79,7 @@ export function Mascot({ testID, tiltSignal = 0 }: MascotProps) {
       testID={testID}
     >
       <Svg width={WIDTH} height={HEIGHT} viewBox="0 0 80 92">
-        <Ellipse cx={40} cy={86} rx={20} ry={4} fill="rgba(46,44,40,0.08)" />
+        <Ellipse cx={40} cy={86} rx={20} ry={4} fill={shadowFill} />
         <Rect x={26} y={52} width={28} height={34} rx={13} fill={clay} stroke={stroke} />
         <Circle cx={40} cy={30} r={26} fill={clay} stroke={stroke} />
         <Circle cx={32} cy={30} r={2.6} fill={eyes} />

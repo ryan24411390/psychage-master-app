@@ -14,7 +14,6 @@ export const CT4_WEBVIEW = {
     directory: 'Find care',
     provider: 'Provider',
     sleep: 'Sleep Architect',
-    relationship: 'Relationship Health Check',
     medTracker: 'Med Tracker',
     clarity: 'Clarity Score',
   } as Record<string, string>,
