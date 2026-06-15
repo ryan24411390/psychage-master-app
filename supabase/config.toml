@@ -216,7 +216,12 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
+# Spec: rules/auth.md "Email + password" — verification REQUIRED before account
+# is fully usable. Local must match the live project (confirm-email ON) so dev
+# does not diverge from prod. NOTE: the live hosted project ALSO requires a
+# working custom SMTP ([auth.email.smtp] below / dashboard) or confirmation
+# emails are stamped but never delivered — see QA auth diagnosis.
+enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
