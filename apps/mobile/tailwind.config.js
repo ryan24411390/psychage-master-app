@@ -106,9 +106,9 @@ module.exports = {
           dark: '#FBF9F4', // Ensure dark mode respects paper if it gets triggered
         },
         intent: {
-          now: { DEFAULT: '#E4F1EE', chip: '#157F73' },
-          patterns: { DEFAULT: '#ECE9F3', chip: '#6C5FA8' },
-          understand: { DEFAULT: '#E6ECF2', chip: '#3F5B78' },
+          now: { light: '#EAF4F1', deep: '#D6EAE5' },
+          patterns: { light: '#F0EDF6', deep: '#E2DCEF' },
+          understand: { light: '#EAEFF4', deep: '#D8E2EC' },
         },
       },
       borderRadius: {

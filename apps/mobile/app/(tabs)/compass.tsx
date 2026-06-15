@@ -28,6 +28,8 @@ export default function CompassScreen() {
           tint="now"
           icon={LifeBuoy}
           variant="hero"
+          index={0}
+          total={5}
           testID="compass-tile-toolkit"
         />
         <View className="flex-row gap-3">
@@ -38,6 +40,8 @@ export default function CompassScreen() {
             tint="now"
             icon={Compass}
             variant="standard"
+            index={1}
+            total={5}
             testID="compass-tile-navigator"
           />
           <CompassTile
@@ -47,6 +51,8 @@ export default function CompassScreen() {
             tint="now"
             icon={HeartHandshake}
             variant="standard"
+            index={2}
+            total={5}
             testID="compass-tile-relationship"
           />
         </View>
@@ -58,6 +64,8 @@ export default function CompassScreen() {
             tint="now"
             icon={MessageCircle}
             variant="standard"
+            index={3}
+            total={5}
             testID="compass-tile-mindmate"
           />
           <CompassTile
@@ -67,6 +75,8 @@ export default function CompassScreen() {
             tint="now"
             icon={Sparkles}
             variant="standard"
+            index={4}
+            total={5}
             testID="compass-tile-clarity"
           />
         </View>
@@ -83,6 +93,8 @@ export default function CompassScreen() {
           tint="patterns"
           icon={Book}
           variant="hero"
+          index={0}
+          total={1}
           testID="compass-tile-mood-journal"
         />
         <Text
@@ -98,6 +110,8 @@ export default function CompassScreen() {
           tint="understand"
           icon={Moon}
           variant="hero"
+          index={0}
+          total={1}
           testID="compass-tile-sleep"
         />
       </ScrollView>
