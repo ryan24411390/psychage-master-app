@@ -19,7 +19,7 @@ import { colors } from '@/lib/colors';
 
 import { MINDMATE_COPY } from '../copy';
 import type { sendMessage } from '../mindmate-service';
-import { useMindMateChat } from '../useMindMateChat';
+import { type UseMindMateChatOptions, useMindMateChat } from '../useMindMateChat';
 import { ChatInput } from './ChatInput';
 import { ConsentBanner } from './ConsentBanner';
 import { type CrisisHotline, CrisisCard } from './CrisisCard';
@@ -56,7 +56,7 @@ type MindMateViewProps = {
   /** Injectable streaming impl for tests; defaults to the real service. */
   sendImpl?: typeof sendMessage;
   /** Injectable consent-gated persister for tests; defaults to the real writer. */
-  persistImpl?: Parameters<typeof useMindMateChat>[0]['persistImpl'];
+  persistImpl?: UseMindMateChatOptions['persistImpl'];
 };
 
 export function MindMateView({
