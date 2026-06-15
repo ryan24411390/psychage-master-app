@@ -22,6 +22,7 @@ export const KNOWN_LOCAL_KEYS = [
   'mobile:personalization', // B2 lib/persistence/personalization
   'mobile:sync-consent', // settings lib/persistence/sync-consent (check-in backup consent)
   'mobile:reading-text-size', // settings lib/persistence/reading-text-size
+  'mobile:directory-location', // find lib/persistence/directory-location (home browse scope)
 ] as const;
 
 // The check-in store quarantines a corrupt blob under a dynamically-suffixed key

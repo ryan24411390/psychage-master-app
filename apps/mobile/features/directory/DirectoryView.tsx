@@ -33,11 +33,27 @@ const EMPTY_FILTERS: FilterDraft = {
   accepting: false,
 };
 
-export function DirectoryView() {
+// `embedded` = rendered as the Find tab root (the tabs GlobalHeader already sits
+// above it, so we skip our own header + the back row). The standalone
+// /find/directory deep-link route renders it un-embedded (own header + back).
+// initialState/initialCity seed the browse scope from the persisted home location.
+export function DirectoryView({
+  embedded = false,
+  initialState = null,
+  initialCity = null,
+}: {
+  embedded?: boolean;
+  initialState?: string | null;
+  initialCity?: string | null;
+} = {}) {
   const online = useIsOnline();
   const [text, setText] = useState('');
   const [debounced, setDebounced] = useState('');
-  const [filters, setFilters] = useState<FilterDraft>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<FilterDraft>(() => ({
+    ...EMPTY_FILTERS,
+    state: initialState ?? '',
+  }));
+  const [city] = useState<string>(initialCity ?? '');
   const [coords, setCoords] = useState<Coords | null>(null);
   const [locNotice, setLocNotice] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -53,6 +69,7 @@ export function DirectoryView() {
     () => ({
       query: debounced || undefined,
       state: filters.state || undefined,
+      city: city || undefined,
       specialty_slugs: filters.specialtySlugs.length ? filters.specialtySlugs : undefined,
       telehealth: filters.telehealth || undefined,
       in_person: filters.inPerson || undefined,
@@ -63,7 +80,7 @@ export function DirectoryView() {
       sort_by: coords ? 'distance' : 'relevance',
       per_page: 20,
     }),
-    [debounced, filters, coords],
+    [debounced, filters, city, coords],
   );
 
   const active = hasActiveSearch(params);
@@ -104,7 +121,7 @@ export function DirectoryView() {
   if (!online) {
     return (
       <View className="flex-1 bg-background dark:bg-background-dark">
-        <GlobalHeader />
+        {embedded ? null : <GlobalHeader />}
         <OfflineFallback variant="offline" testID="directory-offline" />
       </View>
     );
@@ -112,23 +129,25 @@ export function DirectoryView() {
 
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
-      <GlobalHeader />
+      {embedded ? null : <GlobalHeader />}
 
-      <View className="flex-row items-center px-2">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          onPress={() => router.back()}
-          hitSlop={8}
-          testID="directory-back"
-          className="min-h-[44px] flex-row items-center gap-1 px-2"
-        >
-          <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
-            Back
-          </Text>
-        </Pressable>
-      </View>
+      {embedded ? null : (
+        <View className="flex-row items-center px-2">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            onPress={() => router.back()}
+            hitSlop={8}
+            testID="directory-back"
+            className="min-h-[44px] flex-row items-center gap-1 px-2"
+          >
+            <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
+            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              Back
+            </Text>
+          </Pressable>
+        </View>
+      )}
 
       <View className="gap-3 px-4 pb-2">
         <Text variant="headingLg">{t.title}</Text>
