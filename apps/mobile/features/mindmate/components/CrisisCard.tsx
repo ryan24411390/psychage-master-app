@@ -3,7 +3,7 @@ import { View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
-import { colors } from '@/lib/colors';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
 import { MINDMATE_COPY } from '../copy';
 
@@ -11,6 +11,7 @@ import { MINDMATE_COPY } from '../copy';
 // routes to the full crisis screen (S11). Crisis-color OUTLINE only (never a red
 // fill) — matches the Help-now pill's sanctioned use of the crisis color.
 export function CrisisCard({ onGetSupport }: { onGetSupport: () => void }) {
+  const tc = useThemeColors();
   return (
     <View
       accessibilityRole="alert"
@@ -18,7 +19,7 @@ export function CrisisCard({ onGetSupport }: { onGetSupport: () => void }) {
       testID="mindmate-crisis-card"
     >
       <View className="flex-row items-center gap-2">
-        <LifeBuoy size={20} color={colors.crisis} strokeWidth={1.75} />
+        <LifeBuoy size={20} color={tc.crisis} strokeWidth={1.75} />
         <Text
           variant="bodyBold"
           className="flex-1 text-text-primary dark:text-text-primary-dark"

@@ -66,7 +66,7 @@ describe('sendMessage (backend wiring)', () => {
     );
     await drain(sendMessage(INPUT, () => {}, { ...TOKEN_DEPS, fetchImpl: fetchImpl as never }));
 
-    const [url, opts] = fetchImpl.mock.calls[0] as [string, Record<string, unknown>];
+    const [url, opts] = fetchImpl.mock.calls[0] as unknown as [string, Record<string, unknown>];
     expect(url).toBe('https://psychage.com/api/ai/chat');
     const headers = opts.headers as Record<string, string>;
     expect(headers.Authorization).toBe('Bearer jwt-abc');

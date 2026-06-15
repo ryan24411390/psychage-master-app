@@ -22,6 +22,7 @@ export interface ClarityChromeProps {
 export function ClarityChrome({ children, onHelp, onBack }: ClarityChromeProps) {
   const { colorScheme } = useColorScheme();
   const ink = colorScheme === 'dark' ? colors.text.primary.dark : colors.text.primary.light;
+  const crisis = colorScheme === 'dark' ? colors.crisis.dark : colors.crisis.light;
 
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
@@ -47,7 +48,7 @@ export function ClarityChrome({ children, onHelp, onBack }: ClarityChromeProps) 
           hitSlop={4}
           className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-3"
         >
-          <LifeBuoy size={18} color={colors.crisis} strokeWidth={1.75} />
+          <LifeBuoy size={18} color={crisis} strokeWidth={1.75} />
           <Text variant="bodyMedium" className="text-[13px] text-crisis">
             Help now
           </Text>
