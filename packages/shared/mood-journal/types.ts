@@ -36,6 +36,13 @@ export interface MomentEntry {
   readonly createdAt: string;
   readonly emotions: readonly EmotionTag[];
   readonly triggers: readonly TriggerTag[];
+  /**
+   * How pleasant the moment felt, an integer VALENCE_MIN..VALENCE_MAX. OPTIONAL —
+   * absent ⇒ the person logged tags/note without rating it, and pre-valence
+   * (schema v1) moments carry none after migration. This is the ONE mood number the
+   * journal keeps; like every moment field it is LOCAL-ONLY (SR-4) and never syncs.
+   */
+  readonly valence?: Valence;
   /** Optional free text, max NOTE_MAX_LENGTH UTF-16 units. Absent ⇒ no note. */
   readonly note?: string;
 }
@@ -43,10 +50,34 @@ export interface MomentEntry {
 /** Maximum note length, in UTF-16 code units (bounds on-device storage; web had no cap). */
 export const NOTE_MAX_LENGTH = 280;
 
+/**
+ * A moment's pleasantness rating: an integer in [VALENCE_MIN, VALENCE_MAX]. A plain
+ * number (not branded) so a 1–10 selector value flows in without a cast; the range is
+ * enforced at the validation boundary (`isValence`), where a write fails loud rather
+ * than clamp. 1 = hard, 10 = good.
+ */
+export type Valence = number;
+
+/** Inclusive valence bounds (1–10 scale, lifted from the web tool). */
+export const VALENCE_MIN = 1;
+export const VALENCE_MAX = 10;
+
+/** True when `value` is an integer within [VALENCE_MIN, VALENCE_MAX]. */
+export function isValence(value: unknown): value is Valence {
+  return (
+    typeof value === 'number' &&
+    Number.isInteger(value) &&
+    value >= VALENCE_MIN &&
+    value <= VALENCE_MAX
+  );
+}
+
 /** The fields a write supplies; `id`/`date`/`createdAt` are minted by the store. */
 export interface MomentInput {
   readonly emotions: readonly EmotionTag[];
   readonly triggers: readonly TriggerTag[];
+  /** Optional pleasantness rating (VALENCE_MIN..VALENCE_MAX). Absent ⇒ unrated. */
+  readonly valence?: Valence;
   readonly note?: string;
 }
 
@@ -77,7 +108,7 @@ export interface MoodJournalStoreDeps {
 
 /**
  * Thrown when a write would violate the moment contract (unknown tag, no tags at
- * all, note over NOTE_MAX_LENGTH). Writes fail loud rather than silently drop/clamp
+ * all, valence out of range, note over NOTE_MAX_LENGTH). Writes fail loud rather than silently drop/clamp
  * — silent mutation of user input is the failure mode user-data code must avoid.
  */
 export class MomentValidationError extends Error {

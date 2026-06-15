@@ -24,6 +24,7 @@ import {
 } from './migrate';
 import { type EmotionTag, isEmotionTag, isTriggerTag, type TriggerTag } from './tags';
 import {
+  isValence,
   type LocalCalendarDate,
   type MomentEntry,
   type MomentInput,
@@ -32,6 +33,9 @@ import {
   type MoodJournalStoreDeps,
   NOTE_MAX_LENGTH,
   type Storage,
+  type Valence,
+  VALENCE_MAX,
+  VALENCE_MIN,
 } from './types';
 
 /**
@@ -55,7 +59,8 @@ function cloneMoment(moment: MomentEntry): MomentEntry {
     emotions: [...moment.emotions],
     triggers: [...moment.triggers],
   };
-  return moment.note === undefined ? base : { ...base, note: moment.note };
+  const withValence = moment.valence === undefined ? base : { ...base, valence: moment.valence };
+  return moment.note === undefined ? withValence : { ...withValence, note: moment.note };
 }
 
 export class MoodJournalStore {
@@ -115,7 +120,7 @@ export class MoodJournalStore {
 
   /** Append a new moment, dated to the device's local day at save time. */
   addMoment(input: MomentInput): MomentEntry {
-    const { emotions, triggers, note } = this.canonicalizeInput(input);
+    const { emotions, triggers, valence, note } = this.canonicalizeInput(input);
     const ts = this.now();
     const entry = makeMoment(
       this.generateId(),
@@ -123,6 +128,7 @@ export class MoodJournalStore {
       ts.toISOString(),
       emotions,
       triggers,
+      valence,
       note,
     );
     this.byId.set(entry.id, entry);
@@ -138,8 +144,16 @@ export class MoodJournalStore {
     const existing = this.byId.get(id);
     if (!existing) throw new MomentNotFoundError(id);
 
-    const { emotions, triggers, note } = this.canonicalizeInput(input);
-    const entry = makeMoment(existing.id, existing.date, existing.createdAt, emotions, triggers, note);
+    const { emotions, triggers, valence, note } = this.canonicalizeInput(input);
+    const entry = makeMoment(
+      existing.id,
+      existing.date,
+      existing.createdAt,
+      emotions,
+      triggers,
+      valence,
+      note,
+    );
     this.byId.set(id, entry);
     this.persist();
     return cloneMoment(entry);
@@ -162,6 +176,7 @@ export class MoodJournalStore {
   private canonicalizeInput(input: MomentInput): {
     emotions: EmotionTag[];
     triggers: TriggerTag[];
+    valence?: Valence;
     note?: string;
   } {
     if (!Array.isArray(input.emotions) || !input.emotions.every(isEmotionTag)) {
@@ -175,14 +190,19 @@ export class MoodJournalStore {
     if (emotions.length + triggers.length === 0) {
       throw new MomentValidationError('a moment needs at least one emotion or trigger');
     }
+    if (input.valence !== undefined && !isValence(input.valence)) {
+      throw new MomentValidationError(
+        `valence must be an integer ${VALENCE_MIN}–${VALENCE_MAX} (got ${input.valence})`,
+      );
+    }
     if (input.note !== undefined && input.note.length > NOTE_MAX_LENGTH) {
       throw new MomentValidationError(
         `note exceeds ${NOTE_MAX_LENGTH} characters (got ${input.note.length})`,
       );
     }
-    return input.note === undefined || input.note === ''
-      ? { emotions, triggers }
-      : { emotions, triggers, note: input.note };
+    const trimmedNote = input.note === undefined || input.note === '' ? undefined : input.note;
+    const base = input.valence === undefined ? { emotions, triggers } : { emotions, triggers, valence: input.valence };
+    return trimmedNote === undefined ? base : { ...base, note: trimmedNote };
   }
 
   private snapshot(): PersistedMoments {
@@ -232,15 +252,18 @@ export class MoodJournalStore {
   }
 }
 
-/** Build a canonical moment; omit `note` when absent. */
+/** Build a canonical moment; omit `valence`/`note` when absent. Key order matches
+ *  `canonicalMoment` in migrate.ts so writes and reloads serialize identically. */
 function makeMoment(
   id: string,
   date: LocalCalendarDate,
   createdAt: string,
   emotions: EmotionTag[],
   triggers: TriggerTag[],
+  valence: Valence | undefined,
   note: string | undefined,
 ): MomentEntry {
   const base = { id, date, createdAt, emotions, triggers };
-  return note === undefined ? base : { ...base, note };
+  const withValence = valence === undefined ? base : { ...base, valence };
+  return note === undefined ? withValence : { ...withValence, note };
 }

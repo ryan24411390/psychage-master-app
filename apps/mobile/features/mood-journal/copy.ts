@@ -17,10 +17,19 @@ export const CT4_MOOD_JOURNAL = {
     body: 'When something stands out — easy or hard — note the feeling and what was around it. Your notes build a picture only you can see.',
   },
   add: {
+    // Step 1 — pleasantness (valence). Optional; framed as the person's own read of
+    // the moment, never a score the app assigns (SR-3). 1–10 lifted from the web tool.
+    valenceHeading: 'How pleasant did it feel?',
+    valenceHint: 'Optional — slide from hard to good.',
+    valenceLow: 'Hard',
+    valenceHigh: 'Good',
+    // Step 2 — what & where.
     heading: 'What’s this moment like?',
     emotionsLabel: 'How does it feel?',
     triggersLabel: 'What’s around it?',
     notePlaceholder: 'A word about it — optional',
+    next: 'Next',
+    back: 'Back',
     save: 'Save this moment',
     saveFailed: 'We couldn’t save that. Try once more.',
     privacy: 'Stays on your phone.',
@@ -30,5 +39,23 @@ export const CT4_MOOD_JOURNAL = {
     emotionsHeading: 'Feelings you’ve noted',
     triggersHeading: 'What’s come up',
     timelineHeading: 'Your moments',
+    valenceLabel: 'Felt',
+    delete: 'Delete this moment',
+    deleteConfirm: 'Delete?',
+    deleteCancel: 'Keep',
+    deleteYes: 'Delete',
+  },
+  // Insights — DESCRIPTIVE patterns only (SR-3): a trend of the person's own ratings
+  // and how often each tag came up. Never a verdict, a cause, or a diagnosis. Copy
+  // touches feelings → Dr. Dobson review before ship (CLAUDE.md §7); FIXTURE for now.
+  insights: {
+    valenceHeading: 'How moments have felt',
+    valenceCaption: 'Your average rating on the days you logged one.',
+    streakDay: 'day in a row',
+    streakDays: 'days in a row',
+    directionUp: 'Lately, moments have felt a little easier.',
+    directionDown: 'Lately, moments have felt a little harder.',
+    directionSteady: 'Lately, moments have felt about the same.',
+    lowData: 'Log a few more to see how this shifts over time.',
   },
 } as const;
