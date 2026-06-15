@@ -7,8 +7,9 @@
 // copy lives here — instrument wording, screener level labels, and section copy
 // are the app's Dr. Dobson-gated fixture (SR-3).
 //
-// Slice S1 (this file): types + dates + screener scoring + constants.
-// Forthcoming slices add: record-store + migrate, insights, report.
+// Slice S1: types + dates + screener scoring + constants.
+// Slice (this update): record-store + migrate (observability), insights, report.
+// Forthcoming: the React Native UI (app/, features/clarity-journal/).
 
 // Types + DI seams + errors
 export {
@@ -63,6 +64,38 @@ export {
   scoreScreening,
   scoreWHO5,
 } from './scoring';
+
+// Store (the typed local-only boundary) + load-anomaly observability
+export { ClarityJournalStore, type ClarityJournalAnomaly } from './record-store';
+export { type AnomalyReason, type PersistedJournal, SCHEMA_VERSION } from './migrate';
+
+// Insights (pure, on-device aggregations)
+export {
+  behavioralSuccessRate,
+  type BehavioralSuccess,
+  checkInStreak,
+  copingEffectiveness,
+  type CopingEffectiveness,
+  type CountItem,
+  moodDirection,
+  moodTrend,
+  recurringTriggers,
+  type ScreenerKey,
+  type ScreenerTrajectory,
+  screenerDirection,
+  screenerTrajectory,
+  topDistortions,
+  type TrendDirection,
+  type TrendPoint,
+} from './insights';
+
+// Report (therapist-report data assembly)
+export {
+  assembleReport,
+  type ReportData,
+  type ReportOptions,
+  type ScreenerReport,
+} from './report';
 
 // Structural + scoring constants
 export {
