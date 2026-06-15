@@ -75,6 +75,7 @@ function makeDeps(
 ): CheckInPushDeps {
   return {
     enabled: () => true,
+    getConsent: () => true,
     getUserId: async () => 'user-1',
     getWriteClient: () => makeClient(spy, failOnCall),
     writeContext: () => CTX,
