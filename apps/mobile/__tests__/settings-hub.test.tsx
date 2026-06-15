@@ -20,7 +20,10 @@ describe('S42 Settings hub', () => {
     expect(screen.getByTestId('settings-row-appearance')).toBeTruthy();
     expect(screen.getByTestId('settings-row-privacy')).toBeTruthy();
     expect(screen.getByTestId('settings-row-supporter')).toBeTruthy();
+    expect(screen.getByTestId('settings-row-crisis')).toBeTruthy();
+    expect(screen.getByTestId('settings-row-account-status')).toBeTruthy();
     expect(screen.getByTestId('settings-row-sign-out')).toBeTruthy();
+    expect(screen.getByTestId('settings-row-delete-account')).toBeTruthy();
   });
 
   it('navigates to each sub-screen', () => {
@@ -33,9 +36,21 @@ describe('S42 Settings hub', () => {
     expect(pushMock).toHaveBeenCalledWith('/settings/supporter');
   });
 
-  it('sign-out is a no-op stub (B1 owns S37) — no navigation', () => {
+  it('crisis is always reachable (SR-2) — routes to /crisis', () => {
+    renderWithProviders(<SettingsHubScreen />);
+    fireEvent.press(screen.getByTestId('settings-row-crisis'));
+    expect(pushMock).toHaveBeenCalledWith('/crisis');
+  });
+
+  it('sign-out routes to the wired S37 confirm sheet', () => {
     renderWithProviders(<SettingsHubScreen />);
     fireEvent.press(screen.getByTestId('settings-row-sign-out'));
-    expect(pushMock).not.toHaveBeenCalled();
+    expect(pushMock).toHaveBeenCalledWith('/sign-out');
+  });
+
+  it('delete-account routes to the hard-immediate delete flow', () => {
+    renderWithProviders(<SettingsHubScreen />);
+    fireEvent.press(screen.getByTestId('settings-row-delete-account'));
+    expect(pushMock).toHaveBeenCalledWith('/settings/delete');
   });
 });

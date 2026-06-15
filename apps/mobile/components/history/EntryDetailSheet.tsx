@@ -7,7 +7,7 @@ import { formatEntryDate } from '@/features/history/continuum';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { STATE_LABELS } from '@/lib/check-in-labels';
-import { colors } from '@/lib/colors';
+import { useThemeColors } from '@/lib/use-theme-colors';
 import { DURATION, useReducedMotion } from '@/lib/motion';
 
 // S8 entry-detail sheet (over S7). Read-only: the date (Fraunces), the state fill-glyph +
@@ -49,11 +49,12 @@ export interface EntryDetailSheetProps {
 
 export function EntryDetailSheet({ entry, onEdit, onClose }: EntryDetailSheetProps) {
   const reduced = useReducedMotion();
+  const tc = useThemeColors();
 
   return (
     <Animated.View
       entering={reduced ? undefined : FadeIn.duration(DURATION.swift)}
-      className="absolute inset-0 z-40 justify-end bg-charcoal-900/40"
+      className="absolute inset-0 z-40 justify-end bg-charcoal-900/40 dark:bg-black/60"
     >
       <Pressable
         accessibilityRole="button"
@@ -78,7 +79,7 @@ export function EntryDetailSheet({ entry, onEdit, onClose }: EntryDetailSheetPro
             hitSlop={8}
             onPress={onClose}
           >
-            <X size={22} color={colors.charcoal[600]} />
+            <X size={22} color={tc.inkSecondary} />
           </Pressable>
         </View>
 

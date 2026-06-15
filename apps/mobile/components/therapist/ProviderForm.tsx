@@ -13,14 +13,20 @@ import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 // S39 — Add provider (ONE provider in V1). Calm form: name (required) + optional
 // contact. Reuses the calm AuthTextField (no shake on error). Router-agnostic body.
 // Provider contact is PII — never logged (Sacred Rule #11).
+//
+// `initialName` / `initialContact` pre-seed the fields when the user arrived from
+// the directory ("Use in my therapist record"). They are still editable, and the
+// contact remains in-memory only — never persisted or logged.
 type ProviderFormProps = {
   onSubmit: (provider: Provider) => void;
+  initialName?: string;
+  initialContact?: string;
 };
 
-export function ProviderForm({ onSubmit }: ProviderFormProps) {
+export function ProviderForm({ onSubmit, initialName = '', initialContact = '' }: ProviderFormProps) {
   const reduced = useReducedMotion();
-  const [name, setName] = useState('');
-  const [contact, setContact] = useState('');
+  const [name, setName] = useState(initialName);
+  const [contact, setContact] = useState(initialContact);
   const [nameError, setNameError] = useState<string | undefined>(undefined);
 
   const handleSubmit = () => {

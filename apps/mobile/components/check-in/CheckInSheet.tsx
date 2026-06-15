@@ -9,7 +9,6 @@ import { StateRows } from '@/components/check-in/StateRows';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { colorForScheme, resolveColorRef } from '@/lib/a1-tokens';
-import { colors } from '@/lib/colors';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 
 // S4 the full check-in / edit sheet (one sheet, two modes). A bottom-sheet OVERLAY
@@ -70,7 +69,7 @@ export function CheckInSheet({
   return (
     <Animated.View
       entering={reduced ? undefined : FadeIn.duration(DURATION.swift)}
-      className="absolute inset-0 z-40 justify-end bg-charcoal-900/40"
+      className="absolute inset-0 z-40 justify-end bg-charcoal-900/40 dark:bg-black/60"
     >
       <Pressable
         accessibilityRole="button"
@@ -102,7 +101,7 @@ export function CheckInSheet({
             hitSlop={8}
             onPress={onClose}
           >
-            <X size={22} color={colors.charcoal[600]} />
+            <X size={22} color={colorForScheme(resolveColorRef('color.text.secondary'), colorScheme)} />
           </Pressable>
         </View>
 
