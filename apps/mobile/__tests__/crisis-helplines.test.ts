@@ -76,26 +76,46 @@ describe('crisis dataset — verification gating', () => {
   });
 });
 
-// Spot-checks on the founder-verified shipping set. Only the allowlisted rows ship; the
-// rest of the CT3 roster stays staged as needs_verification until founder promotion.
+// Spot-checks on the verified shipping set. Per the Help Now dataset the CT3 roster has
+// been promoted to `verified`; the derivation ships every verified, reachable row and
+// still drops `needs_verification` / `do_not_publish`.
 describe('crisis dataset — verified content spot-checks', () => {
-  it('only the two founder-verified launch helplines ship (US 988 + BD Kaan Pete Roi)', () => {
+  it('ships exactly the verified, reachable seed helplines', () => {
+    // The shipped set is the seed's verified rows minus any that are unreachable
+    // (no call number and no textable number) — the fixture's two gating filters.
+    const expected = CRISIS_SEED.helplines
+      .filter((h) => h.verificationStatus === 'verified')
+      .filter((h) => h.callNumber !== null || (h.textCapable && h.textNumber !== null))
+      .map((h) => `${h.countryIso2}:${h.name}`)
+      .sort();
     const shipped = Object.values(CRISIS_DATASET.helplinesByRegion)
       .flat()
       .map((r) => `${r.region}:${r.name}`)
       .sort();
-    expect(shipped).toEqual(['BD:Kaan Pete Roi', 'US:988 Suicide & Crisis Lifeline']);
+    expect(shipped).toEqual(expected);
+    // Representative members of the promoted roster actually reach the UI.
+    expect(shipped).toEqual(
+      expect.arrayContaining([
+        'US:988 Suicide & Crisis Lifeline',
+        'GB:Samaritans',
+        'IN:KIRAN',
+        'AU:Lifeline',
+        'BD:Kaan Pete Roi',
+      ]),
+    );
   });
 
-  it('US ships 911 emergency + the verified 988 Lifeline (call + text on 988)', () => {
+  it('US ships 911 emergency + 988 Lifeline (call+text) and the text-only Crisis Text Line', () => {
     expect(CRISIS_DATASET.emergencyByRegion.US).toBe('911');
     const us = CRISIS_DATASET.helplinesByRegion.US ?? [];
-    expect(us).toHaveLength(1);
+    expect(us).toHaveLength(2);
     const lifeline = us.find((r) => r.name === '988 Suicide & Crisis Lifeline');
     expect(lifeline?.callNumber).toBe('988');
     expect(lifeline?.textNumber).toBe('988');
-    // Crisis Text Line is staged needs_verification post-gating → must not ship.
-    expect(us.find((r) => r.name === 'Crisis Text Line')).toBeUndefined();
+    // Crisis Text Line is now verified — ships as a text-only row (no Call pill).
+    const textLine = us.find((r) => r.name === 'Crisis Text Line');
+    expect(textLine?.callNumber).toBeNull();
+    expect(textLine?.textNumber).toBe('741741');
   });
 
   it('BD ships 999 emergency + the founder-verified Kaan Pete Roi (call-only)', () => {
@@ -107,8 +127,9 @@ describe('crisis dataset — verified content spot-checks', () => {
     expect(kaan?.textNumber).toBeNull(); // call-only — no Text pill
   });
 
-  it('India is a gap state — its CT3 lines are staged, not shipped, but 112 still dials', () => {
-    expect(CRISIS_DATASET.helplinesByRegion.IN).toBeUndefined();
+  it('India now ships its three verified CT3 lines, ordered, and 112 still dials', () => {
     expect(CRISIS_DATASET.emergencyByRegion.IN).toBe('112');
+    const inRows = CRISIS_DATASET.helplinesByRegion.IN ?? [];
+    expect(inRows.map((r) => r.name)).toEqual(['KIRAN', 'Tele-MANAS', 'AASRA']);
   });
 });
