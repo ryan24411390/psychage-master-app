@@ -1,56 +1,24 @@
 import { Tabs } from 'expo-router';
-import { BookOpen, Compass, MapPin, Sun } from 'lucide-react-native';
-// TODO(tier-3-illustrator): replace lucide `Compass` with bespoke compass-rose
-// glyph per DESIGN.mobile.md §2.4 / clay-figures library V2 batch
-// (workspace.json clayFigures ETA).
 
-import { HeaderAvatar } from '@/components/HeaderAvatar';
-import { colors } from '@/lib/colors';
-import { useHaptics } from '@/lib/haptic-context';
+import { AppTabBar } from '@/components/AppTabBar';
+import { GlobalHeader } from '@/components/GlobalHeader';
 
+// C0.1 + C0.2 chrome. The GlobalHeader is the navigation `header` (persistent on
+// every tab); the AppTabBar replaces the default bottom bar to carry the pressed-
+// pill active treatment, always-visible labels, and the four pictograms. Tab
+// titles double as the always-visible tab labels (read by AppTabBar). Haptics
+// fire inside AppTabBar's onPress (no screen-level tabPress listener, which would
+// double-fire alongside the custom bar's navigation.emit).
 export default function TabsLayout() {
-  const { fireHaptic } = useHaptics();
-
   return (
     <Tabs
-      screenOptions={{
-        headerRight: () => <HeaderAvatar />,
-        // Static light-mode value — see lib/colors.ts caveat re: useColorScheme
-        // reactivity landing in Slice 6+ with the settings dark-mode toggle.
-        tabBarActiveTintColor: colors.primary.default.light,
-      }}
-      screenListeners={{
-        tabPress: () => fireHaptic('tab'),
-      }}
+      screenOptions={{ header: () => <GlobalHeader /> }}
+      tabBar={(props) => <AppTabBar {...props} />}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Today',
-          tabBarIcon: ({ color, size }) => <Sun color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="learn"
-        options={{
-          title: 'Learn',
-          tabBarIcon: ({ color, size }) => <BookOpen color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="compass"
-        options={{
-          title: 'Compass',
-          tabBarIcon: ({ color, size }) => <Compass color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="find"
-        options={{
-          title: 'Find',
-          tabBarIcon: ({ color, size }) => <MapPin color={color} size={size} />,
-        }}
-      />
+      <Tabs.Screen name="index" options={{ title: 'Today' }} />
+      <Tabs.Screen name="learn" options={{ title: 'Learn' }} />
+      <Tabs.Screen name="compass" options={{ title: 'Compass' }} />
+      <Tabs.Screen name="find" options={{ title: 'Find' }} />
     </Tabs>
   );
 }

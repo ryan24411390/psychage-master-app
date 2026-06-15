@@ -1,39 +1,25 @@
-import { View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { Link } from 'expo-router';
+import { Redirect, useLocalSearchParams } from 'expo-router';
 
-import { Button } from '@/components/ui/Button';
-import { ScreenShell } from '@/components/ui/ScreenShell';
-import { Text } from '@/components/ui/Text';
-import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
+import { HomeContainer } from '@/components/home/HomeContainer';
+import { storage } from '@/lib/adapters/storage';
+import { getCheckInStore } from '@/lib/check-in-store';
+import { isOnboardingSeen } from '@/lib/persistence/onboarding';
 
-// Slice 5 validation surface: minimum content to exercise primitive + token +
-// haptic + motion pipeline. Not a feature build — content here seeds Slice 8
-// type/spacing calibration with a real (not synthetic) rendered surface.
-
+// S3 "Today" home. Binds the real (MMKV-backed) CheckInRecordStore to HomeContainer.
+//
+// A2/PR-E: on first launch (no entries) and before onboarding is seen, redirect to S1.
+// The `checkin` param (set by S2's "Do your first check-in") opens S4 over the first-run
+// home via HomeContainer's autoOpenCheckIn seam — and suppresses the redirect, since the
+// user is arriving FROM onboarding. Importing the shared package at runtime keeps this
+// file off the Jest path (Jest does not transform the workspace TS package).
 export default function TodayScreen() {
-  const reduced = useReducedMotion();
-  return (
-    <ScreenShell>
-      <Animated.View
-        entering={reduced ? undefined : FadeIn.duration(DURATION.base).easing(easingFn('out'))}
-        className="flex-1 items-center justify-center"
-      >
-        <View className="gap-3 items-center">
-          <Text variant="headingLg">Today</Text>
-          <Text variant="body">Placeholder content for primitive validation.</Text>
-          <Button variant="primary" onPress={() => {}}>
-            Tap to test affirm haptic
-          </Button>
-          {/* DEV-only Slice 9 verification entrypoint. __DEV__ is false in
-              production bundles → link is omitted from V1 ship. */}
-          {__DEV__ && (
-            <Link href="/dev-navigator" className="text-primary underline mt-4">
-              Open dev verify screen →
-            </Link>
-          )}
-        </View>
-      </Animated.View>
-    </ScreenShell>
-  );
+  const { checkin } = useLocalSearchParams<{ checkin?: string }>();
+  const store = getCheckInStore();
+  const firstRun = store.getRecent(1).length === 0;
+
+  if (firstRun && checkin !== '1' && !isOnboardingSeen(storage)) {
+    return <Redirect href="/onboarding/welcome" />;
+  }
+
+  return <HomeContainer store={store} autoOpenCheckIn={checkin === '1'} />;
 }

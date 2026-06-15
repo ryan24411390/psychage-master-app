@@ -1,0 +1,107 @@
+import { ArrowLeft } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
+import { Pressable, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { Text } from '@/components/ui/Text';
+import { colors } from '@/lib/colors';
+
+import { CrisisCallRow } from './components/CrisisCallRow';
+import { EmergencyButton } from './components/EmergencyButton';
+import type { Dial } from './dialer';
+import type { HelplineRow } from './helpline-schema';
+
+// S11 — the crisis screen, presentational (no navigation hooks, so it unit-tests
+// bare). PLAIN register: NO mascot, NO teal, NO gradient/softness/animation. Exactly
+// ONE filled rust element (the emergency button); helpline actions are rust-outline.
+// Reduced-motion == full-motion by design (there is no motion here).
+//
+// VoiceOver order: lead → call → helplines (the content sequence below). The Back
+// control sits above as a standard nav affordance.
+//
+// All visible copy below is VERBATIM Flow Book (Flow 6). Introduce no new strings.
+
+const LEAD =
+  'If you are in danger, or thinking about ending your life, you deserve help right now. You are not alone in this.';
+const EMERGENCY_LABEL = 'Call your local emergency number';
+const HELPLINES_INTRO = 'Free, confidential helplines are also available in most countries.';
+
+export interface CrisisViewProps {
+  readonly regionName: string;
+  readonly emergencyNumber: string;
+  readonly helplines: readonly HelplineRow[];
+  readonly onBack: () => void;
+  readonly onChangeRegion: () => void;
+  /** Injectable dialer for render tests; defaults to the platform dialer downstream. */
+  readonly dial?: Dial;
+}
+
+export function CrisisView({
+  regionName,
+  emergencyNumber,
+  helplines,
+  onBack,
+  onChangeRegion,
+  dial,
+}: CrisisViewProps) {
+  const { colorScheme } = useColorScheme();
+  // Ink (not teal) is the only accent in the crisis register.
+  const ink = colorScheme === 'dark' ? colors.text.primary.dark : colors.text.primary.light;
+  const hasHelp = helplines.length > 0;
+
+  return (
+    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
+      <View className="px-4 pt-1">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          onPress={onBack}
+          hitSlop={8}
+          className="min-h-[44px] w-11 justify-center"
+        >
+          <ArrowLeft size={24} color={ink} strokeWidth={2} />
+        </Pressable>
+      </View>
+
+      <ScrollView contentContainerClassName="gap-5 px-4 pb-10">
+        <Text variant="headingLg" accessibilityRole="header">
+          Help now.
+        </Text>
+
+        <Text variant="body">{LEAD}</Text>
+
+        <EmergencyButton emergencyNumber={emergencyNumber} label={EMERGENCY_LABEL} dial={dial} />
+
+        {hasHelp ? (
+          <View className="gap-1">
+            <Text variant="body" className="mb-1">
+              {HELPLINES_INTRO}
+            </Text>
+            {helplines.map((row) => (
+              <CrisisCallRow key={`${row.region}:${row.name}`} row={row} dial={dial} />
+            ))}
+          </View>
+        ) : (
+          <Text variant="body">
+            {`We don't yet have verified helplines for ${regionName}. Your local emergency number works right now.`}
+          </Text>
+        )}
+
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel={`Not in ${regionName}?`}
+          onPress={onChangeRegion}
+          hitSlop={8}
+          className="min-h-[44px] justify-center"
+        >
+          <Text
+            variant="bodySm"
+            className="text-text-secondary underline dark:text-text-secondary-dark"
+          >
+            {`Not in ${regionName}?`}
+          </Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
