@@ -205,6 +205,25 @@ export const CT4_SLEEP = {
     emptyBody: 'A few nights in, you’ll see your typical length, timing, and trend here.',
   },
 
+  // Last-7-nights summary. Descriptive only — counts and a gentle week-over-week
+  // comparison of rested time, never a verdict or target (SR-1 / SR-3).
+  weeklyDigest: {
+    title: 'This week',
+    nightsLabel: (n: number) => `${n} ${n === 1 ? 'night' : 'nights'} logged`,
+    typicalLabel: 'Typical length',
+    moreRested: 'A bit more rested time than the week before.',
+    lessRested: 'A bit less rested time than the week before.',
+    aboutSame: 'About the same rested time as the week before.',
+    emptyWeek: 'No nights logged this week yet.',
+  },
+
+  // Quality + morning-mood trends. Self-rated 1–5 lines shown as gentle trends to
+  // notice alongside the night, never scored or judged.
+  trends: {
+    qualityTitle: 'How rested you felt',
+    moodTitle: 'Morning mood',
+  },
+
   form: {
     heading: 'Last night',
     bedtime: 'Got into bed',

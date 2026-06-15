@@ -67,7 +67,9 @@ describe('sendMessage (backend wiring)', () => {
     await drain(sendMessage(INPUT, () => {}, { ...TOKEN_DEPS, fetchImpl: fetchImpl as never }));
 
     const [url, opts] = fetchImpl.mock.calls[0] as unknown as [string, Record<string, unknown>];
-    expect(url).toBe('https://psychage.com/api/ai/chat');
+    // Posts straight at the canonical www host — NOT the apex, which 307-redirects and
+    // would strip the Authorization header on the cross-origin hop.
+    expect(url).toBe('https://www.psychage.com/api/ai/chat');
     const headers = opts.headers as Record<string, string>;
     expect(headers.Authorization).toBe('Bearer jwt-abc');
     const sent = JSON.parse(opts.body as string);

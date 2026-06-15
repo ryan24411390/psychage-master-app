@@ -10,8 +10,6 @@
 // the fetch impl and the token reader are injectable so the generator is unit-
 // testable under Vitest (node) without loading native modules.
 
-import { WV_ORIGIN } from '@/features/webview/wv-url';
-
 import { MindMateUnavailableError, SafetyReplacementError } from './errors';
 import { mapCitation, parseSSEStream } from './streaming';
 import {
@@ -22,6 +20,13 @@ import {
   normalizeSafetyLevel,
 } from './types';
 
+// The CANONICAL app host — NOT the apex. `psychage.com/api/ai/chat` answers with a
+// 307 redirect to `www.psychage.com`; following a redirect across origins drops the
+// `Authorization` header (Fetch spec), so the bearer would be lost and every request
+// 401s even when signed in. Posting straight at www avoids the redirect entirely. The
+// web client never hits this because it runs on www (same origin). Overridable via
+// deps.origin for tests.
+const CHAT_ORIGIN = 'https://www.psychage.com';
 const CHAT_PATH = '/api/ai/chat';
 
 // --- minimal structural fetch types (so we don't depend on expo/fetch's d.ts) ---
@@ -99,7 +104,7 @@ export async function* sendMessage(
   }
 
   const fetchImpl = deps.fetchImpl ?? (await defaultFetch());
-  const origin = deps.origin ?? WV_ORIGIN;
+  const origin = deps.origin ?? CHAT_ORIGIN;
 
   const response = await fetchImpl(`${origin}${CHAT_PATH}`, {
     method: 'POST',

@@ -21,4 +21,14 @@ export const MINDMATE_COPY = {
   crisisBody:
     'You deserve support right now, and you don’t have to face this alone. Trained people are ready to listen.',
   crisisCta: 'Get crisis support',
+  // Crisis card — region hotline call action. `{name}` is filled with the line name.
+  crisisCallPrefix: 'Call',
+  // Sources / citations — the articles the reply drew on.
+  sourcesLabel: 'Sources',
+  // Consent banner — opt-in to save conversations. Plain-language, non-diagnostic,
+  // explains what is saved and that it's optional. Default OFF.
+  consentTitle: 'Save your conversations?',
+  consentBody:
+    'Keep your chats so you can pick up where you left off. They’re saved to your account and only you can read them. Off by default — you can turn this off anytime.',
+  consentToggleLabel: 'Save my conversations',
 } as const;

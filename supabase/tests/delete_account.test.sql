@@ -3,7 +3,7 @@
 -- ============================================================
 -- Runnable on a preview branch / local supabase (`psql -f` or `supabase db test`).
 -- Confirms the hard-immediate cascade shipped in
--- 20260615000001_delete_account.sql. Mirrors platform_claim_rls.test.sql's
+-- 20260615000010_delete_account.sql. Mirrors platform_claim_rls.test.sql's
 -- preview-branch + transactional-rollback pattern (non-destructive).
 --
 -- Simulates a PostgREST request by setting request.jwt.claims + role authenticated.

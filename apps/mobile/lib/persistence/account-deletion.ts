@@ -4,7 +4,7 @@
 // failure so deletion never silently half-completes.
 //
 // Calls the delete_account() SECURITY DEFINER RPC (supabase/migrations/
-// 20260615000001), which for the authenticated user erases every user-scoped row
+// 20260615000010), which for the authenticated user erases every user-scoped row
 // (check_ins + the personal-data tables + audit_events) and the auth.users row
 // itself — hard-immediate, no recovery window (rules/auth.md §7).
 

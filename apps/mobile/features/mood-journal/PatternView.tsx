@@ -1,30 +1,33 @@
 import {
   type DayGroup,
-  emotionFrequency,
   type MomentEntry,
-  type TagCount,
   timeline,
-  triggerFrequency,
+  VALENCE_MAX,
 } from '@psychage/shared/mood-journal';
-import { View } from 'react-native';
+import { Trash2 } from 'lucide-react-native';
+import { useState } from 'react';
+import { Pressable, View } from 'react-native';
 
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
+import { InsightsView } from '@/features/mood-journal/InsightsView';
 import { CT4_MOOD_JOURNAL } from '@/features/mood-journal/copy';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
-// The longitudinal read: what's been coming up. Pure-presentational — it takes the
-// already-windowed moment set and renders frequency rows + a per-day timeline.
+// The longitudinal read: insights (charts) + a per-day timeline (history). Pure-
+// presentational — it takes the already-windowed moment set and an onDelete callback.
 //
-// SAFETY GATE: trigger↔check-in co-occurrence (triggerMoodCoOccurrence) is
-// deliberately NOT rendered here. It surfaces a relationship between triggers and
-// mood states — per CLAUDE.md §7 that copy must clear Dr. Dobson's clinical review
-// before it ships. The pure logic + tests already exist
-// (packages/shared/mood-journal/patterns.ts); wiring the section (with its
-// non-diagnostic framing) and passing the check-in store in is a gated follow-up.
-// Frequency + timeline carry no mood claim, so they ship now.
+// SAFETY GATE: trigger↔check-in co-occurrence (triggerMoodCoOccurrence) is deliberately
+// NOT rendered. It surfaces a relationship between triggers and mood states — per
+// CLAUDE.md §7 that copy must clear Dr. Dobson's clinical review before it ships. The
+// pure logic + tests already exist (packages/shared/mood-journal/patterns.ts); wiring
+// the section (with non-diagnostic framing) is a gated follow-up. Frequency, the valence
+// trend, and the timeline carry no mood claim, so they ship now.
 
 type PatternViewProps = {
   moments: readonly MomentEntry[];
+  onDelete: (id: string) => void;
 };
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
@@ -39,17 +42,14 @@ function formatDay(date: string): string {
   return `${weekday}, ${MONTHS[monthIndex]} ${day}`;
 }
 
-export function PatternView({ moments }: PatternViewProps) {
-  const emotions = emotionFrequency(moments);
-  const triggers = triggerFrequency(moments);
+export function PatternView({ moments, onDelete }: PatternViewProps) {
   const days = timeline(moments);
   const t = CT4_MOOD_JOURNAL.patterns;
 
   return (
     <View className="gap-4">
-      <FrequencySection heading={t.emotionsHeading} rows={emotions} testID="mood-journal-emotions" />
-      <FrequencySection heading={t.triggersHeading} rows={triggers} testID="mood-journal-triggers" />
-      <TimelineSection heading={t.timelineHeading} days={days} />
+      <InsightsView moments={moments} />
+      <TimelineSection heading={t.timelineHeading} days={days} onDelete={onDelete} />
     </View>
   );
 }
@@ -58,46 +58,22 @@ function SectionHeading({ children }: { children: string }) {
   return (
     <Text
       variant="caption"
-      className="mb-2 uppercase tracking-wider text-text-secondary dark:text-text-secondary-dark font-sans-medium"
+      className="mb-2 font-sans-medium uppercase tracking-wider text-text-secondary dark:text-text-secondary-dark"
     >
       {children}
     </Text>
   );
 }
 
-function FrequencySection({
+function TimelineSection({
   heading,
-  rows,
-  testID,
+  days,
+  onDelete,
 }: {
   heading: string;
-  rows: readonly TagCount<string>[];
-  testID: string;
+  days: readonly DayGroup[];
+  onDelete: (id: string) => void;
 }) {
-  if (rows.length === 0) return null;
-  return (
-    <View testID={testID}>
-      <SectionHeading>{heading}</SectionHeading>
-      <View className="rounded-xl border border-border bg-surface dark:border-border-dark dark:bg-surface-dark">
-        {rows.map((row, index) => (
-          <View
-            key={row.tag}
-            className={`flex-row items-center justify-between px-4 py-3 ${
-              index > 0 ? 'border-t border-border dark:border-border-dark' : ''
-            }`}
-          >
-            <Text variant="body">{row.tag}</Text>
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
-              {`${row.count}×`}
-            </Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-}
-
-function TimelineSection({ heading, days }: { heading: string; days: readonly DayGroup[] }) {
   if (days.length === 0) return null;
   return (
     <View testID="mood-journal-timeline">
@@ -106,33 +82,90 @@ function TimelineSection({ heading, days }: { heading: string; days: readonly Da
         {days.map((day) => (
           <Card key={day.date}>
             <Text variant="bodyMedium">{formatDay(day.date)}</Text>
-            <View className="mt-2 gap-2">
+            <View className="mt-2 gap-3">
               {day.moments.map((moment) => (
-                <View key={moment.id}>
-                  <View className="flex-row flex-wrap gap-1.5">
-                    {[...moment.emotions, ...moment.triggers].map((tag) => (
-                      <View
-                        key={tag}
-                        className="rounded-full border border-border px-2.5 py-1 dark:border-border-dark"
-                      >
-                        <Text variant="caption">{tag}</Text>
-                      </View>
-                    ))}
-                  </View>
-                  {moment.note ? (
-                    <Text
-                      variant="bodySm"
-                      className="mt-1 text-text-secondary dark:text-text-secondary-dark"
-                    >
-                      {`“${moment.note}”`}
-                    </Text>
-                  ) : null}
-                </View>
+                <MomentRow key={moment.id} moment={moment} onDelete={onDelete} />
               ))}
             </View>
           </Card>
         ))}
       </View>
+    </View>
+  );
+}
+
+// One timeline moment: its tags (real RN Text chips), an optional valence read, an
+// optional note, and an inline two-tap delete (a destructive action on user data gets
+// a confirm step, not a single tap). Delete state is local so one row's confirm never
+// affects another.
+function MomentRow({ moment, onDelete }: { moment: MomentEntry; onDelete: (id: string) => void }) {
+  const [confirming, setConfirming] = useState(false);
+  const tc = useThemeColors();
+  const t = CT4_MOOD_JOURNAL.patterns;
+  const tags = [...moment.emotions, ...moment.triggers];
+
+  return (
+    <View testID={`mood-journal-moment-${moment.id}`}>
+      <View className="flex-row items-start justify-between gap-2">
+        <View className="flex-1">
+          <View className="flex-row flex-wrap gap-1.5">
+            {tags.map((tag) => (
+              <View
+                key={tag}
+                className="rounded-full border border-border px-2.5 py-1 dark:border-border-dark"
+              >
+                <Text variant="caption">{tag}</Text>
+              </View>
+            ))}
+          </View>
+          {moment.valence !== undefined ? (
+            <Text variant="caption" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
+              {`${t.valenceLabel} ${moment.valence}/${VALENCE_MAX}`}
+            </Text>
+          ) : null}
+          {moment.note ? (
+            <Text variant="bodySm" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
+              {`“${moment.note}”`}
+            </Text>
+          ) : null}
+        </View>
+
+        {!confirming ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t.delete}
+            hitSlop={8}
+            onPress={() => setConfirming(true)}
+            testID={`mood-journal-delete-${moment.id}`}
+          >
+            <Trash2 size={18} color={tc.inkTertiary} />
+          </Pressable>
+        ) : null}
+      </View>
+
+      {confirming ? (
+        <View className="mt-2 flex-row items-center justify-end gap-2">
+          <Text variant="bodySm" className="mr-auto text-text-secondary dark:text-text-secondary-dark">
+            {t.deleteConfirm}
+          </Text>
+          <Button
+            variant="secondary"
+            size="sm"
+            onPress={() => setConfirming(false)}
+            testID={`mood-journal-delete-cancel-${moment.id}`}
+          >
+            {t.deleteCancel}
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            onPress={() => onDelete(moment.id)}
+            testID={`mood-journal-delete-confirm-${moment.id}`}
+          >
+            {t.deleteYes}
+          </Button>
+        </View>
+      ) : null}
     </View>
   );
 }

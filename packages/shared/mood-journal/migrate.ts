@@ -12,9 +12,9 @@
 
 import { isLocalCalendarDate } from '../check-in/dates';
 import { isEmotionTag, isTriggerTag } from './tags';
-import { type MomentEntry, NOTE_MAX_LENGTH } from './types';
+import { isValence, type MomentEntry, NOTE_MAX_LENGTH } from './types';
 
-export const SCHEMA_VERSION = 1 as const;
+export const SCHEMA_VERSION = 2 as const;
 export const STORAGE_KEY = 'mobile:mood-journal-moments';
 /** Quarantined blobs land at `${STORAGE_KEY}:quarantine:<iso>-<uuid>` (uuid keeps each anomaly distinct). */
 export const QUARANTINE_KEY_PREFIX = `${STORAGE_KEY}:quarantine:`;
@@ -45,15 +45,17 @@ export type MigrateOutcome =
       readonly reason: AnomalyReason;
     };
 
-// Forward-only transform registry, indexed by `from`. Empty: v1 is the first
-// mood-journal schema, so there is no legacy shape to expand. A future v2 adds an
-// entry here; `migrate` already walks it.
+// Forward-only transform registry, indexed by `from`. v1→v2 adds the OPTIONAL
+// `valence` field: it is purely additive, so a v1 moment is already a valid v2
+// moment (it simply carries no valence). The transform is therefore identity —
+// `normalizeMoments` re-validates the result under the v2 `isValidMoment`, which
+// accepts a missing valence. No v1 user data is lost or rated retroactively.
 interface Transform {
   readonly from: number;
   readonly to: number;
   readonly transform: (raw: unknown) => unknown;
 }
-const TRANSFORMS: readonly Transform[] = [];
+const TRANSFORMS: readonly Transform[] = [{ from: 1, to: 2, transform: (entries) => entries }];
 
 function emptyStore(): PersistedMoments {
   return { version: SCHEMA_VERSION, entries: [] };
@@ -74,18 +76,26 @@ function isValidMoment(value: unknown): value is MomentEntry {
   if (!Array.isArray(v.emotions) || !v.emotions.every(isEmotionTag)) return false;
   if (!Array.isArray(v.triggers) || !v.triggers.every(isTriggerTag)) return false;
   if (v.emotions.length + v.triggers.length === 0) return false;
+  if (v.valence !== undefined && !isValence(v.valence)) return false;
   if (v.note !== undefined && (typeof v.note !== 'string' || v.note.length > NOTE_MAX_LENGTH)) {
     return false;
   }
   return true;
 }
 
-/** Canonicalize one validated moment — drop unknown keys, dedupe tags, omit an empty note. */
+/**
+ * Canonicalize one validated moment — drop unknown keys, dedupe tags, carry valence
+ * when present, omit an empty note. Key order matches `makeMoment` in the store so a
+ * fresh write and a reloaded write serialize identically (the load() restamp check).
+ */
 function canonicalMoment(moment: MomentEntry): MomentEntry {
   const emotions = [...new Set(moment.emotions)];
   const triggers = [...new Set(moment.triggers)];
   const base = { id: moment.id, date: moment.date, createdAt: moment.createdAt, emotions, triggers };
-  return moment.note === undefined || moment.note === '' ? base : { ...base, note: moment.note };
+  const withValence = moment.valence === undefined ? base : { ...base, valence: moment.valence };
+  return moment.note === undefined || moment.note === ''
+    ? withValence
+    : { ...withValence, note: moment.note };
 }
 
 /**

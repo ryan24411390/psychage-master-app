@@ -12,6 +12,7 @@
 // no causal claim. The consuming UI must frame it as a reflection of what the person
 // noted, not a diagnosis, and that copy is clinically reviewed before it ships.
 
+import { toLocalCalendarDate } from '../check-in/dates';
 import type { CheckInEntry, CheckInState } from '../check-in/types';
 import { compareByCreatedAt } from './migrate';
 import {
@@ -127,4 +128,109 @@ export function triggerMoodCoOccurrence(
   }
   result.sort((a, b) => b.daysNoted - a.daysNoted || triggerIndex(a.trigger) - triggerIndex(b.trigger));
   return result;
+}
+
+// ── valence (the optional 1–10 pleasantness rating) ──────────────────────────
+//
+// These read the OPTIONAL `valence` field. A moment without valence simply does not
+// contribute — the journal works fully whether or not a person rates moments. Like
+// everything in patterns.ts these are descriptive only: a trend line and a streak
+// count, never a score of the person, never a verdict, never a cause (SR-3).
+
+/** A single day's mean valence, for plotting a trend over time. */
+export interface ValenceDayAverage {
+  readonly date: LocalCalendarDate;
+  /** Mean of that day's rated moments (valence-bearing only). */
+  readonly average: number;
+  /** How many rated moments contributed (≥1). */
+  readonly count: number;
+}
+
+/**
+ * Daily-average valence, ascending by date, over the days that have ≥1 rated moment.
+ * Unrated moments and unrated days are skipped (they leave no point) so the trend
+ * reflects only what the person actually rated. Pure; caller pre-windows the input.
+ */
+export function valenceTrend(moments: readonly MomentEntry[]): ValenceDayAverage[] {
+  const byDate = new Map<LocalCalendarDate, { sum: number; count: number }>();
+  for (const moment of moments) {
+    if (moment.valence === undefined) continue;
+    const agg = byDate.get(moment.date);
+    if (agg) {
+      agg.sum += moment.valence;
+      agg.count += 1;
+    } else {
+      byDate.set(moment.date, { sum: moment.valence, count: 1 });
+    }
+  }
+  const out = [...byDate.entries()].map(([date, { sum, count }]) => ({
+    date,
+    average: sum / count,
+    count,
+  }));
+  out.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  return out;
+}
+
+/** Coarse direction of the valence trend. `null` when there are < 2 rated days. */
+export type ValenceDirection = 'up' | 'down' | 'steady';
+
+/** A small, descriptive summary for the insights header. No scoring, no labels. */
+export interface StreakSummary {
+  /** Total moments logged in the windowed set. */
+  readonly momentsLogged: number;
+  /** Distinct calendar days with ≥1 moment. */
+  readonly daysLogged: number;
+  /** Consecutive days (ending at the most recent logged day) that have ≥1 moment. */
+  readonly latestStreak: number;
+  /** Whether rated days have trended gentler/harder/steady. `null` when < 2 rated days. */
+  readonly valenceDirection: ValenceDirection | null;
+}
+
+// The local calendar day before `date`. Built with the LOCAL-time Date constructor
+// (no UTC accessors), so it never shifts across a timezone boundary — same rule as
+// check-in/dates. Deterministic (no clock read), so patterns.ts stays pure.
+function previousDay(date: LocalCalendarDate): LocalCalendarDate {
+  const year = Number(date.slice(0, 4));
+  const monthIndex = Number(date.slice(5, 7)) - 1;
+  const day = Number(date.slice(8, 10));
+  const prev = new Date(year, monthIndex, day);
+  prev.setDate(prev.getDate() - 1);
+  return toLocalCalendarDate(prev);
+}
+
+/** Direction threshold — a small change reads as "steady", not noise. */
+const VALENCE_DIRECTION_EPSILON = 0.5;
+
+/**
+ * A streak/trend summary for the insights surface. `latestStreak` counts consecutive
+ * days back from the most recent logged day (so it survives "user opens the app a few
+ * days later" — it is anchored to their data, not to wall-clock today). Pure.
+ */
+export function streakSummary(moments: readonly MomentEntry[]): StreakSummary {
+  const dateSet = new Set<LocalCalendarDate>(moments.map((m) => m.date));
+  const dates = [...dateSet].sort();
+  const daysLogged = dates.length;
+
+  let latestStreak = 0;
+  if (daysLogged > 0) {
+    let cursor = dates[dates.length - 1] as LocalCalendarDate;
+    while (dateSet.has(cursor)) {
+      latestStreak += 1;
+      cursor = previousDay(cursor);
+    }
+  }
+
+  const trend = valenceTrend(moments);
+  let valenceDirection: ValenceDirection | null = null;
+  if (trend.length >= 2) {
+    const mid = Math.floor(trend.length / 2);
+    const mean = (points: readonly ValenceDayAverage[]) =>
+      points.reduce((sum, p) => sum + p.average, 0) / points.length;
+    const delta = mean(trend.slice(mid)) - mean(trend.slice(0, mid));
+    valenceDirection =
+      delta > VALENCE_DIRECTION_EPSILON ? 'up' : delta < -VALENCE_DIRECTION_EPSILON ? 'down' : 'steady';
+  }
+
+  return { momentsLogged: moments.length, daysLogged, latestStreak, valenceDirection };
 }

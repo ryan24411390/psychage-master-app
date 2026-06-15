@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { View, ScrollView } from 'react-native';
-import { Book, Compass, HeartHandshake, LifeBuoy, MessageCircle, Moon, Sparkles } from 'lucide-react-native';
+import { Backpack, Book, Compass, HeartHandshake, LifeBuoy, MessageCircle, Moon, Sparkles } from 'lucide-react-native';
 
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
@@ -113,6 +113,28 @@ export default function CompassScreen() {
           index={0}
           total={1}
           testID="compass-tile-sleep"
+        />
+        {/* Toolkits browse-index entry point. The route (/toolkits, plural — the
+            published-toolkit library) ships file-disjoint with no copy.ts/routes.ts
+            entry, so this nav-wireup links it inline. Distinct from the singular
+            /toolkit exercise hero above. Inline strings are FIXTURE — not final copy.
+            SR-3: educational framing, no diagnostic language. */}
+        <Text
+          variant="caption"
+          className="mt-2 text-text-secondary dark:text-text-secondary-dark"
+        >
+          When you want tools to lean on
+        </Text>
+        <CompassTile
+          title="Explore self-help toolkits"
+          subLabel="Toolkits"
+          onPress={() => router.push('/toolkits')}
+          tint="now"
+          icon={Backpack}
+          variant="hero"
+          index={0}
+          total={1}
+          testID="compass-tile-toolkits"
         />
       </ScrollView>
     </ScreenShell>

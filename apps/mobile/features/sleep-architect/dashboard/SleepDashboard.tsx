@@ -18,8 +18,10 @@ import { Text } from '@/components/ui/Text';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
 import { colors } from '@/lib/colors';
 
+import { QualityMoodTrend } from './QualityMoodTrend';
 import { ScoreBand } from './ScoreBand';
 import { Sparkline } from './Sparkline';
+import { WeeklyDigest } from './WeeklyDigest';
 
 // Patterns/Dashboard tab. The composite score reaches the UI only as a band
 // (SR-1). Raw measured metrics (length, efficiency, latency) are factual data and
@@ -88,6 +90,8 @@ export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
         <MetricCard label={t.streak} value={String(streak.current)} />
       </View>
 
+      <WeeklyDigest entries={entries} />
+
       {trend.length >= 2 ? (
         <Card className="gap-2 px-4 py-4">
           <Text variant="caption" className="uppercase tracking-wider text-text-secondary dark:text-text-secondary-dark">
@@ -96,6 +100,8 @@ export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
           <Sparkline values={trend} width={Math.max(0, width - 64)} color={strokeTint} />
         </Card>
       ) : null}
+
+      <QualityMoodTrend entries={chronological} />
 
       <View className="gap-2">
         {components.map((c) => (
