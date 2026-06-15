@@ -6,6 +6,7 @@ import { SettingsSection } from '@/components/settings/SettingsSection';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/features/auth';
+import { BOOKMARKS_COPY } from '@/features/bookmarks/copy';
 import { CT4_SETTINGS } from '@/features/settings/copy';
 import { storage } from '@/lib/adapters/storage';
 import { loadPersonalization } from '@/lib/persistence/personalization';
@@ -30,6 +31,11 @@ export default function SettingsHubScreen() {
         </SettingsSection>
 
         <SettingsSection>
+          <SettingsRow
+            label={BOOKMARKS_COPY.list.title}
+            onPress={() => router.push('/saved')}
+            testID="settings-row-saved"
+          />
           <SettingsRow
             label={t.hub.rows.reminders}
             onPress={() => router.push('/settings/reminders')}
