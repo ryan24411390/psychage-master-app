@@ -91,14 +91,25 @@ export default function SettingsHubScreen() {
             chevron={false}
             testID="settings-row-account-status"
           />
-          <SettingsRow
-            label={t.hub.rows.signOut}
-            // Sign-out is NOT destructive — no rust/error tint. Routes to the wired
-            // S37 confirm sheet (app/(auth)/sign-out.tsx), which calls the auth
-            // service + clears the session. Navigation only — no auth model built here.
-            onPress={() => router.push('/sign-out')}
-            testID="settings-row-sign-out"
-          />
+          {session ? (
+            <SettingsRow
+              label={t.hub.rows.signOut}
+              // Sign-out is NOT destructive — no rust/error tint. Routes to the wired
+              // S37 confirm sheet (app/(auth)/sign-out.tsx), which calls the auth
+              // service + clears the session.
+              onPress={() => router.push('/sign-out')}
+              testID="settings-row-sign-out"
+            />
+          ) : (
+            <SettingsRow
+              // Entry point to the sign-in screen (app/(auth)/sign-in.tsx). Shown only
+              // when signed out; returning users + web users log in here. Mutually
+              // exclusive with Sign out so the row reflects the real session state.
+              label={t.hub.rows.signIn}
+              onPress={() => router.push('/sign-in')}
+              testID="settings-row-sign-in"
+            />
+          )}
           <SettingsRow
             label={t.hub.rows.deleteAccount}
             destructive
