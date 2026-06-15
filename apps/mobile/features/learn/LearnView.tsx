@@ -1,76 +1,148 @@
+import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { Pressable, ScrollView } from 'react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Card } from '@/components/ui/Card';
-import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
-import { CategoryStillLife } from '@/features/learn/CategoryStillLife';
+import { ArticleListCard } from '@/features/content/ArticleListCard';
+import { FeaturedCard } from '@/features/learn/FeaturedCard';
+import { LearnHero } from '@/features/learn/LearnHero';
 import { LEARN_CATEGORIES } from '@/features/learn/categories';
 import { CT4_LEARN } from '@/features/learn/copy';
+import { MostReadList } from '@/features/learn/MostReadList';
+import { PathPickerSheet } from '@/features/learn/PathPickerSheet';
+import { SavedRail } from '@/features/learn/SavedRail';
+import { SectionHeader } from '@/features/learn/SectionHeader';
+import { TopicRail } from '@/features/learn/TopicRail';
+import { TopicTile } from '@/features/learn/TopicTile';
+import { listRecentArticles } from '@/lib/articles';
 import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
 
-// S6 Learn — the article rail by topic (fixed order) + a Conditions entry + a
-// Library entry. A plain ScrollView + map (the category set is small; no
-// FlashList). Each topic opens the category article list (real Supabase content,
-// S6→list → reader S22); the Conditions entry opens the conditions library
-// (/conditions); the Library entry opens the WebView browse (S23, PR E).
+// S6 Learn — a scannable library feed (search hero → path picker → Editor's pick
+// → Saved → topic rails → Most read → Reads → Browse). All content is real,
+// published Supabase rows; the "Editor's pick" / "Most read" / "Reads" modules
+// slice ONE recent-articles query so they never overlap and never fabricate.
+// Topic rails are category-scoped (sharing CategoryArticlesView's cache keys so
+// "See all" opens warm). The GlobalHeader (Help-now pill, SR-2) is injected by
+// the tabs layout. Browse drill-down and Search live on pushed routes.
 export function LearnView() {
   const t = CT4_LEARN;
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  const { data } = useQuery({
+    queryKey: ['articles', 'recent', 14],
+    queryFn: () => listRecentArticles(14),
+  });
+  const recent = data ?? [];
+  const featured = recent[0];
+  const mostRead = recent.slice(1, 6);
+  const reads = recent.slice(6, 12);
+
+  // Topic rails: the curated categories minus the "More topics" catch-all (it has
+  // no single article set worth a preview rail — it lives in the tile grid below).
+  const railCategories = LEARN_CATEGORIES.filter((c) => c.id !== 'more');
+
+  const onPick = (route: string) => {
+    setPickerOpen(false);
+    router.push(`/learn/${route}`);
+  };
+
   return (
-    <ScreenShell edges={['bottom']}>
+    <SafeAreaView edges={['bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <ReadingTextSizeProvider>
-        <ScrollView contentContainerClassName="gap-3 py-4" showsVerticalScrollIndicator={false}>
-        <Text variant="body" className="px-1 text-text-secondary dark:text-text-secondary-dark">
-          {t.intro}
-        </Text>
+        <ScrollView contentContainerClassName="pb-8" showsVerticalScrollIndicator={false}>
+          <LearnHero onFindPath={() => setPickerOpen(true)} />
 
-        {LEARN_CATEGORIES.map((cat) => (
-          <Pressable
-            key={cat.id}
-            accessibilityRole="button"
-            accessibilityLabel={cat.label}
-            onPress={() => router.push(`/learn/${cat.id}`)}
-            testID={`learn-category-${cat.id}`}
-            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-          >
-            <Card variant="elevated" className="flex-row items-center gap-4">
-              <CategoryStillLife testID={`learn-art-${cat.id}`} />
-              <Text variant="bodyMedium" className="flex-1">
-                {cat.label}
+          {featured ? (
+            <View className="px-4 pt-7">
+              <SectionHeader title={t.editorsPick} overline />
+              <FeaturedCard article={featured} />
+            </View>
+          ) : null}
+
+          <View className="pt-7">
+            <SavedRail />
+          </View>
+
+          {railCategories.map((cat) => (
+            <View key={cat.id} className="pt-7">
+              <TopicRail category={cat} />
+            </View>
+          ))}
+
+          {mostRead.length > 0 ? (
+            <View className="px-4 pt-8">
+              <SectionHeader title={t.mostRead} overline />
+              <MostReadList articles={mostRead} />
+            </View>
+          ) : null}
+
+          {reads.length > 0 ? (
+            <View className="px-4 pt-8">
+              <SectionHeader title={t.reads} onSeeAll={() => router.push('/learn/browse')} />
+              <View className="gap-3">
+                {reads.map((a) => (
+                  <ArticleListCard key={a.slug} article={a} />
+                ))}
+              </View>
+            </View>
+          ) : null}
+
+          {/* Browse by topic — compact tile grid over the curated categories. */}
+          <View className="px-4 pt-8">
+            <SectionHeader title={t.browseTopics} onSeeAll={() => router.push('/learn/browse')} />
+            <View className="flex-row flex-wrap gap-3">
+              {LEARN_CATEGORIES.map((cat) => (
+                <TopicTile
+                  key={cat.id}
+                  label={cat.label}
+                  artKey={cat.id}
+                  onPress={() => router.push(`/learn/${cat.id}`)}
+                  className="w-[47%] grow"
+                />
+              ))}
+            </View>
+          </View>
+
+          {/* Conditions + full library entries (retained from the original Learn). */}
+          <View className="gap-3 px-4 pt-8">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t.conditionsLabel}
+              onPress={() => router.push('/conditions')}
+              testID="learn-conditions-entry"
+              className="min-h-[52px] flex-row items-center justify-center rounded-xl border border-border px-4 dark:border-border-dark"
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
+              <Text variant="bodyMedium" className="text-teal-700 dark:text-primary-dark">
+                {t.conditionsLabel}
               </Text>
-            </Card>
-          </Pressable>
-        ))}
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t.libraryLabel}
+              onPress={() => router.push('/library')}
+              testID="learn-library-entry"
+              className="min-h-[52px] flex-row items-center justify-center rounded-xl border border-border px-4 dark:border-border-dark"
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
+              <Text variant="bodyMedium" className="text-teal-700 dark:text-primary-dark">
+                {t.libraryLabel}
+              </Text>
+            </Pressable>
+          </View>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t.conditionsLabel}
-          onPress={() => router.push('/conditions')}
-          testID="learn-conditions-entry"
-          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-        >
-          <Card variant="outline" className="min-h-[44px] justify-center px-4 py-0">
-            <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
-              {t.conditionsLabel}
-            </Text>
-          </Card>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t.libraryLabel}
-          onPress={() => router.push('/library')}
-          testID="learn-library-entry"
-          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-        >
-          <Card variant="elevated" className="min-h-[44px] justify-center px-4 py-3">
-            <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
-              {t.libraryLabel}
-            </Text>
-          </Card>
-        </Pressable>
+          <Text
+            variant="caption"
+            className="px-4 pt-6 leading-[18px] text-text-tertiary dark:text-text-tertiary-dark"
+          >
+            {t.footnote}
+          </Text>
         </ScrollView>
       </ReadingTextSizeProvider>
-    </ScreenShell>
+
+      <PathPickerSheet visible={pickerOpen} onClose={() => setPickerOpen(false)} onPick={onPick} />
+    </SafeAreaView>
   );
 }
