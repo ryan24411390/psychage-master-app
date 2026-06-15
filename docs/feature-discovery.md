@@ -99,8 +99,8 @@ already-reviewed verbatim source · **needs-review** = requires Dr. Dobson sign-
 
 | # | Feature | Real data source | Info/Service | Review | Size | Safety flags |
 |---|---|---|---|---|---|---|
-| B1 | **Per-condition summaries** (a real overview paragraph on each conditions screen, not just a name + article list) | none yet — would need authored, reviewed user-facing copy (the taxonomy `description` is an *internal* note, not user-facing) | Informational | **needs-review** | M | SR-2/3; **flag for Dr. Dobson** — do not surface internal architecture text as user copy |
-| B2 | **Condition → "what people often experience"** educational sections | none yet — reviewed verbatim condition content required | Informational | **needs-review** | M | **SR-3 diagnostic risk** — must be educational framing, clinically reviewed |
+| ~~B1~~ **DONE** | **Per-condition summaries** — a reviewed overview paragraph per topic | **Reviewed web `Category.description`** (psychage-v2 `_shared.ts`, rendered on web category pages; mirrored to Supabase `article_categories.description`) — **sourced verbatim**, not authored | Informational | real (inherits web's review) | S | SR-2/3 ✓ · verbatim port, not the internal taxonomy note · approved + built (see Phase 2 below) |
+| B2 | **Condition → "what people often experience"** educational sections | the reviewed **article bodies** (= A2) — no separate reviewed field exists; authoring is **out of scope** (hard rule) | Informational | real (content) | M | **SR-3** — realized by surfacing reviewed articles (A2), gated on the in-flight article layer; **not** authored |
 | B3 | **Native PEAF block rendering** (charts, callouts, comparison tables) for ported articles | In-flight HTML→AST layer (`features/content/html`) covers HTML; rich JSX blocks are repo-only on web | Informational | real (content) | L | Render fidelity only; content stays verbatim. Coordinate with article session |
 
 ### Bucket (c) — Product decision needed
@@ -134,11 +134,13 @@ small follow-up once that work lands on main.
 
 ---
 
-## Phase 2 — What was built (bucket (a), A1 only)
+## Phase 2 — What was built (bucket (a) A1 + bucket (b) B1, approved)
 
-**Conditions library** — a native browse layer over the reviewed taxonomy.
+**Conditions library** — a native browse layer over the reviewed taxonomy, with verbatim
+reviewed topic summaries.
 
 - `apps/mobile/features/conditions/` — `select.ts` (pure logic), `types.ts`, `copy.ts`,
+  `data/condition-summaries.ts` (**B1** — 20 reviewed summaries, sourced verbatim),
   `ConditionsLibraryView.tsx`, `ConditionDetailView.tsx`
 - `apps/mobile/app/conditions/index.tsx` + `app/conditions/[slug].tsx` — self-registering
   pushed routes (auto-register under the root Stack `headerShown:false`; each view renders its
@@ -162,9 +164,23 @@ small follow-up once that work lands on main.
    content) and `/article/[slug]`; deepening to per-topic article lists (A2) is wiring to the
    in-flight repo, not new content.
 
-**Deliberately NOT built (left in the proposal):** B1/B2 (per-condition summaries —
-needs Dr. Dobson review), all of bucket (c) (therapist services, MindMate, auth-gated
-features — product/liability decisions).
+**B1 (approved, built) — verbatim topic summaries.** Each condition detail screen shows the
+reviewed `Category.description` from the web (e.g. anxiety: *"Understanding anxiety disorders,
+stress responses, and evidence-based coping strategies…"*), **sourced verbatim** into
+`features/conditions/data/condition-summaries.ts` (extracted programmatically from the web
+`_shared.ts` on 2026-06-15 — not authored, not paraphrased). 20 condition topics covered. The
+selector exposes it as `summary`; the screen renders it verbatim, degrading to a generic line
+when a topic has no ported summary. A test asserts the rendered text equals the data-module
+value and that no diagnostic-claim phrase appears. Inherits the web content's review status.
+
+**Deliberately NOT built (left in the proposal):**
+- **B2 deeper "what people experience" sections** — that content lives in the reviewed article
+  *bodies* (= A2); surfaced by linking to the real articles, gated on the in-flight article
+  layer. **Not authored.**
+- **subTopics** (reviewed per-topic outlines also in `_shared.ts`) — deferrable verbatim add;
+  skipped this pass (extraction needs hardening; the summary is the clean B1 win).
+- **All of bucket (c)** — therapist services, MindMate, auth-gated features (product/liability
+  decisions).
 
 ---
 

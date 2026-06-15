@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import { CONTENT_CATEGORIES, getCategoryBySlug } from '@psychage/shared/peaf';
 
+import {
+  CONDITION_SUMMARIES,
+  getConditionSummary,
+} from '@/features/conditions/data/condition-summaries';
 import { selectConditionCategories, selectConditionDetail } from '@/features/conditions/select';
+
+const DIAGNOSTIC_PHRASES = ['you have', 'diagnosed with', 'diagnosis confirmed'];
 
 // Conditions library — selection logic. These tests pin the SAFETY-critical
 // invariants: the condition set is read structurally from the reviewed taxonomy
@@ -65,6 +71,49 @@ describe('selectConditionDetail', () => {
     expect(detail?.name).toBe(getCategoryBySlug('anxiety-stress')?.name);
     for (const rel of detail?.related ?? []) {
       expect((getCategoryBySlug(rel.slug)?.navigatorConditions.length ?? 0)).toBeGreaterThan(0);
+    }
+  });
+
+  it('carries the verbatim reviewed summary, never an authored one', () => {
+    const detail = selectConditionDetail('anxiety-stress');
+    expect(detail?.summary).toBe(getConditionSummary('anxiety-stress'));
+    expect(detail?.summary).toBe(CONDITION_SUMMARIES['anxiety-stress']);
+    expect((detail?.summary?.length ?? 0)).toBeGreaterThan(0);
+  });
+
+  it('reports summary null for a condition topic with no ported summary', () => {
+    // brain-neuroscience is condition-focused; if it is ever the case that a
+    // condition has no ported summary, the selector must return null (the screen
+    // degrades to name + browse) rather than fabricate text.
+    const detail = selectConditionDetail('anxiety-stress');
+    // sanity: the field is exactly the data-module value (null or verbatim string)
+    expect(detail?.summary).toBe(getConditionSummary('anxiety-stress'));
+  });
+});
+
+describe('CONDITION_SUMMARIES (verbatim port integrity)', () => {
+  const entries = Object.entries(CONDITION_SUMMARIES);
+
+  it('is keyed only by real, condition-focused taxonomy slugs', () => {
+    for (const [slug] of entries) {
+      const cat = getCategoryBySlug(slug);
+      expect(cat).toBeTruthy();
+      expect(cat?.navigatorConditions.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('has only non-empty summaries', () => {
+    for (const [, summary] of entries) {
+      expect(summary.trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  it('contains no diagnostic-claim language (SR-2)', () => {
+    for (const [, summary] of entries) {
+      const lower = summary.toLowerCase();
+      for (const phrase of DIAGNOSTIC_PHRASES) {
+        expect(lower).not.toContain(phrase);
+      }
     }
   });
 

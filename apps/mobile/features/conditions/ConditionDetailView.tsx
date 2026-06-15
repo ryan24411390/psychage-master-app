@@ -9,11 +9,12 @@ import { selectConditionDetail } from '@/features/conditions/select';
 import { colors } from '@/lib/colors';
 
 // Conditions library (topic overview). Pushed route → renders GlobalHeader (Help-
-// now pill, SR-2) + native back row. The screen shows the reviewed topic NAME
-// verbatim and routes into REAL content (the Library WebView). It authors no
-// condition description, symptom list, or likelihood — per-condition summaries
-// are clinical-review-gated (docs/feature-discovery.md, bucket b). Unknown / non-
-// condition slugs fall back to a safe "not found" state.
+// now pill, SR-2) + native back row. The screen shows the reviewed topic NAME and
+// the reviewed topic SUMMARY, both VERBATIM from the web (the summary via
+// data/condition-summaries.ts — sourced, never authored here), and routes into
+// REAL content (the Library WebView). It authors no symptom list or likelihood —
+// not a diagnostic flow (SR-3). Unknown / non-condition slugs fall back to a safe
+// "not found" state.
 export function ConditionDetailView({ slug }: { slug: string }) {
   const t = CONDITIONS_COPY;
   const detail = selectConditionDetail(slug);
@@ -49,8 +50,13 @@ export function ConditionDetailView({ slug }: { slug: string }) {
           showsVerticalScrollIndicator={false}
         >
           <Text variant="headingLg">{detail.name}</Text>
-          <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
-            {t.detailIntro}
+          {/* Verbatim reviewed summary when ported (B1); else the generic intro. */}
+          <Text
+            variant="body"
+            className="text-text-secondary dark:text-text-secondary-dark"
+            testID={detail.summary ? 'condition-summary' : 'condition-intro'}
+          >
+            {detail.summary ?? t.detailIntro}
           </Text>
 
           <Pressable

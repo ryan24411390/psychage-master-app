@@ -18,8 +18,10 @@ export type ConditionCategory = {
   name: string;
 };
 
-/** Detail view-model: a condition category plus the names of its related,
- * also-condition-focused topics (names only — pure cross-navigation). */
+/** Detail view-model: a condition category, the verbatim reviewed topic summary
+ * (sourced from the web — see data/condition-summaries.ts; `null` when none is
+ * ported), and the names of its related, also-condition-focused topics. */
 export type ConditionDetail = ConditionCategory & {
+  summary: string | null;
   related: ConditionCategory[];
 };

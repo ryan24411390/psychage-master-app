@@ -16,6 +16,7 @@
 import type { ContentCategory } from '@psychage/shared/peaf';
 import { CONTENT_CATEGORIES, getCategoryByNumber, getCategoryBySlug } from '@psychage/shared/peaf';
 
+import { getConditionSummary } from './data/condition-summaries';
 import type { ConditionCategory, ConditionDetail } from './types';
 
 /** True iff the reviewed taxonomy maps this category to ≥1 Navigator condition. */
@@ -51,5 +52,6 @@ export function selectConditionDetail(slug: string): ConditionDetail | null {
     .filter((c): c is ContentCategory => c != null && isConditionFocused(c))
     .map(toCategory);
 
-  return { ...toCategory(category), related };
+  // Verbatim reviewed summary (or null) — never authored here.
+  return { ...toCategory(category), summary: getConditionSummary(slug), related };
 }
