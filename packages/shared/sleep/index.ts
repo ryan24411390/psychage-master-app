@@ -57,6 +57,7 @@ export {
   formatTime,
   minutesBetween,
   parseTime,
+  windowByDays,
 } from './calculations';
 
 // SR-1 score band (the only way the score reaches the UI)

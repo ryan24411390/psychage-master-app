@@ -180,6 +180,26 @@ export function calculateSleepScore(
   };
 }
 
+// ─── Scoring window (web parity) ─────────────────────────────────────────────
+
+/**
+ * Entries falling within the last `days` calendar days relative to `today`
+ * (inclusive of the cutoff day). Mirrors the web Sleep Architect's `useSleepScore`
+ * window — web computes `cutoff = today - days` and keeps `entry.date >= cutoff`
+ * (`src/components/tools/SleepArchitect/hooks/useSleepScore.ts:15-20`). `today` is
+ * injected (no hidden clock) and differencing goes through `dayNumber`, so the
+ * window is timezone-proof. Replaces the prior fixed "newest 14 entries" slice,
+ * which scored a different set than web for the same logged data.
+ */
+export function windowByDays(
+  entries: readonly SleepEntry[],
+  today: LocalCalendarDate,
+  days: number,
+): SleepEntry[] {
+  const cutoff = dayNumber(today) - days;
+  return entries.filter((e) => dayNumber(e.date) >= cutoff);
+}
+
 // ─── Sleep debt ──────────────────────────────────────────────────────────────
 
 export function calculateSleepDebt(

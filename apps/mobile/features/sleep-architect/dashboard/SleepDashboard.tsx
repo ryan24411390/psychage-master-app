@@ -1,5 +1,6 @@
 import { useColorScheme } from 'nativewind';
-import { useWindowDimensions, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, useWindowDimensions, View } from 'react-native';
 
 import {
   bandForScore,
@@ -11,6 +12,7 @@ import {
   type SleepScoreBand,
   type SleepSettings,
   toLocalCalendarDate,
+  windowByDays,
 } from '@psychage/shared/sleep';
 
 import { Card } from '@/components/ui/Card';
@@ -39,9 +41,18 @@ const DOT_CLASS: Record<SleepScoreBand, string> = {
   low: 'bg-charcoal-400',
 };
 
+// Scoring window options, matching web Sleep Architect (7/30/90 days, default 7).
+// Web: SleepDashboard range state '7'|'30'|'90' → useSleepScore(days).
+const RANGE_OPTIONS = [
+  { days: 7, label: '7 days' },
+  { days: 30, label: '30 days' },
+  { days: 90, label: '90 days' },
+] as const;
+
 export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
   const { width } = useWindowDimensions();
   const { colorScheme } = useColorScheme();
+  const [rangeDays, setRangeDays] = useState<number>(7);
   const t = CT4_SLEEP.metrics;
 
   if (entries.length === 0) {
@@ -55,18 +66,39 @@ export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
     );
   }
 
-  const recent = entries.slice(0, 14);
-  const chronological = [...recent].reverse();
-  const metrics = recent.map(calculateMetrics);
+  // Window by calendar days (web parity), not a fixed entry count. Streak still
+  // walks the full history; only the dashboard's scored/averaged set is windowed.
+  const today = toLocalCalendarDate(new Date());
+  const windowed = windowByDays(entries, today, rangeDays);
+  const streak = calculateStreak(entries, today);
+  const rangeSelector = (
+    <RangeSelector value={rangeDays} onChange={setRangeDays} />
+  );
+
+  if (windowed.length === 0) {
+    return (
+      <View className="gap-4">
+        {rangeSelector}
+        <Card className="gap-1 px-4 py-6">
+          <Text variant="bodyBold">{CT4_SLEEP.dashboard.emptyTitle}</Text>
+          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            No nights logged in the last {rangeDays} days.
+          </Text>
+        </Card>
+      </View>
+    );
+  }
+
+  const chronological = [...windowed].reverse();
+  const metrics = windowed.map(calculateMetrics);
   const avg = (nums: number[]) => (nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0);
 
   const avgDuration = avg(metrics.map((m) => m.total_sleep_minutes));
   const avgEfficiency = avg(metrics.map((m) => m.sleep_efficiency));
   const avgLatency = avg(metrics.map((m) => m.sleep_latency_minutes));
 
-  const score = calculateSleepScore(recent, settings.age_range);
+  const score = calculateSleepScore(windowed, settings.age_range);
   const band = bandForScore(score.overall);
-  const streak = calculateStreak(entries, toLocalCalendarDate(new Date()));
 
   const trend = chronological.map((e) => calculateMetrics(e).total_sleep_minutes);
   const strokeTint = colorScheme === 'dark' ? colors.teal[400] : colors.teal[600];
@@ -81,6 +113,7 @@ export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
 
   return (
     <View className="gap-4">
+      {rangeSelector}
       <ScoreBand band={band} caption={CT4_SLEEP.scoreCaption} />
 
       <View className="flex-row flex-wrap gap-3">
@@ -128,5 +161,40 @@ function MetricCard({ label, value }: { label: string; value: string }) {
       </Text>
       <Text variant="bodyBold">{value}</Text>
     </Card>
+  );
+}
+
+function RangeSelector({ value, onChange }: { value: number; onChange: (days: number) => void }) {
+  return (
+    <View
+      accessibilityRole="tablist"
+      className="flex-row gap-2 self-start rounded-lg border border-border bg-surface p-1 dark:border-border-dark dark:bg-surface-dark"
+    >
+      {RANGE_OPTIONS.map((opt) => {
+        const active = opt.days === value;
+        return (
+          <Pressable
+            key={opt.days}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={opt.label}
+            onPress={() => onChange(opt.days)}
+            className={`min-h-[36px] items-center justify-center rounded-md px-3 ${
+              active ? 'bg-primary dark:bg-primary-dark' : 'bg-transparent'
+            }`}
+            style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+          >
+            <Text
+              variant={active ? 'bodyBold' : 'bodySm'}
+              className={
+                active ? 'text-white' : 'text-text-secondary dark:text-text-secondary-dark'
+              }
+            >
+              {opt.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }
