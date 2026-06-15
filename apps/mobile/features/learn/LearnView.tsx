@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/Text';
@@ -29,6 +29,10 @@ import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
 export function LearnView() {
   const t = CT4_LEARN;
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Two-column tile width. NativeWind drops arbitrary % widths in this setup, so
+  // the grid columns are sized from the viewport: (width − px-4 gutters − gap)/2.
+  const { width } = useWindowDimensions();
+  const colW = Math.floor((width - 32 - 12) / 2);
 
   const { data } = useQuery({
     queryKey: ['articles', 'recent', 14],
@@ -94,13 +98,13 @@ export function LearnView() {
             <SectionHeader title={t.browseTopics} onSeeAll={() => router.push('/learn/browse')} />
             <View className="flex-row flex-wrap gap-3">
               {LEARN_CATEGORIES.map((cat) => (
-                <TopicTile
-                  key={cat.id}
-                  label={cat.label}
-                  artKey={cat.id}
-                  onPress={() => router.push(`/learn/${cat.id}`)}
-                  className="w-[47%] grow"
-                />
+                <View key={cat.id} style={{ width: colW }}>
+                  <TopicTile
+                    label={cat.label}
+                    artKey={cat.id}
+                    onPress={() => router.push(`/learn/${cat.id}`)}
+                  />
+                </View>
               ))}
             </View>
           </View>

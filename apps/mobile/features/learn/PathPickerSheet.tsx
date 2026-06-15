@@ -69,9 +69,9 @@ export function PathPickerSheet({ visible, onClose, onPick }: PathPickerSheetPro
                 className="min-h-[52px] flex-row items-center justify-between gap-3 rounded-xl border border-border px-4 py-3 dark:border-border-dark"
                 style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
               >
-                <Text variant="bodyMedium" className="flex-1">
-                  {p.label}
-                </Text>
+                <View className="flex-1">
+                  <Text variant="bodyMedium">{p.label}</Text>
+                </View>
                 <ChevronRight size={18} color={tc.inkTertiary} strokeWidth={2} />
               </Pressable>
             ))}

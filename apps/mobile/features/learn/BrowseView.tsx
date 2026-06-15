@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { Text } from '@/components/ui/Text';
@@ -59,6 +59,9 @@ export function BrowseView() {
 
 function Tier1({ onPick }: { onPick: (id: string) => void }) {
   const { fireHaptic } = useHaptics();
+  // Two-column width from the viewport (NativeWind drops arbitrary % widths here).
+  const { width } = useWindowDimensions();
+  const colW = Math.floor((width - 32 - 12) / 2);
   return (
     <ScrollView contentContainerClassName="px-4 pb-12" showsVerticalScrollIndicator={false}>
       <Text variant="headingLg" className="py-3" accessibilityRole="header">
@@ -66,23 +69,24 @@ function Tier1({ onPick }: { onPick: (id: string) => void }) {
       </Text>
       <View className="flex-row flex-wrap gap-3">
         {LEARN_CATEGORIES.map((cat) => (
-          <Pressable
-            key={cat.id}
-            accessibilityRole="button"
-            accessibilityLabel={cat.label}
-            testID={`browse-cat-${cat.id}`}
-            onPress={() => {
-              fireHaptic('tab');
-              onPick(cat.id);
-            }}
-            className="w-[47%] grow flex-row items-center gap-3 rounded-xl border border-border p-3 dark:border-border-dark"
-            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-          >
-            <ArtPanel artKey={cat.id} className="h-11 w-11 rounded-lg" />
-            <Text variant="bodyMedium" className="flex-1">
-              {cat.label}
-            </Text>
-          </Pressable>
+          <View key={cat.id} style={{ width: colW }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={cat.label}
+              testID={`browse-cat-${cat.id}`}
+              onPress={() => {
+                fireHaptic('tab');
+                onPick(cat.id);
+              }}
+              className="flex-row items-center gap-3 rounded-xl border border-border p-3 dark:border-border-dark"
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
+              <ArtPanel artKey={cat.id} className="h-11 w-11 rounded-lg" />
+              <View className="flex-1">
+                <Text variant="bodyMedium">{cat.label}</Text>
+              </View>
+            </Pressable>
+          </View>
         ))}
       </View>
     </ScrollView>
