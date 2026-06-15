@@ -1,3 +1,5 @@
+import { ArrowLeft } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,6 +14,7 @@ import type {
 import { Button } from '@/components/ui/Button';
 import { CrisisPill } from '@/components/CrisisPill';
 import { Text } from '@/components/ui/Text';
+import { colors } from '@/lib/colors';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
 import { SleepDashboard } from '@/features/sleep-architect/dashboard/SleepDashboard';
 import { SleepDiary } from '@/features/sleep-architect/diary/SleepDiary';
@@ -32,9 +35,15 @@ type Editing = { mode: 'new' } | { mode: 'edit'; entry: SleepEntry } | null;
 
 type SleepArchitectViewProps = {
   store?: SleepRecordStore;
+  onClose?: () => void;
 };
 
-export function SleepArchitectView({ store = getSleepStore() }: SleepArchitectViewProps) {
+export function SleepArchitectView({
+  store = getSleepStore(),
+  onClose,
+}: SleepArchitectViewProps) {
+  const { colorScheme } = useColorScheme();
+  const ink = colorScheme === 'dark' ? colors.text.primary.dark : colors.text.primary.light;
   const [tab, setTab] = useState<Tab>('overview');
   const [editing, setEditing] = useState<Editing>(null);
   const [entries, setEntries] = useState<SleepEntry[]>(() => store.getRecent(120));
@@ -76,9 +85,22 @@ export function SleepArchitectView({ store = getSleepStore() }: SleepArchitectVi
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
       <View className="flex-row items-center justify-between px-4 py-2">
-        <Text variant="heading" accessibilityRole="header">
-          {CT4_SLEEP.title}
-        </Text>
+        <View className="flex-row items-center gap-1">
+          {onClose ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Back"
+              onPress={onClose}
+              hitSlop={8}
+              className="min-h-[44px] w-9 justify-center"
+            >
+              <ArrowLeft size={24} color={ink} strokeWidth={2} />
+            </Pressable>
+          ) : null}
+          <Text variant="heading" accessibilityRole="header">
+            {CT4_SLEEP.title}
+          </Text>
+        </View>
         <CrisisPill />
       </View>
 
