@@ -1,6 +1,9 @@
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
+import { ChevronLeft } from 'lucide-react-native';
+import { Pressable } from 'react-native';
 
 import { CT4_SETTINGS } from '@/features/settings/copy';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
 // Settings stack (Flow 18). Pushed over the tabs as its own stack, so it carries
 // a native header (back chevron + title) instead of the GlobalHeader. Titles +
@@ -9,9 +12,29 @@ import { CT4_SETTINGS } from '@/features/settings/copy';
 // in place so those PRs never touch this layout.
 export default function SettingsLayout() {
   const t = CT4_SETTINGS;
+  const tc = useThemeColors();
   return (
     <Stack screenOptions={{ headerShown: true, headerBackButtonDisplayMode: 'minimal' }}>
-      <Stack.Screen name="index" options={{ title: t.hub.title }} />
+      <Stack.Screen
+        name="index"
+        options={{
+          title: t.hub.title,
+          // `index` is the root of this stack, so it gets no native back chevron.
+          // The settings stack is pushed over the tabs, so router.back() pops back
+          // to wherever the user opened Settings from (GlobalHeader avatar → tabs).
+          headerLeft: () => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Back"
+              onPress={() => router.back()}
+              hitSlop={8}
+              className="h-11 w-11 items-center justify-center"
+            >
+              <ChevronLeft size={24} color={tc.ink} strokeWidth={1.75} />
+            </Pressable>
+          ),
+        }}
+      />
       <Stack.Screen name="reminders" options={{ title: t.reminders.title }} />
       <Stack.Screen
         name="make-it-yours"
