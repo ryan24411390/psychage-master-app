@@ -7,9 +7,11 @@ import { CategoryStillLife } from '@/features/learn/CategoryStillLife';
 import { LEARN_CATEGORIES } from '@/features/learn/categories';
 import { CT4_LEARN } from '@/features/learn/copy';
 
-// S6 Learn — the article rail by topic (fixed order) + a Library entry. A plain
-// ScrollView + map (the category set is small; no FlashList). Each topic opens the
-// article reader (S22); the Library entry opens the WebView browse (S23, PR E).
+// S6 Learn — the article rail by topic (fixed order) + a Conditions entry + a
+// Library entry. A plain ScrollView + map (the category set is small; no
+// FlashList). Each topic opens the article reader (S22); the Conditions entry
+// opens the conditions library (/conditions); the Library entry opens the WebView
+// browse (S23, PR E).
 export function LearnView() {
   const t = CT4_LEARN;
   return (
@@ -35,6 +37,19 @@ export function LearnView() {
             </Text>
           </Pressable>
         ))}
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t.conditionsLabel}
+          onPress={() => router.push('/conditions')}
+          testID="learn-conditions-entry"
+          className="min-h-[44px] justify-center rounded-xl border border-border px-4 dark:border-border-dark"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        >
+          <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+            {t.conditionsLabel}
+          </Text>
+        </Pressable>
 
         <Pressable
           accessibilityRole="button"

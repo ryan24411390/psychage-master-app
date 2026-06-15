@@ -41,7 +41,7 @@ function countSyllables(word: string): number {
   let prevVowel = false;
 
   for (let i = 0; i < w.length; i++) {
-    const isVowel = vowels.includes(w[i]);
+    const isVowel = vowels.includes(w.charAt(i));
     if (isVowel && !prevVowel) {
       count++;
     }
