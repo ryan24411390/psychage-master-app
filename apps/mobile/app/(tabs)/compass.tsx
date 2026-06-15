@@ -32,6 +32,12 @@ export default function CompassScreen() {
           onPress={() => router.push(COMPASS_ROUTES.navigator)}
           testID="compass-tile-navigator"
         />
+        <CompassTile
+          title={t.relationship.title}
+          subLabel={t.relationship.sub}
+          onPress={() => router.push(COMPASS_ROUTES.relationship)}
+          testID="compass-tile-relationship"
+        />
       </ScrollView>
     </ScreenShell>
   );

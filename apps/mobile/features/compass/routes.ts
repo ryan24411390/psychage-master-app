@@ -6,4 +6,5 @@
 export const COMPASS_ROUTES = {
   navigator: '/navigator', // A2 S13 — Symptom Navigator
   toolkit: '/toolkit', // A2 S19 — Toolkit
+  relationship: '/tools/relationship-health', // native Relationship Health tool
 } as const;
