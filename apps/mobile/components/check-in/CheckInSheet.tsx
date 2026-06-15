@@ -8,6 +8,7 @@ import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { StateRows } from '@/components/check-in/StateRows';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
+import { CHECK_IN_COPY } from '@/features/check-in/copy';
 import { colorForScheme, resolveColorRef } from '@/lib/a1-tokens';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 
@@ -85,19 +86,19 @@ export function CheckInSheet({
       >
         <View className="mb-3 flex-row items-start justify-between">
           <View className="flex-1 pr-3">
-            <Text variant="heading">{isEdit ? 'Edit this entry.' : 'How are you right now?'}</Text>
+            <Text variant="heading">{isEdit ? CHECK_IN_COPY.editTitle : CHECK_IN_COPY.title}</Text>
             {!isEdit && (
               <Text
                 variant="body"
                 className="mt-1 text-text-secondary dark:text-text-secondary-dark"
               >
-                There’s no wrong answer.
+                {CHECK_IN_COPY.subline}
               </Text>
             )}
           </View>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Close"
+            accessibilityLabel={CHECK_IN_COPY.close}
             hitSlop={8}
             onPress={onClose}
           >
@@ -114,8 +115,8 @@ export function CheckInSheet({
         />
 
         <TextInput
-          accessibilityLabel="A word about it — optional"
-          placeholder="A word about it — optional"
+          accessibilityLabel={CHECK_IN_COPY.notePlaceholder}
+          placeholder={CHECK_IN_COPY.notePlaceholder}
           placeholderTextColor={placeholderColor}
           value={note}
           onChangeText={(text) => {
@@ -132,7 +133,7 @@ export function CheckInSheet({
             className="mt-2 text-text-primary dark:text-text-primary-dark"
             accessibilityLiveRegion="polite"
           >
-            We couldn’t save that. Try once more.
+            {CHECK_IN_COPY.saveFailed}
           </Text>
         )}
 
@@ -142,13 +143,13 @@ export function CheckInSheet({
           disabled={selected === null}
           onPress={handleSavePress}
         >
-          {isEdit ? 'Save' : 'Save today’s entry'}
+          {isEdit ? CHECK_IN_COPY.editSave : CHECK_IN_COPY.save}
         </Button>
         <Text
           variant="caption"
           className="mt-2 text-center text-text-tertiary dark:text-text-tertiary-dark"
         >
-          Stays on your phone.
+          {CHECK_IN_COPY.whisper}
         </Text>
       </Animated.View>
     </Animated.View>

@@ -99,9 +99,9 @@ describe('HistoryContainer — S8 detail + S4 edit (Flow 11)', () => {
     fireEvent.press(screen.getByRole('button', { name: 'Edit' }));
 
     // S4 edit mode, pre-filled.
-    expect(screen.getByText('Edit this entry.')).toBeTruthy();
+    expect(screen.getByText('Edit this entry')).toBeTruthy();
     expect(screen.getByLabelText('Good').props.accessibilityState.checked).toBe(true);
-    expect(screen.getByPlaceholderText('A word about it — optional').props.value).toBe('tired');
+    expect(screen.getByPlaceholderText('One word, if you want.').props.value).toBe('tired');
 
     // Change the state and save → editEntry keyed to the stored id (NOT a date), note kept.
     fireEvent.press(screen.getByLabelText('Okay'));

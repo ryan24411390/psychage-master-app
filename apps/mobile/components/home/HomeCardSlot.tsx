@@ -50,8 +50,8 @@ function BridgeCardBody({ card }: { card: BridgeCard }) {
       </View>
       {card.veryLow && (
         <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
-          If it feels like too much, Help now at the top of this page is always there — people you can
-          reach, right away.
+          {/* CT4 §3 [CT4] very-low extra line — the one Help-now sentence, verbatim. */}
+          If things feel unsafe, help is one tap away.
         </Text>
       )}
     </View>

@@ -8,6 +8,7 @@ import { colors } from '@/lib/colors';
 
 import { CrisisCallRow } from './components/CrisisCallRow';
 import { EmergencyButton } from './components/EmergencyButton';
+import { CRISIS_COPY } from './copy';
 import type { Dial } from './dialer';
 import type { HelplineRow } from './helpline-schema';
 
@@ -19,12 +20,11 @@ import type { HelplineRow } from './helpline-schema';
 // VoiceOver order: lead → call → helplines (the content sequence below). The Back
 // control sits above as a standard nav affordance.
 //
-// All visible copy below is VERBATIM Flow Book (Flow 6). Introduce no new strings.
+// All visible copy is VERBATIM Flow Book (Flow 6), now sourced from ./copy (CT4 §8).
 
-const LEAD =
-  'If you are in danger, or thinking about ending your life, you deserve help right now. You are not alone in this.';
-const EMERGENCY_LABEL = 'Call your local emergency number';
-const HELPLINES_INTRO = 'Free, confidential helplines are also available in most countries.';
+const LEAD = CRISIS_COPY.lead;
+const EMERGENCY_LABEL = CRISIS_COPY.callEmergency;
+const HELPLINES_INTRO = CRISIS_COPY.helplinesIntro;
 
 export interface CrisisViewProps {
   readonly regionName: string;
@@ -54,7 +54,7 @@ export function CrisisView({
       <View className="px-4 pt-1">
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back"
+          accessibilityLabel={CRISIS_COPY.back}
           onPress={onBack}
           hitSlop={8}
           className="min-h-[44px] w-11 justify-center"
@@ -65,7 +65,7 @@ export function CrisisView({
 
       <ScrollView contentContainerClassName="gap-5 px-4 pb-10">
         <Text variant="headingLg" accessibilityRole="header">
-          Help now.
+          {CRISIS_COPY.heading}
         </Text>
 
         <Text variant="body">{LEAD}</Text>
@@ -82,14 +82,12 @@ export function CrisisView({
             ))}
           </View>
         ) : (
-          <Text variant="body">
-            {`We don't yet have verified helplines for ${regionName}. Your local emergency number works right now.`}
-          </Text>
+          <Text variant="body">{CRISIS_COPY.gapState(regionName)}</Text>
         )}
 
         <Pressable
           accessibilityRole="link"
-          accessibilityLabel={`Not in ${regionName}?`}
+          accessibilityLabel={CRISIS_COPY.notInRegion(regionName)}
           onPress={onChangeRegion}
           hitSlop={8}
           className="min-h-[44px] justify-center"
@@ -98,7 +96,7 @@ export function CrisisView({
             variant="bodySm"
             className="text-text-secondary underline dark:text-text-secondary-dark"
           >
-            {`Not in ${regionName}?`}
+            {CRISIS_COPY.notInRegion(regionName)}
           </Text>
         </Pressable>
       </ScrollView>

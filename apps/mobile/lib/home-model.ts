@@ -92,7 +92,9 @@ export function readForHour(hour: number): Read {
   return hour >= 21 || hour < 5 ? READS.night : READS.day;
 }
 
-export const READ_CREDIT = 'Reviewed by Dr. Lena Dobson, Ph.D. in Clinical Neuropsychology';
+// CT4 §0/§11 credit line — VERBATIM, trailing period included. Single source for
+// ReviewedByCredit (the one enforcement point wherever reviewed content appears).
+export const READ_CREDIT = 'Reviewed by Dr. Lena Dobson, Ph.D. in Clinical Neuropsychology.';
 
 const WEEKDAY_SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 const WEEKDAY_FULL = [

@@ -13,13 +13,13 @@ describe('CheckInSheet — check-in mode', () => {
     expect(screen.getByText('How are you right now?')).toBeTruthy();
     expect(screen.getByText('There’s no wrong answer.')).toBeTruthy();
     expect(screen.getAllByRole('radio')).toHaveLength(5);
-    expect(screen.getByPlaceholderText('A word about it — optional')).toBeTruthy();
+    expect(screen.getByPlaceholderText('One word, if you want.')).toBeTruthy();
     expect(screen.getByText('Stays on your phone.')).toBeTruthy();
   });
 
   it('caps the note at 24 characters (the store NOTE_MAX_LENGTH)', () => {
     renderWithProviders(<CheckInSheet onSave={() => {}} onClose={() => {}} />, { haptics: true });
-    expect(screen.getByPlaceholderText('A word about it — optional').props.maxLength).toBe(24);
+    expect(screen.getByPlaceholderText('One word, if you want.').props.maxLength).toBe(24);
   });
 
   it('does not save while nothing is selected (save disabled)', () => {
@@ -41,7 +41,7 @@ describe('CheckInSheet — check-in mode', () => {
     const onSave = jest.fn();
     renderWithProviders(<CheckInSheet onSave={onSave} onClose={() => {}} />, { haptics: true });
     fireEvent.press(screen.getByLabelText('Good'));
-    fireEvent.changeText(screen.getByPlaceholderText('A word about it — optional'), '  tired  ');
+    fireEvent.changeText(screen.getByPlaceholderText('One word, if you want.'), '  tired  ');
     fireEvent.press(screen.getByRole('button', { name: 'Save today’s entry' }));
     expect(onSave).toHaveBeenCalledWith(3, 'tired');
   });
@@ -54,10 +54,10 @@ describe('CheckInSheet — edit mode', () => {
       <CheckInSheet mode="edit" initialState={2} initialNote="okay day" onSave={onSave} onClose={() => {}} />,
       { haptics: true },
     );
-    expect(screen.getByText('Edit this entry.')).toBeTruthy();
+    expect(screen.getByText('Edit this entry')).toBeTruthy();
     expect(screen.queryByText('There’s no wrong answer.')).toBeNull();
     expect(screen.getByLabelText('Okay').props.accessibilityState.checked).toBe(true);
-    expect(screen.getByPlaceholderText('A word about it — optional').props.value).toBe('okay day');
+    expect(screen.getByPlaceholderText('One word, if you want.').props.value).toBe('okay day');
     // Pre-filled → save is enabled immediately (no fresh selection needed).
     fireEvent.press(screen.getByRole('button', { name: 'Save' }));
     expect(onSave).toHaveBeenCalledWith(2, 'okay day');
