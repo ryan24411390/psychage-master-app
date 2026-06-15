@@ -1,5 +1,4 @@
 import { FlashList } from '@shopify/flash-list';
-import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { ActivityIndicator, Pressable, View } from 'react-native';
@@ -7,26 +6,20 @@ import { ActivityIndicator, Pressable, View } from 'react-native';
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { Text } from '@/components/ui/Text';
 import { ArticleListCard } from '@/features/content/ArticleListCard';
-import { getLearnCategory } from '@/features/learn/categories';
-import { type ArticleListItem, listArticlesByCategorySlugs } from '@/lib/articles';
+import { CT4_LEARN } from '@/features/learn/copy';
+import { useCategoryArticles } from '@/features/learn/hooks';
+import type { ArticleListItem } from '@/lib/articles';
 import { colors } from '@/lib/colors';
 
-// S6→list: a category's real articles (FlashList, ~hundreds at the full corpus).
-// Pushed over the tabs, so it renders the GlobalHeader (Help-now pill reachable,
-// SR-2) + a native back row itself. Content is fetched live from the shared
-// Supabase via TanStack Query — never placeholder. Empty/error states report the
-// absence; they never fabricate articles.
-export function CategoryArticlesView({ id }: { id: string }) {
-  const category = getLearnCategory(id);
-  const slugs = category?.slugs ?? [];
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['articles', 'category', id],
-    queryFn: () => listArticlesByCategorySlugs(slugs),
-    enabled: slugs.length > 0,
-  });
-
-  const articles = data ?? [];
+// S6→list: a category's real articles (FlashList, paginated on scroll). Pushed
+// over the tabs, so it renders the GlobalHeader (Help-now pill reachable, SR-2)
+// + a native back row itself. The category `slug` + `name` arrive verbatim from
+// the live taxonomy (no hardcoded mapping). Content is fetched live via TanStack
+// Query — never placeholder. Empty/error states report the absence.
+export function CategoryArticlesView({ slug, name }: { slug: string; name?: string }) {
+  const t = CT4_LEARN;
+  const { articles, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useCategoryArticles(slug);
 
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
@@ -52,9 +45,13 @@ export function CategoryArticlesView({ id }: { id: string }) {
         keyExtractor={(item: ArticleListItem) => item.slug}
         contentContainerClassName="px-4 pb-12"
         ItemSeparatorComponent={() => <View className="h-3" />}
+        onEndReachedThreshold={0.6}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+        }}
         ListHeaderComponent={
           <Text variant="headingLg" className="py-3">
-            {category?.label ?? 'Articles'}
+            {name ?? t.articlesFallback}
           </Text>
         }
         ListEmptyComponent={
@@ -67,11 +64,16 @@ export function CategoryArticlesView({ id }: { id: string }) {
               variant="body"
               className="px-1 py-8 text-center text-text-secondary dark:text-text-secondary-dark"
             >
-              {isError
-                ? 'These articles could not be loaded right now. Please try again.'
-                : 'No articles here yet.'}
+              {isError ? t.listError : t.listEmpty}
             </Text>
           )
+        }
+        ListFooterComponent={
+          isFetchingNextPage ? (
+            <View className="items-center py-6">
+              <ActivityIndicator color={colors.teal[500]} />
+            </View>
+          ) : null
         }
         renderItem={({ item }: { item: ArticleListItem }) => <ArticleListCard article={item} />}
       />

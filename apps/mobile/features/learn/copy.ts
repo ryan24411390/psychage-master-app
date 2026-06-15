@@ -7,4 +7,8 @@ export const CT4_LEARN = {
   intro: 'Plain-language guides on what you might be experiencing.',
   conditionsLabel: 'Browse conditions',
   libraryLabel: 'Browse the full library',
+  // Shared list/hub fallbacks (no diagnostic language; report absence honestly).
+  articlesFallback: 'Articles',
+  listEmpty: 'No articles here yet.',
+  listError: 'This could not be loaded right now. Please try again.',
 } as const;

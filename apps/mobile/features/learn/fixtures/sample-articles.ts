@@ -26,6 +26,7 @@ export const sampleArticleDetail: ArticleDetail = {
   contentFormat: "html",
   authorName: ARTICLE_AUTHOR_NAME,
   authorRole: ARTICLE_AUTHOR_ROLE,
+  citations: [],
 };
 
 export const sampleArticleDetails: ArticleDetail[] = [
@@ -45,6 +46,7 @@ export const sampleArticleDetails: ArticleDetail[] = [
   contentFormat: "html",
   authorName: ARTICLE_AUTHOR_NAME,
   authorRole: ARTICLE_AUTHOR_ROLE,
+  citations: [],
 },
   {
   slug: "remote-work-social-isolation-working-from-home",
@@ -61,6 +63,7 @@ export const sampleArticleDetails: ArticleDetail[] = [
   contentFormat: "html",
   authorName: ARTICLE_AUTHOR_NAME,
   authorRole: ARTICLE_AUTHOR_ROLE,
+  citations: [],
 },
 ];
 
