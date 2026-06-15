@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { Pressable, ScrollView } from 'react-native';
 
+import { Card } from '@/components/ui/Card';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
 import { CategoryStillLife } from '@/features/learn/CategoryStillLife';
@@ -30,13 +31,14 @@ export function LearnView() {
             accessibilityLabel={cat.label}
             onPress={() => router.push(`/learn/${cat.id}`)}
             testID={`learn-category-${cat.id}`}
-            className="flex-row items-center gap-4 rounded-xl border border-border/50 bg-surface p-4 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
-            <CategoryStillLife testID={`learn-art-${cat.id}`} />
-            <Text variant="bodyMedium" className="flex-1">
-              {cat.label}
-            </Text>
+            <Card variant="elevated" className="flex-row items-center gap-4">
+              <CategoryStillLife testID={`learn-art-${cat.id}`} />
+              <Text variant="bodyMedium" className="flex-1">
+                {cat.label}
+              </Text>
+            </Card>
           </Pressable>
         ))}
 
@@ -45,12 +47,13 @@ export function LearnView() {
           accessibilityLabel={t.conditionsLabel}
           onPress={() => router.push('/conditions')}
           testID="learn-conditions-entry"
-          className="min-h-[44px] justify-center rounded-xl border border-border px-4 dark:border-border-dark"
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
-          <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
-            {t.conditionsLabel}
-          </Text>
+          <Card variant="outline" className="min-h-[44px] justify-center px-4 py-0">
+            <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+              {t.conditionsLabel}
+            </Text>
+          </Card>
         </Pressable>
 
         <Pressable
@@ -58,12 +61,13 @@ export function LearnView() {
           accessibilityLabel={t.libraryLabel}
           onPress={() => router.push('/library')}
           testID="learn-library-entry"
-          className="min-h-[44px] justify-center rounded-xl border border-border/50 bg-surface px-4 py-3 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
-          <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
-            {t.libraryLabel}
-          </Text>
+          <Card variant="elevated" className="min-h-[44px] justify-center px-4 py-3">
+            <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+              {t.libraryLabel}
+            </Text>
+          </Card>
         </Pressable>
         </ScrollView>
       </ReadingTextSizeProvider>

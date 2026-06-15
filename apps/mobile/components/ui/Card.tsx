@@ -11,7 +11,7 @@ import { View, type ViewProps } from 'react-native';
 //     anti-slop pattern on mobile. Web's 4th variant maps to `accent` (tinted surface).
 // Radius `xl` per DESIGN.mobile.md §1.4 (cards/surfaces/panels = xl).
 
-export type CardVariant = 'default' | 'accent' | 'outline' | 'ghost';
+export type CardVariant = 'default' | 'elevated' | 'accent' | 'outline' | 'ghost';
 
 type CardProps = ViewProps & {
   variant?: CardVariant;
@@ -19,8 +19,15 @@ type CardProps = ViewProps & {
   className?: string;
 };
 
+// Variants match the mobile app's established inline card grammar so adoption is
+// visually lossless: `default` = the plain surface card (border-border, no shadow),
+// `elevated` = the softer raised tile (border/50 + shadow-sm) used by Learn/Compass
+// and most tap targets. Padding default is `p-4` (mobile 8pt-grid card density);
+// callers pass px-/py- overrides for the few denser/looser one-offs.
 const variantClasses: Record<CardVariant, string> = {
   default: 'bg-surface dark:bg-surface-dark border border-border dark:border-border-dark',
+  elevated:
+    'bg-surface dark:bg-surface-dark border border-border/50 dark:border-border-dark/50 shadow-sm',
   accent:
     'bg-surface-accent dark:bg-surface-accent-dark border border-border dark:border-border-dark',
   outline: 'bg-transparent border border-border dark:border-border-dark',
@@ -28,7 +35,7 @@ const variantClasses: Record<CardVariant, string> = {
 };
 
 export function Card({ variant = 'default', children, className, ...props }: CardProps) {
-  const composed = ['rounded-xl p-6', variantClasses[variant], className].filter(Boolean).join(' ');
+  const composed = ['rounded-xl p-4', variantClasses[variant], className].filter(Boolean).join(' ');
   return (
     <View className={composed} {...props}>
       {children}
