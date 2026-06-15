@@ -185,7 +185,7 @@ No `supabase/migrations/` (table live). No `packages/i18n/` (not created; string
 
 ## Open items (surface in /spec-review)
 
-1. **Tool-save surface (T-009) — RESOLVED at /spec-review (2026-06-15).** There is no `tools` DB table referenced in the mobile codebase, so `resource_id` for tools = the **stable Expo Router route slug** (`clarity`, `sleep`, `mood-journal`, `mindmate`, `relationship-health`) with `resource_type='tool'`. Saved-list tap routes the slug → `app/tools/<slug>.tsx`. No `tools`-table dependency; all five tool screens are in scope. (web parity: web stores tool slugs in the same column.)
+1. **Tool-save surface (T-009) — mapping RESOLVED; save buttons DEFERRED (2026-06-15).** `resource_id` for tools = the **stable Expo Router route slug** (`clarity`, `sleep`, `mood-journal`, `mindmate`, `relationship-health`) with `resource_type='tool'` (no `tools` DB table in mobile). The saved list + `SavedRow` fully support tool bookmarks (slug → name map + `/tools/<slug>` route), so tool saves render and open correctly. **Deferred:** the per-tool SAVE button. Unlike article/provider, the five tool screens render bespoke full-screen flows with **no uniform header trailing slot** (design.md S-1's mount point doesn't exist there); adding it requires per-flow chrome surgery across five features and is out of scope for this pass. Follow-up: add `BookmarkSaveSlot` to each tool flow's chrome when those flows gain a standard header affordance.
 2. **i18n** — EN-only via copy.ts at ship; PT/ES/SV/FR deferred until `packages/i18n` exists.
 3. **Sentry scrub** — deferred until Sentry is wired in mobile.
 
