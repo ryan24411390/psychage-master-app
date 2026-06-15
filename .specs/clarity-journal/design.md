@@ -89,7 +89,7 @@ All entities **MMKV-only** (SR-4). New shared package `packages/shared/clarity-j
 
 | Entity | Storage | Schema (ported from web) | Notes |
 |---|---|---|---|
-| DailyJournalCheckIn | MMKV | `{ date, mood 1–10, energy 1–10, sleptLastNight, sleepHours?, note, tags[] }` | one per `LocalCalendarDate`; separate from S4 check-in store |
+| DailyJournalCheckIn | MMKV | `{ date, mood 1–10, energy 1–10, sleptLastNight, sleepHours?, note, tags[] }` | one per `LocalCalendarDate`; separate store from S4 check-in. Both MAY coexist on one day; the journal neither reads nor writes the S4 store. Hub "Journal check-in" CTA opens THIS entry, labeled to distinguish it from the Today-tab S4 check-in. |
 | WeeklyScreening | MMKV | `{ weekStart, phq2{q1,q2}, gad2{q1,q2}, pss4{q1,q2}, who5{q1..q5}, levels{} }` | scores computed, not double-stored from items |
 | ThoughtRecord | MMKV | `{ id, createdAt, situation, automaticThought, distortions[], evidenceFor, evidenceAgainst, balancedThought, emotionBefore 0–10, emotionAfter 0–10 }` | |
 | BehavioralActivation | MMKV | `{ id, createdAt, activity, predictedMood 0–10, type, actualMood? 0–10 }` | draft until `actualMood` |
@@ -118,7 +118,7 @@ None. Zero network surface. No Supabase query, RPC, or edge function. (Forced by
 | Corrupt persisted blob | (silent) quarantine + continue | journal shell always loads (EC-2) |
 | Storage write fails | "Couldn't save that just now — try again." (warm, no haptic) | retry; form stays open |
 | Incomplete screener | inline "answer all to see your result" | finish items (EC-9) |
-| Crisis text detected | crisis surface (not an "error") | helpline/dialer; in-progress text not transmitted (EC-4) |
+| Crisis text detected | crisis surface (not an "error") | in-progress entry auto-saved as an on-device draft → full-screen crisis overlay (helpline/dialer) → dismiss/back restores the draft for "resume editing"; in-progress text never transmitted (EC-4) |
 
 ## Sensorial design (mobile)
 
@@ -170,7 +170,7 @@ One total for the feature: **S-4 balanced-thought reveal** (`motion.duration.cal
 | Purple/cyan mesh gradient | No | n/a |
 | Glassmorphism w/o purpose | No | n/a |
 | Three-rounded-cards-in-a-row | No | section list is vertical rows |
-| Inter as default | Yes | brand override (DESIGN.mobile.md) |
+| Inter as default | No | Uses IBM Plex Sans (body/UI) + Fraunces (display) per CLAUDE.md §7 / DD-001; Inter is the web convention and is not used on mobile |
 | Hardcoded shadow values | No | `shadow.*` tokens |
 | Decorative spark-lines | No | trend lines are real data (react-native-svg) |
 | Generic 4-tab nav | No | journal lives under custom Compass tab |

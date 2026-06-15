@@ -15,14 +15,14 @@
 **EARS:** When the person opens the daily check-in and submits, the system shall persist the entry keyed to the local calendar day.
 - AC-1.1: Mood and energy are 1–10 integers; sentence is free text; tags drawn from the journal's daily-tag set.
 - AC-1.2: One entry per local calendar day; re-opening the same day edits the existing entry (no duplicate).
-- AC-1.3: This is distinct from the standalone S4 Daily Check-In store; the journal does NOT write to or double-count the S4 check-in store (no double mood storage). Reconciliation detail → design.
+- AC-1.3: Stored in a separate journal store; the journal neither reads nor writes the S4 Daily Check-In store (no double mood storage). The journal daily entry and an S4 check-in MAY both exist for the same day (independent). The hub "Journal check-in" CTA opens THIS journal entry and is labeled to distinguish it from the Today-tab S4 check-in.
 
 ### US-2: Weekly screening (PHQ-2 / GAD-2 / adapted PSS-4 / adapted WHO-5)
 **As** Aisha **I want** brief weekly screeners with a plain-language level and a trend **so that** I can see whether things are shifting.
 **EARS:** When the person completes a weekly screening, the system shall compute each instrument score with the web's exact formulas and classify a level.
 - AC-2.1: Scores match web byte-for-byte: PHQ-2 `clamp(q1+q2,0..6)`, GAD-2 `clamp(q1+q2,0..6)`, PSS-4 `clamp(q1+(4-q2),0..8)` (reverse-scored confidence item), WHO-5 `clamp(q1+q2,0..10)`.
 - AC-2.2: Levels match web thresholds: PHQ-2/GAD-2 low ≤2 / moderate ≤4 / else elevated; PSS-4 low ≤3 / moderate ≤5 / else elevated; WHO-5 inverted good ≥7 / moderate ≥4 / else elevated.
-- AC-2.3: Levels render as educational language ("lower concern / moderate / worth attention"), never instrument names as verdicts and never diagnostic phrasing (SR-3).
+- AC-2.3: Each screener renders exactly one label from a fixed set (no free variants): PHQ-2 & GAD-2 → "lower concern" (≤2) / "moderate" (3–4) / "worth attention" (≥5); PSS-4 → "lower stress" (≤3) / "moderate stress" (4–5) / "elevated stress" (≥6); WHO-5 → "good sense of wellbeing" (≥7) / "moderate wellbeing" (4–6) / "low wellbeing" (≤3). No instrument names shown as verdicts; no diagnostic phrasing (SR-3). Testable: fixture scores → asserted label string.
 - AC-2.4: Sustained-elevation guidance suggests professional support using invitational framing (copy → Dr. Dobson).
 - AC-2.5: Distinct from the Clarity Score tool (PHQ-4): the journal's weekly screening neither imports nor is imported by Clarity Score.
 
@@ -61,7 +61,7 @@
 ### US-9: Journal insights
 **As** Aisha **I want** trends and patterns across my entries **so that** I understand myself over time.
 - AC-9.1: Computes (on-device) mood trend, screener trajectories, top cognitive distortions, behavioral-activation success rate, coping effectiveness, recurring triggers, and an entry streak.
-- AC-9.2: No numeric verdict label of the person; trends shown as movement/levels with educational framing (SR-3).
+- AC-9.2: Insights present movement only — directional categorical labels (improving ↑ / steady → / declining ↓) plus a time qualifier ("over the past 7 days"), and line charts whose axes are date/week, never a "your score" scalar. No standalone 0–10 person-scalar appears in any text label. Testable: render with seeded entries → assert no text matches /your\s+(mood|score|rating)/i and no 0–10 person-verdict scalar in a label.
 
 ### US-10: Therapist report + PDF export
 **As** Aisha **I want** to generate a report to bring to a provider **so that** the session starts with context.
@@ -81,6 +81,7 @@
 **As** Aisha **I want** my journal to stay private on my device **so that** I trust it with hard things.
 - AC-12.1: All journal data persists via MMKV only; versioned schema with a migrator (SR-13) and quarantine-on-corruption.
 - AC-12.2: No journal/screener/safety-plan data is written to Supabase, analytics, or Sentry (SR-4).
+- AC-12.3: First open of the Clarity Journal shows a one-time on-device-only consent notice ("Your journal stays on this device — never sent to our servers or shared") with a privacy-policy link; proceeding constitutes consent (App Store 5.1.1).
 
 ### US-13: Compass entry + navigation
 **As** Aisha **I want** the journal reachable from Compass **so that** I find it with the other tools.
@@ -106,6 +107,7 @@
 - EC-7: **Schema upgrade** — a person returning after an old version's data is migrated N→N+1 with no silent loss (SR-13).
 - EC-8: **Empty states** — each section and insights show a calm empty state (placeholder clay figure until library lands).
 - EC-9: **Incomplete screener** — cannot compute/classify until all items answered; partial screeners are not scored.
+- EC-10: **Partial screener across a week boundary** — weekly screening is keyed to `weekStart`; an in-progress screener from a prior week shows as "incomplete from ‹date›" with complete-or-delete; only one in-progress screener per week (a new attempt on an incomplete week prompts to finish or discard).
 
 ## Sensorial requirements (mobile)
 
@@ -120,7 +122,7 @@
 ## Out of scope (carry-forward)
 
 - Any cloud sync / telemetry of journal, screener, or safety-plan data (SR-4) — explicit non-goal; intentional divergence from web's Supabase sync.
-- Non-English journal UI copy (no `packages/i18n` yet). Crisis-keyword coverage is English V1 (matches current mobile chat/sleep lists); ES/FR crisis terms tracked as a follow-up tied to i18n.
+- Non-English journal UI copy (no `packages/i18n` yet). Crisis-keyword coverage is English V1 (matches current mobile chat/sleep lists); ES/FR crisis terms tracked as a follow-up tied to i18n, and documented as a V1 known limitation in release notes.
 - New clay figures beyond the existing/forthcoming library (undelivered, ETA 2026-07-08) — placeholders in V1.
 - Merging/replacing the existing S4 Daily Check-In, S9 Reflection, Mood Journal, or Clarity Score tools — the journal is additive and self-contained.
 
@@ -129,7 +131,7 @@
 - **Performance:** section hub and any section open <300ms warm; report assembly <1s for a year of entries.
 - **Accessibility:** ≥44pt touch targets; screen-reader labels per HIG; WCAG AA contrast; honors Reduce Motion / Reduce Haptics.
 - **Localization:** EN only in V1 (per Out of scope).
-- **App Store:** Guideline 1.4.1 (medical/health — no diagnostic claims) and 5.1.1 (data collection consent) apply to the safety plan + screeners + crisis surface; PR must reference both.
+- **App Store:** Guideline 1.4.1 (medical/health — no diagnostic claims) applies to the safety plan, screeners, crisis surface, AND the thought-record / behavioral-activation sections (educational framing only — "a technique to practice," never "this will reduce your anxiety"). 5.1.1 (data collection consent) → on-device consent notice per AC-12.3. PR must reference both.
 - **Privacy:** Data classification = sensitive (mental health) + crisis. On-device only.
 - **Regulatory:** On-device, no PHI transmission → within `rules/regulatory.md` posture (Phase 4.A resolved per workspace.json). No new transmission surface introduced.
 
