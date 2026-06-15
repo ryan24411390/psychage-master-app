@@ -10,4 +10,5 @@ export const COMPASS_ROUTES = {
   mindmate: '/tools/mindmate', // S-MM — MindMate AI companion (native chat)
   clarity: '/tools/clarity', // S32 — Clarity Score (native flow)
   moodJournal: '/tools/mood-journal', // Mood Journal — patterns & triggers
+  sleep: '/tools/sleep', // S29 Sleep Architect (native)
 } as const;

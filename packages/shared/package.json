@@ -21,6 +21,10 @@
       "types": "./check-in/index.ts",
       "default": "./check-in/index.ts"
     },
+    "./sleep": {
+      "types": "./sleep/index.ts",
+      "default": "./sleep/index.ts"
+    },
     "./mood-journal": {
       "types": "./mood-journal/index.ts",
       "default": "./mood-journal/index.ts"
