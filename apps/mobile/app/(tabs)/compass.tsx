@@ -32,6 +32,12 @@ export default function CompassScreen() {
           onPress={() => router.push(COMPASS_ROUTES.navigator)}
           testID="compass-tile-navigator"
         />
+        <CompassTile
+          title={t.clarity.title}
+          subLabel={t.clarity.sub}
+          onPress={() => router.push(COMPASS_ROUTES.clarity)}
+          testID="compass-tile-clarity"
+        />
         <Text
           variant="caption"
           className="mt-2 text-text-secondary dark:text-text-secondary-dark"
