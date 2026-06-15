@@ -127,6 +127,10 @@ These eight decisions block specific feature scopes. Some have recommended defau
 
 CLAUDE.md §5 lists which scopes are *blocked* by missing rule files. When a rule file exists, that scope unblocks.
 
+### 5.1 Resolved scope decisions
+
+- **Med Tracker (S31): WebView-first for V1 — CLOSED.** No native port in V1. Rationale (`V1_FEATURE_SCOPE.md`): the tool is a log + adherence-trend view; daily logging usually happens in third-party apps (Apple Health, etc.), so the WebView reduced-template is sufficient. The current route `apps/mobile/app/tools/med-tracker.tsx → WebViewSurface('med-tracker')` is correct. **Native-rebuild trigger:** >30% premium weekly engagement (V2 / demand-driven). When that fires, the native archetype mirrors Relationship Health (feature dir + store + types + view components + Compass tile + migrator + tests), ~70% reusable from `psychage-v2 src/components/tools/MedicationTracker` (log-only, no multi-dimensional scoring). No code change needed now.
+
 ---
 
 ## 6. Lift plan: web → shared package
