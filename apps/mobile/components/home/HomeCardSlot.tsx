@@ -13,7 +13,15 @@ import type { BridgeCard, HomeCard, ReminderCard } from './home-card';
 // @keyframes settle); reduced motion = appear in place. The reminder-sighting
 // trigger is UNWIRED in A1 — this builds the display logic, not the increment.
 
-function BridgeCardBody({ card }: { card: BridgeCard }) {
+function BridgeCardBody({
+  card,
+  onBreathing,
+  onDismiss,
+}: {
+  card: BridgeCard;
+  onBreathing?: () => void;
+  onDismiss?: () => void;
+}) {
   const isNight = card.register === 'night';
   const chipName = isNight ? 'Night breathing' : 'Breathing';
   const chipMin = isNight ? '· 2 min' : '· 1 min';
@@ -29,7 +37,7 @@ function BridgeCardBody({ card }: { card: BridgeCard }) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${chipName} ${chipMin}`}
-          onPress={() => {}}
+          onPress={onBreathing}
           className="min-h-[44px] flex-row items-center gap-1 rounded-full border border-border/50 bg-surface px-3 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
         >
           <Text variant="bodyMedium">{chipName}</Text>
@@ -40,7 +48,7 @@ function BridgeCardBody({ card }: { card: BridgeCard }) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Not now"
-          onPress={() => {}}
+          onPress={onDismiss}
           className="min-h-[44px] justify-center px-2"
         >
           <Text variant="bodyMedium" className="text-text-secondary dark:text-text-secondary-dark">
@@ -102,7 +110,17 @@ function ReminderCardBody({ card }: { card: ReminderCard }) {
   );
 }
 
-export function HomeCardSlot({ card }: { card: HomeCard | null }) {
+export function HomeCardSlot({
+  card,
+  onBreathing,
+  onDismissBridge,
+}: {
+  card: HomeCard | null;
+  /** Bridge "Breathing" chip — opens the real breathing flow. */
+  onBreathing?: () => void;
+  /** Bridge "Not now" — dismisses the steadying card for the session. */
+  onDismissBridge?: () => void;
+}) {
   const reduced = useReducedMotion();
   if (!card) return null;
   return (
@@ -111,7 +129,7 @@ export function HomeCardSlot({ card }: { card: HomeCard | null }) {
       className="mt-3 rounded-xl border border-border/50 bg-surface px-4 py-4 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
     >
       {card.kind === 'bridge' ? (
-        <BridgeCardBody card={card} />
+        <BridgeCardBody card={card} onBreathing={onBreathing} onDismiss={onDismissBridge} />
       ) : (
         <ReminderCardBody card={card} />
       )}

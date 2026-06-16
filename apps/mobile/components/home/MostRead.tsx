@@ -32,10 +32,10 @@ export function MostRead() {
 
   return (
     <View className="gap-3 mt-6">
-      <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider ml-1 mb-2">
-        Most read this week
+      <Text variant="heading" className="ml-1 mb-2">
+        Most read this month
       </Text>
-      
+
       {loading ? (
         <View className="py-8 items-center justify-center">
           <ActivityIndicator size="small" />
@@ -44,16 +44,20 @@ export function MostRead() {
         articles.map((a, i) => (
           <React.Fragment key={a.id}>
             <Link href={{ pathname: '/article/[slug]', params: { slug: a.id } }} asChild>
-              <Pressable className="flex-row justify-between items-center py-3 active:opacity-70">
-                <View className="flex-1 pr-4">
-                  <Text variant="caption" className="text-primary dark:text-primary-dark font-sans-medium mb-1">{a.topic}</Text>
+              <Pressable className="flex-row items-start gap-3 py-3 active:opacity-70">
+                <Text variant="body" className="w-7 text-text-tertiary dark:text-text-tertiary-dark">
+                  {String(i + 1).padStart(2, '0')}
+                </Text>
+                <View className="flex-1">
                   <Text variant="bodyBold" className="text-text-primary dark:text-text-primary-dark">{a.title}</Text>
+                  <Text variant="caption" className="mt-0.5 text-text-secondary dark:text-text-secondary-dark">
+                    {a.topic} · {a.minutes} min
+                  </Text>
                 </View>
-                <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark shrink-0">{a.minutes} min</Text>
               </Pressable>
             </Link>
             {i < articles.length - 1 && (
-              <View className="h-[1px] w-full bg-border/40 dark:bg-border-dark/40" />
+              <View className="ml-10 h-[1px] bg-border/40 dark:bg-border-dark/40" />
             )}
           </React.Fragment>
         ))

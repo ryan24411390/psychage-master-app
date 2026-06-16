@@ -12,7 +12,7 @@ export function PickUpRail({ reads }: PickUpRailProps) {
 
   return (
     <View className="mb-6 mt-2">
-      <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider ml-1 mb-3">
+      <Text variant="heading" className="ml-1 mb-3">
         Pick up where you left off
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-5 px-5" contentContainerClassName="gap-3">

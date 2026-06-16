@@ -1,42 +1,61 @@
-import React from 'react';
-import { View, Pressable } from 'react-native';
+import { router } from 'expo-router';
+import { Activity, Anchor, Compass, MessageCircle } from 'lucide-react-native';
+import { View } from 'react-native';
+
+import { ClarityTile, HeroTile, SmallTile } from '@/components/ui/tiles/Tiles';
 import { Text } from '@/components/ui/Text';
-import { Link } from 'expo-router';
-import { TOOLS } from '@/lib/tool-usage-store';
+import { COMPASS_ROUTES } from '@/features/compass/routes';
+import { TOOLS, type ToolId, toolUsageStore } from '@/lib/tool-usage-store';
+
+// "When you need something now" bento. Four real tools in the Compass bento system:
+// a tall Toolkit hero + a stacked Navigator/MindMate pair, then the wide navy Clarity
+// tile. Each tap records local usage (drives the dormant-tool nudge — the same behavior
+// the old /tool/[id] placeholder hop gave) then pushes the real native flow.
+function open(id: ToolId, route: string) {
+  toolUsageStore.recordUse(id);
+  router.push(route as Parameters<typeof router.push>[0]);
+}
 
 export function ToolsBento() {
-  const primaryTools = [TOOLS.toolkit, TOOLS.navigator];
-  const secondaryTools = [TOOLS.mindmate, TOOLS.clarity, TOOLS.breathing];
-
   return (
     <View className="gap-3">
-      <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider ml-1 mt-2">
+      <Text variant="heading" className="ml-1 mt-2">
         When you need something now
       </Text>
-      
-      {/* Primary Tools (Stacked full width) */}
-      {primaryTools.map(t => (
-        <Link key={t.id} href={t.route as any} asChild>
-          <Pressable className="rounded-xl border border-border/40 bg-surface p-5 shadow-sm active:scale-[0.98] dark:border-border-dark/40 dark:bg-surface-dark">
-            <Text variant="heading" className="mb-1">{t.title}</Text>
-            <Text variant="bodySm" className="font-sans-medium text-text-secondary dark:text-text-secondary-dark">
-              {t.name}
-            </Text>
-          </Pressable>
-        </Link>
-      ))}
 
-      {/* Secondary Tools (Side by side using flex-wrap or row) */}
       <View className="flex-row gap-3">
-        {secondaryTools.map(t => (
-          <Link key={t.id} href={t.route as any} asChild>
-            <Pressable className="flex-1 rounded-xl border border-border/40 bg-surface p-4 shadow-sm active:scale-[0.98] dark:border-border-dark/40 dark:bg-surface-dark justify-between min-h-[100px]">
-              <Text variant="bodyBold" className="mb-1 leading-tight">{t.name}</Text>
-              <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">Tool</Text>
-            </Pressable>
-          </Link>
-        ))}
+        <HeroTile
+          title={TOOLS.toolkit.title}
+          feature={TOOLS.toolkit.name}
+          icon={Anchor}
+          onPress={() => open('toolkit', COMPASS_ROUTES.toolkit)}
+          testID="bento-tile-toolkit"
+        />
+        <View className="flex-1 gap-3">
+          <SmallTile
+            title={TOOLS.navigator.title}
+            feature={TOOLS.navigator.name}
+            icon={Compass}
+            onPress={() => open('navigator', COMPASS_ROUTES.navigator)}
+            testID="bento-tile-navigator"
+          />
+          <SmallTile
+            title={TOOLS.mindmate.title}
+            feature={TOOLS.mindmate.name}
+            icon={MessageCircle}
+            onPress={() => open('mindmate', COMPASS_ROUTES.mindmate)}
+            testID="bento-tile-mindmate"
+          />
+        </View>
       </View>
+
+      <ClarityTile
+        title={TOOLS.clarity.title}
+        feature="Clarity Score · stays on your phone"
+        icon={Activity}
+        onPress={() => open('clarity', COMPASS_ROUTES.clarity)}
+        testID="bento-tile-clarity"
+      />
     </View>
   );
 }
