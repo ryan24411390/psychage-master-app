@@ -1,7 +1,8 @@
 import { ChevronRight } from 'lucide-react-native';
 import { type ReactNode } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
 
@@ -34,11 +35,15 @@ export function SettingsRow({
   testID,
 }: SettingsRowProps) {
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
       testID={testID}
+      // Utilitarian row: small scale + low overshoot (anti-pattern rule — no bounce
+      // on serious surfaces). The active:bg highlight layers on top of the scale.
+      scaleTo={0.98}
+      springPreset="subtle"
       className="min-h-[52px] flex-row items-center gap-3 px-4 py-3 active:bg-surface-active dark:active:bg-surface-active-dark border-b border-border-hairline last:border-b-0"
     >
       {icon ? <View>{icon}</View> : null}
@@ -56,6 +61,6 @@ export function SettingsRow({
       {chevron ? (
         <ChevronRight size={18} color={colors.charcoal[400]} strokeWidth={2} />
       ) : null}
-    </Pressable>
+    </AnimatedPressable>
   );
 }

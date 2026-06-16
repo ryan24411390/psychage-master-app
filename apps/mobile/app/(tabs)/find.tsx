@@ -1,4 +1,5 @@
 import { ScreenShell } from '@/components/ui/ScreenShell';
+import { TabScreen } from '@/components/ui/TabScreen';
 import FindCareScreen from '@/features/find/FindCareScreen';
 import { OfflineFallback } from '@/features/offline/OfflineFallback';
 import { useIsOnline } from '@/features/offline/useIsOnline';
@@ -19,5 +20,9 @@ export default function FindScreen() {
     );
   }
 
-  return <FindCareScreen />;
+  return (
+    <TabScreen>
+      <FindCareScreen />
+    </TabScreen>
+  );
 }

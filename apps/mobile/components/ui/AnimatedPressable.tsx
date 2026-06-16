@@ -1,16 +1,33 @@
 import React from 'react';
-import { Pressable, PressableProps, GestureResponderEvent, ViewStyle, StyleProp } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import {
+  Pressable,
+  type PressableProps,
+  type GestureResponderEvent,
+  type ViewStyle,
+  type StyleProp,
+} from 'react-native';
+import Animated, {
+  type AnimatedProps,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { useReducedMotion, SPRING_PRESETS } from '@/lib/motion';
 
 const AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);
 
-export type AnimatedPressableProps = PressableProps & {
-  children: React.ReactNode | ((state: { pressed: boolean }) => React.ReactNode);
-  scaleTo?: number;
-  springPreset?: keyof typeof SPRING_PRESETS;
-  style?: StyleProp<ViewStyle> | ((state: { pressed: boolean }) => StyleProp<ViewStyle>);
-};
+// PressableProps + just the three Reanimated layout-animation props (`entering` /
+// `exiting` / `layout`) so callers can thread an animation builder through — e.g.
+// CompassTile passing a staggeredEnter() builder. We Pick only those three from
+// AnimatedProps rather than spreading the whole thing, which would otherwise wrap
+// every callback (onPressIn, …) as a possible SharedValue and break the handlers.
+export type AnimatedPressableProps = PressableProps &
+  Pick<AnimatedProps<PressableProps>, 'entering' | 'exiting' | 'layout'> & {
+    children: React.ReactNode | ((state: { pressed: boolean }) => React.ReactNode);
+    scaleTo?: number;
+    springPreset?: keyof typeof SPRING_PRESETS;
+    style?: StyleProp<ViewStyle> | ((state: { pressed: boolean }) => StyleProp<ViewStyle>);
+  };
 
 export function AnimatedPressable({
   children,

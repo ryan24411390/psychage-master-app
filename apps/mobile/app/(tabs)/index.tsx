@@ -1,6 +1,7 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 
 import { HomeContainer } from '@/components/home/HomeContainer';
+import { TabScreen } from '@/components/ui/TabScreen';
 import { useAuth } from '@/features/auth';
 import { storage } from '@/lib/adapters/storage';
 import { getCheckInStore } from '@/lib/check-in-store';
@@ -32,5 +33,9 @@ export default function TodayScreen() {
     return <Redirect href="/onboarding/welcome" />;
   }
 
-  return <HomeContainer store={store} autoOpenCheckIn={arrivingFromOnboarding} />;
+  return (
+    <TabScreen>
+      <HomeContainer store={store} autoOpenCheckIn={arrivingFromOnboarding} />
+    </TabScreen>
+  );
 }

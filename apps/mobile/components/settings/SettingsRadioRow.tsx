@@ -1,8 +1,8 @@
 import { Check } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { View } from 'react-native';
-import { Pressable } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
 
@@ -46,12 +46,14 @@ export function SettingsRadioRow<T extends string>({
       {options.map((option) => {
         const isSelected = option.value === value;
         return (
-          <Pressable
+          <AnimatedPressable
             key={option.value}
             accessibilityRole="radio"
             accessibilityState={{ checked: isSelected }}
             accessibilityLabel={option.label}
             onPress={() => onChange(option.value)}
+            scaleTo={0.98}
+            springPreset="subtle"
             className={`min-h-[44px] flex-row items-center gap-3 rounded-lg border-2 px-3 py-2 ${
               isSelected
                 ? 'border-charcoal-500'
@@ -69,7 +71,7 @@ export function SettingsRadioRow<T extends string>({
                 testID="settings-radio-check"
               />
             ) : null}
-          </Pressable>
+          </AnimatedPressable>
         );
       })}
     </View>

@@ -3,6 +3,7 @@ import { View, ScrollView } from 'react-native';
 import { Backpack, Book, Compass, HeartHandshake, LifeBuoy, MessageCircle, Moon, Sparkles } from 'lucide-react-native';
 
 import { ScreenShell } from '@/components/ui/ScreenShell';
+import { TabScreen } from '@/components/ui/TabScreen';
 import { Text } from '@/components/ui/Text';
 import { CompassTile } from '@/features/compass/CompassTile';
 import { CT4_COMPASS } from '@/features/compass/copy';
@@ -11,7 +12,8 @@ import { COMPASS_ROUTES } from '@/features/compass/routes';
 export default function CompassScreen() {
   const t = CT4_COMPASS;
   return (
-    <ScreenShell edges={['bottom']}>
+    <TabScreen>
+      <ScreenShell edges={['bottom']}>
       <ScrollView contentContainerClassName="gap-6 pb-10 pt-4" showsVerticalScrollIndicator={false}>
         
         {/* Immediate Actions */}
@@ -28,6 +30,7 @@ export default function CompassScreen() {
               icon={LifeBuoy}
               variant="action"
               testID="compass-tile-toolkit"
+              enterIndex={0}
             />
             <CompassTile
               title={t.navigator.title}
@@ -37,6 +40,7 @@ export default function CompassScreen() {
               icon={Compass}
               variant="action"
               testID="compass-tile-navigator"
+              enterIndex={1}
             />
           </View>
           <View className="flex-row gap-3">
@@ -48,6 +52,7 @@ export default function CompassScreen() {
               icon={MessageCircle}
               variant="action"
               testID="compass-tile-mindmate"
+              enterIndex={2}
             />
             <CompassTile
               title={t.clarity.title}
@@ -57,6 +62,7 @@ export default function CompassScreen() {
               icon={Sparkles}
               variant="action"
               testID="compass-tile-clarity"
+              enterIndex={3}
             />
           </View>
         </View>
@@ -74,6 +80,7 @@ export default function CompassScreen() {
             icon={Book}
             variant="list"
             testID="compass-tile-mood-journal"
+              enterIndex={4}
           />
           <CompassTile
             title={t.relationship.title}
@@ -83,6 +90,7 @@ export default function CompassScreen() {
             icon={HeartHandshake}
             variant="list"
             testID="compass-tile-relationship"
+              enterIndex={5}
           />
         </View>
 
@@ -99,6 +107,7 @@ export default function CompassScreen() {
             icon={Moon}
             variant="feature"
             testID="compass-tile-sleep"
+              enterIndex={6}
           />
           <CompassTile
             title={t.toolkits.title}
@@ -108,10 +117,12 @@ export default function CompassScreen() {
             icon={Backpack}
             variant="feature"
             testID="compass-tile-toolkits"
+              enterIndex={7}
           />
         </View>
 
       </ScrollView>
-    </ScreenShell>
+      </ScreenShell>
+    </TabScreen>
   );
 }

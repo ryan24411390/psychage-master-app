@@ -1,12 +1,9 @@
 import type { ElementType } from 'react';
-import { View, Pressable } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
+import { View } from 'react-native';
+
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
+import { staggeredEnter, useReducedMotion } from '@/lib/motion';
 
 export type CompassTileVariant = 'action' | 'feature' | 'list';
 export type CompassTileTint = 'now' | 'patterns' | 'understand';
@@ -19,6 +16,8 @@ type CompassTileProps = {
   icon: ElementType;
   variant?: CompassTileVariant;
   testID?: string;
+  /** Position in the screen's tile sequence; drives the staggered entrance. Omit to skip. */
+  enterIndex?: number;
 };
 
 // Tints mapping for soft backgrounds or icon wrappers.
@@ -29,8 +28,10 @@ const TINTS = {
   understand: { bg: 'bg-[#F0F9FF] dark:bg-[#0C4A6E]', iconColor: '#0284C7' }, // sky blue
 };
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
+// Press feedback + entrance flow through the shared AnimatedPressable (scale via
+// SPRING_PRESETS) and the staggeredEnter factory — no inline spring/duration
+// constants live here. The press dim is layered as a NativeWind-free style fn,
+// which the shared primitive composes on top of its scale.
 export function CompassTile({
   title,
   subLabel,
@@ -39,26 +40,13 @@ export function CompassTile({
   icon: Icon,
   variant = 'list',
   testID,
+  enterIndex,
 }: CompassTileProps) {
-  const scale = useSharedValue(1);
-  const opacity = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.96, { damping: 20, stiffness: 300 });
-    opacity.value = withTiming(0.8, { duration: 100 });
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 20, stiffness: 300 });
-    opacity.value = withTiming(1, { duration: 150 });
-  };
-
+  const reduced = useReducedMotion();
+  const entering = enterIndex == null ? undefined : staggeredEnter(enterIndex, reduced);
   const colors = TINTS[tint];
+
+  const pressDim = ({ pressed }: { pressed: boolean }) => ({ opacity: pressed ? 0.85 : 1 });
 
   if (variant === 'action') {
     return (
@@ -66,11 +54,10 @@ export function CompassTile({
         accessibilityRole="button"
         accessibilityLabel={title}
         onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
         testID={testID}
+        entering={entering}
         className="flex-1 rounded-2xl bg-surface dark:bg-surface-dark p-4 shadow-sm border border-border-hairline"
-        style={animatedStyle}
+        style={pressDim}
       >
         <View className={`h-10 w-10 items-center justify-center rounded-full mb-3 ${colors.bg}`}>
           <Icon size={20} color={colors.iconColor} />
@@ -87,11 +74,10 @@ export function CompassTile({
         accessibilityRole="button"
         accessibilityLabel={title}
         onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
         testID={testID}
+        entering={entering}
         className="w-full overflow-hidden rounded-3xl bg-surface dark:bg-surface-dark shadow-sm border border-border-hairline mb-4"
-        style={animatedStyle}
+        style={pressDim}
       >
         <View className={`absolute -right-6 -top-6 p-6 opacity-5 dark:opacity-10`} pointerEvents="none">
            <Icon size={140} color={colors.iconColor} />
@@ -113,11 +99,10 @@ export function CompassTile({
       accessibilityRole="button"
       accessibilityLabel={title}
       onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
       testID={testID}
+      entering={entering}
       className="w-full flex-row items-center rounded-2xl bg-surface dark:bg-surface-dark p-4 shadow-sm border border-border-hairline mb-3"
-      style={animatedStyle}
+      style={pressDim}
     >
       <View className={`h-12 w-12 items-center justify-center rounded-full mr-4 ${colors.bg}`}>
         <Icon size={24} color={colors.iconColor} />

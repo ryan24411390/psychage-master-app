@@ -1,3 +1,9 @@
+// react-native-gesture-handler's native module + GestureDetector need its bundled
+// jest setup to render under react-test-renderer (no GestureHandlerRootView in the
+// harness). Required since AnimatedSheet (and ConfirmSheet, which now composes it)
+// mount a GestureDetector. Side-effect import; mocks the native side only.
+require('react-native-gesture-handler/jestSetup');
+
 // Jest render-harness setup (W2-A). RNTL's built-in matchers (toHaveStyle,
 // toBeOnTheScreen, …) auto-extend on import — no jest-native needed.
 //
