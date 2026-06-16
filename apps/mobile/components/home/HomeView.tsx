@@ -16,6 +16,7 @@ import { PrimaryAction } from '@/components/home/PrimaryAction';
 import { PickUpRail } from '@/components/home/PickUpRail';
 import { ToolsBento } from '@/components/home/ToolsBento';
 import { MostRead } from '@/components/home/MostRead';
+import { CareAndLearning } from '@/components/home/CareAndLearning';
 import { Text } from '@/components/ui/Text';
 import { ctaLabel, type HomeViewModel } from '@/lib/home-model';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
@@ -23,12 +24,10 @@ import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 // S3 presentational view (sub-slice D structure). Takes a derived HomeViewModel +
 // handlers; the stateful wiring (state selection, clock, RecordStore) lives in the
 // screen. Anatomy top→bottom: state zone (greeting + Fraunces-italic status +
-// mascot) · record well (pressed) with the 7-day terrain · check-in CTA · card slot
-// · "When you need something now" bento · "Care and learning" (today's read + rail)
-// · mission footer. The page-load SETTLE fires on the content; reduced motion = in
-// place. Bento/read/rail tiles are static placeholders (their tools are later waves).
-
-// S3 presentational view. Takes a derived HomeViewModel + handlers.
+// mascot) · record well (pressed) with the 14-day terrain · check-in CTA · card slot
+// (steadying bridge) · in-progress reads · "When you need something now" bento ·
+// "Most read this month" · "Care & learning" doorways · mission footer. The page-load
+// SETTLE fires on the content; reduced motion = in place.
 
 type HomeViewProps = {
   model: HomeViewModel;
@@ -168,6 +167,9 @@ export function HomeView({
 
           {/* EDITORIAL MOST READ */}
           <MostRead />
+
+          {/* CARE & LEARNING — outward doorways */}
+          <CareAndLearning />
 
           {/* MISSION FOOTER */}
           <Text
