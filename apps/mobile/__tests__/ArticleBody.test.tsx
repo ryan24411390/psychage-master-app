@@ -58,3 +58,58 @@ describe('ArticleBody', () => {
     expect(tree).toBeTruthy();
   });
 });
+
+// Rich PEAF blocks — the web JSX is flattened to class-rich HTML; the native
+// renderers recover structure and must always keep the prose.
+const RICH = `<div>
+  <div class="not-prose rounded-2xl bg-gradient-to-br from-surface to-white border border-border">
+    <div class="grid grid-cols-2 divide-x divide-border">
+      <div class="flex flex-col items-center text-center p-6"><div class="text-4xl font-bold tabular-nums">30%</div><p class="text-sm">Adults affected</p></div>
+    </div>
+  </div>
+  <div class="not-prose my-8"><div class="relative pl-8"><div class="space-y-8">
+    <div class="relative"><div class="rounded-full bg-teal-100"><span class="font-bold text-teal-600">1</span></div><div class="pl-4"><h4>Breathe slowly</h4><div class="text-sm text-text-secondary"><p>Exhale longer than you inhale.</p></div></div></div>
+  </div></div></div>
+  <div class="not-prose my-8"><div class="grid grid-cols-2 rounded-2xl border border-border">
+    <div class="bg-red-50 p-6"><span class="uppercase text-red-700">Before</span><div class="text-sm text-text-secondary"><p>Skipping meals.</p></div></div>
+    <div class="bg-emerald-50 p-6"><span class="uppercase text-emerald-700">After</span><div class="text-sm text-text-secondary"><p>Eating regularly.</p></div></div>
+  </div></div>
+  <div class="not-prose my-8 scroll-mt-32"><div class="grid">
+    <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6"><span class="uppercase text-red-700">Myth</span><p class="text-base">Anxiety is a weakness.</p></div>
+    <div class="bg-teal-50 border-2 border-teal-200 rounded-2xl p-6"><span class="uppercase text-teal-700">Fact</span><p class="text-base">Anxiety is a common response.</p></div>
+  </div></div>
+  <div class="not-prose my-8 py-8 px-8 rounded-2xl bg-gradient-to-br from-teal-50 to-white border border-teal-100 text-center"><div class="space-y-3"><p>You are not alone.</p></div></div>
+</div>`;
+
+describe('ArticleBody — rich PEAF blocks', () => {
+  it('renders a StatCard value and label', () => {
+    render(<ArticleBody html={RICH} />);
+    expect(screen.getByText('30%')).toBeOnTheScreen();
+    expect(screen.getByText('Adults affected')).toBeOnTheScreen();
+  });
+
+  it('renders ProgressSteps title + content', () => {
+    render(<ArticleBody html={RICH} />);
+    expect(screen.getByText('Breathe slowly')).toBeOnTheScreen();
+    expect(screen.getByText('Exhale longer than you inhale.')).toBeOnTheScreen();
+  });
+
+  it('renders BeforeAfter labels + both panels', () => {
+    render(<ArticleBody html={RICH} />);
+    expect(screen.getByText('Before')).toBeOnTheScreen();
+    expect(screen.getByText('After')).toBeOnTheScreen();
+    expect(screen.getByText('Skipping meals.')).toBeOnTheScreen();
+    expect(screen.getByText('Eating regularly.')).toBeOnTheScreen();
+  });
+
+  it('renders MythVsFact text', () => {
+    render(<ArticleBody html={RICH} />);
+    expect(screen.getByText('Anxiety is a weakness.')).toBeOnTheScreen();
+    expect(screen.getByText('Anxiety is a common response.')).toBeOnTheScreen();
+  });
+
+  it('renders HighlightBox content', () => {
+    render(<ArticleBody html={RICH} />);
+    expect(screen.getByText('You are not alone.')).toBeOnTheScreen();
+  });
+});

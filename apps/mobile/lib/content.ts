@@ -18,11 +18,3 @@ export async function fetchMostRead(): Promise<Article[]> {
     }, 400); // slight delay to simulate network
   });
 }
-
-export const ARTICLE_TITLES: Record<string, string> = {
-  'anxiety-toolkit': 'Building Your Anxiety Management Toolkit',
-  'meaning-hard-year': 'Meaning after a hard year',
-  'alexithymia': 'When you can’t name a feeling',
-  'gender-identity-development': 'Gender Identity Development',
-  'animal-assisted-dementia': 'Animal-Assisted Therapy and Dementia'
-};

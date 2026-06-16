@@ -14,6 +14,7 @@ import { CT4_CONTENT } from '@/features/content/copy';
 import { MedicalDisclaimer } from '@/features/content/MedicalDisclaimer';
 import { ReviewedByCredit } from '@/features/content/ReviewedByCredit';
 import { getArticleBySlug } from '@/lib/articles';
+import { useReadingProgressTracker } from '@/lib/reading-progress-tracker';
 import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
@@ -35,6 +36,13 @@ export function ArticleReader({ slug }: { slug: string }) {
     queryKey: ['article', slug],
     queryFn: () => getArticleBySlug(slug),
     enabled: slug.length > 0,
+  });
+
+  // Record real reading progress as the user scrolls, tagged with the title +
+  // read-time so the Today "Pick up where you left off" rail renders real data.
+  const { onScroll } = useReadingProgressTracker(slug, {
+    title: article?.title,
+    readTime: article?.readTime ?? undefined,
   });
 
   return (
@@ -77,6 +85,8 @@ export function ArticleReader({ slug }: { slug: string }) {
           <ScrollView
             contentContainerClassName="gap-3 px-5 pb-12"
             showsVerticalScrollIndicator={false}
+            onScroll={onScroll}
+            scrollEventThrottle={16}
           >
             {article.heroImageUrl ? (
               <ArtPanel
