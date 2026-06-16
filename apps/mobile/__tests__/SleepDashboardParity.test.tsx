@@ -48,10 +48,13 @@ describe('SleepDashboard — weekly digest', () => {
     expect(screen.getByText(CT4_SLEEP.weeklyDigest.nightsLabel(3))).toBeTruthy();
   });
 
-  it('shows the empty-week line when the only nights are older than this week', () => {
+  it('shows the range-empty line when the only nights are older than the scored window', () => {
     const entries = [entry(isoDaysAgo(40))];
     renderWithProviders(<SleepDashboard entries={entries} settings={DEFAULT_SLEEP_SETTINGS} />);
-    expect(screen.getByText(CT4_SLEEP.weeklyDigest.emptyWeek)).toBeTruthy();
+    // The default scoring window is 7 days (web parity, 7/30/90 toggle). A
+    // 40-day-old night falls outside it, so the dashboard renders its own
+    // range-empty state and short-circuits before the weekly digest.
+    expect(screen.getByText('No nights logged in the last 7 days.')).toBeTruthy();
   });
 
   it('compares to the prior week when prior-week nights exist', () => {

@@ -20,7 +20,17 @@ jest.mock('expo-router', () => {
   // (jest forbids out-of-scope vars in a mock factory).
   const Stack = ({ children }: { children?: unknown }) => children ?? null;
   Stack.Screen = () => null;
-  return { Stack };
+  // RootLayout mounts <AuthEffects/>, which calls useRouter() via the
+  // deep-link + session-revalidate hooks (both use router.replace). Provide a
+  // no-op router stub so the cold-start chain mounts without throwing.
+  const router = {
+    replace: () => {},
+    push: () => {},
+    back: () => {},
+    navigate: () => {},
+    dismiss: () => {},
+  };
+  return { Stack, router, useRouter: () => router };
 });
 
 import RootLayout from '@/app/_layout';
