@@ -4,7 +4,7 @@ jest.mock('@/features/offline/useIsOnline', () => ({ useIsOnline: jest.fn() }));
 jest.mock('@/components/HeaderAvatar', () => ({ HeaderAvatar: () => null }));
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn() }, useFocusEffect: () => undefined }));
 
-import FindScreen from '@/app/(tabs)/find';
+import FindScreen from '@/app/(tabs)/(find)/find';
 import { useIsOnline } from '@/features/offline/useIsOnline';
 import {
   __resetDirectoryLocationCacheForTests,

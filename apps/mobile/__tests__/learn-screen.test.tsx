@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn() } }));
 
-import LearnScreen from '@/app/(tabs)/learn';
+import LearnScreen from '@/app/(tabs)/(learn)/learn';
 import { CT4_LEARN } from '@/features/learn/copy';
 
 import { renderWithProviders } from './_helpers';

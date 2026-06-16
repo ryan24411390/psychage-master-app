@@ -1,5 +1,6 @@
 import { type PressableProps, ActivityIndicator } from 'react-native';
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { useColorScheme } from 'nativewind';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { useHaptics } from '@/lib/haptic-context';
@@ -63,6 +64,23 @@ export function Button({
   ...props
 }: ButtonProps) {
   const { fireHaptic } = useHaptics();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
+  // Spinner color tracks textVariantClasses (AA contract): on the primary fill the
+  // label is white in light but flips to ink (#0C0A09) in dark where the fill
+  // brightens to #20B8A6 and white drops below AA; danger stays white both registers;
+  // secondary/ghost use the scheme-correct teal (#1A9B8C light, #20B8A6 dark).
+  const spinnerColor =
+    variant === 'primary'
+      ? isDark
+        ? '#0C0A09'
+        : '#ffffff'
+      : variant === 'danger'
+        ? '#ffffff'
+        : isDark
+          ? '#20B8A6'
+          : '#1A9B8C';
 
   const handlePress: PressableProps['onPress'] = (event) => {
     if (disabled || isLoading) return;
@@ -94,7 +112,7 @@ export function Button({
       >
         {isLoading ? (
           <Animated.View entering={FadeIn} exiting={FadeOut}>
-            <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? '#fff' : '#1A9B8C'} size="small" />
+            <ActivityIndicator color={spinnerColor} size="small" />
           </Animated.View>
         ) : typeof children === 'string' ? (
           <Animated.Text entering={FadeIn} exiting={FadeOut} className={textVariantClasses[variant]}>

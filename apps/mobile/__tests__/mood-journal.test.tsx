@@ -35,7 +35,7 @@ jest.mock('@/lib/mood-journal-store', () => ({
   }),
 }));
 
-import MoodJournalRoute from '@/app/tools/mood-journal';
+import MoodJournalRoute from '@/app/(tabs)/(compass)/tools/mood-journal';
 
 import { renderWithProviders } from './_helpers';
 
