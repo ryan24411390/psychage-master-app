@@ -12,6 +12,9 @@
       "node": "22.16.0",
       "ios": {
         "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "preview": {
