@@ -13,9 +13,14 @@ type EasingFactory = ReturnType<typeof Easing.bezier>;
 
 export const DURATION = {
   swift: 150,
-  base: 300,
-  calm: 600,
+  base: 250,
+  calm: 400,
   breath: 4000,
+  // Premium motion tokens:
+  quick: 120,
+  standard: 220,
+  expressive: 350,
+  hero: 500,
 } as const;
 
 export const EASING = {
@@ -23,6 +28,9 @@ export const EASING = {
   in: 'cubic-bezier(0.4, 0, 1, 1)',
   standard: 'cubic-bezier(0.2, 0, 0, 1)',
   breath: 'cubic-bezier(0.45, 0, 0.55, 1)',
+  // Premium curves:
+  magnetic: 'cubic-bezier(0.25, 1, 0.5, 1)',
+  expressive: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
 } as const;
 
 export const SPRING_PRESETS = {

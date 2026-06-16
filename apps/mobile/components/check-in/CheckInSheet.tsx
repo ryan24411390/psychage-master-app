@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { CHECK_IN_COPY } from '@/features/check-in/copy';
 import { colorForScheme, resolveColorRef } from '@/lib/a1-tokens';
-import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
+import { DURATION, useReducedMotion } from '@/lib/motion';
 
 // S4 the full check-in / edit sheet (one sheet, two modes). A bottom-sheet OVERLAY
 // under the global header (the Help-now pill stays reachable above the veil). The
@@ -81,10 +81,10 @@ export function CheckInSheet({
       />
       <Animated.View
         entering={
-          reduced ? undefined : SlideInDown.duration(DURATION.base).easing(easingFn('standard'))
+          reduced ? undefined : SlideInDown.springify().damping(20).stiffness(200).mass(0.8)
         }
         exiting={
-          reduced ? undefined : SlideOutDown.duration(DURATION.base).easing(easingFn('standard'))
+          reduced ? undefined : SlideOutDown.springify().damping(20).stiffness(200).mass(0.8)
         }
         className="rounded-t-xl bg-surface px-5 pb-6 pt-5 dark:bg-surface-dark"
       >

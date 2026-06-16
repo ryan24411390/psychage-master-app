@@ -1,5 +1,8 @@
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
+import type { CheckInEntry } from '@psychage/shared/check-in';
+import { getCheckInStore } from '@/lib/check-in-store';
 import {
   Activity,
   Anchor,
@@ -21,9 +24,32 @@ const HEADING = 'ml-0.5 font-display text-[16px] text-text-primary dark:text-tex
 
 export default function CompassScreen() {
   const t = CT4_COMPASS;
+  const [recent, setRecent] = useState<CheckInEntry[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const store = getCheckInStore();
+      setRecent(store.getRecent(3));
+    }, [])
+  );
+
+  const showStrugglingSuggestion = recent.length >= 2 && recent.filter(r => r.state <= 1).length >= 2;
+
   return (
     <ScreenShell edges={['bottom']}>
       <ScrollView contentContainerClassName="gap-6 pb-10 pt-4" showsVerticalScrollIndicator={false}>
+        {showStrugglingSuggestion && (
+          <View className="gap-3">
+            <HeroTile
+              title="You've logged some tough moments"
+              feature="The Toolkit is here when you need to steady yourself."
+              icon={Backpack}
+              onPress={() => router.push(COMPASS_ROUTES.toolkit)}
+              testID="compass-predictive-toolkit"
+            />
+          </View>
+        )}
+
         {/* Right now */}
         <View className="gap-3">
           <Text variant="heading" className={HEADING}>

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedScrollHandler,
@@ -67,6 +67,11 @@ export function AnimatedScrollView({
         onScroll={scrollHandler}
         scrollEventThrottle={scrollEventThrottle}
         contentContainerStyle={{ paddingTop: headerImage ? headerHeight : 0 }}
+        decelerationRate="normal"
+        alwaysBounceVertical={true}
+        bounces={true}
+        showsVerticalScrollIndicator={false}
+        overScrollMode="always"
         {...props}
       >
         <View className="bg-surface dark:bg-surface-dark min-h-screen rounded-t-3xl shadow-sm z-10">

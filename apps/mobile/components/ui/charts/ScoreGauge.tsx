@@ -1,4 +1,5 @@
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { useEffect, useState } from 'react';
+import Animated, { FadeIn, useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Circle, Text as SvgText } from 'react-native-svg';
 
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
@@ -29,6 +30,7 @@ export interface ScoreGaugeProps {
 }
 
 const STROKE = 12;
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 export function ScoreGauge({
   value,
@@ -49,7 +51,47 @@ export function ScoreGauge({
   const cy = size / 2;
   const r = (size - STROKE) / 2;
   const circumference = 2 * Math.PI * r;
-  const dashOffset = circumference * (1 - clamped / 100);
+
+  const progress = useSharedValue(0);
+  const [score, setScore] = useState(0);
+
+  useEffect(() => {
+    progress.value = 0;
+    if (reduced) {
+      progress.value = 1;
+      setScore(clamped);
+      return;
+    }
+    progress.value = withTiming(1, { duration: DURATION.calm, easing: easingFn('out') });
+
+    const start = 0;
+    const end = clamped;
+    const duration = DURATION.calm;
+    const startTime = Date.now();
+    let timer: number;
+
+    const update = () => {
+      const now = Date.now();
+      const elapsed = now - startTime;
+      if (elapsed >= duration) {
+        setScore(end);
+      } else {
+        const progressVal = elapsed / duration;
+        const easeProgress = progressVal * (2 - progressVal); // Ease out quad
+        setScore(Math.round(start + (end - start) * easeProgress));
+        timer = requestAnimationFrame(update);
+      }
+    };
+    timer = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(timer);
+  }, [clamped, reduced, progress]);
+
+  const animatedCircleProps = useAnimatedProps(() => {
+    const dashOffset = circumference * (1 - (clamped / 100) * progress.value);
+    return {
+      strokeDashoffset: dashOffset,
+    };
+  });
 
   const track = trackColor ?? tc.inkTertiary;
   const fill = fillColor ?? tc.primary;
@@ -60,8 +102,8 @@ export function ScoreGauge({
   const a11y =
     accessibilityLabel ??
     (hasValue
-      ? `Score ${Math.round(clamped)} out of 100${label ? `, ${label}` : ''}`
-      : 'No score yet');
+       ? `Score ${Math.round(clamped)} out of 100${label ? `, ${label}` : ''}`
+       : 'No score yet');
 
   return (
     <Animated.View
@@ -76,7 +118,7 @@ export function ScoreGauge({
         <Circle cx={cx} cy={cy} r={r} stroke={track} strokeWidth={STROKE} fill="none" />
         {/* value arc — rotated -90° so the sweep starts at 12 o'clock */}
         {hasValue ? (
-          <Circle
+          <AnimatedCircle
             cx={cx}
             cy={cy}
             r={r}
@@ -85,7 +127,7 @@ export function ScoreGauge({
             strokeLinecap="round"
             fill="none"
             strokeDasharray={circumference}
-            strokeDashoffset={dashOffset}
+            animatedProps={animatedCircleProps}
             transform={`rotate(-90 ${cx} ${cy})`}
           />
         ) : null}
@@ -98,7 +140,7 @@ export function ScoreGauge({
           fill={tc.ink}
           textAnchor="middle"
         >
-          {hasValue ? String(Math.round(clamped)) : '—'}
+          {hasValue ? String(score) : '—'}
         </SvgText>
         {label ? (
           <SvgText

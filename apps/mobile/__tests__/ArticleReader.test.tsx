@@ -121,4 +121,12 @@ describe('S22 ArticleReader', () => {
     await screen.findByText('Why your chest gets tight');
     expect(screen.queryByTestId('article-references')).toBeNull();
   });
+
+  it('renders the reading progress bar when an article is loaded', async () => {
+    (getArticleBySlug as jest.Mock).mockResolvedValue(ARTICLE);
+    renderReader(<ArticleReader slug={ARTICLE.slug} />);
+    await screen.findByText('Why your chest gets tight');
+    expect(screen.getByTestId('reading-progress-container')).toBeTruthy();
+    expect(screen.getByTestId('reading-progress-bar')).toBeTruthy();
+  });
 });

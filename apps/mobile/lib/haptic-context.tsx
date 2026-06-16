@@ -33,10 +33,13 @@ export function HapticProvider({ children }: { children: ReactNode }) {
   return <HapticContext.Provider value={value}>{children}</HapticContext.Provider>;
 }
 
+const fallbackValue: HapticContextValue = {
+  enabled: false,
+  setEnabled: () => {},
+  fireHaptic: () => {},
+};
+
 export function useHaptics(): HapticContextValue {
   const value = useContext(HapticContext);
-  if (!value) {
-    throw new Error('useHaptics must be used within a HapticProvider');
-  }
-  return value;
+  return value ?? fallbackValue;
 }

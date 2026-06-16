@@ -1,5 +1,5 @@
 import { ChevronRight } from 'lucide-react-native';
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';

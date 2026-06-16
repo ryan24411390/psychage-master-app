@@ -1,11 +1,14 @@
 import * as Haptics from 'expo-haptics';
+import { Platform } from 'react-native';
 
+import PsychageHapticsModule from '../modules/psychage-haptics';
 export type HapticEvent =
   | 'tab'
   | 'affirm'
   | 'confirm'
   | 'celebrate'
   | 'alert'
+  | 'error'
   | 'complete'
   | 'breathIn'
   | 'breathOut';
@@ -39,10 +42,9 @@ const sequences: Record<'complete' | 'breathIn' | 'breathOut', SequenceStep[]> =
  *
  * No-haptic zones (DESIGN.mobile.md §3.3, tokens haptic._noHapticZones) —
  * guard at the CALL SITE, not here (the lib has no surface context):
- *   1. Error states — warm copy + visual only; no haptic.error token exists.
- *   2. High-frequency micro-interactions — typing keystrokes, slider drag
+ *   1. High-frequency micro-interactions — typing keystrokes, slider drag
  *      deltas, scroll velocity. Aggregated end-of-gesture OK; per-event not.
- *   3. Background notifications — OS notification haptic owns this surface.
+ *   2. Background notifications — OS notification haptic owns this surface.
  *
  * `isEnabled` is checked before each step (including inside sequenced setTimeout
  * callbacks) so a mid-sequence toggle-off halts the rest of the pattern.
@@ -69,10 +71,29 @@ export function fireHaptic(event: HapticEvent, isEnabled: () => boolean): void {
     case 'alert':
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning); // → haptic.alert._expo
       return;
+    case 'error':
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); // → haptic.error._expo
+      return;
     case 'complete':
+      if (Platform.OS === 'ios') {
+        PsychageHapticsModule.playCompleteSequence();
+      } else {
+        runSequence(sequences[event], isEnabled);
+      }
+      return;
     case 'breathIn':
+      if (Platform.OS === 'ios') {
+        PsychageHapticsModule.playBreathIn();
+      } else {
+        runSequence(sequences[event], isEnabled);
+      }
+      return;
     case 'breathOut':
-      runSequence(sequences[event], isEnabled);
+      if (Platform.OS === 'ios') {
+        PsychageHapticsModule.playBreathOut();
+      } else {
+        runSequence(sequences[event], isEnabled);
+      }
       return;
   }
 }

@@ -1,4 +1,5 @@
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, { FadeIn, useAnimatedProps, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 import Svg, { Circle, G, Line, Polygon, Text as SvgText } from 'react-native-svg';
 
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
@@ -28,10 +29,41 @@ export interface DomainRadarProps {
 }
 
 const RINGS = [25, 50, 75, 100];
+const AnimatedPolygon = Animated.createAnimatedComponent(Polygon);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 function polar(cx: number, cy: number, radius: number, angleDeg: number): { x: number; y: number } {
   const a = (angleDeg * Math.PI) / 180;
   return { x: cx + radius * Math.cos(a), y: cy + radius * Math.sin(a) };
+}
+
+function RadarDot({
+  cx,
+  cy,
+  radius,
+  angle,
+  value,
+  progress,
+  fill,
+}: {
+  cx: number;
+  cy: number;
+  radius: number;
+  angle: number;
+  value: number;
+  progress: SharedValue<number>;
+  fill: string;
+}) {
+  const animatedProps = useAnimatedProps(() => {
+    const clamped = Math.max(0, Math.min(100, value)) * progress.value;
+    const p = polar(cx, cy, radius * (clamped / 100), angle);
+    return {
+      cx: p.x,
+      cy: p.y,
+    };
+  });
+
+  return <AnimatedCircle r={3} fill={fill} animatedProps={animatedProps} />;
 }
 
 export function DomainRadar({
@@ -63,13 +95,29 @@ export function DomainRadar({
       })
       .join(' ');
 
-  const dataPoly = points
-    .map((pt, i) => {
-      const clamped = Math.max(0, Math.min(100, pt.value));
-      const p = polar(cx, cy, radius * (clamped / 100), angleAt(i));
-      return `${p.x},${p.y}`;
-    })
-    .join(' ');
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = 0;
+    if (reduced) {
+      progress.value = 1;
+      return;
+    }
+    progress.value = withTiming(1, { duration: DURATION.calm, easing: easingFn('out') });
+  }, [reduced, progress]);
+
+  const animatedPolygonProps = useAnimatedProps(() => {
+    const pointsStr = points
+      .map((pt, i) => {
+        const clamped = Math.max(0, Math.min(100, pt.value)) * progress.value;
+        const p = polar(cx, cy, radius * (clamped / 100), angleAt(i));
+        return `${p.x},${p.y}`;
+      })
+      .join(' ');
+    return {
+      points: pointsStr,
+    };
+  });
 
   const a11y =
     accessibilityLabel ??
@@ -115,19 +163,26 @@ export function DomainRadar({
                 );
               })}
               {/* data polygon */}
-              <Polygon
-                points={dataPoly}
+              <AnimatedPolygon
                 fill={fill}
                 fillOpacity={0.18}
                 stroke={fill}
                 strokeWidth={2}
+                animatedProps={animatedPolygonProps}
               />
               {/* vertices */}
-              {points.map((pt, i) => {
-                const clamped = Math.max(0, Math.min(100, pt.value));
-                const p = polar(cx, cy, radius * (clamped / 100), angleAt(i));
-                return <Circle key={`dot-${pt.label}`} cx={p.x} cy={p.y} r={3} fill={fill} />;
-              })}
+              {points.map((pt, i) => (
+                <RadarDot
+                  key={`dot-${pt.label}`}
+                  cx={cx}
+                  cy={cy}
+                  radius={radius}
+                  angle={angleAt(i)}
+                  value={pt.value}
+                  progress={progress}
+                  fill={fill}
+                />
+              ))}
               {/* labels */}
               {points.map((pt, i) => {
                 const lp = polar(cx, cy, radius + 18, angleAt(i));

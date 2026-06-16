@@ -1,7 +1,8 @@
 import { VALENCE_MAX, VALENCE_MIN } from '@psychage/shared/mood-journal';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 
 // A 1–10 pleasantness picker (the optional valence step). Single-select, calm by
 // design: a teal BORDER + teal numeral when chosen, neutral otherwise — no color
@@ -28,19 +29,21 @@ export function ValenceScale({ value, onChange, lowLabel, highLabel }: ValenceSc
         {SCALE.map((n) => {
           const selected = value === n;
           return (
-            <Pressable
+            <AnimatedPressable
               key={n}
               accessibilityRole="button"
               accessibilityState={{ selected }}
               accessibilityLabel={`Rate ${n} of ${VALENCE_MAX}`}
               testID={`valence-chip-${n}`}
               onPress={() => onChange(n)}
+              haptic="tab"
+              scaleTo={0.93}
+              springPreset="magnetic"
               className={`h-11 w-11 items-center justify-center rounded-full border ${
                 selected
-                  ? 'border-primary dark:border-primary-dark'
-                  : 'border-border dark:border-border-dark'
+                  ? 'border-primary dark:border-primary-dark bg-primary/5 dark:bg-primary-dark/5'
+                  : 'border-border dark:border-border-dark bg-transparent'
               }`}
-              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
               <Text
                 variant="bodySm"
@@ -52,7 +55,7 @@ export function ValenceScale({ value, onChange, lowLabel, highLabel }: ValenceSc
               >
                 {n}
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           );
         })}
       </View>

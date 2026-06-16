@@ -1,4 +1,5 @@
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, { FadeIn, useAnimatedProps, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 import Svg, { Circle, Line, Polyline, Text as SvgText } from 'react-native-svg';
 
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
@@ -30,8 +31,74 @@ export interface TrendLineProps {
 }
 
 const PAD = 8;
+const AnimatedPolyline = Animated.createAnimatedComponent(Polyline);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 type PlotPoint = { readonly i: number; readonly x: number; readonly y: number };
+
+const segmentLength = (seg: PlotPoint[]) => {
+  let len = 0;
+  for (let i = 1; i < seg.length; i++) {
+    const p1 = seg[i - 1];
+    const p2 = seg[i];
+    if (p1 && p2) {
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      len += Math.sqrt(dx * dx + dy * dy);
+    }
+  }
+  return len || 1;
+};
+
+function AnimatedSegment({
+  points,
+  len,
+  progress,
+  stroke,
+}: {
+  points: string;
+  len: number;
+  progress: SharedValue<number>;
+  stroke: string;
+}) {
+  const animatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: len * (1 - progress.value),
+  }));
+  return (
+    <AnimatedPolyline
+      points={points}
+      fill="none"
+      stroke={stroke}
+      strokeWidth={2}
+      strokeLinejoin="round"
+      strokeLinecap="round"
+      strokeDasharray={len}
+      animatedProps={animatedProps}
+    />
+  );
+}
+
+function AnimatedDot({
+  cx,
+  cy,
+  progress,
+  stroke,
+  delay,
+}: {
+  cx: number;
+  cy: number;
+  progress: SharedValue<number>;
+  stroke: string;
+  delay: number;
+}) {
+  const animatedProps = useAnimatedProps(() => {
+    const scale = Math.max(0, Math.min(1, (progress.value - delay) / (1 - delay || 1)));
+    return {
+      r: 3 * scale,
+    };
+  });
+  return <AnimatedCircle cx={cx} cy={cy} fill={stroke} animatedProps={animatedProps} />;
+}
 
 export function TrendLine({
   data,
@@ -75,6 +142,17 @@ export function TrendLine({
   if (run.length > 0) segments.push(run);
   const dots = segments.flat();
 
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = 0;
+    if (reduced) {
+      progress.value = 1;
+      return;
+    }
+    progress.value = withTiming(1, { duration: DURATION.calm, easing: easingFn('out') });
+  }, [reduced, progress]);
+
   const a11y =
     accessibilityLabel ??
     (isEmpty ? 'No trend data yet' : `Trend line with ${present.length} of ${n} points`);
@@ -114,21 +192,31 @@ export function TrendLine({
             {segments.map((seg) => {
               const first = seg[0];
               if (!first || seg.length < 2) return null;
+              const pointsStr = seg.map((p) => `${p.x},${p.y}`).join(' ');
+              const len = segmentLength(seg);
               return (
-                <Polyline
+                <AnimatedSegment
                   key={`seg-${first.i}`}
-                  points={seg.map((p) => `${p.x},${p.y}`).join(' ')}
-                  fill="none"
+                  points={pointsStr}
+                  len={len}
+                  progress={progress}
                   stroke={stroke}
-                  strokeWidth={2}
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
                 />
               );
             })}
-            {dots.map((p) => (
-              <Circle key={`dot-${p.i}`} cx={p.x} cy={p.y} r={3} fill={stroke} />
-            ))}
+            {dots.map((p) => {
+              const delay = n > 1 ? (p.i / (n - 1)) * 0.7 : 0;
+              return (
+                <AnimatedDot
+                  key={`dot-${p.i}`}
+                  cx={p.x}
+                  cy={p.y}
+                  progress={progress}
+                  stroke={stroke}
+                  delay={delay}
+                />
+              );
+            })}
           </>
         )}
       </Svg>

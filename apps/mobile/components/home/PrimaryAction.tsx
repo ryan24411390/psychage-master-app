@@ -1,8 +1,8 @@
-import React from 'react';
+
 import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
-import { Tool } from '@/lib/tool-usage-store';
+import type { Tool } from '@/lib/tool-usage-store';
 import { Link } from 'expo-router';
 import { Check } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';

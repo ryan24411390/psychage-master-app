@@ -1,5 +1,5 @@
-import React, { useState, useEffect, forwardRef } from 'react';
-import { TextInput, TextInputProps, View, Text } from 'react-native';
+import { useState, useEffect, forwardRef } from 'react';
+import { TextInput, type TextInputProps, View, } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,

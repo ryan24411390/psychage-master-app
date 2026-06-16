@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { ViewProps } from 'react-native';
+import { useEffect } from 'react';
+import type { ViewProps } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -24,8 +24,8 @@ export function Skeleton({ className, style, ...props }: SkeletonProps) {
       return;
     }
     opacity.value = withRepeat(
-      withTiming(0.45, { 
-        duration: 1200,
+      withTiming(0.6, { 
+        duration: 1000,
         easing: Easing.inOut(Easing.ease)
       }),
       -1,

@@ -28,7 +28,7 @@ import type {
 export function cleanDisplayName(name: string | null | undefined): string {
   if (!name) return '';
   return name
-    .replace(/^[\s/:.\-]+|[\s/:.\-]+$/g, '')
+    .replace(/^[\s/:.-]+|[\s/:.-]+$/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }

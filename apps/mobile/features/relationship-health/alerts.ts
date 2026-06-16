@@ -34,8 +34,8 @@ export function checkDVSafety(
   trustSafetySubScore: number,
   fourHorsemen: FourHorsemenResult | null,
 ): DVAlertResult {
-  const safetyRaw = answers['p_ts_02'] ?? 3;
-  const contemptRaw = answers['p_ap_02'] ?? 3;
+  const safetyRaw = answers.p_ts_02 ?? 3;
+  const contemptRaw = answers.p_ap_02 ?? 3;
 
   // Trigger 1: Very low safety score is an immediate critical signal
   if (safetyRaw <= 2) {

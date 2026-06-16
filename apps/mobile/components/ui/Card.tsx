@@ -1,8 +1,8 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { View, type ViewProps } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
-import { useReducedMotion, DURATION, easingFn } from '@/lib/motion';
+import { useReducedMotion, } from '@/lib/motion';
 
 // Surface primitive — mobile port of web components/ui/Card.tsx (parity remediation).
 // Web anatomy kept 1:1 (rounded-xl, p-6, Header/Body/Footer/Icon sub-components),
@@ -61,6 +61,8 @@ export function Card({
         onPress={onPress}
         entering={entering}
         scaleTo={0.97}
+        springPreset="magnetic"
+        tilt={true}
         className={composed}
         style={({ pressed }: { pressed: boolean }) => ({
           opacity: pressed ? 0.95 : 1,

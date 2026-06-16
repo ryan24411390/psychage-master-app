@@ -1,7 +1,6 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
-import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 
 // A labelled group of settings rows. Optional heading + a hairline-bordered

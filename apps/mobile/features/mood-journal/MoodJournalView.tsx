@@ -31,7 +31,9 @@ export function MoodJournalView({ momentStore }: MoodJournalViewProps) {
     // keeps the sheet open with the selection intact. On success we refresh + close.
     momentStore.addMoment(input);
     setMoments(momentStore.getAll());
-    setSheetOpen(false);
+    setTimeout(() => {
+      setSheetOpen(false);
+    }, 750);
   };
 
   const handleDelete = (id: string) => {

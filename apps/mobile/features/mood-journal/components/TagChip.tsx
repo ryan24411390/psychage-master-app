@@ -1,5 +1,4 @@
-import { Pressable } from 'react-native';
-
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 
 // A multi-select tag chip (emotions / triggers). Calm by design: a teal BORDER +
@@ -16,16 +15,20 @@ type TagChipProps = {
 
 export function TagChip({ label, selected, onPress, testID }: TagChipProps) {
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
       accessibilityLabel={label}
       testID={testID}
       onPress={onPress}
+      haptic="affirm"
+      scaleTo={0.95}
+      springPreset="magnetic"
       className={`min-h-[44px] flex-row items-center justify-center rounded-full border px-4 ${
-        selected ? 'border-primary dark:border-primary-dark' : 'border-border dark:border-border-dark'
+        selected
+          ? 'border-primary dark:border-primary-dark bg-primary/5 dark:bg-primary-dark/5'
+          : 'border-border dark:border-border-dark bg-transparent'
       }`}
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
       <Text
         variant="bodySm"
@@ -37,6 +40,6 @@ export function TagChip({ label, selected, onPress, testID }: TagChipProps) {
       >
         {label}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

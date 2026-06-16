@@ -135,9 +135,9 @@ export function computeAllSubDimensionScores(
  */
 export function computeFourHorsemen(answers: Record<string, number>): FourHorsemenResult {
   // Raw values (defaulting to 3 = neutral)
-  const criticismRaw = answers['p_cq_01'] ?? 3;
-  const stonewallingRaw = answers['p_cq_02'] ?? 3;
-  const contemptRaw = answers['p_ap_02'] ?? 3;
+  const criticismRaw = answers.p_cq_01 ?? 3;
+  const stonewallingRaw = answers.p_cq_02 ?? 3;
+  const contemptRaw = answers.p_ap_02 ?? 3;
 
   // Transform: for forward-scored items, lower response = higher horseman risk
   const criticismScore = 6 - criticismRaw;

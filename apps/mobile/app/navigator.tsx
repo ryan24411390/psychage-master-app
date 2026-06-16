@@ -35,7 +35,7 @@ export default function NavigatorScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
+      <Stack.Screen options={{ headerShown: false, animation: 'slide_from_bottom' }} />
       <NavigatorFlow
         kb={NAVIGATOR_KB}
         runNavigator={(inputs: UserSymptomInput[]) =>

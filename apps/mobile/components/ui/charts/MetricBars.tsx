@@ -1,4 +1,5 @@
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, { FadeIn, useAnimatedProps, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 import Svg, { G, Rect, Text as SvgText } from 'react-native-svg';
 
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
@@ -33,6 +34,46 @@ const LABEL_BAND = 20; // px reserved at the bottom for x-axis labels
 const GAP = 8;
 const RADIUS = 4;
 
+const AnimatedRect = Animated.createAnimatedComponent(Rect);
+
+function AnimatedBar({
+  x,
+  finalH,
+  plotH,
+  bandW,
+  color,
+  progress,
+  delay,
+}: {
+  x: number;
+  finalH: number;
+  plotH: number;
+  bandW: number;
+  color: string;
+  progress: SharedValue<number>;
+  delay: number;
+}) {
+  const animatedProps = useAnimatedProps(() => {
+    const scale = Math.max(0, Math.min(1, (progress.value - delay) / (1 - delay || 1)));
+    const h = finalH * scale;
+    const y = plotH - h;
+    return {
+      height: h,
+      y: y,
+    };
+  });
+
+  return (
+    <AnimatedRect
+      x={x}
+      width={bandW}
+      rx={RADIUS}
+      fill={color}
+      animatedProps={animatedProps}
+    />
+  );
+}
+
 export function MetricBars({
   bars,
   width = 280,
@@ -49,6 +90,17 @@ export function MetricBars({
   const n = bars.length;
   const bandW = n > 0 ? (width - GAP * (n - 1)) / n : 0;
   const max = maxValue ?? Math.max(1, ...bars.map((b) => (Number.isFinite(b.value) ? b.value : 0)));
+
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = 0;
+    if (reduced) {
+      progress.value = 1;
+      return;
+    }
+    progress.value = withTiming(1, { duration: DURATION.calm, easing: easingFn('out') });
+  }, [reduced, progress]);
 
   const a11y =
     accessibilityLabel ??
@@ -80,10 +132,18 @@ export function MetricBars({
             const v = Number.isFinite(b.value) ? Math.max(0, b.value) : 0;
             const h = max > 0 ? (v / max) * plotH : 0;
             const x = i * (bandW + GAP);
-            const y = plotH - h;
+            const delay = n > 1 ? (i / (n - 1)) * 0.4 : 0;
             return (
               <G key={`bar-${b.label}`}>
-                <Rect x={x} y={y} width={bandW} height={h} rx={RADIUS} fill={b.color ?? tc.primary} />
+                <AnimatedBar
+                  x={x}
+                  finalH={h}
+                  plotH={plotH}
+                  bandW={bandW}
+                  color={b.color ?? tc.primary}
+                  progress={progress}
+                  delay={delay}
+                />
                 <SvgText
                   x={x + bandW / 2}
                   y={height - 6}

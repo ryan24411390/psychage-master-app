@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 // Safe-area + padding wrapper for tab-root screens. Consumes themed background

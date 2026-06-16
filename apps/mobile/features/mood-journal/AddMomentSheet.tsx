@@ -6,11 +6,11 @@ import {
   TRIGGER_TAGS,
   type TriggerTag,
 } from '@psychage/shared/mood-journal';
-import { X } from 'lucide-react-native';
+import { X, Check } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
-import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInUp, SlideInDown, ZoomIn } from 'react-native-reanimated';
 
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
@@ -20,6 +20,7 @@ import { CT4_MOOD_JOURNAL } from '@/features/mood-journal/copy';
 import { colorForScheme, resolveColorRef } from '@/lib/a1-tokens';
 import { colors } from '@/lib/colors';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
+import { useHaptics } from '@/lib/haptic-context';
 
 // Add-a-moment bottom sheet — an OVERLAY under the global header (the Help-now pill
 // stays reachable above the veil, SR-2). A short 2-STEP wizard:
@@ -42,12 +43,14 @@ type Step = 0 | 1;
 export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
   const reduced = useReducedMotion();
   const { colorScheme } = useColorScheme();
+  const { fireHaptic } = useHaptics();
   const [step, setStep] = useState<Step>(0);
   const [valence, setValence] = useState<number | null>(null);
   const [emotions, setEmotions] = useState<EmotionTag[]>([]);
   const [triggers, setTriggers] = useState<TriggerTag[]>([]);
   const [note, setNote] = useState('');
   const [saveFailed, setSaveFailed] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const t = CT4_MOOD_JOURNAL.add;
   const placeholderColor = colorForScheme(resolveColorRef('color.text.tertiary'), colorScheme);
@@ -72,11 +75,36 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
         ...(valence !== null ? { valence } : {}),
         ...(trimmed.length > 0 ? { note: trimmed } : {}),
       });
-      // Success → the parent unmounts this sheet.
+      setIsSaved(true);
+      fireHaptic('celebrate');
     } catch {
       setSaveFailed(true);
     }
   };
+
+  if (isSaved) {
+    return (
+      <Animated.View
+        entering={reduced ? undefined : FadeIn.duration(DURATION.swift)}
+        className="absolute inset-0 z-40 justify-end bg-charcoal-900/40"
+      >
+        <Animated.View
+          entering={reduced ? undefined : SlideInDown.duration(DURATION.base)}
+          className="rounded-t-xl bg-surface px-5 py-12 dark:bg-surface-dark items-center justify-center gap-4 min-h-[300px]"
+        >
+          <Animated.View
+            entering={reduced ? undefined : ZoomIn.springify().damping(12).stiffness(150)}
+            className="w-16 h-16 rounded-full bg-primary/25 dark:bg-primary-dark/25 items-center justify-center"
+          >
+            <Check size={36} color={colorScheme === 'dark' ? '#20B8A6' : '#1A9B8C'} strokeWidth={3} />
+          </Animated.View>
+          <Text variant="headingLg" className="text-center mt-2">
+            Saved.
+          </Text>
+        </Animated.View>
+      </Animated.View>
+    );
+  }
 
   return (
     <Animated.View

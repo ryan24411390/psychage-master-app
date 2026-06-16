@@ -1,9 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import Animated, {
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  runOnJS,
+} from 'react-native-reanimated';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { ScreenEntrance } from '@/components/ui/ScreenEntrance';
 import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
@@ -45,6 +52,42 @@ export function ArticleReader({ slug }: { slug: string }) {
     readTime: article?.readTime ?? undefined,
   });
 
+  const scrollProgressVal = useSharedValue(0);
+
+  const runOnScrollJS = (offsetY: number, contentHeight: number, layoutHeight: number) => {
+    const fakeEvent = {
+      nativeEvent: {
+        contentOffset: { y: offsetY, x: 0 },
+        contentSize: { height: contentHeight, width: 0 },
+        layoutMeasurement: { height: layoutHeight, width: 0 },
+      },
+    } as any;
+    onScroll(fakeEvent);
+  };
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      const offsetY = event.contentOffset.y;
+      const contentHeight = event.contentSize.height;
+      const layoutHeight = event.layoutMeasurement.height;
+      const scrollable = contentHeight - layoutHeight;
+      let progress = 0;
+      if (scrollable > 0) {
+        progress = offsetY / scrollable;
+      } else {
+        progress = 1;
+      }
+      scrollProgressVal.value = Math.max(0, Math.min(1, progress));
+      runOnJS(runOnScrollJS)(offsetY, contentHeight, layoutHeight);
+    },
+  });
+
+  const animatedProgressStyle = useAnimatedStyle(() => {
+    return {
+      width: `${scrollProgressVal.value * 100}%`,
+    };
+  });
+
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
@@ -67,6 +110,17 @@ export function ArticleReader({ slug }: { slug: string }) {
         <BookmarkSaveSlot resourceType="article" resourceId={slug} testID="article-save" />
       </View>
 
+      <View className="h-1 w-full bg-border/20 dark:bg-border-dark/20 overflow-hidden" testID="reading-progress-container">
+        <Animated.View
+          style={[
+            { height: '100%' },
+            animatedProgressStyle,
+          ]}
+          className="bg-primary dark:bg-primary-dark"
+          testID="reading-progress-bar"
+        />
+      </View>
+
       {isLoading ? (
         <View className="flex-1 items-center justify-center" testID="article-loading">
           <AppLoader />
@@ -82,57 +136,59 @@ export function ArticleReader({ slug }: { slug: string }) {
         </View>
       ) : (
         <ReadingTextSizeProvider>
-          <ScrollView
+          <Animated.ScrollView
             contentContainerClassName="gap-3 px-5 pb-12"
             showsVerticalScrollIndicator={false}
-            onScroll={onScroll}
+            onScroll={scrollHandler}
             scrollEventThrottle={16}
           >
-            {article.heroImageUrl ? (
-              <ArtPanel
-                artKey={article.slug}
-                imageUrl={article.heroImageUrl}
-                className="aspect-[16/9] rounded-xl"
-              />
-            ) : null}
+            <ScreenEntrance staggerMs={80}>
+              {article.heroImageUrl ? (
+                <ArtPanel
+                  artKey={article.slug}
+                  imageUrl={article.heroImageUrl}
+                  className="aspect-[16/9] rounded-xl"
+                />
+              ) : null}
 
-            <View className="flex-row items-center gap-2">
-              <Text
-                variant="caption"
-                className="rounded-full bg-surface-active px-2 py-0.5 text-text-secondary dark:bg-surface-active-dark dark:text-text-secondary-dark"
-              >
-                {article.categoryName}
-              </Text>
-              {article.readTime ? (
-                <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
-                  {`${article.readTime} min read`}
+              <View className="flex-row items-center gap-2">
+                <Text
+                  variant="caption"
+                  className="rounded-full bg-surface-active px-2 py-0.5 text-text-secondary dark:bg-surface-active-dark dark:text-text-secondary-dark"
+                >
+                  {article.categoryName}
+                </Text>
+                {article.readTime ? (
+                  <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
+                    {`${article.readTime} min read`}
+                  </Text>
+                ) : null}
+              </View>
+
+              <Text variant="headingLg">{article.title}</Text>
+              {article.subtitle ? (
+                <Text
+                  variant="bodyMedium"
+                  className="text-text-secondary dark:text-text-secondary-dark"
+                >
+                  {article.subtitle}
                 </Text>
               ) : null}
-            </View>
 
-            <Text variant="headingLg">{article.title}</Text>
-            {article.subtitle ? (
-              <Text
-                variant="bodyMedium"
-                className="text-text-secondary dark:text-text-secondary-dark"
-              >
-                {article.subtitle}
-              </Text>
-            ) : null}
+              <View className="gap-0.5">
+                <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+                  {`${article.authorName} · ${article.authorRole}`}
+                </Text>
+                <ReviewedByCredit />
+              </View>
 
-            <View className="gap-0.5">
-              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
-                {`${article.authorName} · ${article.authorRole}`}
-              </Text>
-              <ReviewedByCredit />
-            </View>
+              <MedicalDisclaimer />
 
-            <MedicalDisclaimer />
+              <ArticleBody html={article.contentHtml} />
 
-            <ArticleBody html={article.contentHtml} />
-
-            <Citations items={article.citations} />
-          </ScrollView>
+              <Citations items={article.citations} />
+            </ScreenEntrance>
+          </Animated.ScrollView>
         </ReadingTextSizeProvider>
       )}
     </View>

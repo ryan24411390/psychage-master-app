@@ -20,3 +20,5 @@ jest.mock('@shopify/flash-list');
 // plain View that re-exposes AppLoader's props so its animation + reduced-motion
 // wiring is assertable. No test mounts a real LottieView.
 jest.mock('lottie-react-native');
+
+

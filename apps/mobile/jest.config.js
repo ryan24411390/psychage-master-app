@@ -7,6 +7,8 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testMatch: ['**/__tests__/**/*.test.tsx'],
   moduleNameMapper: {
+    // Redirect haptics native module to Jest mock file
+    'modules/psychage-haptics': '<rootDir>/jest/haptics-mock.js',
     // CSS side-effect imports (global.css) → no-op; the stylesheet is a Metro
     // transformer artifact, absent under jest.
     '\\.css$': '<rootDir>/jest/style-mock.js',

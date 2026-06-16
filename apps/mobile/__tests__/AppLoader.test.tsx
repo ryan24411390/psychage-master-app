@@ -5,7 +5,13 @@ import { useReducedMotion } from '@/lib/motion';
 
 // Reduced-motion is the only branch we drive; everything else (theme colors,
 // nativewind scheme) resolves to its light default under the runner.
-jest.mock('@/lib/motion', () => ({ useReducedMotion: jest.fn(() => false) }));
+jest.mock('@/lib/motion', () => {
+  const actual = jest.requireActual('@/lib/motion');
+  return {
+    ...actual,
+    useReducedMotion: jest.fn(() => false),
+  };
+});
 
 const mockReducedMotion = useReducedMotion as jest.Mock;
 

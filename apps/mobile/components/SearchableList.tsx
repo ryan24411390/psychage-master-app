@@ -13,6 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Text } from '@/components/ui/Text';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { colors } from '@/lib/colors';
 import { useReducedMotion } from '@/lib/motion';
 
@@ -118,6 +119,8 @@ export function SearchableList<T>({
 
       <FlashList
         data={filtered}
+        // @ts-expect-error - FlashList JSX children typing mismatch under React 19
+        estimatedItemSize={44}
         keyExtractor={getKey}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
@@ -138,12 +141,14 @@ export function SearchableList<T>({
 
           return (
             <Animated.View entering={entering}>
-              <Pressable
+              <AnimatedPressable
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 onPress={() => onSelect(item)}
                 className="min-h-[44px] flex-row items-center justify-between border-b border-border py-3 dark:border-border-dark gap-3"
-                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                scaleTo={0.98}
+                springPreset="subtle"
+                style={({ pressed }: { pressed: boolean }) => ({ opacity: pressed ? 0.7 : 1 })}
               >
                 <View className="flex-1 flex-row items-center justify-between pr-2">
                   <Text variant={selected ? 'bodyMedium' : 'body'} className="flex-shrink">
@@ -156,7 +161,7 @@ export function SearchableList<T>({
                   ) : null}
                 </View>
                 {selected ? <Check size={18} color={accentColor} strokeWidth={2} /> : <View style={{ width: 18 }} />}
-              </Pressable>
+              </AnimatedPressable>
             </Animated.View>
           );
         }}

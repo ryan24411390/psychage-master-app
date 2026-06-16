@@ -1,7 +1,10 @@
 import { fireEvent, screen } from '@testing-library/react-native';
 import { router } from 'expo-router';
 
-jest.mock('expo-router', () => ({ router: { push: jest.fn() } }));
+jest.mock('expo-router', () => ({
+  router: { push: jest.fn() },
+  useFocusEffect: () => undefined,
+}));
 
 import CompassScreen from '@/app/(tabs)/(compass)/compass';
 import { COMPASS_ROUTES } from '@/features/compass/routes';

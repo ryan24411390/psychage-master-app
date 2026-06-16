@@ -2,8 +2,9 @@ import { memo, useMemo } from 'react';
 import { View } from 'react-native';
 import LottieView from 'lottie-react-native';
 
-import { useReducedMotion } from '@/lib/motion';
+import { useReducedMotion, DURATION, easingFn } from '@/lib/motion';
 import { useThemeColors } from '@/lib/use-theme-colors';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 // Brand loading mark, ported from the web preloader (psychage-v2
 // public/animations/preloader.json → lottie-web). The web asset is a one-shot
@@ -84,7 +85,9 @@ function AppLoaderComponent({
     : ['items-center justify-center', className];
 
   return (
-    <View
+    <Animated.View
+      entering={reduced ? undefined : FadeIn.duration(DURATION.base).easing(easingFn('out'))}
+      exiting={reduced ? undefined : FadeOut.duration(DURATION.swift)}
       testID={testID}
       accessible
       accessibilityRole="progressbar"
@@ -94,7 +97,7 @@ function AppLoaderComponent({
       className={containerClass.filter(Boolean).join(' ')}
     >
       {lottie}
-    </View>
+    </Animated.View>
   );
 }
 

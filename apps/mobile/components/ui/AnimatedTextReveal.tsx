@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { View, type TextProps } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Text } from './Text';

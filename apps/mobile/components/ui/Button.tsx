@@ -4,6 +4,7 @@ import { useColorScheme } from 'nativewind';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { useHaptics } from '@/lib/haptic-context';
+import { DURATION, easingFn } from '@/lib/motion';
 
 import { Text } from './Text';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -100,7 +101,8 @@ export function Button({
       disabled={disabled}
       onPress={handlePress}
       className={composed}
-      scaleTo={0.96}
+      scaleTo={0.98}
+      springPreset="subtle"
       style={({ pressed }: { pressed: boolean }) => ({
         opacity: disabled || isLoading ? 0.5 : pressed ? 0.85 : 1,
       })}
@@ -111,15 +113,15 @@ export function Button({
         className="flex-row items-center justify-center gap-2"
       >
         {isLoading ? (
-          <Animated.View entering={FadeIn} exiting={FadeOut}>
+          <Animated.View entering={FadeIn.duration(DURATION.swift).easing(easingFn('out'))} exiting={FadeOut.duration(DURATION.swift)}>
             <ActivityIndicator color={spinnerColor} size="small" />
           </Animated.View>
         ) : typeof children === 'string' ? (
-          <Animated.Text entering={FadeIn} exiting={FadeOut} className={textVariantClasses[variant]}>
+          <Animated.Text entering={FadeIn.duration(DURATION.swift).easing(easingFn('out'))} exiting={FadeOut.duration(DURATION.swift)} className={textVariantClasses[variant]}>
             <Text className={textVariantClasses[variant]}>{children}</Text>
           </Animated.Text>
         ) : (
-          <Animated.View entering={FadeIn} exiting={FadeOut}>
+          <Animated.View entering={FadeIn.duration(DURATION.swift).easing(easingFn('out'))} exiting={FadeOut.duration(DURATION.swift)}>
             {children}
           </Animated.View>
         )}
