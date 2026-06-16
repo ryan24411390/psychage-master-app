@@ -184,3 +184,7 @@ _metrics.jsonl
 # ─────────────────────────────────────────────────────────────────────────────
 *.jks
 .pnpm-store/
+
+# Raw Higgsfield mascot generations (scratch source — renamed canonical copies
+# live in apps/mobile/assets/mascot/). Keep the 26MB of UUID-named dupes out.
+/mascots/

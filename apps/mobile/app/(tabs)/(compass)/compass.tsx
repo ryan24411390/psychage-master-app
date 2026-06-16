@@ -17,7 +17,7 @@ import { ClarityTile, DeepDiveCard, HeroTile, SmallTile } from '@/features/compa
 import { CT4_COMPASS } from '@/features/compass/copy';
 import { COMPASS_ROUTES } from '@/features/compass/routes';
 
-const HEADING = 'ml-0.5 font-display text-[16px] text-[#1A1A2E] dark:text-text-primary-dark';
+const HEADING = 'ml-0.5 font-display text-[16px] text-text-primary dark:text-text-primary-dark';
 
 export default function CompassScreen() {
   const t = CT4_COMPASS;

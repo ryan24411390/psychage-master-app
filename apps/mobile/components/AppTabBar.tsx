@@ -1,4 +1,5 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { router } from 'expo-router';
 import { BookOpen, Compass, type LucideIcon, MapPin, Sun } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { Pressable, View } from 'react-native';
@@ -63,7 +64,13 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
               target: route.key,
               canPreventDefault: true,
             });
-            if (!isActive && !event.defaultPrevented) {
+            if (event.defaultPrevented) return;
+            if (isActive) {
+              // Re-tapping the focused tab pops its nested stack back to the
+              // landing (standard tab behavior). canDismiss() guards the no-op
+              // case where the tab is already at its root.
+              if (router.canDismiss()) router.dismissAll();
+            } else {
               navigation.navigate(route.name);
             }
           };

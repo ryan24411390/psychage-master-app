@@ -72,12 +72,12 @@ export function HeroTile({ title, feature, icon: Icon, onPress, testID }: TilePr
       </View>
       <View className="mt-12">
         <Text
-          className="font-sans-medium text-[15.5px] text-[#1A1A2E] dark:text-text-primary-dark"
+          className="font-sans-medium text-[15.5px] text-text-primary dark:text-text-primary-dark"
           numberOfLines={2}
         >
           {title}
         </Text>
-        <Text className="mt-0.5 font-sans text-[10.5px] text-[#7C766C] dark:text-text-secondary-dark">
+        <Text className="mt-0.5 font-sans text-[10.5px] text-text-secondary dark:text-text-secondary-dark">
           {feature}
         </Text>
       </View>
@@ -103,12 +103,12 @@ export function SmallTile({ title, feature, icon: Icon, onPress, testID }: TileP
       <Icon size={21} color={TEAL} strokeWidth={1.75} />
       <View className="mt-3">
         <Text
-          className="font-sans-medium text-[12px] text-[#1A1A2E] dark:text-text-primary-dark"
+          className="font-sans-medium text-[12px] text-text-primary dark:text-text-primary-dark"
           numberOfLines={2}
         >
           {title}
         </Text>
-        <Text className="mt-0.5 font-sans text-[10.5px] text-[#7C766C] dark:text-text-secondary-dark">
+        <Text className="mt-0.5 font-sans text-[10.5px] text-text-secondary dark:text-text-secondary-dark">
           {feature}
         </Text>
       </View>
@@ -132,10 +132,10 @@ export function ClarityTile({ title, feature, icon: Icon, onPress, testID }: Til
       className="min-h-[44px] w-full flex-row items-center justify-between rounded-[20px] bg-[#1A1A2E] p-[15px]"
     >
       <View className="flex-1 pr-3">
-        <Text className="font-sans-medium text-[15px] text-[#F0ECE3]" numberOfLines={2}>
+        <Text className="font-sans-bold text-[15px] text-white" numberOfLines={2}>
           {title}
         </Text>
-        <Text className="mt-0.5 font-sans text-[10.5px] text-[#7FD8C6]">{feature}</Text>
+        <Text className="mt-0.5 font-sans-medium text-[10.5px] text-teal-400">{feature}</Text>
       </View>
       <Icon size={30} color={TEAL} strokeWidth={1.75} />
     </AnimatedPressable>
@@ -167,10 +167,10 @@ export function DeepDiveCard({ title, feature, icon: Icon, onPress, testID }: Ti
       </View>
       <Icon size={24} color={TEAL} strokeWidth={1.75} />
       <View className="mt-10">
-        <Text className="font-sans-medium text-[15px] text-[#1A1A2E] dark:text-text-primary-dark">
+        <Text className="font-sans-medium text-[15px] text-text-primary dark:text-text-primary-dark">
           {title}
         </Text>
-        <Text className="mt-0.5 font-sans text-[10.5px] text-[#7C766C] dark:text-text-secondary-dark">
+        <Text className="mt-0.5 font-sans text-[10.5px] text-text-secondary dark:text-text-secondary-dark">
           {feature}
         </Text>
       </View>
