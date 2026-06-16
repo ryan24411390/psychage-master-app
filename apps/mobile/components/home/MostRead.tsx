@@ -2,16 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { View, Pressable, ActivityIndicator } from 'react-native';
 import { Text } from '@/components/ui/Text';
 import { Link } from 'expo-router';
-import { fetchMostRead, type Article } from '@/lib/content';
+import { type ArticleListItem, listRecentArticles } from '@/lib/articles';
+
+// "Most read this month" — backed by the live Supabase `articles` table. No
+// popularity/view-count signal exists yet (open decision §6), so the rail ranks by
+// recency (newest published first) — real articles with real slugs, so every row
+// opens its reader. Degrades to an empty (hidden) rail when the fetch fails.
+const MOST_READ_LIMIT = 4;
 
 export function MostRead() {
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<ArticleListItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
-    fetchMostRead()
-      .then(data => {
+    listRecentArticles(MOST_READ_LIMIT)
+      .then((data) => {
         if (active) setArticles(data);
       })
       .catch(() => {
@@ -42,8 +48,8 @@ export function MostRead() {
         </View>
       ) : (
         articles.map((a, i) => (
-          <React.Fragment key={a.id}>
-            <Link href={{ pathname: '/article/[slug]', params: { slug: a.id } }} asChild>
+          <React.Fragment key={a.slug}>
+            <Link href={{ pathname: '/article/[slug]', params: { slug: a.slug } }} asChild>
               <Pressable className="flex-row items-start gap-3 py-3 active:opacity-70">
                 <Text variant="body" className="w-7 text-text-tertiary dark:text-text-tertiary-dark">
                   {String(i + 1).padStart(2, '0')}
@@ -51,7 +57,8 @@ export function MostRead() {
                 <View className="flex-1">
                   <Text variant="bodyBold" className="text-text-primary dark:text-text-primary-dark">{a.title}</Text>
                   <Text variant="caption" className="mt-0.5 text-text-secondary dark:text-text-secondary-dark">
-                    {a.topic} · {a.minutes} min
+                    {a.categoryName}
+                    {a.readTime ? ` · ${a.readTime} min` : ''}
                   </Text>
                 </View>
               </Pressable>
