@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack, type ErrorBoundaryProps } from 'expo-router';
 import { useFonts } from 'expo-font';
 import {
   IBMPlexSans_400Regular,
@@ -11,8 +11,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { colorScheme, useColorScheme } from 'nativewind';
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import '../global.css';
+
+import { Text } from '@/components/ui/Text';
 
 // Side-effect import: loading featureFlags.ts executes loadTierFlags(storage)
 // at module init, which runs the SR-13 migrator before any consumer reads isTierEnabled.
@@ -28,6 +30,42 @@ import { resolveColorScheme } from '@/lib/theme';
 import { useReducedMotion } from '@/lib/motion';
 
 SplashScreen.preventAutoHideAsync();
+
+// Root render-error fallback (Expo Router catches a thrown render here instead of
+// showing a blank/red screen in production). Copy is generic chrome — never
+// diagnostic. We do NOT log `error` anywhere: per Sacred Rule #11 the message could
+// carry symptom/PII context, and Sentry's beforeSend hasn't been audited for this
+// path. `retry` re-mounts the segment.
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  return (
+    <View className="flex-1 items-center justify-center gap-3 bg-background px-6 dark:bg-background-dark">
+      <Text variant="heading" className="text-center text-text-primary dark:text-text-primary-dark">
+        Something went wrong
+      </Text>
+      <Text
+        variant="body"
+        className="text-center text-text-secondary dark:text-text-secondary-dark"
+      >
+        Please try again. If it keeps happening, restarting the app usually helps.
+      </Text>
+      {__DEV__ ? (
+        <Text variant="caption" className="text-center text-text-tertiary dark:text-text-tertiary-dark">
+          {error.message}
+        </Text>
+      ) : null}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Try again"
+        onPress={retry}
+        className="mt-2 rounded-xl bg-primary px-5 py-3 active:opacity-80 dark:bg-primary-dark"
+      >
+        <Text variant="bodyBold" className="text-white">
+          Try again
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
 
 // Bridges the persisted appearance `mode` onto NativeWind's runtime color scheme.
 // Effect re-runs whenever the S45 toggle changes `mode`; `colorScheme.set` is the

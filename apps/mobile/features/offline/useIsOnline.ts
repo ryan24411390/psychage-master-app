@@ -9,9 +9,16 @@ export function useIsOnline(): boolean {
 
   useEffect(() => {
     let active = true;
-    NetInfo.fetch().then((state) => {
-      if (active) setOnline(state.isConnected !== false);
-    });
+    NetInfo
+      .fetch()
+      .then((state) => {
+        if (active) setOnline(state.isConnected !== false);
+      })
+      .catch(() => {
+        // Probe failed — keep the optimistic default (online) rather than leaving
+        // an unhandled rejection.
+        if (active) setOnline(true);
+      });
     const unsubscribe = NetInfo.addEventListener((state) => {
       setOnline(state.isConnected !== false);
     });

@@ -4,17 +4,13 @@
 //   - `reducedMotion` → OR-ed into lib/motion.ts useReducedMotion() app-wide, so
 //                       EVERY screen (A1 home/terrain included) calms its motion.
 //                       FULLY FUNCTIONAL — no tailwind dependency.
-//   - `mode`          → light / night / system. PERSISTED and ready, but applying
-//                       it app-wide is GATED: tailwind.config.js uses media-based
-//                       dark mode (no `darkMode: 'class'`), so NativeWind's
-//                       setColorScheme throws ("Unable to manually set color
-//                       scheme without using darkMode: class"). Flipping the app
-//                       between light/night needs a tailwind darkMode→'class'
-//                       migration, which is a forbidden tailwind-wiring change in
-//                       Wave B2 (and would alter every A1 `dark:` class). Until a
-//                       tokens/tailwind owner lands that migration, the app
-//                       follows the OS (media) and `mode` only records intent.
-//                       FLAGGED to the wave-end report.
+//   - `mode`          → light / night / system. FULLY FUNCTIONAL since the #81
+//                       wiring: tailwind.config.js uses `darkMode: 'class'`, and
+//                       app/_layout.tsx's AppearanceSync applies the persisted mode
+//                       imperatively via NativeWind's `colorScheme.set()`
+//                       (lib/theme.ts maps mode → scheme). 'system' defers to the
+//                       OS, which requires app.json `userInterfaceStyle: automatic`
+//                       so the OS reports its real appearance to the app.
 //
 // RESEED-ON-ANOMALY (derived preference, never throws) — the tier-flags policy.
 // Not user-authored record data.

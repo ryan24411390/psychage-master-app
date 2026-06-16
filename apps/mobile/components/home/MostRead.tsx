@@ -9,11 +9,26 @@ export function MostRead() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchMostRead().then(data => {
-      setArticles(data);
-      setLoading(false);
-    });
+    let active = true;
+    fetchMostRead()
+      .then(data => {
+        if (active) setArticles(data);
+      })
+      .catch(() => {
+        // Fetch failed — degrade to an empty rail rather than an infinite spinner.
+        if (active) setArticles([]);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
+
+  // Nothing to show (failed fetch / empty) once settled: render nothing rather than
+  // a dangling section header.
+  if (!loading && articles.length === 0) return null;
 
   return (
     <View className="gap-3 mt-6">
@@ -28,7 +43,7 @@ export function MostRead() {
       ) : (
         articles.map((a, i) => (
           <React.Fragment key={a.id}>
-            <Link href={`/read/${a.id}` as any} asChild>
+            <Link href={{ pathname: '/read/[id]', params: { id: a.id } }} asChild>
               <Pressable className="flex-row justify-between items-center py-3 active:opacity-70">
                 <View className="flex-1 pr-4">
                   <Text variant="caption" className="text-primary dark:text-primary-dark font-sans-medium mb-1">{a.topic}</Text>
