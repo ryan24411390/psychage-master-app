@@ -20,6 +20,7 @@ import { NavigatorFlow } from '@/features/navigator/NavigatorFlow';
 import { isTierEnabled } from '@/lib/adapters';
 import { storage } from '@/lib/adapters/storage';
 import { goBackOr } from '@/lib/nav';
+import { getNavigatorStore } from '@/lib/navigator-store';
 
 // S — Symptom Navigator route. The ONLY place the shared navigator engine +
 // provider-question generator are imported as VALUES — both are injected into
@@ -49,6 +50,7 @@ export default function NavigatorScreen() {
             knowledgeBase: NAVIGATOR_KB,
           })
         }
+        onResults={(inputs, results) => getNavigatorStore().save(inputs, results)}
         onExit={() => goBackOr('/compass')}
         emergencyNumber={getEmergencyNumber(CRISIS_DATASET, region)}
         helplines={getHelplines(CRISIS_DATASET, region)}
