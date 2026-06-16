@@ -1,116 +1,115 @@
 import { router } from 'expo-router';
-import { View, ScrollView } from 'react-native';
-import { Backpack, Book, Compass, HeartHandshake, LifeBuoy, MessageCircle, Moon, Sparkles } from 'lucide-react-native';
+import { ScrollView, View } from 'react-native';
+import {
+  Activity,
+  Anchor,
+  Backpack,
+  Compass,
+  HeartHandshake,
+  MessageCircle,
+  Moon,
+  Notebook,
+} from 'lucide-react-native';
 
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
-import { CompassTile } from '@/features/compass/CompassTile';
+import { ClarityTile, DeepDiveCard, HeroTile, SmallTile } from '@/features/compass/CompassTile';
 import { CT4_COMPASS } from '@/features/compass/copy';
 import { COMPASS_ROUTES } from '@/features/compass/routes';
+
+const HEADING = 'ml-0.5 font-display text-[16px] text-[#1A1A2E] dark:text-text-primary-dark';
 
 export default function CompassScreen() {
   const t = CT4_COMPASS;
   return (
     <ScreenShell edges={['bottom']}>
       <ScrollView contentContainerClassName="gap-6 pb-10 pt-4" showsVerticalScrollIndicator={false}>
-        
-        {/* Immediate Actions */}
+        {/* Right now */}
         <View className="gap-3">
-          <Text variant="heading" className="ml-1 mb-1">
-            {t.headingImmediate}
+          <Text variant="heading" className={HEADING}>
+            {t.headingRightNow}
           </Text>
           <View className="flex-row gap-3">
-            <CompassTile
+            <HeroTile
               title={t.toolkit.title}
-              subLabel={t.toolkit.sub}
+              feature={t.toolkit.sub}
+              icon={Anchor}
               onPress={() => router.push(COMPASS_ROUTES.toolkit)}
-              tint="now"
-              icon={LifeBuoy}
-              variant="action"
               testID="compass-tile-toolkit"
             />
-            <CompassTile
-              title={t.navigator.title}
-              subLabel={t.navigator.sub}
-              onPress={() => router.push(COMPASS_ROUTES.navigator)}
-              tint="now"
-              icon={Compass}
-              variant="action"
-              testID="compass-tile-navigator"
-            />
-          </View>
-          <View className="flex-row gap-3">
-            <CompassTile
-              title={t.mindmate.title}
-              subLabel={t.mindmate.sub}
-              onPress={() => router.push(COMPASS_ROUTES.mindmate)}
-              tint="now"
-              icon={MessageCircle}
-              variant="action"
-              testID="compass-tile-mindmate"
-            />
-            <CompassTile
-              title={t.clarity.title}
-              subLabel={t.clarity.sub}
-              onPress={() => router.push(COMPASS_ROUTES.clarity)}
-              tint="now"
-              icon={Sparkles}
-              variant="action"
-              testID="compass-tile-clarity"
-            />
+            <View className="flex-1 gap-3">
+              <SmallTile
+                title={t.navigator.title}
+                feature={t.navigator.sub}
+                icon={Compass}
+                onPress={() => router.push(COMPASS_ROUTES.navigator)}
+                testID="compass-tile-navigator"
+              />
+              <SmallTile
+                title={t.mindmate.title}
+                feature={t.mindmate.sub}
+                icon={MessageCircle}
+                onPress={() => router.push(COMPASS_ROUTES.mindmate)}
+                testID="compass-tile-mindmate"
+              />
+            </View>
           </View>
         </View>
 
-        {/* Reflection */}
-        <View className="gap-2 mt-2">
-          <Text variant="heading" className="ml-1 mb-2">
-            {t.headingReflection}
+        {/* Over time */}
+        <View className="gap-3">
+          <Text variant="heading" className={HEADING}>
+            {t.headingOverTime}
           </Text>
-          <CompassTile
-            title={t.moodJournal.title}
-            subLabel={t.moodJournal.sub}
-            onPress={() => router.push(COMPASS_ROUTES.moodJournal)}
-            tint="patterns"
-            icon={Book}
-            variant="list"
-            testID="compass-tile-mood-journal"
+          <ClarityTile
+            title={t.clarity.title}
+            feature={t.clarity.sub}
+            icon={Activity}
+            onPress={() => router.push(COMPASS_ROUTES.clarity)}
+            testID="compass-tile-clarity"
           />
-          <CompassTile
-            title={t.relationship.title}
-            subLabel={t.relationship.sub}
-            onPress={() => router.push(COMPASS_ROUTES.relationship)}
-            tint="patterns"
-            icon={HeartHandshake}
-            variant="list"
-            testID="compass-tile-relationship"
-          />
+          <View className="flex-row gap-3">
+            <View className="flex-1">
+              <SmallTile
+                title={t.moodJournal.title}
+                feature={t.moodJournal.sub}
+                icon={Notebook}
+                onPress={() => router.push(COMPASS_ROUTES.moodJournal)}
+                testID="compass-tile-mood-journal"
+              />
+            </View>
+            <View className="flex-1">
+              <SmallTile
+                title={t.relationship.title}
+                feature={t.relationship.sub}
+                icon={HeartHandshake}
+                onPress={() => router.push(COMPASS_ROUTES.relationship)}
+                testID="compass-tile-relationship"
+              />
+            </View>
+          </View>
         </View>
 
         {/* Deep Dives */}
-        <View className="gap-3 mt-2">
-          <Text variant="heading" className="ml-1 mb-1">
-            {t.headingExplore}
+        <View className="gap-3">
+          <Text variant="heading" className={HEADING}>
+            {t.headingDeepDives}
           </Text>
-          <CompassTile
+          <DeepDiveCard
             title={t.sleep.title}
-            subLabel={t.sleep.sub}
-            onPress={() => router.push(COMPASS_ROUTES.sleep)}
-            tint="understand"
+            feature={t.sleep.sub}
             icon={Moon}
-            variant="feature"
+            onPress={() => router.push(COMPASS_ROUTES.sleep)}
             testID="compass-tile-sleep"
           />
-          <CompassTile
+          <DeepDiveCard
             title={t.toolkits.title}
-            subLabel={t.toolkits.sub}
-            onPress={() => router.push('/toolkits')}
-            tint="understand"
+            feature={t.toolkits.sub}
             icon={Backpack}
-            variant="feature"
+            onPress={() => router.push(COMPASS_ROUTES.toolkits)}
             testID="compass-tile-toolkits"
           />
         </View>
-
       </ScrollView>
     </ScreenShell>
   );

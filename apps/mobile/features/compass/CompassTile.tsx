@@ -1,130 +1,178 @@
 import type { ElementType } from 'react';
-import { View, Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { ArrowUpRight } from 'lucide-react-native';
 import { Text } from '@/components/ui/Text';
 
-export type CompassTileVariant = 'action' | 'feature' | 'list';
-export type CompassTileTint = 'now' | 'patterns' | 'understand';
+// Compass bento tiles. These are explicit, single-purpose components local to the
+// Compass landing — NOT a generic tile framework. Light-mode colors are the
+// confirmed design hexes (arbitrary classNames, matching this feature's existing
+// convention); dark-mode pairs keep the true-black register intact.
+const TEAL = '#1A9B8C';
 
-type CompassTileProps = {
+type TileProps = {
   title: string;
-  subLabel: string;
-  onPress: () => void;
-  tint?: CompassTileTint;
+  feature: string;
   icon: ElementType;
-  variant?: CompassTileVariant;
+  onPress: () => void;
   testID?: string;
-};
-
-// Tints mapping for soft backgrounds or icon wrappers.
-// These use standard Psychage tailwind classes and hexes.
-const TINTS = {
-  now: { bg: 'bg-[#F0FDFA] dark:bg-[#0D5C54]', iconColor: '#1A9B8C' }, // teal (brand)
-  patterns: { bg: 'bg-[#F5F3FF] dark:bg-[#4C1D95]', iconColor: '#7C3AED' }, // violet
-  understand: { bg: 'bg-[#F0F9FF] dark:bg-[#0C4A6E]', iconColor: '#0284C7' }, // sky blue
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function CompassTile({
-  title,
-  subLabel,
-  onPress,
-  tint = 'now',
-  icon: Icon,
-  variant = 'list',
-  testID,
-}: CompassTileProps) {
+// Shared press feedback (scale + fade). An interaction primitive, not layout —
+// every Compass tile reuses the same gesture the previous tiles had.
+function usePressScale() {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
+  const style = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
     opacity: opacity.value,
   }));
-
-  const handlePressIn = () => {
+  const onPressIn = () => {
     scale.value = withSpring(0.96, { damping: 20, stiffness: 300 });
     opacity.value = withTiming(0.8, { duration: 100 });
   };
-
-  const handlePressOut = () => {
+  const onPressOut = () => {
     scale.value = withSpring(1, { damping: 20, stiffness: 300 });
     opacity.value = withTiming(1, { duration: 150 });
   };
+  return { style, onPressIn, onPressOut };
+}
 
-  const colors = TINTS[tint];
-
-  if (variant === 'action') {
-    return (
-      <AnimatedPressable
-        accessibilityRole="button"
-        accessibilityLabel={title}
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        testID={testID}
-        className="flex-1 rounded-2xl bg-surface dark:bg-surface-dark p-4 shadow-sm border border-border-hairline"
-        style={animatedStyle}
-      >
-        <View className={`h-10 w-10 items-center justify-center rounded-full mb-3 ${colors.bg}`}>
-          <Icon size={20} color={colors.iconColor} />
-        </View>
-        <Text variant="bodyBold" className="mb-1" numberOfLines={2}>{title}</Text>
-        <Text variant="caption" numberOfLines={1}>{subLabel}</Text>
-      </AnimatedPressable>
-    );
-  }
-
-  if (variant === 'feature') {
-    return (
-      <AnimatedPressable
-        accessibilityRole="button"
-        accessibilityLabel={title}
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        testID={testID}
-        className="w-full overflow-hidden rounded-3xl bg-surface dark:bg-surface-dark shadow-sm border border-border-hairline mb-4"
-        style={animatedStyle}
-      >
-        <View className={`absolute -right-6 -top-6 p-6 opacity-5 dark:opacity-10`} pointerEvents="none">
-           <Icon size={140} color={colors.iconColor} />
-        </View>
-        <View className="p-5">
-          <View className={`h-12 w-12 items-center justify-center rounded-2xl mb-4 ${colors.bg}`}>
-            <Icon size={24} color={colors.iconColor} />
-          </View>
-          <Text variant="heading" className="mb-1">{title}</Text>
-          <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">{subLabel}</Text>
-        </View>
-      </AnimatedPressable>
-    );
-  }
-
-  // default 'list' variant
+// Tall hero (Toolkit). Stretches to match the stacked small tiles beside it.
+export function HeroTile({ title, feature, icon: Icon, onPress, testID }: TileProps) {
+  const press = usePressScale();
   return (
     <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={title}
       onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
+      onPressIn={press.onPressIn}
+      onPressOut={press.onPressOut}
+      hitSlop={4}
       testID={testID}
-      className="w-full flex-row items-center rounded-2xl bg-surface dark:bg-surface-dark p-4 shadow-sm border border-border-hairline mb-3"
-      style={animatedStyle}
+      style={press.style}
+      className="min-h-[44px] flex-1 justify-between rounded-[20px] border border-[rgba(26,155,140,0.22)] bg-[rgba(26,155,140,0.08)] p-4 dark:border-border-dark dark:bg-surface-dark"
     >
-      <View className={`h-12 w-12 items-center justify-center rounded-full mr-4 ${colors.bg}`}>
-        <Icon size={24} color={colors.iconColor} />
+      <View className="flex-row items-start justify-between">
+        <Icon size={27} color={TEAL} strokeWidth={1.75} />
+        <ArrowUpRight
+          size={17}
+          color={TEAL}
+          strokeWidth={1.75}
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+        />
       </View>
-      <View className="flex-1 justify-center">
-        <Text variant="bodyBold" className="mb-1">{title}</Text>
-        <Text variant="caption">{subLabel}</Text>
+      <View className="mt-12">
+        <Text
+          className="font-sans-medium text-[15.5px] text-[#1A1A2E] dark:text-text-primary-dark"
+          numberOfLines={2}
+        >
+          {title}
+        </Text>
+        <Text className="mt-0.5 font-sans text-[10.5px] text-[#7C766C] dark:text-text-secondary-dark">
+          {feature}
+        </Text>
+      </View>
+    </AnimatedPressable>
+  );
+}
+
+// White small tile. Self-sizing to content; stretches to its parent's width.
+export function SmallTile({ title, feature, icon: Icon, onPress, testID }: TileProps) {
+  const press = usePressScale();
+  return (
+    <AnimatedPressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      onPress={onPress}
+      onPressIn={press.onPressIn}
+      onPressOut={press.onPressOut}
+      hitSlop={4}
+      testID={testID}
+      style={press.style}
+      className="min-h-[44px] justify-between rounded-[20px] border border-[#EDE7DB] bg-white p-4 dark:border-border-dark dark:bg-surface-dark"
+    >
+      <Icon size={21} color={TEAL} strokeWidth={1.75} />
+      <View className="mt-3">
+        <Text
+          className="font-sans-medium text-[12px] text-[#1A1A2E] dark:text-text-primary-dark"
+          numberOfLines={2}
+        >
+          {title}
+        </Text>
+        <Text className="mt-0.5 font-sans text-[10.5px] text-[#7C766C] dark:text-text-secondary-dark">
+          {feature}
+        </Text>
+      </View>
+    </AnimatedPressable>
+  );
+}
+
+// Full-width navy accent tile (Clarity Score). Same in both color schemes.
+export function ClarityTile({ title, feature, icon: Icon, onPress, testID }: TileProps) {
+  const press = usePressScale();
+  return (
+    <AnimatedPressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      onPress={onPress}
+      onPressIn={press.onPressIn}
+      onPressOut={press.onPressOut}
+      hitSlop={4}
+      testID={testID}
+      style={press.style}
+      className="min-h-[44px] w-full flex-row items-center justify-between rounded-[20px] bg-[#1A1A2E] p-[15px]"
+    >
+      <View className="flex-1 pr-3">
+        <Text className="font-sans-medium text-[15px] text-[#F0ECE3]" numberOfLines={2}>
+          {title}
+        </Text>
+        <Text className="mt-0.5 font-sans text-[10.5px] text-[#7FD8C6]">{feature}</Text>
+      </View>
+      <Icon size={30} color={TEAL} strokeWidth={1.75} />
+    </AnimatedPressable>
+  );
+}
+
+// Full-width illustrated card with a large ghosted background glyph.
+export function DeepDiveCard({ title, feature, icon: Icon, onPress, testID }: TileProps) {
+  const press = usePressScale();
+  return (
+    <AnimatedPressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      onPress={onPress}
+      onPressIn={press.onPressIn}
+      onPressOut={press.onPressOut}
+      hitSlop={4}
+      testID={testID}
+      style={press.style}
+      className="min-h-[44px] w-full overflow-hidden rounded-[20px] border border-[#EDE7DB] bg-white p-4 dark:border-border-dark dark:bg-surface-dark"
+    >
+      <View
+        className="absolute -bottom-2 -right-2 opacity-[0.09]"
+        pointerEvents="none"
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+      >
+        <Icon size={94} color={TEAL} strokeWidth={1.5} />
+      </View>
+      <Icon size={24} color={TEAL} strokeWidth={1.75} />
+      <View className="mt-10">
+        <Text className="font-sans-medium text-[15px] text-[#1A1A2E] dark:text-text-primary-dark">
+          {title}
+        </Text>
+        <Text className="mt-0.5 font-sans text-[10.5px] text-[#7C766C] dark:text-text-secondary-dark">
+          {feature}
+        </Text>
       </View>
     </AnimatedPressable>
   );

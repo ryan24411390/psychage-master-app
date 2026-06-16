@@ -6,9 +6,9 @@ const FIXTURE = 'FIXTURE — not final copy' as const;
 export const CT4_COMPASS = {
   _fixture: 'CT4' as const,
   _marker: FIXTURE,
-  headingImmediate: 'Immediate Actions',
-  headingReflection: 'Reflection',
-  headingExplore: 'Deep Dives',
+  headingRightNow: 'Right now',
+  headingOverTime: 'Over time',
+  headingDeepDives: 'Deep Dives',
   toolkit: { title: 'Steady yourself right now', sub: 'Toolkit' },
   navigator: { title: 'Make sense of what you feel', sub: 'Symptom Navigator' },
   relationship: { title: 'Take stock of your connections', sub: 'Relationship Health' },

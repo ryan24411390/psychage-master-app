@@ -11,4 +11,5 @@ export const COMPASS_ROUTES = {
   clarity: '/tools/clarity', // S32 — Clarity Score (native flow)
   moodJournal: '/tools/mood-journal', // Mood Journal — patterns & triggers
   sleep: '/tools/sleep', // S29 Sleep Architect (native)
+  toolkits: '/toolkits', // Toolkits Library (PLURAL — published toolkit list)
 } as const;
