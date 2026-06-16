@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 import Animated, {
@@ -21,6 +20,7 @@ import { CT4_CONTENT } from '@/features/content/copy';
 import { MedicalDisclaimer } from '@/features/content/MedicalDisclaimer';
 import { ReviewedByCredit } from '@/features/content/ReviewedByCredit';
 import { getArticleBySlug } from '@/lib/articles';
+import { goBackOr } from '@/lib/nav';
 import { useReadingProgressTracker } from '@/lib/reading-progress-tracker';
 import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
 import { useThemeColors } from '@/lib/use-theme-colors';
@@ -95,7 +95,7 @@ export function ArticleReader({ slug }: { slug: string }) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t.back}
-          onPress={() => router.back()}
+          onPress={() => goBackOr('/learn')}
           hitSlop={8}
           testID="article-back"
           className="min-h-[44px] flex-row items-center gap-1 px-2 active:scale-[0.96]"

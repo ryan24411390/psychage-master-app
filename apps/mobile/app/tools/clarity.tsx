@@ -4,6 +4,7 @@ import { ClarityFlow } from '@/features/clarity/ClarityFlow';
 import { getScoreLabel } from '@/features/clarity/scoring';
 import type { ClarityHistoryItem, ClarityResult } from '@/features/clarity/types';
 import { getClarityStore } from '@/lib/clarity-store';
+import { goBackOr } from '@/lib/nav';
 
 // S32 Clarity Score — NATIVE flow (supersedes the former WebView embed of
 // /m/clarity-score). The store is wired here at the route so ClarityFlow stays free
@@ -34,7 +35,7 @@ export default function ClarityRoute() {
     <>
       <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
       <ClarityFlow
-        onExit={() => router.back()}
+        onExit={() => goBackOr('/compass')}
         onHelp={() => router.push('/crisis')}
         onCrisisResources={() => router.push('/crisis')}
         onRecommend={(route) => router.push(route as never)}
