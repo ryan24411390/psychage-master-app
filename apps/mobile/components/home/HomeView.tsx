@@ -34,6 +34,10 @@ type HomeViewProps = {
   model: HomeViewModel;
   onCheckIn: () => void;
   onHistory: () => void;
+  /** Steadying-bridge "Breathing" chip — opens the real breathing flow. */
+  onBreathing?: () => void;
+  /** Steadying-bridge "Not now" — dismisses the card for the session. */
+  onDismissBridge?: () => void;
   /** Bumps to fire the home Imprint (first save of today only — never on re-save). */
   imprintSignal?: number;
   /** Bumps to tilt the mascot. */
@@ -48,6 +52,8 @@ export function HomeView({
   model,
   onCheckIn,
   onHistory,
+  onBreathing,
+  onDismissBridge,
   imprintSignal = 0,
   tiltSignal = 0,
   reflectionReady = false,
@@ -148,7 +154,11 @@ export function HomeView({
           />
 
           {/* HOME CARD SLOT (bridge > reminder) */}
-          <HomeCardSlot card={model.card} />
+          <HomeCardSlot
+            card={model.card}
+            onBreathing={onBreathing}
+            onDismissBridge={onDismissBridge}
+          />
 
           {/* IN-PROGRESS READS */}
           <PickUpRail reads={model.inProgressReads} />

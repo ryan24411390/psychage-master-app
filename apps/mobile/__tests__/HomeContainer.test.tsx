@@ -77,14 +77,26 @@ describe('HomeContainer (S3 live flow)', () => {
     expect(screen.queryByText('How are you right now?')).toBeNull();
   });
 
-  it('reaches the away and checked-in states via the dev toggle', () => {
-    renderWithProviders(<HomeContainer store={makeFakeStore()} />, { haptics: true });
+  it('steadying bridge: Breathing chip navigates and "Not now" dismisses it', () => {
+    const breathSpy = jest.fn(); // nav seam — never touch the real router in a render test
+    renderWithProviders(
+      <HomeContainer store={makeFakeStore()} navigateToBreathing={breathSpy} />,
+      { haptics: true },
+    );
 
-    fireEvent.press(screen.getByLabelText('dev-state-away'));
-    expect(screen.getByText('Your record waited. Nothing was lost.')).toBeTruthy();
-
-    fireEvent.press(screen.getByLabelText('dev-state-checked-in'));
+    // Check in Low → the bridge surfaces.
+    fireEvent.press(screen.getByRole('button', { name: 'Check in — 30 seconds' }));
+    fireEvent.press(screen.getByLabelText('Low'));
+    fireEvent.press(screen.getByRole('button', { name: 'Save today’s entry' }));
     expect(screen.getByText('Would something steadying help right now?')).toBeTruthy();
+
+    // Breathing chip opens the real breathing flow (via the injected seam).
+    fireEvent.press(screen.getByRole('button', { name: 'Breathing · 1 min' }));
+    expect(breathSpy).toHaveBeenCalledTimes(1);
+
+    // "Not now" dismisses the bridge for the session.
+    fireEvent.press(screen.getByRole('button', { name: 'Not now' }));
+    expect(screen.queryByText('Would something steadying help right now?')).toBeNull();
   });
 });
 
