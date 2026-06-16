@@ -7,9 +7,12 @@
       "com.googleusercontent.apps.369007537232-jutu7kb6jtd4kauvptd7rr0dh8349tpo"
     ],
     "version": "1.0.0",
-    "owner": "OWNER_PLACEHOLDER",
+    "owner": "ryan2441139",
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/dbec71a9-4ce8-43cb-b3ab-ab6718105600"
     },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -31,7 +34,11 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.psychage.app"
+      "package": "com.psychage.app",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -50,6 +57,12 @@
         }
       ],
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "dbec71a9-4ce8-43cb-b3ab-ab6718105600"
+      }
+    }
   }
 }
