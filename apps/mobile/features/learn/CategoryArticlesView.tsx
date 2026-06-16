@@ -42,7 +42,7 @@ export function CategoryArticlesView({ id }: { id: string }) {
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
           <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
             Back
           </Text>
         </Pressable>
@@ -54,7 +54,7 @@ export function CategoryArticlesView({ id }: { id: string }) {
         contentContainerClassName="px-4 pb-12"
         ItemSeparatorComponent={() => <View className="h-3" />}
         ListHeaderComponent={
-          <Text variant="headingLg" className="py-3">
+          <Text variant="h2" className="py-3">
             {category?.label ?? 'Articles'}
           </Text>
         }

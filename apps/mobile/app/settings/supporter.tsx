@@ -23,7 +23,7 @@ export default function SupporterScreen() {
   return (
     <ScreenShell edges={['bottom']}>
       <ScrollView contentContainerClassName="gap-5 py-4" showsVerticalScrollIndicator={false}>
-        <Text variant="headingLg" className="px-1">
+        <Text variant="h2" className="px-1">
           {t.title}
         </Text>
         <Text variant="body" className="px-1 text-text-secondary dark:text-text-secondary-dark">
@@ -31,7 +31,7 @@ export default function SupporterScreen() {
         </Text>
 
         <View className="gap-2">
-          <Text variant="bodyMedium" className="px-1">
+          <Text variant="h6" className="px-1">
             {t.tiersLabel}
           </Text>
           <SupporterTiers onSelect={onSelect} />
@@ -39,7 +39,7 @@ export default function SupporterScreen() {
 
         {status === 'thanks' ? (
           <Text
-            variant="bodySm"
+            variant="bodySmall"
             className="px-1 text-text-secondary dark:text-text-secondary-dark"
             testID="supporter-thanks"
           >
@@ -48,7 +48,7 @@ export default function SupporterScreen() {
         ) : null}
         {status === 'unavailable' ? (
           <Text
-            variant="bodySm"
+            variant="bodySmall"
             className="px-1 text-text-secondary dark:text-text-secondary-dark"
             testID="supporter-unavailable"
           >

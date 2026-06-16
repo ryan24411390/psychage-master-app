@@ -57,7 +57,7 @@ export function AnimatedEmptyState({
       <Animated.View style={animatedIconStyle} className="mb-6 opacity-80">
         {icon || <Search size={64} color="#A8A29E" strokeWidth={1.5} />}
       </Animated.View>
-      <Text variant="heading" className="text-center mb-2 text-text-primary dark:text-text-primary-dark">
+      <Text variant="h3" className="text-center mb-2 text-text-primary dark:text-text-primary-dark">
         {title}
       </Text>
       {description && (

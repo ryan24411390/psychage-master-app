@@ -37,7 +37,7 @@ function Chip({ label, selected, onPress }: { label: string; selected: boolean; 
       }`}
     >
       <Text
-        variant="bodyMedium"
+        variant="h6"
         className={
           selected
             ? 'text-primary dark:text-primary-dark'
@@ -55,7 +55,7 @@ function EmptyState() {
   return (
     <View className="items-center gap-3 px-6 py-16">
       <BookmarkPlus size={40} color={tc.inkSecondary} strokeWidth={1.5} />
-      <Text variant="bodyBold" className="text-center text-text-primary dark:text-text-primary-dark">
+      <Text variant="h5" className="text-center text-text-primary dark:text-text-primary-dark">
         {BOOKMARKS_COPY.empty.title}
       </Text>
       <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">

@@ -44,9 +44,9 @@ export function ScoreBand({ band, caption, testID }: ScoreBandProps) {
       ) : null}
       <View className="flex-row items-center gap-2">
         <View className={`h-2.5 w-2.5 rounded-full ${DOT_CLASS[band]}`} />
-        <Text variant="bodyBold">{copy.label}</Text>
+        <Text variant="h5">{copy.label}</Text>
       </View>
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
         {copy.note}
       </Text>
     </View>

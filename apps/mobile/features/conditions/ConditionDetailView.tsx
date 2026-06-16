@@ -32,7 +32,7 @@ export function ConditionDetailView({ slug }: { slug: string }) {
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
           <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>
         </Pressable>
@@ -49,7 +49,7 @@ export function ConditionDetailView({ slug }: { slug: string }) {
           contentContainerClassName="gap-3 px-5 pb-12"
           showsVerticalScrollIndicator={false}
         >
-          <Text variant="headingLg">{detail.name}</Text>
+          <Text variant="h2">{detail.name}</Text>
           {/* Verbatim reviewed summary when ported (B1); else the generic intro. */}
           <Text
             variant="body"
@@ -61,7 +61,7 @@ export function ConditionDetailView({ slug }: { slug: string }) {
 
           {detail.subTopics.length > 0 ? (
             <View className="gap-1.5 pt-1" testID="condition-subtopics">
-              <Text variant="bodyMedium">{t.coversLabel}</Text>
+              <Text variant="h6">{t.coversLabel}</Text>
               {detail.subTopics.map((topic) => (
                 <Text
                   key={topic}
@@ -82,14 +82,14 @@ export function ConditionDetailView({ slug }: { slug: string }) {
             className="min-h-[44px] justify-center rounded-xl border border-border px-4 dark:border-border-dark"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
-            <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+            <Text variant="h6" className="text-primary dark:text-primary-dark">
               {t.browseLabel}
             </Text>
           </Pressable>
 
           {detail.related.length > 0 ? (
             <View className="gap-2 pt-2" testID="condition-related">
-              <Text variant="bodyMedium">{t.relatedLabel}</Text>
+              <Text variant="h6">{t.relatedLabel}</Text>
               {detail.related.map((rel) => (
                 <Pressable
                   key={rel.slug}

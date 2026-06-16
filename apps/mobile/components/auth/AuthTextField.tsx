@@ -56,7 +56,7 @@ export function AuthTextField({
 
   return (
     <View className="gap-1.5">
-      <Text variant="bodyMedium">{label}</Text>
+      <Text variant="h6">{label}</Text>
       <View className="justify-center">
         <TextInput
           accessibilityLabel={label}
@@ -82,14 +82,14 @@ export function AuthTextField({
             onPress={() => setVisible((value) => !value)}
             className="absolute right-3 px-1 py-2"
           >
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
               {visible ? hideLabel : showLabel}
             </Text>
           </Pressable>
         ) : null}
       </View>
       {hasError ? (
-        <Text variant="bodySm" className="text-error dark:text-error-dark">
+        <Text variant="bodySmall" className="text-error dark:text-error-dark">
           {errorText}
         </Text>
       ) : null}

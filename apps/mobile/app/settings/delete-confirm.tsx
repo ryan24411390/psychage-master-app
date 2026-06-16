@@ -47,7 +47,7 @@ export default function DeleteConfirmScreen() {
   return (
     <ScreenShell edges={['bottom']}>
       <ScrollView contentContainerClassName="gap-5 py-4" showsVerticalScrollIndicator={false}>
-        <Text variant="heading" className="px-1">
+        <Text variant="h3" className="px-1">
           {t.heading}
         </Text>
         <Text variant="body" className="px-1 text-text-secondary dark:text-text-secondary-dark">

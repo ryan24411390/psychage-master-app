@@ -122,11 +122,11 @@ function Block({ node }: { node: NElement }): ReactNode {
     case 'paragraph':
       return <Paragraph node={node} />;
     case 'heading2':
-      return <Heading node={node} variant="headingLg" />;
+      return <Heading node={node} variant="h2" />;
     case 'heading3':
-      return <Heading node={node} variant="heading" />;
+      return <Heading node={node} variant="h3" />;
     case 'heading4':
-      return <Heading node={node} variant="bodyBold" />;
+      return <Heading node={node} variant="h5" />;
     case 'list-unordered':
       return <ListBlock node={node} ordered={false} />;
     case 'list-ordered':
@@ -161,7 +161,7 @@ function Paragraph({ node }: { node: NElement }) {
   const { align } = resolveTextStyle(node.classes);
   return (
     <Text
-      variant={lead ? 'bodyMedium' : 'body'}
+      variant={lead ? 'bodyLarge' : 'body'}
       className="leading-7"
       style={align ? { textAlign: align } : undefined}
     >
@@ -175,7 +175,7 @@ function Heading({
   variant,
 }: {
   node: NElement;
-  variant: 'headingLg' | 'heading' | 'bodyBold';
+  variant: 'h2' | 'h3' | 'h5';
 }) {
   const { align } = resolveTextStyle(node.classes);
   return (
@@ -245,7 +245,7 @@ function TableBlock({ node }: { node: NElement }) {
       style={{ width: cellWidth }}
       className="border-b border-border px-3 py-2 dark:border-border-dark"
     >
-      <Text variant={head ? 'bodyMedium' : 'bodySm'} className="leading-6">
+      <Text variant={head ? 'h6' : 'bodySmall'} className="leading-6">
         {text}
       </Text>
     </View>
@@ -401,7 +401,7 @@ function AccordionBlock({ node }: { node: NElement }) {
               className="min-h-[44px] flex-row items-center justify-between gap-2 bg-surface px-4 py-3 dark:bg-surface-dark"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
-              <Text variant="bodyMedium" className="flex-1">
+              <Text variant="h6" className="flex-1">
                 {item.heading}
               </Text>
               <ChevronDown
@@ -444,7 +444,7 @@ function TabsBlock({ node }: { node: NElement }) {
                 onPress={() => setActive(i)}
                 className={`min-h-[36px] justify-center rounded-full px-3 ${selected ? 'bg-surface-active dark:bg-surface-active-dark' : ''}`}
               >
-                <Text variant={selected ? 'bodyMedium' : 'bodySm'}>{tab.label}</Text>
+                <Text variant={selected ? 'h6' : 'bodySmall'}>{tab.label}</Text>
               </Pressable>
             );
           })}

@@ -37,7 +37,7 @@ export function WelcomeView({ reduced, onContinue }: WelcomeViewProps) {
         <View className="mb-4">
           <OnboardingMascot testID="onboarding-host-mascot" />
         </View>
-        <Text variant="headingLg" className="text-center" accessibilityRole="header">
+        <Text variant="h2" className="text-center" accessibilityRole="header">
           {TITLE}
         </Text>
         <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark px-4">

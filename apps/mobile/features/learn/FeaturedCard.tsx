@@ -43,18 +43,18 @@ export const FeaturedCard = memo(function FeaturedCard({ article }: { article: A
       <View className="gap-1.5 px-0.5 pt-3.5">
         <Text
           variant="caption"
-          className="font-sans-bold uppercase tracking-[0.08em] text-teal-700 dark:text-primary-dark"
+          className="font-sans-medium uppercase tracking-[0.08em] text-teal-700 dark:text-primary-dark"
         >
           {article.categoryName}
         </Text>
         <Pressable accessibilityRole="link" accessibilityLabel={article.title} onPress={open}>
-          <Text variant="heading" numberOfLines={1} ellipsizeMode="tail">
+          <Text variant="h3" numberOfLines={1} ellipsizeMode="tail">
             {article.title}
           </Text>
         </Pressable>
         {article.seoDescription ? (
           <Text
-            variant="bodySm"
+            variant="bodySmall"
             numberOfLines={1}
             ellipsizeMode="tail"
             className="text-text-secondary dark:text-text-secondary-dark"

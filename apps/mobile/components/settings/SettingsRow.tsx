@@ -43,13 +43,13 @@ export function SettingsRow({
     >
       {icon ? <View>{icon}</View> : null}
       <Text
-        variant="bodyMedium"
+        variant="h6"
         className={`flex-1 ${destructive ? 'text-error dark:text-error-dark' : ''}`}
       >
         {label}
       </Text>
       {value ? (
-        <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+        <Text variant="bodySmall" className="text-text-tertiary dark:text-text-tertiary-dark">
           {value}
         </Text>
       ) : null}

@@ -38,7 +38,7 @@ const FIRST_RUN: HomeViewModel = {
 function render(model: HomeViewModel) {
   return renderWithProviders(
     <HomeView model={model} onCheckIn={() => {}} onHistory={() => {}} />,
-    { haptics: true },
+    { haptics: true, query: true },
   );
 }
 
@@ -78,7 +78,7 @@ describe('HomeView (S3)', () => {
         reflectionReady
         onReflectionOpen={onReflectionOpen}
       />,
-      { haptics: true },
+      { haptics: true, query: true },
     );
     expect(screen.getByText('This week’s reflection is ready.')).toBeTruthy();
     fireEvent.press(screen.getByRole('button', { name: 'This week’s reflection is ready.' }));

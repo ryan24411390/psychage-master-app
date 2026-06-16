@@ -17,10 +17,10 @@ export function DomainBar({ label, score, subLabel }: DomainBarProps) {
   return (
     <View className="gap-1.5">
       <View className="flex-row items-baseline justify-between">
-        <Text variant="bodyMedium" className="text-[15px]">
+        <Text variant="h6" className="text-[15px]">
           {label}
         </Text>
-        <Text variant="bodyMedium" className="text-[15px] text-primary dark:text-primary-dark">
+        <Text variant="h6" className="text-[15px] text-primary dark:text-primary-dark">
           {score}
           <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
             {' '}

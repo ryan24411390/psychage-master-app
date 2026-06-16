@@ -8,6 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { CareAndLearning } from '@/components/home/CareAndLearning';
 import { HomeCardSlot } from '@/components/home/HomeCardSlot';
 import { Mascot } from '@/components/home/Mascot';
 import { ReflectionRow } from '@/components/home/ReflectionRow';
@@ -15,6 +16,7 @@ import { RecordChart } from '@/components/home/RecordChart';
 import { PrimaryAction } from '@/components/home/PrimaryAction';
 import { PickUpRail } from '@/components/home/PickUpRail';
 import { ToolsBento } from '@/components/home/ToolsBento';
+import { TopReads } from '@/components/home/TopReads';
 import { MostRead } from '@/components/home/MostRead';
 import { Text } from '@/components/ui/Text';
 import { ctaLabel, type HomeViewModel } from '@/lib/home-model';
@@ -89,7 +91,7 @@ export function HomeView({
           {/* STATE ZONE */}
           <View className="flex-row items-start justify-between gap-3 bg-surface-accent/30 border border-border-accent/50 dark:bg-surface-accent-dark/15 dark:border-border-accent-dark/30 p-5 rounded-xl shadow-sm">
             <View className="flex-1 gap-1">
-              <Text variant="headingLg">{model.greeting}</Text>
+              <Text variant="h2">{model.greeting}</Text>
               <Text
                 variant="body"
                 className="font-display italic text-text-secondary dark:text-text-secondary-dark"
@@ -125,7 +127,7 @@ export function HomeView({
                 hitSlop={8}
                 className="min-h-[44px] justify-center"
               >
-                <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+                <Text variant="h6" className="text-primary dark:text-primary-dark">
                   History
                 </Text>
               </Pressable>
@@ -156,8 +158,14 @@ export function HomeView({
           {/* TOOLS BENTO */}
           <ToolsBento />
 
+          {/* TOP READS BY TOPIC */}
+          <TopReads />
+
           {/* EDITORIAL MOST READ */}
           <MostRead />
+
+          {/* CARE AND LEARNING — doorways to Find + Library */}
+          <CareAndLearning />
 
           {/* MISSION FOOTER */}
           <Text

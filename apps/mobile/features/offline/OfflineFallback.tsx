@@ -22,7 +22,7 @@ export function OfflineFallback({ variant, onRetry, testID }: OfflineFallbackPro
     <View className="flex-1 items-center justify-center gap-3 px-6" testID={testID}>
       {/* CT2 PLACEHOLDER — clay still-life illustration slot (commission pending). */}
       <View className="h-20 w-20 rounded-xl bg-border dark:bg-border-dark" />
-      <Text variant="heading" className="text-center">
+      <Text variant="h3" className="text-center">
         {t.title}
       </Text>
       <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">

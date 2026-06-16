@@ -39,7 +39,7 @@ function OnwardLink({ label, onPress }: { label: string; onPress: () => void }) 
       className="min-h-[44px] justify-center"
       style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
     >
-      <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+      <Text variant="h6" className="text-primary dark:text-primary-dark">
         {label}
       </Text>
     </Pressable>
@@ -60,7 +60,7 @@ export function ClarityResultsView({
   return (
     <ScrollView contentContainerClassName="gap-6 px-4 pb-12 pt-2" showsVerticalScrollIndicator={false}>
       <View className="gap-1">
-        <Text variant="headingLg" accessibilityRole="header">
+        <Text variant="h2" accessibilityRole="header">
           {TITLE}
         </Text>
         <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
@@ -73,12 +73,12 @@ export function ClarityResultsView({
         <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           Overall
         </Text>
-        <Text variant="heading">{tier.label}</Text>
+        <Text variant="h3">{tier.label}</Text>
         <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
           {tier.line}
         </Text>
         {changeNote ? (
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
             {changeNote}
           </Text>
         ) : null}
@@ -87,7 +87,7 @@ export function ClarityResultsView({
       {/* Steady / strong domains */}
       {steady.length > 0 ? (
         <View className="gap-2">
-          <Text variant="bodyBold">Steady</Text>
+          <Text variant="h5">Steady</Text>
           {steady.map((d) => (
             <Text key={d.key} variant="body">
               {d.label} — {DOMAIN_BAND_WORD[d.band]}
@@ -103,7 +103,7 @@ export function ClarityResultsView({
       {/* Worth gentle attention */}
       {attention.length > 0 ? (
         <View className="gap-2">
-          <Text variant="bodyBold">Worth gentle attention</Text>
+          <Text variant="h5">Worth gentle attention</Text>
           {attention.map((d) => (
             <Text key={d.key} variant="body">
               {d.label} — {DOMAIN_BAND_WORD[d.band]}
@@ -115,7 +115,7 @@ export function ClarityResultsView({
       {/* What stood out — reframed, person-first notes */}
       {result.notes.length > 0 ? (
         <View className="gap-2">
-          <Text variant="bodyBold">What stood out</Text>
+          <Text variant="h5">What stood out</Text>
           {result.notes.map((n) => (
             <Text key={n.id} variant="body" className="text-text-secondary dark:text-text-secondary-dark">
               {n.text}
@@ -126,7 +126,7 @@ export function ClarityResultsView({
 
       {/* What might help */}
       <View className="gap-2 border-t border-border pt-4 dark:border-border-dark">
-        <Text variant="bodyBold">What might help</Text>
+        <Text variant="h5">What might help</Text>
         {recs.map((r) => (
           <View key={`${r.route}-${r.actionLabel}`} className="gap-1">
             <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">

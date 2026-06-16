@@ -52,7 +52,7 @@ function OnwardLink({ label, onPress }: { label: string; onPress: () => void }) 
       className="min-h-[44px] justify-center"
       style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
     >
-      <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+      <Text variant="h6" className="text-primary dark:text-primary-dark">
         {label}
       </Text>
     </Pressable>
@@ -95,7 +95,7 @@ export function ResultsView({
         {shown.map((r) => (
           <Card key={r.condition_id} variant="elevated" className="gap-2 p-5">
             <RelevancePhrase phrase={r.relevance_label} />
-            <Text variant="heading">{r.name}</Text>
+            <Text variant="h3">{r.name}</Text>
             <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
               {r.description_for_user}
             </Text>

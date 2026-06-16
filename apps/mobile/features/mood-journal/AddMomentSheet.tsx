@@ -94,7 +94,7 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
         className="rounded-t-xl bg-surface px-5 pb-6 pt-5 dark:bg-surface-dark"
       >
         <View className="mb-3 flex-row items-start justify-between">
-          <Text variant="heading" className="flex-1 pr-3">
+          <Text variant="h3" className="flex-1 pr-3">
             {step === 0 ? t.valenceHeading : t.heading}
           </Text>
           <Pressable
@@ -128,7 +128,7 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
         <ScrollView showsVerticalScrollIndicator={false} className="max-h-[440px]">
           {step === 0 ? (
             <View testID="mood-journal-valence-step">
-              <Text variant="bodySm" className="mb-3 text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="bodySmall" className="mb-3 text-text-secondary dark:text-text-secondary-dark">
                 {t.valenceHint}
               </Text>
               <ValenceScale
@@ -140,7 +140,7 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
             </View>
           ) : (
             <View testID="mood-journal-tags-step">
-              <Text variant="bodyMedium" className="mb-2">
+              <Text variant="h6" className="mb-2">
                 {t.emotionsLabel}
               </Text>
               <View className="mb-4 flex-row flex-wrap gap-2">
@@ -155,7 +155,7 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
                 ))}
               </View>
 
-              <Text variant="bodyMedium" className="mb-2">
+              <Text variant="h6" className="mb-2">
                 {t.triggersLabel}
               </Text>
               <View className="mb-4 flex-row flex-wrap gap-2">
@@ -189,7 +189,7 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
 
         {saveFailed && step === 1 && (
           <Text
-            variant="bodySm"
+            variant="bodySmall"
             className="mt-2 text-text-primary dark:text-text-primary-dark"
             accessibilityLiveRegion="polite"
           >

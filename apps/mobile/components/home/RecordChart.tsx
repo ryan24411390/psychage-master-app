@@ -23,7 +23,7 @@ export function RecordChart({ days, insight, width }: RecordChartProps) {
     <View className="gap-4">
       {insight ? (
         <View className="gap-1">
-          <Text variant="bodyBold" className="text-text-primary dark:text-text-primary-dark">
+          <Text variant="h5" className="text-text-primary dark:text-text-primary-dark">
             {insight.headline}
           </Text>
           <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
@@ -32,7 +32,7 @@ export function RecordChart({ days, insight, width }: RecordChartProps) {
         </View>
       ) : (
         <Text
-          variant="bodyBold"
+          variant="h5"
           className="mt-2 mb-2 text-text-secondary dark:text-text-secondary-dark"
         >
           No history to show yet.

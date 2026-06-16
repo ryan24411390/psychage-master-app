@@ -12,7 +12,7 @@ export function MindMateIntro() {
     <View className="items-center gap-4 px-6 py-10" testID="mindmate-intro">
       <Mascot testID="mindmate-mascot" />
       <Text
-        variant="headingLg"
+        variant="h2"
         accessibilityRole="header"
         className="text-center text-text-primary dark:text-text-primary-dark"
       >

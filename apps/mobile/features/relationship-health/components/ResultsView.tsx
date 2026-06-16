@@ -42,11 +42,11 @@ function PatternCard({ pattern }: { pattern: DetectedPattern }) {
     <Card>
       <View className="mb-1.5 flex-row items-center gap-2">
         <View className={`h-2 w-2 rounded-full ${SEVERITY_DOT[pattern.severity]}`} />
-        <Text variant="bodyMedium" className="flex-1 text-[15px]">
+        <Text variant="h6" className="flex-1 text-[15px]">
           {pattern.title}
         </Text>
       </View>
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark leading-5">
+      <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark leading-5">
         {pattern.description}
       </Text>
       <Text variant="caption" className="mt-2 text-text-tertiary dark:text-text-tertiary-dark leading-4">
@@ -87,7 +87,7 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
           </Text>
           <ScoreRing score={result.compositeScore} />
           <Text
-            variant="bodyMedium"
+            variant="h6"
             className="px-6 text-center text-text-secondary dark:text-text-secondary-dark"
           >
             {result.tierLabel}
@@ -101,7 +101,7 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
 
         {/* By area */}
         <View className="gap-3">
-          <Text variant="heading" className="text-lg" accessibilityRole="header">
+          <Text variant="h3" className="text-lg" accessibilityRole="header">
             {t.areasHeading}
           </Text>
           {domains.map((d) => {
@@ -129,7 +129,7 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
 
         {/* Blueprint */}
         <View className="gap-2">
-          <Text variant="heading" className="text-lg" accessibilityRole="header">
+          <Text variant="h3" className="text-lg" accessibilityRole="header">
             {t.blueprintHeading}
           </Text>
           {blueprintParas.map((para) => (
@@ -146,7 +146,7 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
         {/* Patterns */}
         {result.patterns.length > 0 ? (
           <View className="gap-3">
-            <Text variant="heading" className="text-lg" accessibilityRole="header">
+            <Text variant="h3" className="text-lg" accessibilityRole="header">
               {t.patternsHeading}
             </Text>
             {result.patterns.map((p) => (
@@ -158,15 +158,15 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
         {/* Next steps */}
         {interventions.length > 0 ? (
           <View className="gap-3">
-            <Text variant="heading" className="text-lg" accessibilityRole="header">
+            <Text variant="h3" className="text-lg" accessibilityRole="header">
               {t.stepsHeading}
             </Text>
             {interventions.map((iv) => (
               <Card key={iv.id} className="gap-2">
-                <Text variant="bodyMedium" className="text-[15px]">
+                <Text variant="h6" className="text-[15px]">
                   {iv.title}
                 </Text>
-                <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark leading-5">
+                <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark leading-5">
                   {iv.description}
                 </Text>
                 <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">

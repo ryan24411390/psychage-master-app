@@ -183,7 +183,7 @@ export function DirectoryView({
             className="min-h-[44px] flex-row items-center gap-1 px-2"
           >
             <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
               Back
             </Text>
           </Pressable>
@@ -191,7 +191,7 @@ export function DirectoryView({
       )}
 
       <View className="gap-3 px-4 pb-2">
-        <Text variant="headingLg">{t.title}</Text>
+        <Text variant="h2">{t.title}</Text>
 
         {/* Scope chip — shows the home location and re-opens setup on tap. */}
         {embedded && onEditLocation ? (
@@ -203,7 +203,7 @@ export function DirectoryView({
             className="min-h-[36px] flex-row items-center gap-1.5 self-start rounded-full border border-border px-3 py-1.5 dark:border-border-dark"
           >
             <MapPin size={16} color={colors.primary.default.light} strokeWidth={1.75} />
-            <Text variant="bodySm" className="text-text-primary dark:text-text-primary-dark">
+            <Text variant="bodySmall" className="text-text-primary dark:text-text-primary-dark">
               {scopeLabel || t.scopeAllStates}
             </Text>
             <ChevronDown size={14} color={colors.charcoal[500]} strokeWidth={2} />
@@ -248,7 +248,7 @@ export function DirectoryView({
               strokeWidth={1.75}
             />
             <Text
-              variant="bodySm"
+              variant="bodySmall"
               className={coords ? 'text-primary dark:text-primary-dark' : 'text-text-secondary dark:text-text-secondary-dark'}
             >
               {t.nearMe}
@@ -263,7 +263,7 @@ export function DirectoryView({
             className="min-h-[36px] flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5 dark:border-border-dark"
           >
             <SlidersHorizontal size={16} color={colors.charcoal[500]} strokeWidth={1.75} />
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
               {filterCount > 0 ? `${t.filtersButton} (${filterCount})` : t.filtersButton}
             </Text>
           </Pressable>
@@ -276,7 +276,7 @@ export function DirectoryView({
             className="min-h-[36px] flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5 dark:border-border-dark"
           >
             <ArrowUpDown size={16} color={colors.charcoal[500]} strokeWidth={1.75} />
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
               {t.sortButton}
             </Text>
           </Pressable>
@@ -295,7 +295,7 @@ export function DirectoryView({
                 className="min-h-[36px] flex-row items-center gap-1.5 rounded-full border border-primary px-3 py-1.5 dark:border-primary-dark"
               >
                 <Search size={14} color={colors.primary.default.light} strokeWidth={1.75} />
-                <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+                <Text variant="bodySmall" className="text-primary dark:text-primary-dark">
                   {s.label}
                 </Text>
               </Pressable>
@@ -323,7 +323,7 @@ export function DirectoryView({
 
         {showCoverage ? (
           <View className="flex-row flex-wrap items-center gap-1.5 rounded-lg bg-surface-accent px-3 py-2 dark:bg-surface-accent-dark">
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
               {t.coverageNote(scopeLabel || filters.state, search.total)}
             </Text>
             <Pressable
@@ -332,7 +332,7 @@ export function DirectoryView({
               onPress={() => setFilters((f) => ({ ...f, state: '' }))}
               testID="directory-coverage-widen"
             >
-              <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+              <Text variant="bodySmall" className="text-primary dark:text-primary-dark">
                 {t.coverageAction}
               </Text>
             </Pressable>
@@ -372,7 +372,7 @@ export function DirectoryView({
                 <View className="h-14 w-14 items-center justify-center rounded-full bg-surface dark:bg-surface-dark">
                   <Search size={22} color={colors.charcoal[500]} strokeWidth={1.75} />
                 </View>
-                <Text variant="heading" className="text-center">
+                <Text variant="h3" className="text-center">
                   {t.emptyTitle}
                 </Text>
                 <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">

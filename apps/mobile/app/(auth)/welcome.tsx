@@ -48,7 +48,7 @@ export default function WelcomeScreen() {
           className="flex-1 items-center justify-center gap-4"
         >
           <View className="h-2 w-12 rounded-full bg-primary dark:bg-primary-dark" />
-          <Text variant="headingLg" className="text-center text-4xl">
+          <Text variant="h1" className="text-center">
             {AUTH_COPY.welcomeTitle}
           </Text>
           <Text
@@ -66,7 +66,7 @@ export default function WelcomeScreen() {
           className="gap-3"
         >
           {socialError ? (
-            <Text variant="bodySm" className="text-center text-error dark:text-error-dark">
+            <Text variant="bodySmall" className="text-center text-error dark:text-error-dark">
               {socialError}
             </Text>
           ) : null}

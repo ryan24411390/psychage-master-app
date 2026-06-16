@@ -51,7 +51,7 @@ export function StateRows({ value, onChange }: StateRowsProps) {
             }`}
           >
             <MoodGlyphFace state={state} />
-            <Text variant="bodyMedium" className="flex-1">
+            <Text variant="h6" className="flex-1">
               {STATE_LABELS[state]}
             </Text>
             {isSelected && (

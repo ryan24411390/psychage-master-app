@@ -90,7 +90,7 @@ export function CheckInSheet({
       >
         <View className="mb-3 flex-row items-start justify-between">
           <View className="flex-1 pr-3">
-            <Text variant="heading">{isEdit ? CHECK_IN_COPY.editTitle : CHECK_IN_COPY.title}</Text>
+            <Text variant="h3">{isEdit ? CHECK_IN_COPY.editTitle : CHECK_IN_COPY.title}</Text>
             {!isEdit && (
               <Text
                 variant="body"
@@ -133,7 +133,7 @@ export function CheckInSheet({
 
         {saveFailed && (
           <Text
-            variant="bodySm"
+            variant="bodySmall"
             className="mt-2 text-text-primary dark:text-text-primary-dark"
             accessibilityLiveRegion="polite"
           >

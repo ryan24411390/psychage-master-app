@@ -48,7 +48,7 @@ export function ExerciseChrome({ children, onHelp, onClose }: ExerciseChromeProp
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <LifeBuoy size={18} color={tc.crisis} strokeWidth={1.75} />
-          <Text variant="bodyMedium" className="text-[13px] text-crisis dark:text-crisis-dark">
+          <Text variant="h6" className="text-[13px] text-crisis dark:text-crisis-dark">
             Help now
           </Text>
         </Pressable>

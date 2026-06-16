@@ -1,8 +1,6 @@
 // FindCareScreen — faithful port of the FindCare.tsx prototype, wired to REAL
-// shared-Supabase data and the app's stores. Visual fidelity to the mock was the
-// explicit goal, so this screen intentionally uses the prototype's warm palette +
-// serif headers rather than the token classes — it will NOT pass mobile-design-audit
-// (accepted trade-off). Behavior is real:
+// shared-Supabase data and the app's stores. Heading variants now use the Text
+// component system (h1/h2/h3/h4) per the typography refactor. Behavior is real:
 //   • results          → useProviderSearch (search_providers_v3 cascade)
 //   • provider types   → useProviderTypes (real provider_types lookup)
 //   • profile details  → getProviderById
@@ -285,7 +283,7 @@ export default function FindCareScreen() {
       <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
         <Header />
         <View className="px-5 pt-2">
-          <Text className="font-display text-4xl text-text-primary dark:text-text-primary-dark mt-1.5 mb-2.5">Find care</Text>
+          <Text variant="h1" className="mt-1.5 mb-2.5">Find care</Text>
           <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-2">Browse NPI-verified providers licensed in your state. A listing is information, not a recommendation.</Text>
           <View className="h-[120px] items-center justify-center my-4 bg-surface-accent dark:bg-surface-accent-dark rounded-[18px]"><BadgeCheck size={30} color={teal} /></View>
           <Primary label="Use my location" onPress={onUseLocation} />
@@ -301,7 +299,7 @@ export default function FindCareScreen() {
       <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
         <Header back={() => setStep('location')} />
         <View className="px-5 flex-1">
-          <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark mt-1.5 mb-2.5">Which state?</Text>
+          <Text variant="h2" className="mt-1.5 mb-2.5">Which state?</Text>
           <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-3.5">Providers are licensed by state. Coverage varies — some states have far fewer.</Text>
           <View className="flex-row items-center gap-2.5 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-xl px-4 py-4">
             <Search size={18} color={soft} /><TextInput placeholder="Search states" placeholderTextColor={faint} value={stateQ} onChangeText={setStateQ} className="flex-1 font-sans text-base text-text-primary dark:text-text-primary-dark" />
@@ -350,7 +348,7 @@ export default function FindCareScreen() {
         <Header back={() => setStep('manual')} />
         <View className="px-5 flex-1">
           <Chip label={loc} onPress={() => setStep('manual')} />
-          <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark mt-3 mb-2.5">Which city?</Text>
+          <Text variant="h2" className="mt-3 mb-2.5">Which city?</Text>
           <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-3.5">Filter by practice location, or browse the whole state.</Text>
           <View className="flex-row items-center gap-2.5 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-xl px-4 py-4">
             <Search size={18} color={soft} /><TextInput placeholder={`Search cities in ${loc}`} placeholderTextColor={faint} value={cityQ} onChangeText={setCityQ} className="flex-1 font-sans text-base text-text-primary dark:text-text-primary-dark" />
@@ -405,7 +403,7 @@ export default function FindCareScreen() {
             {loc ? <Chip label={loc} onPress={() => setStep('manual')} /> : null}
             {cityLabel ? <Chip label={cityLabel} onPress={() => setStep('city')} /> : null}
           </View>
-          <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark mt-3 mb-2.5">What type of provider?</Text>
+          <Text variant="h2" className="mt-3 mb-2.5">What type of provider?</Text>
           <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-3.5">Provider type comes straight from the NPI registry.</Text>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}>
             <Tap onPress={() => startType(null)}>
@@ -442,7 +440,7 @@ export default function FindCareScreen() {
       <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
         <Header back={() => setStep('manual')} />
         <View className="px-5 pt-2">
-          <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark mb-2.5">The directory is U.S.-only for now</Text>
+          <Text variant="h2" className="mb-2.5">The directory is U.S.-only for now</Text>
           <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-2">We currently list NPI-registered providers in the United States. We're working on more regions.</Text>
           <View className="bg-[#FBE9E7] dark:bg-[#3D2523] rounded-2xl p-4 my-2">
             <View className="flex-row items-center gap-2 mb-1.5"><LifeBuoy size={18} color={red} /><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">In crisis right now?</Text></View>
@@ -524,7 +522,7 @@ export default function FindCareScreen() {
   const Empty = (
     <View className="items-center px-6 pt-12">
       <View className="w-14 h-14 rounded-full bg-surface-active dark:bg-surface-active-dark items-center justify-center mb-4"><Search size={24} color={soft} /></View>
-      <Text className="font-display text-xl text-text-primary dark:text-text-primary-dark mb-2 text-center">No providers match</Text>
+      <Text variant="h4" className="mb-2 text-center">No providers match</Text>
       <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5 text-center mb-5">{debounced ? `Nothing matches “${debounced}” in ${cityLabel ?? locLabel}.` : `No providers of this type are listed in ${cityLabel ?? locLabel}.`}</Text>
       <View className="w-full gap-2.5">
         <Primary label={debounced ? 'Clear search' : 'Show all types'} onPress={() => (debounced ? setQuery('') : startType(null))} />
@@ -609,7 +607,7 @@ function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: stri
       <ScrollView className="px-5" showsVerticalScrollIndicator={false}>
         <View className="flex-row gap-3.5 items-center">
           <View style={{ backgroundColor: colorFor(p.id) }} className="w-[60px] h-[60px] rounded-full items-center justify-center"><Text className="font-sans-bold text-white text-xl">{initials(name)}</Text></View>
-          <View className="flex-1"><Text className="font-display text-2xl text-text-primary dark:text-text-primary-dark">{name}</Text><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm mt-0.5">{[p.provider_type?.label, p.credentials_suffix].filter(Boolean).join(' · ')}</Text></View>
+          <View className="flex-1"><Text variant="h3">{name}</Text><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm mt-0.5">{[p.provider_type?.label, p.credentials_suffix].filter(Boolean).join(' · ')}</Text></View>
           <Tap onPress={onToggleSave}><View className="pl-3"><Bookmark size={20} color={saved ? teal : faint} fill={saved ? teal : 'transparent'} /></View></Tap>
         </View>
         {verified && (badge === 'verified') ? (

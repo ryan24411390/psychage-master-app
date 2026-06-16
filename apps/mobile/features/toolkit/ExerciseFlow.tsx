@@ -36,7 +36,7 @@ export function ExerciseFlow({ exercise, onExit, onHelp }: ExerciseFlowProps) {
           >
             {exercise.name}
           </Text>
-          <Text variant="headingLg">{exercise.need}</Text>
+          <Text variant="h2">{exercise.need}</Text>
         </View>
         <View className="px-6 pb-8">
           <Button variant="primary" className="w-full" onPress={() => setStep('exercise')}>
@@ -51,7 +51,7 @@ export function ExerciseFlow({ exercise, onExit, onHelp }: ExerciseFlowProps) {
     return (
       <ExerciseChrome onHelp={onHelp}>
         <View className="flex-1 items-center justify-center gap-6 px-6">
-          <Text variant="headingLg">Done.</Text>
+          <Text variant="h2">Done.</Text>
           <Button variant="secondary" onPress={onExit}>
             Close
           </Button>

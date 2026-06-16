@@ -101,7 +101,7 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
             entering={reduced ? undefined : FadeIn.duration(DURATION.base).easing(easingFn('out'))}
             className="gap-6"
           >
-            <Text variant="headingLg">{AUTH_COPY.signUpTitle}</Text>
+            <Text variant="h2">{AUTH_COPY.signUpTitle}</Text>
 
             <View className="gap-4">
               <AuthTextField
@@ -179,10 +179,10 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
                 >
                   {accepted ? <Check size={16} color="#FFFFFF" strokeWidth={3} /> : null}
                 </View>
-                <Text variant="bodySm" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
+                <Text variant="bodySmall" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
                   {AUTH_COPY.termsPrefix}
                   <Text
-                    variant="bodySm"
+                    variant="bodySmall"
                     className="text-primary underline dark:text-primary-dark"
                     onPress={() => void Linking.openURL(TERMS_URL)}
                   >
@@ -190,7 +190,7 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
                   </Text>
                   {AUTH_COPY.termsAnd}
                   <Text
-                    variant="bodySm"
+                    variant="bodySmall"
                     className="text-primary underline dark:text-primary-dark"
                     onPress={() => void Linking.openURL(PRIVACY_URL)}
                   >
@@ -199,7 +199,7 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
                 </Text>
               </Pressable>
               {termsError ? (
-                <Text variant="bodySm" className="text-error dark:text-error-dark">
+                <Text variant="bodySmall" className="text-error dark:text-error-dark">
                   {AUTH_COPY.termsRequiredLine}
                 </Text>
               ) : null}
@@ -207,7 +207,7 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
 
             <View className="gap-2">
               {formError ? (
-                <Text variant="bodySm" className="text-error dark:text-error-dark">
+                <Text variant="bodySmall" className="text-error dark:text-error-dark">
                   {formError}
                 </Text>
               ) : null}

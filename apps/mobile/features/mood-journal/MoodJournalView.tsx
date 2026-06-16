@@ -44,7 +44,7 @@ export function MoodJournalView({ momentStore }: MoodJournalViewProps) {
     <View className="flex-1">
       <ScrollView contentContainerClassName="gap-4 px-4 py-4" showsVerticalScrollIndicator={false}>
         <View>
-          <Text variant="headingLg">{t.title}</Text>
+          <Text variant="h2">{t.title}</Text>
           <Text variant="body" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
             {t.intro}
           </Text>
@@ -52,7 +52,7 @@ export function MoodJournalView({ momentStore }: MoodJournalViewProps) {
 
         {moments.length === 0 ? (
           <Card testID="mood-journal-empty" className="p-5">
-            <Text variant="heading">{t.empty.heading}</Text>
+            <Text variant="h3">{t.empty.heading}</Text>
             <Text variant="body" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
               {t.empty.body}
             </Text>

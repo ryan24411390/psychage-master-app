@@ -32,14 +32,14 @@ export function ConditionsLibraryView() {
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
           <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>
         </Pressable>
       </View>
 
       <ScrollView contentContainerClassName="gap-3 px-5 pb-12" showsVerticalScrollIndicator={false}>
-        <Text variant="headingLg">{t.title}</Text>
+        <Text variant="h2">{t.title}</Text>
         <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
           {t.intro}
         </Text>
@@ -54,7 +54,7 @@ export function ConditionsLibraryView() {
             className="min-h-[44px] flex-row items-center justify-between gap-3 rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
-            <Text variant="bodyMedium" className="flex-1">
+            <Text variant="h6" className="flex-1">
               {cat.name}
             </Text>
             <ChevronRight size={18} color={colors.charcoal[600]} strokeWidth={2} />

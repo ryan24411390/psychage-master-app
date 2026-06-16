@@ -31,10 +31,10 @@ export function PrimaryAction({ checkedInToday, dormantTool, onCheckIn }: Primar
         <Pressable className="overflow-hidden rounded-xl bg-surface-active p-5 shadow-base dark:bg-surface-active-dark flex-row items-center justify-between active:scale-[0.98]">
           <View className="flex-1 gap-1">
             <Text variant="caption" className="text-primary dark:text-primary-dark font-sans-medium">It's been a while</Text>
-            <Text variant="bodyBold" className="text-text-primary dark:text-text-primary-dark">Use {dormantTool.tool.name}</Text>
+            <Text variant="h5" className="text-text-primary dark:text-text-primary-dark">Use {dormantTool.tool.name}</Text>
           </View>
           <View className="bg-background dark:bg-background-dark px-4 py-2 rounded-full border border-border/50 dark:border-border-dark/50">
-            <Text variant="bodySm" className="font-sans-medium">Open</Text>
+            <Text variant="bodySmall" className="font-sans-medium">Open</Text>
           </View>
         </Pressable>
       </Link>
@@ -44,7 +44,7 @@ export function PrimaryAction({ checkedInToday, dormantTool, onCheckIn }: Primar
   return (
     <View className="flex-row items-center justify-center py-4 bg-transparent">
       <Check size={20} color={iconColor} className="mr-2" />
-      <Text variant="bodyMedium" className="text-text-secondary dark:text-text-secondary-dark">Checked in today</Text>
+      <Text variant="h6" className="text-text-secondary dark:text-text-secondary-dark">Checked in today</Text>
     </View>
   );
 }

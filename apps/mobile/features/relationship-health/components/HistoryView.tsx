@@ -27,7 +27,7 @@ export function HistoryView({ history, onSelect, onDelete, onStartNew }: History
   if (history.length === 0) {
     return (
       <View className="flex-1 items-center justify-center gap-4 px-8">
-        <Text variant="heading" className="text-center" accessibilityRole="header">
+        <Text variant="h3" className="text-center" accessibilityRole="header">
           {t.title}
         </Text>
         <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark leading-6">
@@ -47,7 +47,7 @@ export function HistoryView({ history, onSelect, onDelete, onStartNew }: History
       showsVerticalScrollIndicator={false}
     >
       <View className="flex-row items-baseline justify-between pt-2">
-        <Text variant="heading" className="text-lg" accessibilityRole="header">
+        <Text variant="h3" className="text-lg" accessibilityRole="header">
           {t.title}
         </Text>
         <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
@@ -64,12 +64,12 @@ export function HistoryView({ history, onSelect, onDelete, onStartNew }: History
           className="flex-row items-center gap-3 rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
         >
           <View className="h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+            <Text variant="h6" className="text-primary dark:text-primary-dark">
               {r.compositeScore}
             </Text>
           </View>
           <View className="flex-1">
-            <Text variant="bodyMedium" className="text-[15px]">
+            <Text variant="h6" className="text-[15px]">
               {formatDate(r.createdAt)}
             </Text>
             <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark" numberOfLines={1}>

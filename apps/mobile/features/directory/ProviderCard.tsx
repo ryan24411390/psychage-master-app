@@ -75,9 +75,9 @@ export const ProviderCard = memo(function ProviderCard({
         <View className="flex-1 gap-1">
           <View className="flex-row items-start justify-between gap-2">
             <View className="flex-1 flex-row flex-wrap items-baseline">
-              <Text variant="bodyMedium">{name}</Text>
+              <Text variant="h6">{name}</Text>
               {provider.credentials_suffix ? (
-                <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
                   {`, ${provider.credentials_suffix}`}
                 </Text>
               ) : null}
@@ -86,7 +86,7 @@ export const ProviderCard = memo(function ProviderCard({
           </View>
 
           {typeLine ? (
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
               {typeLine}
             </Text>
           ) : null}

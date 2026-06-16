@@ -130,7 +130,7 @@ export function SleepLogForm({ initial, onSubmit, onCancel }: SleepLogFormProps)
       contentContainerClassName="gap-5 px-4 pb-12 pt-2"
       keyboardShouldPersistTaps="handled"
     >
-      <Text variant="headingLg">{t.heading}</Text>
+      <Text variant="h2">{t.heading}</Text>
 
       <Section title={CT4_SLEEP.tabs.diary}>
         <TimeField label={t.bedtime} value={draft.bedtime} onChange={(v) => set('bedtime', v)} invalid={showInvalid && !HHMM_RE.test(draft.bedtime)} />
@@ -163,14 +163,14 @@ export function SleepLogForm({ initial, onSubmit, onCancel }: SleepLogFormProps)
       </Section>
 
       {showInvalid && !timesValid ? (
-        <Text variant="bodySm" className="text-error dark:text-error-dark">
+        <Text variant="bodySmall" className="text-error dark:text-error-dark">
           {t.invalid}
         </Text>
       ) : null}
 
       {crisisFlagged ? (
         <View className="gap-2 rounded-xl border border-crisis px-4 py-3">
-          <Text variant="bodySm" className="text-text-primary dark:text-text-primary-dark">
+          <Text variant="bodySmall" className="text-text-primary dark:text-text-primary-dark">
             If you’re going through something hard, support is here for you.
           </Text>
           <CrisisPill />
@@ -208,7 +208,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View className="gap-1.5">
-      <Text variant="bodySm" className="text-text-primary dark:text-text-primary-dark">
+      <Text variant="bodySmall" className="text-text-primary dark:text-text-primary-dark">
         {label}
       </Text>
       {children}
@@ -329,7 +329,7 @@ function RatingField({
               }`}
             >
               <Text
-                variant={selected ? 'bodyBold' : 'body'}
+                variant={selected ? 'h5' : 'body'}
                 className={selected ? 'text-primary dark:text-primary-dark' : ''}
               >
                 {r}

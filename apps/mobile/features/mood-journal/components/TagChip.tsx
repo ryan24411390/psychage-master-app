@@ -28,7 +28,7 @@ export function TagChip({ label, selected, onPress, testID }: TagChipProps) {
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
       <Text
-        variant="bodySm"
+        variant="bodySmall"
         className={
           selected
             ? 'text-primary dark:text-primary-dark'

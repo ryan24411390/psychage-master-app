@@ -48,7 +48,7 @@ export function ConfirmSheet({
         className="gap-4 rounded-t-xl bg-surface px-5 pb-6 pt-5 dark:bg-surface-dark"
       >
         <View className="gap-2">
-          <Text variant="heading">{title}</Text>
+          <Text variant="h3">{title}</Text>
           <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
             {body}
           </Text>

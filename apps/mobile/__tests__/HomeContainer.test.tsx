@@ -55,7 +55,7 @@ const REFLECTION_COPY = 'This week’s reflection is ready.';
 
 describe('HomeContainer (S3 live flow)', () => {
   it('first-run → check in Low → checked-in + bridge; the check-in CTA is replaced', () => {
-    renderWithProviders(<HomeContainer store={makeFakeStore()} />, { haptics: true });
+    renderWithProviders(<HomeContainer store={makeFakeStore()} />, { haptics: true, query: true });
 
     // first-run (empty store)
     expect(screen.getByText('This is your space. It starts whenever you’re ready.')).toBeTruthy();
@@ -76,16 +76,6 @@ describe('HomeContainer (S3 live flow)', () => {
     expect(screen.queryByRole('button', { name: 'Check in — 30 seconds' })).toBeNull();
     expect(screen.queryByText('How are you right now?')).toBeNull();
   });
-
-  it('reaches the away and checked-in states via the dev toggle', () => {
-    renderWithProviders(<HomeContainer store={makeFakeStore()} />, { haptics: true });
-
-    fireEvent.press(screen.getByLabelText('dev-state-away'));
-    expect(screen.getByText('Your record waited. Nothing was lost.')).toBeTruthy();
-
-    fireEvent.press(screen.getByLabelText('dev-state-checked-in'));
-    expect(screen.getByText('Would something steadying help right now?')).toBeTruthy();
-  });
 });
 
 describe('HomeContainer — reflection-ready row (Flow 12, one-time)', () => {
@@ -104,7 +94,7 @@ describe('HomeContainer — reflection-ready row (Flow 12, one-time)', () => {
         reflectionGate={gate}
         navigateToReflection={navSpy}
       />,
-      { haptics: true },
+      { haptics: true, query: true },
     );
 
     expect(screen.getByText(REFLECTION_COPY)).toBeTruthy();
@@ -120,6 +110,7 @@ describe('HomeContainer — reflection-ready row (Flow 12, one-time)', () => {
     const gate = { isOpened: () => true, markOpened: () => {} };
     renderWithProviders(<HomeContainer store={makeAvailableStore()} reflectionGate={gate} />, {
       haptics: true,
+      query: true,
     });
     expect(screen.queryByText(REFLECTION_COPY)).toBeNull();
   });
@@ -129,12 +120,12 @@ describe('HomeContainer — reflection-ready row (Flow 12, one-time)', () => {
 // index route maps to autoOpenCheckIn → S4 opens over the first-run home on mount.
 describe('HomeContainer — autoOpenCheckIn (onboarding → S4)', () => {
   it('opens the check-in sheet on mount when autoOpenCheckIn is set', () => {
-    renderWithProviders(<HomeContainer store={makeFakeStore()} autoOpenCheckIn />, { haptics: true });
+    renderWithProviders(<HomeContainer store={makeFakeStore()} autoOpenCheckIn />, { haptics: true, query: true });
     expect(screen.getByText('How are you right now?')).toBeTruthy();
   });
 
   it('does not open the sheet by default', () => {
-    renderWithProviders(<HomeContainer store={makeFakeStore()} />, { haptics: true });
+    renderWithProviders(<HomeContainer store={makeFakeStore()} />, { haptics: true, query: true });
     expect(screen.queryByText('How are you right now?')).toBeNull();
   });
 });

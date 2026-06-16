@@ -21,22 +21,22 @@ describe('Text variant → font-family class', () => {
     expect(classesFor('body')).toContain('font-sans');
   });
 
-  it('bodyMedium uses font-sans-medium (500)', () => {
-    expect(classesFor('bodyMedium')).toContain('font-sans-medium');
+  it('h6 uses font-sans-medium (500)', () => {
+    expect(classesFor('h6')).toContain('font-sans-medium');
   });
 
-  it('bodyBold uses font-sans-bold (700)', () => {
-    expect(classesFor('bodyBold')).toContain('font-sans-bold');
+  it('h5 uses font-sans-bold (700)', () => {
+    expect(classesFor('h5')).toContain('font-sans-bold');
   });
 
-  it('heading + headingLg use font-display (Fraunces 600)', () => {
-    expect(classesFor('heading')).toContain('font-display');
-    expect(classesFor('headingLg')).toContain('font-display');
+  it('h3 + h2 use font-display (Fraunces 600)', () => {
+    expect(classesFor('h3')).toContain('font-display');
+    expect(classesFor('h2')).toContain('font-display');
   });
 
-  it('headingLg no longer carries the no-op font-bold weight utility', () => {
+  it('h2 no longer carries the no-op font-bold weight utility', () => {
     // Custom-cut fonts ignore RN fontWeight on iOS; font-bold was dead. Weight
     // is family-selected now. This guards the Slice-1 removal from regressing.
-    expect(classesFor('headingLg')).not.toContain('font-bold');
+    expect(classesFor('h2')).not.toContain('font-bold');
   });
 });

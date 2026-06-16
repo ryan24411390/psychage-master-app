@@ -22,7 +22,7 @@ export function ChipXL({ label, onPress, accessibilityLabel }: ChipXLProps) {
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
       <View className="items-center">
-        <Text variant="bodyMedium">{label}</Text>
+        <Text variant="h6">{label}</Text>
       </View>
     </Pressable>
   );

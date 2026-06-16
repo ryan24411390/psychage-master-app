@@ -39,7 +39,7 @@ function CrisisActionPill({
       className="min-h-[44px] min-w-[72px] items-center justify-center rounded-xl border border-crisis px-4 dark:border-crisis-dark"
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
-      <Text variant="bodyMedium" className="text-crisis dark:text-crisis-dark">
+      <Text variant="h6" className="text-crisis dark:text-crisis-dark">
         {label}
       </Text>
     </Pressable>
@@ -52,8 +52,8 @@ export function CrisisCallRow({ row, dial = defaultDial }: CrisisCallRowProps) {
   return (
     <View className="min-h-[72px] flex-row items-center justify-between gap-3 rounded-xl border border-border bg-surface p-4 mb-3 shadow-sm dark:border-border-dark dark:bg-surface-dark">
       <View className="flex-1">
-        <Text variant="bodyMedium">{name}</Text>
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="h6">{name}</Text>
+        <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
           {row.fiveWordDesc}
         </Text>
       </View>

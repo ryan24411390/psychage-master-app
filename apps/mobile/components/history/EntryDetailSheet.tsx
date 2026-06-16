@@ -61,7 +61,7 @@ export function EntryDetailSheet({ entry, onEdit, onClose }: EntryDetailSheetPro
 
         <View className="flex-row items-center gap-3">
           <MoodGlyphFace state={entry.state} />
-          <Text variant="bodyMedium">{STATE_LABELS[entry.state]}</Text>
+          <Text variant="h6">{STATE_LABELS[entry.state]}</Text>
         </View>
 
         {entry.note ? (

@@ -43,7 +43,7 @@ export function BrowseView() {
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
           <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
             {category ? 'All topics' : 'Back'}
           </Text>
         </Pressable>
@@ -65,7 +65,7 @@ function Tier1({ onPick }: { onPick: (id: string) => void }) {
   const colW = Math.floor((width - 32 - 12) / 2);
   return (
     <ScrollView contentContainerClassName="px-4 pb-12" showsVerticalScrollIndicator={false}>
-      <Text variant="headingLg" className="py-3" accessibilityRole="header">
+      <Text variant="h2" className="py-3" accessibilityRole="header">
         Browse by topic
       </Text>
       <View className="flex-row flex-wrap gap-3">
@@ -84,7 +84,7 @@ function Tier1({ onPick }: { onPick: (id: string) => void }) {
             >
               <ArtPanel artKey={cat.id} className="h-11 w-11 rounded-lg" />
               <View className="flex-1">
-                <Text variant="bodyMedium">{cat.label}</Text>
+                <Text variant="h6">{cat.label}</Text>
               </View>
             </Pressable>
           </View>
@@ -138,7 +138,7 @@ function Tier2({ category }: { category: LearnCategory }) {
       ListHeaderComponent={
         <View>
           <View className="flex-row items-baseline gap-2 py-3">
-            <Text variant="headingLg" accessibilityRole="header">
+            <Text variant="h2" accessibilityRole="header">
               {category.label}
             </Text>
             <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
@@ -202,7 +202,7 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
       <Text
-        variant="bodySm"
+        variant="bodySmall"
         className={`font-sans-medium ${active ? 'text-white dark:text-charcoal-950' : 'text-text-secondary dark:text-text-secondary-dark'}`}
       >
         {label}

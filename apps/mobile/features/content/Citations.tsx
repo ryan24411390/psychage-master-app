@@ -30,7 +30,7 @@ export function Citations({ items }: { items: readonly Citation[] }) {
       className="mt-4 gap-2 border-t border-border pt-4 dark:border-border-dark"
       testID="article-references"
     >
-      <Text variant="bodyBold">{CT4_CONTENT.referencesTitle}</Text>
+      <Text variant="h5">{CT4_CONTENT.referencesTitle}</Text>
       {items.map((c, i) => {
         const meta = formatMeta(c);
         const href = sourceHref(c);
@@ -40,7 +40,7 @@ export function Citations({ items }: { items: readonly Citation[] }) {
               {`${i + 1}.`}
             </Text>
             <View className="flex-1 gap-0.5">
-              <Text variant="bodySm" className="leading-5">
+              <Text variant="bodySmall" className="leading-5">
                 {c.title}
               </Text>
               {meta ? (

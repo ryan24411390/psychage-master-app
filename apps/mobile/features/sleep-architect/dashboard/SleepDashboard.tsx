@@ -58,8 +58,8 @@ export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
   if (entries.length === 0) {
     return (
       <Card className="gap-1 px-4 py-6">
-        <Text variant="bodyBold">{CT4_SLEEP.dashboard.emptyTitle}</Text>
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="h5">{CT4_SLEEP.dashboard.emptyTitle}</Text>
+        <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
           {CT4_SLEEP.dashboard.emptyBody}
         </Text>
       </Card>
@@ -80,8 +80,8 @@ export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
       <View className="gap-4">
         {rangeSelector}
         <Card className="gap-1 px-4 py-6">
-          <Text variant="bodyBold">{CT4_SLEEP.dashboard.emptyTitle}</Text>
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="h5">{CT4_SLEEP.dashboard.emptyTitle}</Text>
+          <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
             No nights logged in the last {rangeDays} days.
           </Text>
         </Card>
@@ -139,10 +139,10 @@ export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
       <View className="gap-2">
         {components.map((c) => (
           <View key={c.key} className="min-h-[44px] flex-row items-center justify-between rounded-lg border border-border bg-surface px-4 py-2 dark:border-border-dark dark:bg-surface-dark">
-            <Text variant="bodySm">{CT4_SLEEP.componentLabels[c.key]}</Text>
+            <Text variant="bodySmall">{CT4_SLEEP.componentLabels[c.key]}</Text>
             <View className="flex-row items-center gap-2">
               <View className={`h-2 w-2 rounded-full ${DOT_CLASS[bandForScore(c.value)]}`} />
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
                 {CT4_SLEEP.bands[bandForScore(c.value)].label}
               </Text>
             </View>
@@ -159,7 +159,7 @@ function MetricCard({ label, value }: { label: string; value: string }) {
       <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
         {label}
       </Text>
-      <Text variant="bodyBold">{value}</Text>
+      <Text variant="h5">{value}</Text>
     </Card>
   );
 }
@@ -185,7 +185,7 @@ function RangeSelector({ value, onChange }: { value: number; onChange: (days: nu
             style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
           >
             <Text
-              variant={active ? 'bodyBold' : 'bodySm'}
+              variant={active ? 'h5' : 'bodySmall'}
               className={
                 active ? 'text-white' : 'text-text-secondary dark:text-text-secondary-dark'
               }

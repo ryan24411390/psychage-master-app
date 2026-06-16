@@ -74,7 +74,7 @@ export default function PrivacyScreen() {
         </SettingsSection>
 
         <View className="gap-1">
-          <Text variant="bodyMedium" className="px-1">
+          <Text variant="h6" className="px-1">
             {t.onDeviceLabel}
           </Text>
           <Text variant="caption" className="px-1 text-text-secondary dark:text-text-secondary-dark">
@@ -83,7 +83,7 @@ export default function PrivacyScreen() {
         </View>
 
         <View className="gap-1">
-          <Text variant="bodyMedium" className="px-1">
+          <Text variant="h6" className="px-1">
             {t.syncedLabel}
           </Text>
           <Text variant="caption" className="px-1 text-text-secondary dark:text-text-secondary-dark">
@@ -92,7 +92,7 @@ export default function PrivacyScreen() {
         </View>
 
         <View className="gap-2">
-          <Text variant="bodyMedium" className="px-1">
+          <Text variant="h6" className="px-1">
             {t.exportLabel}
           </Text>
           <Text variant="caption" className="px-1 text-text-secondary dark:text-text-secondary-dark">
@@ -107,14 +107,14 @@ export default function PrivacyScreen() {
         </View>
 
         <View className="gap-2">
-          <Text variant="bodyMedium" className="px-1">
+          <Text variant="h6" className="px-1">
             {t.clearLabel}
           </Text>
           <Text variant="caption" className="px-1 text-text-secondary dark:text-text-secondary-dark">
             {t.clearDescription}
           </Text>
           {cleared ? (
-            <Text variant="bodySm" className="px-1 text-text-secondary dark:text-text-secondary-dark" testID="clear-done">
+            <Text variant="bodySmall" className="px-1 text-text-secondary dark:text-text-secondary-dark" testID="clear-done">
               {t.clearDone}
             </Text>
           ) : confirmingClear ? (

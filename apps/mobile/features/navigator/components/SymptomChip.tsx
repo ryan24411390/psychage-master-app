@@ -29,7 +29,7 @@ export function SymptomChip({ label, selected, onToggle }: SymptomChipProps) {
       style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
     >
       <Text
-        variant="bodyMedium"
+        variant="h6"
         className={selected ? 'text-teal-900 dark:text-teal-50' : undefined}
       >
         {label}

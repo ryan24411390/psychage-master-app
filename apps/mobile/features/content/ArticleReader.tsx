@@ -14,6 +14,7 @@ import { CT4_CONTENT } from '@/features/content/copy';
 import { MedicalDisclaimer } from '@/features/content/MedicalDisclaimer';
 import { ReviewedByCredit } from '@/features/content/ReviewedByCredit';
 import { getArticleBySlug } from '@/lib/articles';
+import { readingProgressStore } from '@/lib/reading-progress-store';
 import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
@@ -51,7 +52,7 @@ export function ArticleReader({ slug }: { slug: string }) {
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>
         </Pressable>
@@ -77,6 +78,17 @@ export function ArticleReader({ slug }: { slug: string }) {
           <ScrollView
             contentContainerClassName="gap-3 px-5 pb-12"
             showsVerticalScrollIndicator={false}
+            scrollEventThrottle={250}
+            onScroll={(e) => {
+              // Record how far through the article the reader is, keyed by slug, so
+              // Today's "Pick up where you left off" reflects real reading. Local-only
+              // (MMKV), never sent anywhere (SR-4).
+              const { contentOffset, layoutMeasurement, contentSize } = e.nativeEvent;
+              const scrollable = contentSize.height - layoutMeasurement.height;
+              if (scrollable <= 0) return;
+              const fraction = Math.min(1, Math.max(0, contentOffset.y / scrollable));
+              readingProgressStore.setProgress(slug, fraction);
+            }}
           >
             {article.heroImageUrl ? (
               <ArtPanel
@@ -100,10 +112,10 @@ export function ArticleReader({ slug }: { slug: string }) {
               ) : null}
             </View>
 
-            <Text variant="headingLg">{article.title}</Text>
+            <Text variant="h2">{article.title}</Text>
             {article.subtitle ? (
               <Text
-                variant="bodyMedium"
+                variant="h6"
                 className="text-text-secondary dark:text-text-secondary-dark"
               >
                 {article.subtitle}

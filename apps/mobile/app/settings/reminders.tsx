@@ -86,14 +86,14 @@ export default function RemindersScreen() {
         </SettingsSection>
 
         {lastAction === 'set' ? (
-          <Text variant="bodySm" className="px-1 text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="px-1 text-text-secondary dark:text-text-secondary-dark">
             {t.setConfirmation}
           </Text>
         ) : null}
 
         {settings.neverAsked ? (
           <Text
-            variant="bodySm"
+            variant="bodySmall"
             className="px-1 text-text-secondary dark:text-text-secondary-dark"
             testID="reminder-never-confirmation"
           >
@@ -102,12 +102,12 @@ export default function RemindersScreen() {
         ) : (
           <View className="flex-row gap-4 px-1 pt-2">
             <Pressable accessibilityRole="button" onPress={onNotNow} testID="reminder-not-now">
-              <Text variant="bodyMedium" className="text-text-tertiary dark:text-text-tertiary-dark">
+              <Text variant="h6" className="text-text-tertiary dark:text-text-tertiary-dark">
                 {t.notNow}
               </Text>
             </Pressable>
             <Pressable accessibilityRole="button" onPress={onNever} testID="reminder-never">
-              <Text variant="bodyMedium" className="text-text-tertiary dark:text-text-tertiary-dark">
+              <Text variant="h6" className="text-text-tertiary dark:text-text-tertiary-dark">
                 {t.never}
               </Text>
             </Pressable>

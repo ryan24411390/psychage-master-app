@@ -37,7 +37,7 @@ export function ToolkitsView() {
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
           <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>
         </Pressable>
@@ -48,7 +48,7 @@ export function ToolkitsView() {
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-1.5">
-          <Text variant="headingLg">{t.title}</Text>
+          <Text variant="h2">{t.title}</Text>
           <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
             {t.intro}
           </Text>

@@ -42,7 +42,7 @@ export function SleepTools({ entries, settings, onSaveTargets }: SleepToolsProps
             onPress={() => setTool(item.key)}
             className="min-h-[44px] gap-0.5 rounded-xl border border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark"
           >
-            <Text variant="bodyBold">{item.title}</Text>
+            <Text variant="h5">{item.title}</Text>
             <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               {item.sub}
             </Text>

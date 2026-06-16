@@ -23,7 +23,7 @@ export function ConsentIntro({ onPrimary }: ConsentIntroProps) {
         className="flex-1 justify-center gap-7"
       >
         <View className="gap-3">
-          <Text variant="headingLg">{THERAPIST_COPY.consentTitle}</Text>
+          <Text variant="h2">{THERAPIST_COPY.consentTitle}</Text>
           <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
             {THERAPIST_COPY.consentBody}
           </Text>

@@ -16,7 +16,7 @@ export default function CompassScreen() {
         
         {/* Immediate Actions */}
         <View className="gap-3">
-          <Text variant="heading" className="ml-1 mb-1">
+          <Text variant="h3" className="ml-1 mb-1">
             {t.headingImmediate}
           </Text>
           <View className="flex-row gap-3">
@@ -63,7 +63,7 @@ export default function CompassScreen() {
 
         {/* Reflection */}
         <View className="gap-2 mt-2">
-          <Text variant="heading" className="ml-1 mb-2">
+          <Text variant="h3" className="ml-1 mb-2">
             {t.headingReflection}
           </Text>
           <CompassTile
@@ -88,7 +88,7 @@ export default function CompassScreen() {
 
         {/* Deep Dives */}
         <View className="gap-3 mt-2">
-          <Text variant="heading" className="ml-1 mb-1">
+          <Text variant="h3" className="ml-1 mb-1">
             {t.headingExplore}
           </Text>
           <CompassTile

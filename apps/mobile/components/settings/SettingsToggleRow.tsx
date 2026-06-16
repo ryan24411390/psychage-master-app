@@ -28,7 +28,7 @@ export function SettingsToggleRow({
   return (
     <View className="min-h-[44px] flex-row items-center gap-3 px-1 py-3">
       <View className="flex-1 gap-0.5">
-        <Text variant="bodyMedium">{label}</Text>
+        <Text variant="h6">{label}</Text>
         {description ? (
           <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {description}

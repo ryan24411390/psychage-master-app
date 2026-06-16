@@ -37,7 +37,7 @@ export default function MakeItYoursScreen() {
     <ScreenShell edges={['bottom']}>
       <ScrollView contentContainerClassName="gap-5 py-4" showsVerticalScrollIndicator={false}>
         <View className="gap-2">
-          <Text variant="bodyMedium">{t.nameLabel}</Text>
+          <Text variant="h6">{t.nameLabel}</Text>
           <TextInput
             value={name}
             onChangeText={setName}
@@ -50,7 +50,7 @@ export default function MakeItYoursScreen() {
         </View>
 
         <View className="gap-2">
-          <Text variant="bodyMedium">{t.leadLabel}</Text>
+          <Text variant="h6">{t.leadLabel}</Text>
           <SettingsRadioRow
             groupLabel={t.leadLabel}
             options={LEAD_ORDER.map((value) => ({ value, label: t.leadOptions[value] }))}

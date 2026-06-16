@@ -36,7 +36,7 @@ export function ReflectionRow({ onOpen }: { onOpen?: () => void }) {
     >
       <View className="h-[14px] w-[14px] rounded-full bg-primary dark:bg-primary-dark" />
       <Text
-        variant="bodyMedium"
+        variant="h6"
         className="flex-1 text-text-secondary dark:text-text-secondary-dark"
       >
         {REFLECTION_READY_LABEL}

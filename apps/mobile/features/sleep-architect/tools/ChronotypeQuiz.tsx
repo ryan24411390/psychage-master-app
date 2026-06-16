@@ -34,7 +34,7 @@ export function ChronotypeQuiz({ onSaveTargets }: ChronotypeQuizProps) {
         >
           {t.chronotypeResult}
         </Text>
-        <Text variant="headingLg">{result.label}</Text>
+        <Text variant="h2">{result.label}</Text>
         <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
           {result.description}
         </Text>
@@ -42,7 +42,7 @@ export function ChronotypeQuiz({ onSaveTargets }: ChronotypeQuizProps) {
           <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {t.chronotypeIdeal}
           </Text>
-          <Text variant="bodyBold">
+          <Text variant="h5">
             {result.ideal_bedtime} – {result.ideal_wake_time}
           </Text>
         </Card>
@@ -58,12 +58,12 @@ export function ChronotypeQuiz({ onSaveTargets }: ChronotypeQuizProps) {
 
   return (
     <View className="gap-5">
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
         {t.chronotypeIntro}
       </Text>
       {questions.map((q) => (
         <View key={q.id} className="gap-2">
-          <Text variant="bodyMedium">{q.question}</Text>
+          <Text variant="h6">{q.question}</Text>
           {q.options.map((opt) => {
             const selected = answers[q.id] === opt.value;
             return (
@@ -80,7 +80,7 @@ export function ChronotypeQuiz({ onSaveTargets }: ChronotypeQuizProps) {
                 }`}
               >
                 <Text
-                  variant={selected ? 'bodyBold' : 'body'}
+                  variant={selected ? 'h5' : 'body'}
                   className={selected ? 'text-primary dark:text-primary-dark' : ''}
                 >
                   {opt.label}

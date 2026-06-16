@@ -43,7 +43,7 @@ export function RangeRadio({ options, value, onChange }: RangeRadioProps) {
                 : 'border-border dark:border-border-dark'
             }`}
           >
-            <Text variant="bodyMedium" className="flex-1">
+            <Text variant="h6" className="flex-1">
               {option.label}
             </Text>
             {isSelected ? <Check size={20} color={checkColor} strokeWidth={2.25} /> : null}

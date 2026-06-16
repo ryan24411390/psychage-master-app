@@ -1,40 +1,48 @@
-import React, { useEffect, useState } from 'react';
-import { View, Pressable, ActivityIndicator } from 'react-native';
-import { Text } from '@/components/ui/Text';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'expo-router';
-import { fetchMostRead, type Article } from '@/lib/content';
+import React from 'react';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 
+import { Text } from '@/components/ui/Text';
+import { listRecentArticles } from '@/lib/articles';
+
+// "Most read this week" — real, published Supabase articles via the shared article
+// repo (same query key the Learn tab uses, so the cache is warm). Links to the real
+// reader at /article/[slug]. Offset past the lead items the rails above surface so the
+// home sections don't all repeat the same article.
 export function MostRead() {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchMostRead().then(data => {
-      setArticles(data);
-      setLoading(false);
-    });
-  }, []);
+  const { data, isLoading } = useQuery({
+    queryKey: ['articles', 'recent', 14],
+    queryFn: () => listRecentArticles(14),
+  });
+  const articles = (data ?? []).slice(6, 10);
 
   return (
     <View className="gap-3 mt-6">
       <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider ml-1 mb-2">
         Most read this week
       </Text>
-      
-      {loading ? (
+
+      {isLoading ? (
         <View className="py-8 items-center justify-center">
           <ActivityIndicator size="small" />
         </View>
       ) : (
         articles.map((a, i) => (
-          <React.Fragment key={a.id}>
-            <Link href={`/read/${a.id}` as any} asChild>
-              <Pressable className="flex-row justify-between items-center py-3 active:opacity-70">
+          <React.Fragment key={a.slug}>
+            <Link href={`/article/${a.slug}` as never} asChild>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${a.title}, ${a.categoryName}`}
+                className="flex-row justify-between items-center py-3 active:opacity-70"
+              >
                 <View className="flex-1 pr-4">
-                  <Text variant="caption" className="text-primary dark:text-primary-dark font-sans-medium mb-1">{a.topic}</Text>
-                  <Text variant="bodyBold" className="text-text-primary dark:text-text-primary-dark">{a.title}</Text>
+                  <Text variant="caption" className="text-primary dark:text-primary-dark font-sans-medium mb-1">{a.categoryName}</Text>
+                  <Text variant="h5" className="text-text-primary dark:text-text-primary-dark">{a.title}</Text>
                 </View>
-                <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark shrink-0">{a.minutes} min</Text>
+                {a.readTime ? (
+                  <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark shrink-0">{a.readTime} min</Text>
+                ) : null}
               </Pressable>
             </Link>
             {i < articles.length - 1 && (

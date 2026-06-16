@@ -90,7 +90,7 @@ export function ReflectionView({
               className="min-h-[44px] justify-center active:scale-[0.98]"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
-              <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+              <Text variant="h6" className="text-primary dark:text-primary-dark">
                 See the full record
               </Text>
             </Pressable>
@@ -102,7 +102,7 @@ export function ReflectionView({
               className="min-h-[44px] justify-center active:scale-[0.98]"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
-              <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+              <Text variant="h6" className="text-primary dark:text-primary-dark">
                 Earlier weeks
               </Text>
             </Pressable>

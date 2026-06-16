@@ -64,16 +64,18 @@ describe('reading-text-size reactive value', () => {
 
 describe('readingBodySizeClass — the scaling map', () => {
   it('reproduces the prior fixed sizes at the default size (no visual change)', () => {
+    expect(readingBodySizeClass('bodyLarge', 'default')).toBe('text-lg');
     expect(readingBodySizeClass('body', 'default')).toBe('text-base');
-    expect(readingBodySizeClass('bodyMedium', 'default')).toBe('text-base');
-    expect(readingBodySizeClass('bodyBold', 'default')).toBe('text-base');
-    expect(readingBodySizeClass('bodySm', 'default')).toBe('text-sm');
+    expect(readingBodySizeClass('bodySmall', 'default')).toBe('text-sm');
   });
 
-  it('scales body up at large and down at small', () => {
+  it('respects small size', () => {
     expect(readingBodySizeClass('body', 'small')).toBe('text-sm');
+    expect(readingBodySizeClass('bodySmall', 'small')).toBe('text-xs');
+  });
+
+  it('scales body up at large', () => {
     expect(readingBodySizeClass('body', 'large')).toBe('text-lg');
-    expect(readingBodySizeClass('bodySm', 'small')).toBe('text-xs');
-    expect(readingBodySizeClass('bodySm', 'large')).toBe('text-base');
+    expect(readingBodySizeClass('bodySmall', 'large')).toBe('text-base');
   });
 });

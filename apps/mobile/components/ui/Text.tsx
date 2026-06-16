@@ -10,13 +10,18 @@ import { useReadingScale } from '@/lib/reading-text-size-context';
 // token-wired via tailwind.config.js fontFamily.
 
 export type TextVariant =
+  | 'display'
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'h4'
+  | 'h5'
+  | 'h6'
+  | 'bodyLarge'
   | 'body'
-  | 'bodyMedium'
-  | 'bodyBold'
-  | 'bodySm'
-  | 'heading'
-  | 'headingLg'
-  | 'caption';
+  | 'bodySmall'
+  | 'caption'
+  | 'button';
 
 type TextProps = RNTextProps & {
   variant?: TextVariant;
@@ -34,16 +39,21 @@ type TextProps = RNTextProps & {
 // and any Text outside a provider, keeps its fixed size (the map below produces the
 // exact prior classes at the 'default' size).
 const variantBase: Record<TextVariant, string> = {
+  display: 'font-display text-5xl tracking-tighter text-text-primary dark:text-text-primary-dark',
+  h1: 'font-display text-4xl tracking-tighter text-text-primary dark:text-text-primary-dark',
+  h2: 'font-display text-3xl tracking-tight text-text-primary dark:text-text-primary-dark',
+  h3: 'font-display text-2xl tracking-tight text-text-primary dark:text-text-primary-dark',
+  h4: 'font-sans-medium text-xl leading-tight tracking-normal text-text-primary dark:text-text-primary-dark',
+  h5: 'font-sans-medium text-lg leading-tight tracking-normal text-text-primary dark:text-text-primary-dark',
+  h6: 'font-sans-medium text-base tracking-normal text-text-primary dark:text-text-primary-dark',
+  bodyLarge: 'font-sans text-text-primary dark:text-text-primary-dark',
   body: 'font-sans text-text-primary dark:text-text-primary-dark',
-  bodyMedium: 'font-sans-medium text-text-primary dark:text-text-primary-dark',
-  bodyBold: 'font-sans-bold text-text-primary dark:text-text-primary-dark',
-  bodySm: 'font-sans text-text-primary dark:text-text-primary-dark',
+  bodySmall: 'font-sans text-text-primary dark:text-text-primary-dark',
   caption: 'font-sans text-xs tracking-wider text-text-secondary dark:text-text-secondary-dark',
-  heading: 'font-display text-xl tracking-tight text-text-primary dark:text-text-primary-dark',
-  headingLg: 'font-display text-2xl tracking-tighter text-text-primary dark:text-text-primary-dark',
+  button: 'font-sans-medium text-base tracking-normal text-text-primary dark:text-text-primary-dark',
 };
 
-const BODY_VARIANTS: readonly TextVariant[] = ['body', 'bodyMedium', 'bodyBold', 'bodySm'];
+const BODY_VARIANTS: readonly TextVariant[] = ['bodyLarge', 'body', 'bodySmall'];
 
 function isBodyVariant(variant: TextVariant): variant is BodyVariant {
   return BODY_VARIANTS.includes(variant);

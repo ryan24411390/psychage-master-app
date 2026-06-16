@@ -47,7 +47,7 @@ export function DestructivePair({
         className={`${BASE} border-error`}
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
       >
-        <Text variant="bodyMedium" className="text-error dark:text-error-dark">
+        <Text variant="h6" className="text-error dark:text-error-dark">
           {destructLabel}
         </Text>
       </Pressable>
@@ -60,7 +60,7 @@ export function DestructivePair({
         className={`${BASE} border-charcoal-500`}
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
       >
-        <Text variant="bodyMedium">{keepLabel}</Text>
+        <Text variant="h6">{keepLabel}</Text>
       </Pressable>
     </View>
   );

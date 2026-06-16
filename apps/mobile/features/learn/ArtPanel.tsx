@@ -32,6 +32,12 @@ type ArtPanelProps = {
   scrim?: boolean;
   /** When set, a translucent pill in the top-right shows "<n> min" over the art. */
   readTime?: number | null;
+  /**
+   * Fill the frame edge-to-edge (contentFit:cover, cropped) instead of the default
+   * blur-fill letterbox (contentFit:contain). Use for fixed thumbnail frames — covers
+   * in the home rails — where a clean fill reads better than letterbox bars.
+   */
+  cover?: boolean;
   children?: ReactNode;
 };
 
@@ -41,6 +47,7 @@ export function ArtPanel({
   className,
   scrim = false,
   readTime,
+  cover = false,
   children,
 }: ArtPanelProps) {
   const g = gradientForKey(artKey);
@@ -66,23 +73,28 @@ export function ArtPanel({
       .join(' ')}>
       {showImage ? (
         <>
-          {/* Blurred cover copy fills the letterbox bars behind the real image. */}
+          {/* Cover mode: a single image fills the frame edge-to-edge (cropped). */}
+          {cover ? null : (
+            /* Letterbox mode: blurred cover copy fills the bars behind the contained image. */
+            <>
+              <Image
+                source={{ uri: imageUrl ?? undefined }}
+                recyclingKey={imageUrl ?? undefined}
+                accessibilityIgnoresInvertColors
+                contentFit="cover"
+                blurRadius={24}
+                cachePolicy="memory-disk"
+                style={StyleSheet.absoluteFill}
+              />
+              <View style={StyleSheet.absoluteFill} pointerEvents="none" className="bg-black/15" />
+            </>
+          )}
+          {/* The real image — cover fills the frame; contain shows it whole, never cropped. */}
           <Image
             source={{ uri: imageUrl ?? undefined }}
             recyclingKey={imageUrl ?? undefined}
             accessibilityIgnoresInvertColors
-            contentFit="cover"
-            blurRadius={24}
-            cachePolicy="memory-disk"
-            style={StyleSheet.absoluteFill}
-          />
-          <View style={StyleSheet.absoluteFill} pointerEvents="none" className="bg-black/15" />
-          {/* The real image, fully visible (contain) — never cropped. */}
-          <Image
-            source={{ uri: imageUrl ?? undefined }}
-            recyclingKey={imageUrl ?? undefined}
-            accessibilityIgnoresInvertColors
-            contentFit="contain"
+            contentFit={cover ? 'cover' : 'contain'}
             transition={250}
             cachePolicy="memory-disk"
             onLoadStart={() => setLoaded(false)}

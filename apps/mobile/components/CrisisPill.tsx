@@ -23,7 +23,7 @@ export function CrisisPill() {
       className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-3 dark:border-crisis-dark"
     >
       <LifeBuoy size={18} color={tc.crisis} strokeWidth={1.75} />
-      <Text variant="bodyMedium" className="text-[13px] text-crisis dark:text-crisis-dark">
+      <Text variant="h6" className="text-[13px] text-crisis dark:text-crisis-dark">
         Help now
       </Text>
     </Pressable>

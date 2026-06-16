@@ -9,7 +9,10 @@ import { renderWithProviders } from './_helpers';
 describe('GlobalHeader (anonymous)', () => {
   it('renders the wordmark, the Help-now pill, and the account avatar', () => {
     renderWithProviders(<GlobalHeader />);
-    expect(screen.getByText('Psychage')).toBeTruthy();
+    // Two-tone wordmark: Psy (teal) + chage (ink), one accessible word for SR.
+    expect(screen.getByLabelText('Psychage')).toBeTruthy();
+    expect(screen.getByText('Psy')).toBeTruthy();
+    expect(screen.getByText('chage')).toBeTruthy();
     expect(screen.getByText('Help now')).toBeTruthy();
     expect(screen.getByLabelText('Help now')).toBeTruthy();
     expect(screen.getByLabelText('Account')).toBeTruthy();

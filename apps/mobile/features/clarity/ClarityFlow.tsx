@@ -119,7 +119,7 @@ export function ClarityFlow({
     return (
       <ClarityChrome onHelp={onHelp} onBack={handleBack}>
         <ScrollView contentContainerClassName="gap-5 px-4 pb-12 pt-4" showsVerticalScrollIndicator={false}>
-          <Text variant="headingLg" accessibilityRole="header">
+          <Text variant="h2" accessibilityRole="header">
             {CRISIS_TITLE}
           </Text>
           <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
@@ -141,13 +141,13 @@ export function ClarityFlow({
     return (
       <ClarityChrome onHelp={onHelp} onBack={handleBack}>
         <ScrollView contentContainerClassName="gap-5 px-4 pb-12 pt-4" showsVerticalScrollIndicator={false}>
-          <Text variant="headingLg" accessibilityRole="header">
+          <Text variant="h2" accessibilityRole="header">
             {INTRO_TITLE}
           </Text>
           <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
             {INTRO_BODY}
           </Text>
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
             {INTRO_META}
           </Text>
           <Button variant="primary" onPress={() => dispatch({ type: 'START' })}>
@@ -185,10 +185,10 @@ function QuestionStep({
       <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
         Question {state.index + 1} of {CLARITY_QUESTION_COUNT}
       </Text>
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
         {question.lead}
       </Text>
-      <Text variant="headingLg" accessibilityRole="header">
+      <Text variant="h2" accessibilityRole="header">
         {question.prompt}
       </Text>
       <View className="gap-3 pt-1">

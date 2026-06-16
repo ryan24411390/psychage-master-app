@@ -119,7 +119,7 @@ export function WebViewSurface({ surface, params, issuer = stubWvtIssuer }: WebV
             color={colorForScheme(resolveColorRef('color.text.secondary'), colorScheme)}
             strokeWidth={2}
           />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
             {CT4_WEBVIEW.back}
           </Text>
         </Pressable>

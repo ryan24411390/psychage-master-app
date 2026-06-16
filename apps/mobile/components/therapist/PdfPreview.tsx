@@ -62,7 +62,7 @@ export function PdfPreview({
         </Card>
 
         {isEmpty ? (
-          <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+          <Text variant="bodySmall" className="text-text-tertiary dark:text-text-tertiary-dark">
             {THERAPIST_COPY.emptyRangeLine}
           </Text>
         ) : null}

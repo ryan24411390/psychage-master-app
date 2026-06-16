@@ -24,7 +24,7 @@ export function RecentlyViewedRail({
 
   return (
     <View className="gap-2 pb-3">
-      <Text variant="bodyMedium">{t.recentlyViewed}</Text>
+      <Text variant="h6">{t.recentlyViewed}</Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

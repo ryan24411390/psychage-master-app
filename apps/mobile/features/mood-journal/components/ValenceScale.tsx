@@ -43,7 +43,7 @@ export function ValenceScale({ value, onChange, lowLabel, highLabel }: ValenceSc
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
               <Text
-                variant="bodySm"
+                variant="bodySmall"
                 className={
                   selected
                     ? 'text-primary dark:text-primary-dark'

@@ -17,8 +17,15 @@ export function GlobalHeader() {
   return (
     <SafeAreaView edges={['top']} className="bg-background dark:bg-background-dark">
       <View className="flex-row items-center justify-between border-b border-border/20 px-5 py-3 dark:border-border-dark/20">
-        <Text variant="heading" accessibilityRole="header">
-          Psychage
+        {/* Two-tone wordmark: Psy in teal, chage in ink (ink follows the theme).
+            Nested Text keeps the spans inline; SR reads it as one word. */}
+        <Text variant="h3" accessibilityRole="header" accessibilityLabel="Psychage">
+          <Text variant="h3" className="text-primary dark:text-primary-dark">
+            Psy
+          </Text>
+          <Text variant="h3" className="text-text-primary dark:text-text-primary-dark">
+            chage
+          </Text>
         </Text>
         <View className="flex-row items-center gap-2">
           <CrisisPill />

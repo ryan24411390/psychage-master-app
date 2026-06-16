@@ -94,7 +94,7 @@ export function SavedRow({ item }: { item: BookmarkItem }) {
     >
       <Icon size={20} color={tc.inkSecondary} strokeWidth={1.75} />
       <View className="flex-1">
-        <Text variant="bodyMedium" numberOfLines={1} className="text-text-primary dark:text-text-primary-dark">
+        <Text variant="h6" numberOfLines={1} className="text-text-primary dark:text-text-primary-dark">
           {display}
         </Text>
         <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">

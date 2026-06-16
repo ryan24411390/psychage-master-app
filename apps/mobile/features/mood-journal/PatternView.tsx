@@ -81,7 +81,7 @@ function TimelineSection({
       <View className="gap-3">
         {days.map((day) => (
           <Card key={day.date}>
-            <Text variant="bodyMedium">{formatDay(day.date)}</Text>
+            <Text variant="h6">{formatDay(day.date)}</Text>
             <View className="mt-2 gap-3">
               {day.moments.map((moment) => (
                 <MomentRow key={moment.id} moment={moment} onDelete={onDelete} />
@@ -124,7 +124,7 @@ function MomentRow({ moment, onDelete }: { moment: MomentEntry; onDelete: (id: s
             </Text>
           ) : null}
           {moment.note ? (
-            <Text variant="bodySm" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="bodySmall" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
               {`“${moment.note}”`}
             </Text>
           ) : null}
@@ -145,7 +145,7 @@ function MomentRow({ moment, onDelete }: { moment: MomentEntry; onDelete: (id: s
 
       {confirming ? (
         <View className="mt-2 flex-row items-center justify-end gap-2">
-          <Text variant="bodySm" className="mr-auto text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="mr-auto text-text-secondary dark:text-text-secondary-dark">
             {t.deleteConfirm}
           </Text>
           <Button

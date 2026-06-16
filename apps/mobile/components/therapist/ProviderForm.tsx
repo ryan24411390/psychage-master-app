@@ -44,7 +44,7 @@ export function ProviderForm({ onSubmit, initialName = '', initialContact = '' }
         entering={reduced ? undefined : FadeIn.duration(DURATION.base).easing(easingFn('out'))}
         className="flex-1 justify-center gap-6"
       >
-        <Text variant="headingLg">{THERAPIST_COPY.consentTitle}</Text>
+        <Text variant="h2">{THERAPIST_COPY.consentTitle}</Text>
         <View className="gap-4">
           <AuthTextField
             label={THERAPIST_COPY.providerNameLabel}

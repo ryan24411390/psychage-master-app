@@ -29,8 +29,8 @@ export function SleepDiary({ entries, onLog, onSelect }: SleepDiaryProps) {
 
       {entries.length === 0 ? (
         <Card className="gap-1 px-4 py-6">
-          <Text variant="bodyBold">{t.emptyTitle}</Text>
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="h5">{t.emptyTitle}</Text>
+          <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
             {t.emptyBody}
           </Text>
         </Card>
@@ -56,12 +56,12 @@ function DiaryRow({ entry, onPress }: { entry: SleepEntry; onPress: () => void }
       className="min-h-[44px] flex-row items-center justify-between rounded-xl border border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark"
     >
       <View className="gap-0.5">
-        <Text variant="bodyMedium">{entry.date}</Text>
+        <Text variant="h6">{entry.date}</Text>
         <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {CT4_SLEEP.diary.quality}: {entry.sleep_quality}/5
         </Text>
       </View>
-      <Text variant="bodyBold">{formatDuration(metrics.total_sleep_minutes)}</Text>
+      <Text variant="h5">{formatDuration(metrics.total_sleep_minutes)}</Text>
     </Pressable>
   );
 }

@@ -165,8 +165,8 @@ export default function DevNavigatorScreen() {
               key={r.condition_id}
               className="border border-border dark:border-border-dark rounded-lg p-3 gap-1"
             >
-              <Text variant="heading">{r.condition_id}</Text>
-              <Text variant="bodySm">
+              <Text variant="h3">{r.condition_id}</Text>
+              <Text variant="bodySmall">
                 relevance: {r.relevance_score.toFixed(4)} · level: {r.relevance_level}
               </Text>
             </View>

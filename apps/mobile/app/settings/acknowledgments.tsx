@@ -24,10 +24,10 @@ export default function AcknowledgmentsScreen() {
               key={item.name}
               className="min-h-[44px] flex-row items-center justify-between gap-3 px-1 py-3"
             >
-              <Text variant="bodyMedium" className="flex-1">
+              <Text variant="h6" className="flex-1">
                 {item.name}
               </Text>
-              <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+              <Text variant="bodySmall" className="text-text-tertiary dark:text-text-tertiary-dark">
                 {item.license}
               </Text>
             </View>

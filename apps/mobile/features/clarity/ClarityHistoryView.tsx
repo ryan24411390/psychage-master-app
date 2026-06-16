@@ -32,7 +32,7 @@ export interface ClarityHistoryViewProps {
 export function ClarityHistoryView({ snapshots, onStartNew }: ClarityHistoryViewProps) {
   return (
     <ScrollView contentContainerClassName="gap-5 px-4 pb-12 pt-2" showsVerticalScrollIndicator={false}>
-      <Text variant="headingLg" accessibilityRole="header">
+      <Text variant="h2" accessibilityRole="header">
         {TITLE}
       </Text>
 
@@ -49,9 +49,9 @@ export function ClarityHistoryView({ snapshots, onStartNew }: ClarityHistoryView
               <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 {formatDate(s.date)}
               </Text>
-              <Text variant="heading">{TIER_COPY[s.tier].label}</Text>
+              <Text variant="h3">{TIER_COPY[s.tier].label}</Text>
               {change ? (
-                <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
                   {change}
                 </Text>
               ) : null}
@@ -68,7 +68,7 @@ export function ClarityHistoryView({ snapshots, onStartNew }: ClarityHistoryView
         className="min-h-[44px] justify-center"
         style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
       >
-        <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+        <Text variant="h6" className="text-primary dark:text-primary-dark">
           Take a new reflection
         </Text>
       </Pressable>

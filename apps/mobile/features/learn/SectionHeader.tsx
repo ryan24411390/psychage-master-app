@@ -34,7 +34,7 @@ export function SectionHeader({
     return (
       <Text
         variant="caption"
-        className="mb-2 font-sans-bold uppercase tracking-[0.12em] text-teal-700 dark:text-primary-dark"
+        className="mb-2 font-sans-medium uppercase tracking-[0.12em] text-teal-700 dark:text-primary-dark"
         accessibilityRole="header"
       >
         {title}
@@ -45,7 +45,7 @@ export function SectionHeader({
   return (
     <View className="mb-3 flex-row items-end justify-between gap-3">
       <View className="flex-1 flex-row items-baseline gap-2">
-        <Text variant="headingLg" accessibilityRole="header">
+        <Text variant="h3" accessibilityRole="header">
           {title}
         </Text>
         {count ? (
@@ -67,7 +67,7 @@ export function SectionHeader({
           className="min-h-[44px] flex-row items-center gap-1 pl-2"
           style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
         >
-          <Text variant="bodySm" className="font-sans-medium text-teal-700 dark:text-primary-dark">
+          <Text variant="bodySmall" className="font-sans-medium text-teal-700 dark:text-primary-dark">
             {seeAllLabel}
           </Text>
           <ArrowRight size={15} color={tc.primary} strokeWidth={2} />

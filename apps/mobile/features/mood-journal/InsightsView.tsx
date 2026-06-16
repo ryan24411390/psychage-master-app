@@ -63,9 +63,9 @@ export function InsightsView({ moments }: InsightsViewProps) {
   return (
     <View className="gap-4">
       <Card testID="mood-journal-streak">
-        <Text variant="headingLg">{streakLabel}</Text>
+        <Text variant="h2">{streakLabel}</Text>
         {directionLine ? (
-          <Text variant="bodySm" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
             {directionLine}
           </Text>
         ) : null}
@@ -86,7 +86,7 @@ export function InsightsView({ moments }: InsightsViewProps) {
       ) : trend.length === 1 ? (
         <View testID="mood-journal-valence-lowdata">
           <SectionHeading>{t.insights.valenceHeading}</SectionHeading>
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
             {t.insights.lowData}
           </Text>
         </View>

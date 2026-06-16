@@ -27,8 +27,8 @@ export function SupporterTiers({ onSelect }: SupporterTiersProps) {
             className="min-h-[44px] flex-row items-center justify-between rounded-lg border border-border px-4 py-3 dark:border-border-dark"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
-            <Text variant="bodyMedium">{name}</Text>
-            <Text variant="bodyMedium" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="h6">{name}</Text>
+            <Text variant="h6" className="text-text-secondary dark:text-text-secondary-dark">
               {tier.priceLabel}
             </Text>
           </Pressable>

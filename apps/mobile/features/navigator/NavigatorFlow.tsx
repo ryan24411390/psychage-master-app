@@ -167,7 +167,7 @@ export function NavigatorFlow({
             if (!q) return null;
             return (
               <View className="gap-4">
-                <Text variant="headingLg" accessibilityRole="header">
+                <Text variant="h2" accessibilityRole="header">
                   {q.prompt}
                 </Text>
                 {q.options.map((o) => (
@@ -183,7 +183,7 @@ export function NavigatorFlow({
 
         {state.step === 'severity' && (
           <View className="gap-4">
-            <Text variant="headingLg" accessibilityRole="header">
+            <Text variant="h2" accessibilityRole="header">
               {SEVERITY_QUESTION}
             </Text>
             <ChipXL
@@ -260,7 +260,7 @@ function SymptomStep({
         hitSlop={6}
         className="min-h-[44px] justify-center"
       >
-        <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+        <Text variant="h6" className="text-primary dark:text-primary-dark">
           {SOMETHING_ELSE}
         </Text>
       </Pressable>

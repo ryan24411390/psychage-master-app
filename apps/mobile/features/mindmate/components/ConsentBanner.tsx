@@ -28,7 +28,7 @@ export function ConsentBanner({ onDismiss }: { onDismiss?: () => void }) {
     >
       <View className="flex-row items-start gap-2">
         <Text
-          variant="bodyBold"
+          variant="h5"
           className="flex-1 text-text-primary dark:text-text-primary-dark"
         >
           {MINDMATE_COPY.consentTitle}
@@ -45,7 +45,7 @@ export function ConsentBanner({ onDismiss }: { onDismiss?: () => void }) {
           </Pressable>
         ) : null}
       </View>
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="bodySmall" className="text-text-secondary dark:text-text-secondary-dark">
         {MINDMATE_COPY.consentBody}
       </Text>
       <SettingsToggleRow

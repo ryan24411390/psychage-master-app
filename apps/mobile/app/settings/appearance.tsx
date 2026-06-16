@@ -29,7 +29,7 @@ export default function AppearanceScreen() {
     <ScreenShell edges={['bottom']}>
       <ScrollView contentContainerClassName="gap-5 py-4" showsVerticalScrollIndicator={false}>
         <View className="gap-2">
-          <Text variant="bodyMedium" className="px-1">
+          <Text variant="h6" className="px-1">
             {t.appearanceLabel}
           </Text>
           <SettingsRadioRow
@@ -41,7 +41,7 @@ export default function AppearanceScreen() {
         </View>
 
         <View className="gap-2">
-          <Text variant="bodyMedium" className="px-1">
+          <Text variant="h6" className="px-1">
             {t.textSizeLabel}
           </Text>
           <SettingsRadioRow

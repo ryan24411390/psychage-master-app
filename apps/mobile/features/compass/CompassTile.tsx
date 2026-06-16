@@ -75,7 +75,7 @@ export function CompassTile({
         <View className={`h-10 w-10 items-center justify-center rounded-full mb-3 ${colors.bg}`}>
           <Icon size={20} color={colors.iconColor} />
         </View>
-        <Text variant="bodyBold" className="mb-1" numberOfLines={2}>{title}</Text>
+        <Text variant="h5" className="mb-1" numberOfLines={2}>{title}</Text>
         <Text variant="caption" numberOfLines={1}>{subLabel}</Text>
       </AnimatedPressable>
     );
@@ -100,7 +100,7 @@ export function CompassTile({
           <View className={`h-12 w-12 items-center justify-center rounded-2xl mb-4 ${colors.bg}`}>
             <Icon size={24} color={colors.iconColor} />
           </View>
-          <Text variant="heading" className="mb-1">{title}</Text>
+          <Text variant="h3" className="mb-1">{title}</Text>
           <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">{subLabel}</Text>
         </View>
       </AnimatedPressable>
@@ -123,7 +123,7 @@ export function CompassTile({
         <Icon size={24} color={colors.iconColor} />
       </View>
       <View className="flex-1 justify-center">
-        <Text variant="bodyBold" className="mb-1">{title}</Text>
+        <Text variant="h5" className="mb-1">{title}</Text>
         <Text variant="caption">{subLabel}</Text>
       </View>
     </AnimatedPressable>

@@ -35,7 +35,7 @@ export function RelationshipChrome({ children, onBack, onHelp, backLabel }: Rela
           className="min-h-[44px] flex-row items-center gap-1 pr-2"
         >
           <ChevronLeft size={22} color={tc.inkSecondary} strokeWidth={1.75} />
-          <Text variant="bodyMedium" className="text-[15px] text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="h6" className="text-[15px] text-text-secondary dark:text-text-secondary-dark">
             {backLabel ?? t.back}
           </Text>
         </Pressable>
@@ -48,7 +48,7 @@ export function RelationshipChrome({ children, onBack, onHelp, backLabel }: Rela
           className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-3"
         >
           <LifeBuoy size={18} color={tc.crisis} strokeWidth={1.75} />
-          <Text variant="bodyMedium" className="text-[13px] text-crisis">
+          <Text variant="h6" className="text-[13px] text-crisis">
             {t.helpNow}
           </Text>
         </Pressable>

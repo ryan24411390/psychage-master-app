@@ -47,7 +47,7 @@ export function Citations({
           >
             <BookOpen size={14} color={tc.primary} strokeWidth={2} />
             <Text
-              variant="bodySm"
+              variant="bodySmall"
               className="text-text-primary dark:text-text-primary-dark"
             >
               {c.title}

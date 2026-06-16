@@ -75,7 +75,7 @@ export function SignInForm({
             entering={reduced ? undefined : FadeIn.duration(DURATION.base).easing(easingFn('out'))}
             className="gap-6"
           >
-            <Text variant="headingLg">{AUTH_COPY.signInPrimary}</Text>
+            <Text variant="h2">{AUTH_COPY.signInPrimary}</Text>
 
             <View className="gap-4">
               <AuthTextField
@@ -108,7 +108,7 @@ export function SignInForm({
                 onPress={onForgotPassword}
                 className="self-end px-1 py-1"
               >
-                <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+                <Text variant="bodySmall" className="text-primary dark:text-primary-dark">
                   {AUTH_COPY.forgotLink}
                 </Text>
               </Pressable>
@@ -116,7 +116,7 @@ export function SignInForm({
 
             <View className="gap-2">
               {formError ? (
-                <Text variant="bodySm" className="text-error dark:text-error-dark">
+                <Text variant="bodySmall" className="text-error dark:text-error-dark">
                   {formError}
                 </Text>
               ) : null}

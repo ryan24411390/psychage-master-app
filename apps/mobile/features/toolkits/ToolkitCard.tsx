@@ -41,7 +41,7 @@ export function ToolkitCard({ toolkit, onPress, coverUrl }: ToolkitCardProps) {
         <Layers size={22} color={tc.primary} strokeWidth={1.75} />
       </View>
       <View className="gap-1 p-3">
-        <Text variant="bodyMedium" numberOfLines={2}>
+        <Text variant="h6" numberOfLines={2}>
           {toolkit.theme_title}
         </Text>
         {toolkit.clinical_subtitle ? (

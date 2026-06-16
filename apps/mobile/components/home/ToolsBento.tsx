@@ -18,8 +18,8 @@ export function ToolsBento() {
       {primaryTools.map(t => (
         <Link key={t.id} href={t.route as any} asChild>
           <Pressable className="rounded-xl border border-border/40 bg-surface p-5 shadow-sm active:scale-[0.98] dark:border-border-dark/40 dark:bg-surface-dark">
-            <Text variant="heading" className="mb-1">{t.title}</Text>
-            <Text variant="bodySm" className="font-sans-medium text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="h3" className="mb-1">{t.title}</Text>
+            <Text variant="bodySmall" className="font-sans-medium text-text-secondary dark:text-text-secondary-dark">
               {t.name}
             </Text>
           </Pressable>
@@ -31,7 +31,7 @@ export function ToolsBento() {
         {secondaryTools.map(t => (
           <Link key={t.id} href={t.route as any} asChild>
             <Pressable className="flex-1 rounded-xl border border-border/40 bg-surface p-4 shadow-sm active:scale-[0.98] dark:border-border-dark/40 dark:bg-surface-dark justify-between min-h-[100px]">
-              <Text variant="bodyBold" className="mb-1 leading-tight">{t.name}</Text>
+              <Text variant="h5" className="mb-1 leading-tight">{t.name}</Text>
               <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">Tool</Text>
             </Pressable>
           </Link>
