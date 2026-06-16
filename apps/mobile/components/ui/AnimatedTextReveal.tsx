@@ -30,15 +30,20 @@ export function AnimatedTextReveal({
     );
   }
 
-  const words = children.split(' ');
+  const seenCounts = new Map<string, number>();
+  const words = children.split(' ').map((word) => {
+    const occurrence = seenCounts.get(word) ?? 0;
+    seenCounts.set(word, occurrence + 1);
+    return { word, key: `${word}-${occurrence}` };
+  });
 
   return (
     <View className="flex-row flex-wrap" accessibilityRole="text" accessibilityLabel={children}>
-      {words.map((word, index) => {
+      {words.map(({ word, key }, index) => {
         const animation = direction === 'up' ? FadeInUp : FadeInDown;
         return (
           <Animated.View
-            key={`${word}-${index}`}
+            key={key}
             entering={animation
               .springify()
               .damping(16)
