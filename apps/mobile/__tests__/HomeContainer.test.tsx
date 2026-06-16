@@ -54,7 +54,7 @@ function makeAvailableStore(): HomeStore {
 const REFLECTION_COPY = 'This week’s reflection is ready.';
 
 describe('HomeContainer (S3 live flow)', () => {
-  it('first-run → check in Low → checked-in + bridge; Good re-save overwrites + clears the bridge', () => {
+  it('first-run → check in Low → checked-in + bridge; the check-in CTA is replaced', () => {
     renderWithProviders(<HomeContainer store={makeFakeStore()} />, { haptics: true });
 
     // first-run (empty store)
@@ -70,13 +70,11 @@ describe('HomeContainer (S3 live flow)', () => {
     expect(screen.getByText('Checked in · Low. Your record has begun.')).toBeTruthy();
     expect(screen.getByText('Would something steadying help right now?')).toBeTruthy();
 
-    // re-save as Good — overwrite, no new day, bridge clears (state > 1)
-    fireEvent.press(screen.getByRole('button', { name: 'Update today’s check-in' }));
-    fireEvent.press(screen.getByLabelText('Good'));
-    fireEvent.press(screen.getByRole('button', { name: 'Save today’s entry' }));
-
-    expect(screen.getByText('Checked in · Good. Your record has begun.')).toBeTruthy();
-    expect(screen.queryByText('Would something steadying help right now?')).toBeNull();
+    // The adaptive PrimaryAction takes over once today is checked in: the check-in CTA
+    // is gone (replaced by the re-engagement nudge / "Checked in today" — this design
+    // has no same-day "Update today's check-in" button; same-day edits live elsewhere).
+    expect(screen.queryByRole('button', { name: 'Check in — 30 seconds' })).toBeNull();
+    expect(screen.queryByText('How are you right now?')).toBeNull();
   });
 
   it('reaches the away and checked-in states via the dev toggle', () => {

@@ -116,11 +116,11 @@ describe('statusLine', () => {
 });
 
 describe('recordLabel', () => {
-  it('is "Your record" until a 2nd recorded day, then "Your last 7 days"', () => {
+  it('is "Your record" until a 2nd recorded day, then "Your last 14 days"', () => {
     expect(recordLabel(0)).toBe('Your record');
     expect(recordLabel(1)).toBe('Your record');
-    expect(recordLabel(2)).toBe('Your last 7 days');
-    expect(recordLabel(5)).toBe('Your last 7 days');
+    expect(recordLabel(2)).toBe('Your last 14 days');
+    expect(recordLabel(5)).toBe('Your last 14 days');
   });
 });
 
@@ -191,16 +191,17 @@ describe('buildTerrainDaysFromEntries', () => {
       [entry('a', today, 3), entry('b', yesterday, 1)],
       today,
     );
-    expect(days).toHaveLength(7);
-    expect(days[6]?.value).toBe(3); // today checked in
-    expect(days[5]?.value).toBe(1); // yesterday
-    expect(days[0]?.value).toBeNull(); // 6 days ago, no entry
+    expect(days).toHaveLength(14);
+    expect(days[13]?.value).toBe(3); // today checked in
+    expect(days[12]?.value).toBe(1); // yesterday
+    expect(days[0]?.value).toBeNull(); // 13 days ago, no entry
   });
 
   it('marks an unchecked today as the today marker', () => {
     const today = new Date(2026, 5, 14);
     const days = buildTerrainDaysFromEntries([], today);
-    expect(days[6]?.value).toBe('today');
+    expect(days).toHaveLength(14);
+    expect(days[13]?.value).toBe('today');
     expect(days[0]?.value).toBeNull();
   });
 });

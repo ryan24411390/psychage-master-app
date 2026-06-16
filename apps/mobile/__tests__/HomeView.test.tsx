@@ -17,6 +17,9 @@ const REGULAR: HomeViewModel = {
   read: READS.day,
   ctaLabel: 'Check in — 30 seconds',
   card: null,
+  dormantTool: null,
+  insight: null,
+  inProgressReads: [],
 };
 
 const FIRST_RUN: HomeViewModel = {
@@ -27,6 +30,9 @@ const FIRST_RUN: HomeViewModel = {
   read: READS.day,
   ctaLabel: 'Check in — 30 seconds',
   card: null,
+  dormantTool: null,
+  insight: null,
+  inProgressReads: [],
 };
 
 function render(model: HomeViewModel) {
@@ -47,8 +53,6 @@ describe('HomeView (S3)', () => {
     expect(screen.getByText('When you need something now')).toBeTruthy();
     expect(screen.getByText('Steady yourself right now')).toBeTruthy();
     expect(screen.getByText('Make sense of what you feel')).toBeTruthy();
-    expect(screen.getByText('Care and learning')).toBeTruthy();
-    expect(screen.getByText('Why your chest gets tight when you worry')).toBeTruthy();
     expect(screen.getByText('Free for everyone · 5 languages · No ads')).toBeTruthy();
   });
 

@@ -17,7 +17,7 @@ import { PickUpRail } from '@/components/home/PickUpRail';
 import { ToolsBento } from '@/components/home/ToolsBento';
 import { MostRead } from '@/components/home/MostRead';
 import { Text } from '@/components/ui/Text';
-import { type HomeViewModel, READ_CREDIT } from '@/lib/home-model';
+import { ctaLabel, type HomeViewModel } from '@/lib/home-model';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 
 // S3 presentational view (sub-slice D structure). Takes a derived HomeViewModel +
@@ -142,7 +142,7 @@ export function HomeView({
 
           {/* CHECK-IN CTA / ADAPTIVE ACTION */}
           <PrimaryAction 
-            checkedInToday={model.ctaLabel !== 'Check in'} 
+            checkedInToday={model.ctaLabel === ctaLabel(true)} 
             dormantTool={model.dormantTool} 
             onCheckIn={onCheckIn} 
           />

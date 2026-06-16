@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
-import { toolUsageStore, ToolId, TOOLS } from '@/lib/tool-usage-store';
+import { toolUsageStore, type ToolId, TOOLS } from '@/lib/tool-usage-store';
 
 export default function ToolScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -21,8 +21,8 @@ export default function ToolScreen() {
     <View className="flex-1 items-center justify-center bg-background dark:bg-background-dark p-6 gap-6">
       <Text variant="headingLg">{tool ? tool.name : 'Tool Not Found'}</Text>
       <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
-        This is a stub screen for {tool?.name}. In a full app, this would mount the actual tool UI.
-        Usage has been recorded for the dormant-tool nudge demo!
+        This is a placeholder for {tool?.name}. In the full app, the tool itself opens here. Opening
+        it is noted on your device, so Today can gently bring it back if it has been a while.
       </Text>
       <Button variant="secondary" onPress={() => router.back()}>
         Back to Today

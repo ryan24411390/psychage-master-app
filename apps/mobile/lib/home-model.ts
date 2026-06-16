@@ -3,7 +3,6 @@ import type { CheckInEntry, CheckInState } from '@psychage/shared/check-in';
 import type { HomeCard } from '@/components/home/home-card';
 import type { TerrainDay, TerrainValue } from '@/components/terrain/terrain-geometry';
 import { type Tool, TOOLS, toolUsageStore } from '@/lib/tool-usage-store';
-import { readingProgressStore } from '@/lib/reading-progress-store';
 
 // Pure S3 view-model derivation — greeting, status line, record label, CTA label,
 // the day/night read, and the 7-day terrain mapping. React-free so it is unit-
@@ -178,9 +177,10 @@ export function generateMoodInsight(days: TerrainDay[]): { headline: string; con
   }
 
   const counts = [0, 0, 0, 0, 0];
-  logged.forEach((d) => counts[d.value]++);
+  for (const d of logged) counts[d.value] = (counts[d.value] ?? 0) + 1;
   const dom = counts.indexOf(Math.max(...counts));
-  return { headline: `Mostly ${MOOD_LABELS[dom].toLowerCase()} these two weeks.`, consistency };
+  const domLabel = MOOD_LABELS[dom] ?? 'okay'; // dom is always a valid 0–4 index here
+  return { headline: `Mostly ${domLabel.toLowerCase()} these two weeks.`, consistency };
 }
 
 // --- Live derivation from the RecordStore (sub-slice E) --------------------------
