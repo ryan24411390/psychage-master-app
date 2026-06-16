@@ -9,7 +9,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
-      "node": "22.16.0",
+      "node": "22.22.3",
       "ios": {
         "simulator": true
       },
@@ -20,12 +20,12 @@
     "preview": {
       "distribution": "internal",
       "channel": "preview",
-      "node": "22.16.0"
+      "node": "22.22.3"
     },
     "production": {
       "distribution": "store",
       "channel": "production",
-      "node": "22.16.0",
+      "node": "22.22.3",
       "autoIncrement": true
     }
   },
