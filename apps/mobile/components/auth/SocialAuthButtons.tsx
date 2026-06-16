@@ -1,25 +1,39 @@
+import type { ReactNode } from 'react';
 import { Platform, View } from 'react-native';
 
+import { AppleIcon, GoogleIcon } from '@/components/auth/SocialIcons';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { AUTH_COPY } from '@/features/auth/copy';
 import type { SocialProvider } from '@/features/auth';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
-// Apple + Google sign-in entry (rules/auth.md §3). Apple is iOS-only (the provider
-// doesn't exist on Android); Google shows on both. A plain "or" divider separates
-// these from the email form.
+// Apple + Google sign-in entry (rules/auth.md §3). Apple is iOS-only; Google shows on
+// both. Each button carries its brand mark (SocialIcons) left of the label. A plain "or"
+// divider separates these from the email form.
 //
 // STORE-COMPLIANCE NOTE: Apple HIG prefers the native AppleAuthentication.Apple-
-// AuthenticationButton. It's omitted here to keep this component free of native
-// imports (RNTL-renderable); swap it in behind a Platform.OS==='ios' guard before
-// store submission. Tracked in docs/AUTH-OPS-RUNBOOK.md.
+// AuthenticationButton. The styled button is used to keep this RNTL-renderable; swap it
+// in behind Platform.OS==='ios' before store submission (docs/AUTH-OPS-RUNBOOK.md).
 
 type SocialAuthButtonsProps = {
   onProvider: (provider: SocialProvider) => void;
   disabled?: boolean;
 };
 
+function ButtonRow({ icon, label }: { icon: ReactNode; label: string }) {
+  return (
+    <View className="flex-row items-center justify-center gap-2.5">
+      {icon}
+      <Text variant="bodyMedium" className="text-text-primary dark:text-text-primary-dark">
+        {label}
+      </Text>
+    </View>
+  );
+}
+
 export function SocialAuthButtons({ onProvider, disabled }: SocialAuthButtonsProps) {
+  const colors = useThemeColors();
   return (
     <View className="gap-3">
       <View className="flex-row items-center gap-3">
@@ -32,12 +46,12 @@ export function SocialAuthButtons({ onProvider, disabled }: SocialAuthButtonsPro
 
       {Platform.OS === 'ios' ? (
         <Button variant="secondary" disabled={disabled} onPress={() => onProvider('apple')}>
-          {AUTH_COPY.continueWithApple}
+          <ButtonRow icon={<AppleIcon color={colors.ink} />} label={AUTH_COPY.continueWithApple} />
         </Button>
       ) : null}
 
       <Button variant="secondary" disabled={disabled} onPress={() => onProvider('google')}>
-        {AUTH_COPY.continueWithGoogle}
+        <ButtonRow icon={<GoogleIcon />} label={AUTH_COPY.continueWithGoogle} />
       </Button>
     </View>
   );

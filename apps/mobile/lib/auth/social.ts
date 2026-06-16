@@ -74,6 +74,9 @@ async function getGoogleCredential(): Promise<ProviderCredential> {
     scopes: ['openid', 'email', 'profile'],
     redirectUri,
     responseType: AuthSession.ResponseType.IdToken,
+    // id_token implicit flow: PKCE adds code_challenge(_method), which Google rejects
+    // for this response type ("Parameter not allowed... code_challenge_method").
+    usePKCE: false,
     extraParams: { nonce: rawNonce },
   });
 
