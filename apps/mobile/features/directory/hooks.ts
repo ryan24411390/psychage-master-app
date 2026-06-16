@@ -6,7 +6,15 @@
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
-import { getFeaturedProviders, getProviderTypes, getSpecialties, searchProviders } from './queries';
+import {
+  getCityCounts,
+  getFeaturedProviders,
+  getProviderTypes,
+  getSpecialties,
+  getStateCounts,
+  getTypeCounts,
+  searchProviders,
+} from './queries';
 import type { ProviderCardData, ProviderSearchParams } from './types';
 
 /** True when the user has narrowed the directory in any way. */
@@ -60,6 +68,36 @@ export function useProviderTypes() {
   return useQuery({
     queryKey: ['providers', 'types'],
     queryFn: () => getProviderTypes(),
+    staleTime: 30 * 60_000,
+  });
+}
+
+// --- facet counts (honest coverage) — power the State / City / Type pickers ------
+
+/** Provider count per state (2-char code → count). */
+export function useStateCounts() {
+  return useQuery({
+    queryKey: ['providers', 'facets', 'states'],
+    queryFn: () => getStateCounts(),
+    staleTime: 30 * 60_000,
+  });
+}
+
+/** Real cities (with counts) for a state — replaces any hardcoded city list. */
+export function useCityCounts(stateAbbr: string | undefined) {
+  return useQuery({
+    queryKey: ['providers', 'facets', 'cities', stateAbbr],
+    enabled: Boolean(stateAbbr),
+    queryFn: () => getCityCounts(stateAbbr as string),
+    staleTime: 30 * 60_000,
+  });
+}
+
+/** Provider count per provider_type_id within the current state/city scope. */
+export function useTypeCounts(stateAbbr: string | undefined, city: string | undefined) {
+  return useQuery({
+    queryKey: ['providers', 'facets', 'types', stateAbbr, city],
+    queryFn: () => getTypeCounts(stateAbbr, city && city !== 'all' ? city : undefined),
     staleTime: 30 * 60_000,
   });
 }

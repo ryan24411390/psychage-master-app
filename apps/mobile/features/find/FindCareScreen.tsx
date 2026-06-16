@@ -10,8 +10,10 @@
 //   • save / compare   → bookmarks (auth-gated; anon tap → sign-up)
 //   • "Use my location"→ real expo-location (one-shot, never persisted)
 //   • home location    → remembered across launches (useDirectoryLocation)
-// Dropped from the mock because the data does NOT back them (fidelity rule — never
-// fabricate): per-state counts, per-type counts, and gender (no such column).
+//   • per-state / city / type counts → real facet RPCs (directory_facets), grouped
+//     on the SAME columns search_providers_v3 filters on, so a count never disagrees
+//     with the list selecting it produces (honest coverage; zero-yield disabled).
+// Dropped from the mock because the data does NOT back it: gender (no such column).
 
 import { FlashList } from '@shopify/flash-list';
 import { useQuery } from '@tanstack/react-query';
@@ -38,7 +40,7 @@ import { recordRecentlyViewed } from '@/lib/persistence/recently-viewed';
 import { colors } from '@/lib/colors';
 
 import { telUrl } from '@/features/directory/contact';
-import { useProviderSearch, useProviderTypes } from '@/features/directory/hooks';
+import { useCityCounts, useProviderSearch, useProviderTypes, useStateCounts, useTypeCounts } from '@/features/directory/hooks';
 import { DEFAULT_RADIUS_MILES, requestAndGetCoords, type Coords } from '@/features/directory/location';
 import { cleanDisplayName } from '@/features/directory/mapping';
 import { getProviderById } from '@/features/directory/queries';
@@ -46,23 +48,8 @@ import { ABBR, STATES } from '@/features/directory/states';
 import { getTrustBadge } from '@/features/directory/trust';
 import type { ProviderCardData, ProviderSearchParams, ProviderType, ProviderWithDetails } from '@/features/directory/types';
 
-
-// City suggestions are navigation hints (like the state list) — not provider data.
-const CITIES: Record<string, string[]> = {
-  California: ['Los Angeles', 'San Francisco', 'San Diego', 'San Jose', 'Sacramento', 'Oakland', 'Fresno', 'Long Beach', 'Berkeley', 'Pasadena'],
-  'New York': ['New York City', 'Brooklyn', 'Buffalo', 'Rochester', 'Albany', 'Syracuse', 'Yonkers'],
-  Texas: ['Houston', 'Dallas', 'Austin', 'San Antonio', 'Fort Worth', 'El Paso'],
-  Florida: ['Miami', 'Orlando', 'Tampa', 'Jacksonville', 'Fort Lauderdale', 'Tallahassee'],
-  Illinois: ['Chicago', 'Aurora', 'Naperville', 'Springfield', 'Peoria'],
-  Washington: ['Seattle', 'Spokane', 'Tacoma', 'Bellevue', 'Olympia'],
-  Massachusetts: ['Boston', 'Cambridge', 'Worcester', 'Springfield'],
-  Pennsylvania: ['Philadelphia', 'Pittsburgh', 'Allentown', 'Harrisburg'],
-  Georgia: ['Atlanta', 'Augusta', 'Savannah', 'Athens'],
-  Colorado: ['Denver', 'Colorado Springs', 'Boulder', 'Aurora'],
-  Oregon: ['Portland', 'Eugene', 'Salem', 'Bend'],
-};
-const citiesFor = (s: string) => CITIES[s] || [];
-
+// Clay-initial avatar palette — providers are NEVER shown by photo (NPPES has none);
+// a deterministic initial circle from this fixed set is the avatar everywhere.
 const AVA = ['#7E9C8E', '#B98A6A', '#8A86B0', '#A6707A', '#6F94A8', '#9B9460'];
 const colorFor = (id: string) => {
   let h = 0;
@@ -214,6 +201,14 @@ export default function FindCareScreen() {
   const countShown = useCountUp(headerCount, reduce);
 
   const types = useProviderTypes();
+
+  // Honest coverage facets — counts come straight from the query layer (never
+  // hardcoded). Options that would yield zero are disabled in each picker.
+  const stateCounts = useStateCounts();
+  const cityCounts = useCityCounts(stateAbbr);
+  const typeCounts = useTypeCounts(stateAbbr, city ?? undefined);
+  const stateTotal = stateAbbr ? stateCounts.data?.[stateAbbr] : undefined;
+
   const cityLabel = city === 'all' ? `All ${loc}` : city;
   const locLabel = loc ?? 'Near you';
 
@@ -316,14 +311,23 @@ export default function FindCareScreen() {
             data={STATES.filter((s) => s.toLowerCase().includes(stateQ.toLowerCase()))}
             keyExtractor={(s) => s}
             keyboardShouldPersistTaps="handled"
-            renderItem={({ item: s }) => (
-              <Tap onPress={() => { setLoc(s); setCity(null); setCityQ(''); setStep('city'); }}>
-                <View className="flex-row items-center justify-between py-4 border-b border-border dark:border-border-dark">
+            renderItem={({ item: s }) => {
+              const abbr = ABBR[s];
+              const count = stateCounts.data && abbr ? (stateCounts.data[abbr] ?? 0) : undefined;
+              const disabled = count === 0;
+              const row = (
+                <View style={{ opacity: disabled ? 0.4 : 1 }} className="flex-row items-center justify-between py-4 border-b border-border dark:border-border-dark">
                   <Text className="font-sans text-text-primary dark:text-text-primary-dark text-base">{s}</Text>
-                  <ChevronRight size={18} color={soft} />
+                  <View className="flex-row items-center gap-2.5">
+                    {count !== undefined ? <Text className="font-sans text-sm text-text-tertiary dark:text-text-tertiary-dark">{count > 0 ? count.toLocaleString() : 'None listed'}</Text> : null}
+                    {!disabled ? <ChevronRight size={18} color={soft} /> : null}
+                  </View>
                 </View>
-              </Tap>
-            )}
+              );
+              return disabled ? row : (
+                <Tap onPress={() => { setLoc(s); setCity(null); setCityQ(''); setStep('city'); }}>{row}</Tap>
+              );
+            }}
             ListFooterComponent={
               <Tap onPress={() => setStep('outside')}>
                 <View className="flex-row items-center justify-between py-4 mt-1"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base">I'm outside the United States</Text><ChevronRight size={18} color={soft} /></View>
@@ -337,7 +341,10 @@ export default function FindCareScreen() {
 
   /* ============================ CITY ============================ */
   if (step === 'city' && loc) {
-    const cities = citiesFor(loc).filter((c) => c.toLowerCase().includes(cityQ.toLowerCase()));
+    // Real cities for this state (with counts) — never a hardcoded hint list.
+    const allCities = cityCounts.data ?? [];
+    const cities = allCities.filter((c) => c.city.toLowerCase().includes(cityQ.toLowerCase()));
+    const loadingCities = cityCounts.isLoading;
     return (
       <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
         <Header back={() => setStep('manual')} />
@@ -349,12 +356,35 @@ export default function FindCareScreen() {
             <Search size={18} color={soft} /><TextInput placeholder={`Search cities in ${loc}`} placeholderTextColor={faint} value={cityQ} onChangeText={setCityQ} className="flex-1 font-sans text-base text-text-primary dark:text-text-primary-dark" />
           </View>
           <ScrollView className="mt-3" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-            <Tap onPress={() => { setCity('all'); setStep('type'); }}><View className="flex-row items-center justify-between py-4 border-b border-border dark:border-border-dark"><Text className="font-sans-medium text-text-primary dark:text-text-primary-dark text-base">All cities in {loc}</Text><ChevronRight size={18} color={soft} /></View></Tap>
-            {cities.map((c) => (
-              <Tap key={c} onPress={() => { setCity(c); setStep('type'); }}><View className="flex-row items-center justify-between py-4 border-b border-border dark:border-border-dark"><Text className="font-sans text-text-primary dark:text-text-primary-dark text-base">{c}</Text><ChevronRight size={18} color={soft} /></View></Tap>
-            ))}
-            {cityQ && !cities.length ? (
-              <Tap onPress={() => { setCity(cityQ); setStep('type'); }}><View className="flex-row items-center justify-between py-4 border-b border-border dark:border-border-dark"><Text className="font-sans text-text-primary dark:text-text-primary-dark text-base">Use “{cityQ}”</Text><ChevronRight size={18} color={soft} /></View></Tap>
+            <Tap onPress={() => { setCity('all'); setStep('type'); }}>
+              <View className="flex-row items-center justify-between py-4 border-b border-border dark:border-border-dark">
+                <Text className="font-sans-medium text-text-primary dark:text-text-primary-dark text-base">All cities in {loc}</Text>
+                <View className="flex-row items-center gap-2.5">
+                  {stateTotal !== undefined ? <Text className="font-sans text-sm text-text-tertiary dark:text-text-tertiary-dark">{stateTotal.toLocaleString()}</Text> : null}
+                  <ChevronRight size={18} color={soft} />
+                </View>
+              </View>
+            </Tap>
+            {loadingCities ? (
+              <View className="pt-3">{[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} />)}</View>
+            ) : (
+              cities.map((c) => (
+                <Tap key={c.city} onPress={() => { setCity(c.city); setStep('type'); }}>
+                  <View className="flex-row items-center justify-between py-4 border-b border-border dark:border-border-dark">
+                    <Text className="font-sans text-text-primary dark:text-text-primary-dark text-base">{c.city}</Text>
+                    <View className="flex-row items-center gap-2.5">
+                      <Text className="font-sans text-sm text-text-tertiary dark:text-text-tertiary-dark">{c.count.toLocaleString()}</Text>
+                      <ChevronRight size={18} color={soft} />
+                    </View>
+                  </View>
+                </Tap>
+              ))
+            )}
+            {!loadingCities && cityQ && !cities.length ? (
+              <View className="items-center py-8 px-4">
+                <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm text-center">No listed cities in {loc} match “{cityQ}”.</Text>
+                <Tap onPress={() => { setCity('all'); setStep('type'); }}><View className="py-3"><Text className="font-sans-bold text-base text-primary dark:text-primary-dark">Browse all of {loc}</Text></View></Tap>
+              </View>
             ) : null}
             <View className="h-4" />
           </ScrollView>
@@ -364,7 +394,9 @@ export default function FindCareScreen() {
   }
 
   /* ============================ TYPE ============================ */
-  if (step === 'type')
+  if (step === 'type') {
+    const tc = typeCounts.data;
+    const allTypesTotal = tc ? Object.values(tc).reduce((a, b) => a + b, 0) : undefined;
     return (
       <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
         <Header back={() => setStep(city ? 'city' : 'manual')} />
@@ -378,26 +410,31 @@ export default function FindCareScreen() {
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}>
             <Tap onPress={() => startType(null)}>
               <View className="flex-row items-center justify-between border-[1.5px] border-border dark:border-border-dark rounded-2xl p-4 mb-3 bg-surface shadow-sm dark:shadow-none dark:bg-surface-dark">
-                <View><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">All provider types</Text><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm">Browse everyone in {cityLabel ?? loc}</Text></View>
+                <View><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">All provider types</Text><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm">Browse everyone in {cityLabel ?? loc}{allTypesTotal !== undefined ? ` · ${allTypesTotal.toLocaleString()}` : ''}</Text></View>
                 <ChevronRight size={18} color={soft} />
               </View>
             </Tap>
             {(types.data ?? []).map((t: ProviderType) => {
               const Icon = iconForType(t.slug);
-              return (
-                <Tap key={t.id} onPress={() => startType({ id: t.id, label: t.label })}>
-                  <View className="flex-row items-center gap-3 border-[1.5px] border-border dark:border-border-dark rounded-2xl p-4 mb-3 bg-surface shadow-sm dark:shadow-none dark:bg-surface-dark">
-                    <View className="w-[38px] h-[38px] rounded-[10px] bg-surface-accent dark:bg-surface-accent-dark items-center justify-center"><Icon size={18} color={teal} /></View>
-                    <View className="flex-1"><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">{t.label}</Text>{t.description ? <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm">{t.description}</Text> : null}</View>
-                    <ChevronRight size={18} color={soft} />
-                  </View>
-                </Tap>
+              const count = tc ? (tc[t.id] ?? 0) : undefined;
+              const disabled = count === 0;
+              const inner = (
+                <View key={t.id} style={{ opacity: disabled ? 0.4 : 1 }} className="flex-row items-center gap-3 border-[1.5px] border-border dark:border-border-dark rounded-2xl p-4 mb-3 bg-surface shadow-sm dark:shadow-none dark:bg-surface-dark">
+                  <View className="w-[38px] h-[38px] rounded-[10px] bg-surface-accent dark:bg-surface-accent-dark items-center justify-center"><Icon size={18} color={teal} /></View>
+                  <View className="flex-1"><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">{t.label}</Text>{t.description ? <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm">{t.description}</Text> : null}</View>
+                  {count !== undefined ? <Text className="font-sans text-sm text-text-tertiary dark:text-text-tertiary-dark">{count > 0 ? count.toLocaleString() : 'None'}</Text> : null}
+                  {!disabled ? <ChevronRight size={18} color={soft} /> : null}
+                </View>
+              );
+              return disabled ? <View key={t.id}>{inner}</View> : (
+                <Tap key={t.id} onPress={() => startType({ id: t.id, label: t.label })}>{inner}</Tap>
               );
             })}
           </ScrollView>
         </View>
       </SafeAreaView>
     );
+  }
 
   /* ============================ OUTSIDE US ============================ */
   if (step === 'outside')
@@ -452,7 +489,7 @@ export default function FindCareScreen() {
       {!loading && headerCount > 0 && headerCount <= 25 ? (
         <View className="flex-row gap-2 items-start bg-surface-active dark:bg-surface-active-dark rounded-xl px-3 py-2.5 mt-3">
           <Info size={15} color="#A9791F" />
-          <Text className="font-sans text-sm text-text-primary dark:text-text-primary-dark leading-4 flex-1">Limited coverage in {cityLabel ?? loc} ({headerCount}). {city && city !== 'all' ? <Text onPress={() => setCity('all')} className="font-sans-bold text-warning dark:text-warning-dark underline">Browse all of {loc}</Text> : "Try a nearby state if you're open to telehealth."}</Text>
+          <Text className="font-sans text-sm text-text-primary dark:text-text-primary-dark leading-4 flex-1">Limited coverage in {cityLabel ?? loc} ({headerCount}). {city && city !== 'all' ? <Text onPress={() => setCity('all')} className="font-sans-bold text-warning dark:text-warning-dark underline">Browse all of {loc}</Text> : `That's the full count of NPI listings for ${loc}.`}</Text>
         </View>
       ) : null}
     </View>
@@ -465,7 +502,8 @@ export default function FindCareScreen() {
     const dist = p.distance_miles != null ? ` · ${p.distance_miles.toFixed(1)} mi` : '';
     return (
       <Animated.View entering={enter()} className="flex-row bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-2xl mb-4 overflow-hidden shadow-sm dark:shadow-none">
-        <Pressable className="flex-1" onPress={() => { recordRecentlyViewed({ id: p.id, name, photoUrl: p.photo_url }); setActiveId(p.id); setStep('profile'); }}>
+        {/* No photoUrl: the directory is NPPES-only — providers are never shown by photo, anywhere (clay initials only). */}
+        <Pressable className="flex-1" onPress={() => { recordRecentlyViewed({ id: p.id, name, photoUrl: null }); setActiveId(p.id); setStep('profile'); }}>
           <View className="flex-row gap-3 p-[15px]">
             <View style={{ backgroundColor: colorFor(p.id) }} className="w-[46px] h-[46px] rounded-full items-center justify-center"><Text className="font-sans-bold text-white text-base">{initials(name)}</Text></View>
             <View className="flex-1">
@@ -549,7 +587,6 @@ function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: stri
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
   const ink = isDark ? colors.text.primary.dark : colors.text.primary.light;
-  const soft = isDark ? colors.text.secondary.dark : colors.text.secondary.light;
   const faint = isDark ? colors.text.tertiary.dark : colors.text.tertiary.light;
   const teal = isDark ? colors.teal[400] : colors.teal[600];
   const { data, isLoading } = useQuery({ queryKey: ['providers', 'detail', id], queryFn: () => getProviderById(id), enabled: !!id });
@@ -585,7 +622,6 @@ function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: stri
           {locrow?.city ? <Row icon={Building2} label="Practice city" value={[locrow.city, locrow.state_province].filter(Boolean).join(', ')} /> : null}
           {p.phone ? <Row icon={Phone} label="Phone" value={p.phone} /> : null}
         </View>
-        {p.bio ? <View className="mt-4"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5">{p.bio}</Text></View> : null}
         <View className="bg-surface-active dark:bg-surface-active-dark rounded-2xl p-4 mt-4 mb-2"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5">This listing is drawn from the NPI registry. It's information, not a recommendation or endorsement by Psychage. Confirm license, availability, and fit directly with the provider.</Text></View>
         <View className="h-24" />
       </ScrollView>
@@ -595,7 +631,7 @@ function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: stri
             <View style={{ backgroundColor: teal }} className="rounded-[13px] py-4 flex-row items-center justify-center gap-2"><Phone size={17} color="#fff" /><Text className="font-sans-bold text-white text-base">Call {p.phone}</Text></View>
           </Tap>
         ) : null}
-        <Tap onPress={() => router.push({ pathname: '/add-provider', params: { name, ...(p.phone || p.email || p.website_url ? { contact: (p.phone ?? p.email ?? p.website_url) as string } : {}) } })}>
+        <Tap onPress={() => router.push({ pathname: '/add-provider', params: { name, ...(p.phone ? { contact: p.phone } : {}) } })}>
           <View className="rounded-[13px] py-4 items-center border border-border dark:border-border-dark"><Text className="font-sans-bold text-base text-text-primary dark:text-text-primary-dark">Use in my therapist record</Text></View>
         </Tap>
       </View>

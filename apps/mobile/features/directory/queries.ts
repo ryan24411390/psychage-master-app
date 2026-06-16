@@ -312,6 +312,53 @@ export async function getFeaturedProviders(limit = 12): Promise<ProviderCardData
   return [...withPhoto, ...withoutPhoto].slice(0, limit);
 }
 
+// --- facet counts (honest coverage: never hardcode, never fabricate) ------------
+//
+// Back the State / City / Type pickers. Each wraps a directory_facets RPC that
+// GROUPs on the SAME columns search_providers_v3 filters on, so a count shown next
+// to an option always matches the result list that selecting it produces (the
+// "filters can't dead-end the user" rule). Empty map on any failure — never faked.
+
+/** Provider count per state (2-char code → count), primary-location based. */
+export async function getStateCounts(): Promise<Record<string, number>> {
+  const client = getSupabaseClient();
+  if (!client) return {};
+  const { data, error } = await client.rpc('directory_state_counts');
+  if (error || !data) return {};
+  const out: Record<string, number> = {};
+  for (const row of data as { state: string; provider_count: number }[]) {
+    if (row.state) out[row.state.toUpperCase()] = Number(row.provider_count) || 0;
+  }
+  return out;
+}
+
+/** Real cities (with counts) for a state, busiest first. Empty when none/unreachable. */
+export async function getCityCounts(state: string): Promise<{ city: string; count: number }[]> {
+  const client = getSupabaseClient();
+  if (!client || !state) return [];
+  const { data, error } = await client.rpc('directory_city_counts', { p_state: state });
+  if (error || !data) return [];
+  return (data as { city: string; provider_count: number }[])
+    .filter((r) => Boolean(r.city))
+    .map((r) => ({ city: r.city, count: Number(r.provider_count) || 0 }));
+}
+
+/** Provider count per provider_type_id within the current state/city scope. */
+export async function getTypeCounts(state?: string, city?: string): Promise<Record<string, number>> {
+  const client = getSupabaseClient();
+  if (!client) return {};
+  const { data, error } = await client.rpc('directory_type_counts', {
+    p_state: state || null,
+    p_city: city || null,
+  });
+  if (error || !data) return {};
+  const out: Record<string, number> = {};
+  for (const row of data as { provider_type_id: string; provider_count: number }[]) {
+    if (row.provider_type_id) out[row.provider_type_id] = Number(row.provider_count) || 0;
+  }
+  return out;
+}
+
 export async function getProviderCount(): Promise<number> {
   const client = getSupabaseClient();
   if (!client) return 0;
