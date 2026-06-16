@@ -8,6 +8,7 @@ import {
   FadeOutDown,
   LinearTransition,
   ReduceMotion,
+  ZoomIn,
 } from 'react-native-reanimated';
 
 // Wave B2 (S45): the in-app reduced-motion override. ADDITIVE — OR-ed with the OS
@@ -191,5 +192,27 @@ export function listLayout(reduced: boolean) {
     .damping(s.damping)
     .stiffness(s.stiffness)
     .mass(s.mass)
+    .reduceMotion(ReduceMotion.Never);
+}
+
+/**
+ * The single "signature" entrance: a deliberate scale-from-0.94 + fade on the
+ * heavy `gentle` spring, for the hero element a detail screen shares with the
+ * card it was opened from (article art, provider photo). Used rarely and on
+ * purpose — distinct from the small standard entrances. True cross-screen
+ * shared-element morphs are intentionally not used: Reanimated's
+ * sharedTransitionTag is unsupported on the New Architecture, so this coordinated
+ * entrance is the robust stand-in. Reduced motion → the plain 200ms cross-fade.
+ */
+export function heroEnter(reduced: boolean) {
+  if (reduced) {
+    return FadeIn.duration(REDUCED_MOTION_FADE_MS).reduceMotion(ReduceMotion.Never);
+  }
+  const s = SPRING_PRESETS.gentle;
+  return ZoomIn.springify()
+    .damping(s.damping)
+    .stiffness(s.stiffness)
+    .mass(s.mass)
+    .withInitialValues({ opacity: 0, transform: [{ scale: 0.94 }] })
     .reduceMotion(ReduceMotion.Never);
 }

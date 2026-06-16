@@ -6,6 +6,7 @@ import { ScrollView, View } from 'react-native';
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { AppLoader } from '@/components/ui/AppLoader';
+import { HeroReveal } from '@/components/ui/HeroReveal';
 import { Text } from '@/components/ui/Text';
 import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
 import { ArticleBody } from '@/features/content/blocks/ArticleBody';
@@ -80,11 +81,13 @@ export function ArticleReader({ slug }: { slug: string }) {
             showsVerticalScrollIndicator={false}
           >
             {article.heroImageUrl ? (
-              <ArtPanel
-                artKey={article.slug}
-                imageUrl={article.heroImageUrl}
-                className="aspect-[16/9] rounded-xl"
-              />
+              <HeroReveal>
+                <ArtPanel
+                  artKey={article.slug}
+                  imageUrl={article.heroImageUrl}
+                  className="aspect-[16/9] rounded-xl"
+                />
+              </HeroReveal>
             ) : null}
 
             <View className="flex-row items-center gap-2">

@@ -8,6 +8,7 @@ import { GlobalHeader } from '@/components/GlobalHeader';
 import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { AppLoader } from '@/components/ui/AppLoader';
 import { Button } from '@/components/ui/Button';
+import { HeroReveal } from '@/components/ui/HeroReveal';
 import { Text } from '@/components/ui/Text';
 import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
 import { dial } from '@/features/crisis/dialer';
@@ -195,7 +196,9 @@ export function ProviderDetailView({ id }: { id: string }) {
       <ScrollView contentContainerClassName="gap-5 px-4 pb-10 pt-1" showsVerticalScrollIndicator={false}>
         {/* Identity */}
         <View className="flex-row gap-3">
-          <Avatar name={name} photoUrl={p.photo_url} size="lg" />
+          <HeroReveal>
+            <Avatar name={name} photoUrl={p.photo_url} size="lg" />
+          </HeroReveal>
           <View className="flex-1 gap-1">
             <View className="flex-row items-start justify-between gap-2">
               <Text variant="headingLg" className="flex-1">

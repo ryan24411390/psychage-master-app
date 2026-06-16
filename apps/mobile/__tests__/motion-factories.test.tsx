@@ -14,6 +14,7 @@ import {
   STAGGER_MS,
   enter,
   exit,
+  heroEnter,
   listLayout,
   staggeredEnter,
 } from '@/lib/motion';
@@ -54,6 +55,13 @@ describe('staggeredEnter', () => {
 
   it('falls back to the reduced cross-fade when reduced', () => {
     expect(staggeredEnter(3, true)).toBeDefined();
+  });
+});
+
+describe('heroEnter', () => {
+  it('returns a usable builder in both motion modes', () => {
+    expect(heroEnter(false)).toBeDefined();
+    expect(heroEnter(true)).toBeDefined();
   });
 });
 
