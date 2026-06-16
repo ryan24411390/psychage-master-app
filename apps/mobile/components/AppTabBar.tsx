@@ -2,7 +2,7 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BookOpen, Compass, type LucideIcon, MapPin, Sun } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { Pressable, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/Text';
@@ -17,6 +17,11 @@ import { DURATION, useReducedMotion } from '@/lib/motion';
 // mode swaps it; the pill tint, hairline, paper bar and label teal are NativeWind
 // arbitrary-value classes because an alpha tint and the #157F73 label teal have no
 // existing token leaf (a tab-bar-local choice, not a shared palette edit).
+//
+// Transition: switching tabs animates the pill. Each tab's content is ONE persistent
+// Animated.View (not a remounted branch), so LinearTransition morphs its width as the
+// label/padding change and reflows the row; the label fades in/out. All gated on
+// useReducedMotion() — reduced motion swaps to instant layout, no fade.
 // Keyed by the tab route names, which are the group-folder names after the
 // per-tab nested-stack restructure ((today)/(learn)/(compass)/(find)).
 const ICONS: Record<string, LucideIcon> = {
@@ -72,24 +77,29 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
               onPress={onPress}
               className="min-h-[44px] min-w-[44px] items-center justify-center"
             >
-              {isActive ? (
-                <Animated.View
-                  entering={reduced ? undefined : FadeIn.duration(DURATION.swift)}
-                  className="flex-row items-center gap-2 rounded-full bg-[rgba(26,155,140,0.14)] px-4 py-[9px] dark:bg-[rgba(32,184,166,0.18)]"
-                >
-                  <Icon size={ICON_SIZE} color={activeInk} />
-                  <Text
-                    variant="caption"
-                    className="font-sans-medium text-[13px] tracking-normal text-[#157F73] dark:text-[#2DD4BF]"
+              <Animated.View
+                layout={reduced ? undefined : LinearTransition.duration(DURATION.base)}
+                className={
+                  isActive
+                    ? 'flex-row items-center gap-2 rounded-full bg-[rgba(26,155,140,0.14)] px-4 py-[9px] dark:bg-[rgba(32,184,166,0.18)]'
+                    : 'items-center justify-center px-3'
+                }
+              >
+                <Icon size={ICON_SIZE} color={isActive ? activeInk : inactiveInk} />
+                {isActive ? (
+                  <Animated.View
+                    entering={reduced ? undefined : FadeIn.duration(DURATION.base)}
+                    exiting={reduced ? undefined : FadeOut.duration(DURATION.swift)}
                   >
-                    {label}
-                  </Text>
-                </Animated.View>
-              ) : (
-                <View className="items-center justify-center px-3">
-                  <Icon size={ICON_SIZE} color={inactiveInk} />
-                </View>
-              )}
+                    <Text
+                      variant="caption"
+                      className="font-sans-medium text-[13px] tracking-normal text-[#157F73] dark:text-[#2DD4BF]"
+                    >
+                      {label}
+                    </Text>
+                  </Animated.View>
+                ) : null}
+              </Animated.View>
             </Pressable>
           );
         })}
