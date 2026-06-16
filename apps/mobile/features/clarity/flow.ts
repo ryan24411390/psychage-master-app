@@ -16,7 +16,10 @@ import { CLARITY_QUESTION_COUNT, PHQ4_LAST_INDEX } from './questions';
 import { isCrisisPattern } from './scoring';
 import type { ClarityAnswers } from './types';
 
-export type ClarityStep = 'intro' | 'question' | 'crisis' | 'results';
+// Steps now include a 'calculating' interlude between the last answer and 'results',
+// matching the web's 2s "Analyzing your responses…" delay (the timer is a side effect
+// in ClarityFlow; the reducer only models the state transition).
+export type ClarityStep = 'intro' | 'question' | 'crisis' | 'calculating' | 'results';
 
 export interface ClarityFlowState {
   readonly step: ClarityStep;
@@ -38,6 +41,7 @@ export type ClarityAction =
   | { type: 'START' }
   | { type: 'ANSWER'; value: number }
   | { type: 'ACK_CRISIS' }
+  | { type: 'FINISH_CALCULATING' }
   | { type: 'BACK' }
   | { type: 'RESET' };
 
@@ -61,8 +65,9 @@ function back(state: ClarityFlowState): ClarityFlowState {
     case 'crisis':
       // Walking back from the interstitial re-opens q4 (never silently resumes past it).
       return { ...state, step: 'question', index: PHQ4_LAST_INDEX };
+    case 'calculating':
     case 'results':
-      // Back from results re-opens the last question.
+      // Back from the calculating interlude or results re-opens the last question.
       return { ...state, step: 'question', index: CLARITY_QUESTION_COUNT - 1 };
   }
 }
@@ -87,8 +92,10 @@ export function clarityReducer(state: ClarityFlowState, action: ClarityAction): 
         return { ...state, answers, index: nextIndex, step: 'crisis' };
       }
 
+      // Completing the last question enters the 'calculating' interlude (the 2s web
+      // delay); the container then dispatches FINISH_CALCULATING to reveal results.
       return nextIndex >= CLARITY_QUESTION_COUNT
-        ? { ...state, answers, step: 'results' }
+        ? { ...state, answers, step: 'calculating' }
         : { ...state, answers, index: nextIndex, step: 'question' };
     }
 
@@ -98,6 +105,10 @@ export function clarityReducer(state: ClarityFlowState, action: ClarityAction): 
       return state.step === 'crisis'
         ? { ...state, step: 'question', crisisAcknowledged: true }
         : state;
+
+    case 'FINISH_CALCULATING':
+      // The calculating timer elapsed — reveal results.
+      return state.step === 'calculating' ? { ...state, step: 'results' } : state;
 
     case 'BACK':
       return back(state);

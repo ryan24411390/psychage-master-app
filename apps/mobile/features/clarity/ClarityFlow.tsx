@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { ChipXL } from '@/features/navigator/components/ChipXL';
 
-import { describeChange } from './bands';
 import { ClarityChrome } from './components/ClarityChrome';
-import { ClarityResultsView } from './ClarityResultsView';
+import { ClarityResultsDashboard } from './components/ClarityResultsDashboard';
 import {
   type ClarityFlowState,
   clarityReducer,
@@ -15,31 +14,34 @@ import {
   isExitOnBack,
 } from './flow';
 import { CLARITY_QUESTION_COUNT, CLARITY_QUESTIONS } from './questions';
-import { scoreClarity } from './scoring';
-import type { ClarityResult } from './types';
+import { getRecommendations, scoreClarity } from './scoring';
+import type { ClarityHistoryItem, ClarityResult } from './types';
 
 // The Clarity Score flow (intro → 20 questions → optional crisis interstitial →
-// results). Fully ON-DEVICE: the reducer holds the in-progress answers in component
-// state, so leaving unmounts them and nothing raw is persisted (SR-4). Only the
-// COMPLETED result (composite + tier + domains) is saved, via the injected
-// `saveResult` — the store import stays out of this component so render tests inject
-// a double (mirrors the Navigator's injected-engine pattern). Crisis is reachable on
-// every screen via the chrome's Help-now pill (SR-2).
+// 2s calculating interlude → results dashboard). Fully ON-DEVICE: the reducer holds the
+// in-progress answers in component state, so leaving unmounts them and nothing raw is
+// persisted (SR-4). Only the COMPLETED result (composite + tier + domains) is saved, via
+// the injected `saveResult`. Crisis is reachable on every screen via the chrome's
+// Help-now pill and the mid-flow interstitial (SR-2).
 //
-// All user-facing copy here is PROVISIONAL pending Dr. Dobson review (rules §7).
+// Web-parity override: results render the raw 0–100 score, animated gauge, radar, and the
+// 4-tab dashboard. Release-gated on Dr. Dobson + Apple review (see types.ts).
 
 const INTRO_TITLE = 'Clarity Score';
 const INTRO_BODY =
-  'A short set of questions about how the last couple of weeks have felt. It’s a reflection to help you notice patterns — not a test, and not a label. Your answers stay on this device.';
+  'A short set of questions about how the last couple of weeks have felt. Your answers stay on this device.';
 const INTRO_META = 'About 20 questions. There are no right answers.';
 const BEGIN = 'Begin';
 const SEE_HISTORY = 'See your past snapshots';
 
 const CRISIS_TITLE = 'Support is available';
 const CRISIS_BODY =
-  'Your responses suggest you may be going through a lot right now. You don’t have to face this alone.';
+  'Your responses suggest you may be going through a lot right now. Reaching out can help — and you do not need to do it alone.';
 const CRISIS_PRIMARY = 'See support resources';
 const CRISIS_CONTINUE = 'I’m safe right now — continue';
+
+const CALCULATING_TITLE = 'Analyzing your responses…';
+const CALCULATING_BODY = 'Computing your Clarity Score across five dimensions';
 
 export interface ClarityFlowProps {
   readonly onExit: () => void;
@@ -50,11 +52,10 @@ export interface ClarityFlowProps {
   /** A recommendation's action → a mobile route. */
   readonly onRecommend: (route: string) => void;
   readonly onViewHistory: () => void;
-  /**
-   * Persist the completed result; returns the PREVIOUS snapshot's composite (for the
-   * qualitative change line), or null on a first run. Called once per completion.
-   */
+  /** Persist the completed result; called once per completion. */
   readonly saveResult: (result: ClarityResult) => number | null;
+  /** Read recent snapshots for the History tab (called after saveResult). */
+  readonly getHistory?: () => ClarityHistoryItem[];
   /** Whether to offer the "see past snapshots" link on the intro. */
   readonly hasHistory?: boolean;
 }
@@ -66,6 +67,7 @@ export function ClarityFlow({
   onRecommend,
   onViewHistory,
   saveResult,
+  getHistory,
   hasHistory = false,
 }: ClarityFlowProps) {
   const [state, dispatch] = useReducer(clarityReducer, initialClarityState);
@@ -75,41 +77,70 @@ export function ClarityFlow({
     else dispatch({ type: 'BACK' });
   };
 
-  // Score only at the results step (pure; stable per answers).
+  // Score once answers are complete (the calculating interlude + results both need it).
   const result = useMemo<ClarityResult | null>(
-    () => (state.step === 'results' ? scoreClarity(state.answers) : null),
+    () =>
+      state.step === 'calculating' || state.step === 'results' ? scoreClarity(state.answers) : null,
     [state.step, state.answers],
   );
 
-  // Persist exactly once per completion; capture the qualitative change vs the prior.
-  const [changeNote, setChangeNote] = useState<string | null>(null);
+  const recommendations = useMemo(
+    () => (result ? getRecommendations(result.domainScores) : []),
+    [result],
+  );
+
+  // Persist exactly once per completion (on entering the calculating interlude), then
+  // snapshot history (which now includes this result) for the History tab.
   const savedForResults = useRef(false);
+  const [history, setHistory] = useState<ClarityHistoryItem[]>([]);
   useEffect(() => {
-    if (state.step !== 'results') {
+    if (state.step !== 'calculating' && state.step !== 'results') {
       savedForResults.current = false;
       return;
     }
     if (result && !savedForResults.current) {
       savedForResults.current = true;
-      const previousComposite = saveResult(result);
-      setChangeNote(previousComposite !== null ? describeChange(result.composite, previousComposite) : null);
+      saveResult(result);
+      setHistory(getHistory ? getHistory() : []);
     }
-  }, [state.step, result, saveResult]);
+  }, [state.step, result, saveResult, getHistory]);
+
+  // The 2s calculating delay (web parity). The timer is the only side effect; the reducer
+  // just models 'calculating' → 'results'.
+  useEffect(() => {
+    if (state.step !== 'calculating') return;
+    const t = setTimeout(() => dispatch({ type: 'FINISH_CALCULATING' }), 2000);
+    return () => clearTimeout(t);
+  }, [state.step]);
 
   // ── Results ────────────────────────────────────────────────────────────────────
   if (state.step === 'results' && result) {
     return (
       <ClarityChrome onHelp={onHelp} onBack={handleBack}>
-        <ClarityResultsView
-          result={result}
-          changeNote={changeNote}
+        <ClarityResultsDashboard
+          results={result}
+          recommendations={recommendations}
+          history={history}
           onRecommend={onRecommend}
-          onViewHistory={onViewHistory}
-          onRetake={() => {
-            setChangeNote(null);
-            dispatch({ type: 'RESET' });
-          }}
+          onRetake={() => dispatch({ type: 'RESET' })}
         />
+      </ClarityChrome>
+    );
+  }
+
+  // ── Calculating interlude (web parity) ───────────────────────────────────────────
+  if (state.step === 'calculating') {
+    return (
+      <ClarityChrome onHelp={onHelp} onBack={handleBack}>
+        <View className="flex-1 items-center justify-center px-8" accessibilityRole="progressbar">
+          <ActivityIndicator size="large" color="#1A9B8C" />
+          <Text variant="headingLg" className="mt-8 text-center">
+            {CALCULATING_TITLE}
+          </Text>
+          <Text variant="body" className="mt-2 text-center text-text-secondary dark:text-text-secondary-dark">
+            {CALCULATING_BODY}
+          </Text>
+        </View>
       </ClarityChrome>
     );
   }

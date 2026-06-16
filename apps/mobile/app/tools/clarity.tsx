@@ -1,7 +1,8 @@
 import { router, Stack } from 'expo-router';
 
 import { ClarityFlow } from '@/features/clarity/ClarityFlow';
-import type { ClarityResult } from '@/features/clarity/types';
+import { getScoreLabel } from '@/features/clarity/scoring';
+import type { ClarityHistoryItem, ClarityResult } from '@/features/clarity/types';
 import { getClarityStore } from '@/lib/clarity-store';
 
 // S32 Clarity Score — NATIVE flow (supersedes the former WebView embed of
@@ -13,12 +14,21 @@ export default function ClarityRoute() {
   const store = getClarityStore();
 
   const saveResult = (result: ClarityResult): number | null => {
-    // The previous snapshot's composite (for the qualitative change line) must be read
-    // BEFORE the new save appends this one.
     const previous = store.getRecent(1)[0]?.composite ?? null;
     store.save(result);
     return previous;
   };
+
+  // History for the dashboard's History tab — newest first, adapted to the web's
+  // ClarityHistoryItem shape (label derived from the composite).
+  const getHistory = (): ClarityHistoryItem[] =>
+    store.getRecent(30).map((s) => ({
+      id: s.id,
+      date: s.date,
+      score: s.composite,
+      label: getScoreLabel(s.composite).label,
+      domainScores: s.domains,
+    }));
 
   return (
     <>
@@ -27,9 +37,10 @@ export default function ClarityRoute() {
         onExit={() => router.back()}
         onHelp={() => router.push('/crisis')}
         onCrisisResources={() => router.push('/crisis')}
-        onRecommend={(route) => router.push(route)}
+        onRecommend={(route) => router.push(route as never)}
         onViewHistory={() => router.push('/tools/clarity-history')}
         saveResult={saveResult}
+        getHistory={getHistory}
         hasHistory={store.count > 0}
       />
     </>

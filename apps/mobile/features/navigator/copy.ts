@@ -42,4 +42,35 @@ export const NAVIGATOR_COPY = {
   // Halt (§9 [FINAL])
   haltLead: "Then let's pause this. What you're feeling deserves real support right now.",
   goBack: 'Go back',
+
+  // ── Web-parity chrome (ported from psychage-v2 Navigator screens) ──────────────
+  // Welcome
+  welcomeTitle: 'Understand your experience.',
+  welcomeSubtitle:
+    "Answer a few questions about what you've been noticing. We'll point you toward patterns and resources — this is educational, never a diagnosis.",
+  welcomeDisclaimer:
+    'This tool provides educational information only. It is not a diagnosis or a substitute for professional care. If you are in crisis, contact emergency services or a crisis line.',
+  welcomeStart: 'Start the Navigator',
+
+  // Domains
+  domainTitle: 'Where are you noticing things?',
+  domainSubtitle: 'Choose the areas that feel relevant. You can pick more than one.',
+  selectAll: 'Select all areas',
+
+  // Symptoms
+  symptomsTitle: 'What have you been experiencing?',
+  symptomsSubtitle: 'Select everything that applies. Tap a section to expand it.',
+
+  // Detail (per-symptom)
+  detailProgress: (n: number, total: number) => `Symptom ${n} of ${total}`,
+  detailSeverityLabel: 'How intense does this feel?',
+  detailDurationLabel: 'How long has this been going on?',
+  detailFrequencyLabel: 'How often does it happen?',
+  detailAnalyze: 'See results',
+
+  // Processing
+  processingFootnote: 'Please wait while we prepare your personalized insights.',
+
+  // Results
+  startOver: 'Start over',
 } as const;

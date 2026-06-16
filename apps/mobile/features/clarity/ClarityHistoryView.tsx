@@ -3,16 +3,16 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 
-import { TIER_COPY, describeChange } from './bands';
+import { TierBadge } from './components/TierBadge';
 import type { ClaritySnapshot } from './result-store';
 
-// S-history — past Clarity snapshots, newest first. Read-only, text-only, and (like
-// the results screen) free of any raw 0–100 number: each snapshot shows its tier band
-// label, and the newest carries a QUALITATIVE change vs the one before it. Crisis stays
-// reachable via the chrome's Help-now pill (this view is composed inside ClarityChrome).
+// S-history — past Clarity snapshots, newest first. Web-parity override: each snapshot
+// shows its raw composite (0–100) and tier badge, matching the dashboard's History tab
+// list. Read-only, local-only. Crisis stays reachable via the chrome's Help-now pill
+// (this view is composed inside ClarityChrome).
 
 const TITLE = 'Your snapshots';
-const EMPTY = "No snapshots yet. When you finish a Clarity reflection, it'll show up here.";
+const EMPTY = "No snapshots yet. When you finish a Clarity assessment, it'll show up here.";
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -41,35 +41,41 @@ export function ClarityHistoryView({ snapshots, onStartNew }: ClarityHistoryView
           {EMPTY}
         </Text>
       ) : (
-        snapshots.map((s, i) => {
-          const prev = snapshots[i + 1];
-          const change = i === 0 && prev ? describeChange(s.composite, prev.composite) : null;
-          return (
-            <Card key={s.id} className="gap-1">
+        snapshots.map((s) => (
+          <Card key={s.id} className="flex-row items-center gap-4">
+            <View
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 999,
+                borderWidth: 1,
+                borderColor: '#9ca3af55',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Text variant="bodyBold">{s.composite}</Text>
+            </View>
+            <View className="flex-1">
               <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 {formatDate(s.date)}
               </Text>
-              <Text variant="heading">{TIER_COPY[s.tier].label}</Text>
-              {change ? (
-                <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
-                  {change}
-                </Text>
-              ) : null}
-            </Card>
-          );
-        })
+              <TierBadge tier={s.tier} size="sm" />
+            </View>
+          </Card>
+        ))
       )}
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Take a new reflection"
+        accessibilityLabel="Take a new assessment"
         onPress={onStartNew}
         hitSlop={6}
         className="min-h-[44px] justify-center"
         style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
       >
         <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
-          Take a new reflection
+          Take a new assessment
         </Text>
       </Pressable>
     </ScrollView>

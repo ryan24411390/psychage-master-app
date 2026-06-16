@@ -1,69 +1,77 @@
 import { ArrowLeft } from 'lucide-react-native';
-import { useColorScheme } from 'nativewind';
-import { useMemo, useReducer, useState } from 'react';
+import { useMemo, useReducer, useRef } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import type { NavigatorResults, UserSymptomInput } from '@psychage/shared/navigator';
+import type {
+  KnowledgeBase,
+  NavigatorResults,
+  UserSymptomInput,
+} from '@psychage/shared/navigator';
 
-import { SearchableList } from '@/components/SearchableList';
-import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import type { HelplineRow } from '@/features/crisis/helpline-schema';
-import { colors } from '@/lib/colors';
+import { useReducedMotion } from '@/lib/motion';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
-import { type NavigatorArea, type SymptomOption, symptomsForArea } from './areas';
-import type { ClarifierQuestion } from './clarifiers';
+import { stepEnter } from './animations';
 import { ChipXL } from './components/ChipXL';
-import { SymptomChip } from './components/SymptomChip';
 import { NAVIGATOR_COPY } from './copy';
 import {
   buildUserInputs,
-  createNavigatorReducer,
   initialNavigatorState,
   isExitOnBack,
+  type NavStep,
+  navigatorReducer,
 } from './flow';
 import { HaltView } from './HaltView';
-import { ResultsView, type ResultItemVM } from './ResultsView';
+import { DetailScreen } from './screens/DetailScreen';
+import { DomainSelectionScreen, DOMAINS } from './screens/DomainSelectionScreen';
+import { ProcessingScreen } from './screens/ProcessingScreen';
+import { ResultsScreen, type ResultSymptomVM } from './screens/ResultsScreen';
+import { SymptomSelectionScreen } from './screens/SymptomSelectionScreen';
+import { WelcomeScreen } from './screens/WelcomeScreen';
 
-// The Symptom Navigator flow (S13–S18). Fully ON-DEVICE and in-memory — the reducer
-// state lives in component state, so leaving the flow unmounts it and NOTHING persists
-// (SR-4; abandon leaves zero residue, re-entry starts fresh). The scoring engine is
-// INJECTED (`runNavigator`) so the shared package stays off every Jest path — this
-// container imports only TYPES from @psychage/shared.
+// The Symptom Navigator flow — web-V2 parity (welcome → domains → symptoms → per-symptom
+// details → safety → processing → results | halt). Fully ON-DEVICE and in-memory (SR-4).
+// The scoring engine + provider-question generator are INJECTED (`runNavigator` /
+// `getProviderQuestions`) so the shared package stays off every Jest path — this
+// container imports only TYPES from @psychage/shared. The KB is passed as DATA.
 
 export type RunNavigator = (inputs: UserSymptomInput[]) => NavigatorResults;
+export type GetProviderQuestions = (
+  results: NavigatorResults,
+  inputs: UserSymptomInput[],
+) => string[];
 
-const AREAS: ReadonlyArray<{ area: NavigatorArea; label: string }> = [
-  { area: 'body', label: NAVIGATOR_COPY.areaBody },
-  { area: 'mind', label: NAVIGATOR_COPY.areaMind },
-  { area: 'sleep', label: NAVIGATOR_COPY.areaSleep },
-  { area: 'both', label: NAVIGATOR_COPY.areaBoth },
+const ALL_DOMAINS = DOMAINS.map((d) => d.id);
+
+const STEP_ORDER: NavStep[] = [
+  'welcome',
+  'domains',
+  'symptoms',
+  'details',
+  'safety',
+  'processing',
+  'results',
+  'halt',
 ];
 
-// All chrome below is VERBATIM Flow Book (Flow 13), now sourced from ./copy (CT4 §9).
-const SEVERITY_QUESTION = NAVIGATOR_COPY.severityQuestion;
-const CONTINUE_LABEL = NAVIGATOR_COPY.continue;
-const SOMETHING_ELSE = NAVIGATOR_COPY.somethingElse;
-const SEARCH_PLACEHOLDER = NAVIGATOR_COPY.searchPlaceholder;
-const SEARCH_A11Y = NAVIGATOR_COPY.searchA11y;
-const NO_MATCH = NAVIGATOR_COPY.noMatch;
-
 export interface NavigatorFlowProps {
-  readonly symptoms: readonly SymptomOption[];
-  readonly clarifiers: readonly ClarifierQuestion[];
+  readonly kb: KnowledgeBase;
   readonly runNavigator: RunNavigator;
+  readonly getProviderQuestions: GetProviderQuestions;
   readonly onExit: () => void;
   readonly emergencyNumber: string;
   readonly helplines: readonly HelplineRow[];
-  readonly onReadAbout: (conditionId: string) => void;
-  readonly onSteadyingNow: () => void;
+  readonly onTrack: () => void;
   readonly onFindCare: () => void;
+  readonly onLearn: () => void;
 }
 
 function BackButton({ onPress }: { onPress: () => void }) {
-  const { colorScheme } = useColorScheme();
-  const ink = colorScheme === 'dark' ? colors.text.primary.dark : colors.text.primary.light;
+  const tc = useThemeColors();
   return (
     <Pressable
       accessibilityRole="button"
@@ -72,30 +80,52 @@ function BackButton({ onPress }: { onPress: () => void }) {
       hitSlop={8}
       className="min-h-[44px] w-11 justify-center"
     >
-      <ArrowLeft size={24} color={ink} strokeWidth={2} />
+      <ArrowLeft size={24} color={tc.ink} strokeWidth={2} />
     </Pressable>
   );
 }
 
 export function NavigatorFlow({
-  symptoms,
-  clarifiers,
+  kb,
   runNavigator,
+  getProviderQuestions,
   onExit,
   emergencyNumber,
   helplines,
-  onReadAbout,
-  onSteadyingNow,
+  onTrack,
   onFindCare,
+  onLearn,
 }: NavigatorFlowProps) {
-  const reducer = useMemo(() => createNavigatorReducer(clarifiers), [clarifiers]);
-  const [state, dispatch] = useReducer(reducer, initialNavigatorState);
-  const [searching, setSearching] = useState(false);
+  const [state, dispatch] = useReducer(navigatorReducer, initialNavigatorState);
+  const reduced = useReducedMotion();
 
-  // Engine runs only at the 'evaluate' step (pure; useMemo keeps it stable per state).
+  // Direction for the step slide (forward = +1, back = -1).
+  const prevIdx = useRef(STEP_ORDER.indexOf(state.step));
+  const idx = STEP_ORDER.indexOf(state.step);
+  const direction = idx >= prevIdx.current ? 1 : -1;
+  prevIdx.current = idx;
+
+  // Symptoms scoped to the selected domains (active only) — the symptom-screen source.
+  const domainSymptoms = useMemo(
+    () =>
+      kb.symptoms.filter((s) => s.is_active && state.selectedDomains.includes(s.domain)),
+    [kb.symptoms, state.selectedDomains],
+  );
+
+  // Selected symptom objects in selection order — drives the Detail pager.
+  const orderedSelected = useMemo(
+    () =>
+      state.selectedSymptomIds
+        .map((id) => kb.symptoms.find((s) => s.id === id))
+        .filter((s): s is NonNullable<typeof s> => s != null),
+    [kb.symptoms, state.selectedSymptomIds],
+  );
+
+  // Engine runs only once results are needed (processing / results / halt-by-engine).
+  const needsEngine = state.step === 'processing' || state.step === 'results';
   const engineResult = useMemo<NavigatorResults | null>(
-    () => (state.step === 'evaluate' ? runNavigator(buildUserInputs(state)) : null),
-    [state, runNavigator],
+    () => (needsEngine ? runNavigator(buildUserInputs(state)) : null),
+    [needsEngine, runNavigator, state],
   );
 
   const handleBack = () => {
@@ -103,8 +133,9 @@ export function NavigatorFlow({
     else dispatch({ type: 'BACK' });
   };
 
-  // ── Halt (user "Yes" OR the engine's red-flag screen) ───────────────────────────
-  if (state.step === 'haltUnsafe' || engineResult?.safety.should_halt) {
+  // ── Halt: explicit "Yes" OR the engine's red-flag screen ───────────────────────
+  const engineHalts = engineResult?.safety.should_halt ?? false;
+  if (state.step === 'halt' || engineHalts) {
     return (
       <HaltView
         emergencyNumber={emergencyNumber}
@@ -114,159 +145,113 @@ export function NavigatorFlow({
     );
   }
 
-  // ── Results (S18) ────────────────────────────────────────────────────────────────
-  if (state.step === 'evaluate' && engineResult !== null) {
-    const vms: ResultItemVM[] = engineResult.results.map((r) => ({
-      condition_id: r.condition_id,
-      name: r.name,
-      description_for_user: r.description_for_user,
-      relevance_label: r.relevance_label,
-    }));
+  // ── Processing (engine did not halt) ───────────────────────────────────────────
+  if (state.step === 'processing') {
     return (
-      <ResultsView
-        results={vms}
-        onReadAbout={onReadAbout}
-        onSteadyingNow={onSteadyingNow}
-        onFindCare={onFindCare}
-        onBack={() => dispatch({ type: 'BACK' })}
-      />
+      <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
+        <ProcessingScreen onDone={() => dispatch({ type: 'SHOW_RESULTS' })} />
+      </SafeAreaView>
     );
   }
 
-  // ── Step screens (S13–S16) ───────────────────────────────────────────────────────
+  // ── Results ────────────────────────────────────────────────────────────────────
+  if (state.step === 'results' && engineResult) {
+    const symptomDetails: ResultSymptomVM[] = state.selectedSymptomIds.map((id) => {
+      const def = kb.symptoms.find((s) => s.id === id);
+      const detail = state.details[id];
+      return {
+        id,
+        name: def?.name ?? id,
+        severity: detail?.severity,
+        frequency: detail?.frequency,
+      };
+    });
+    const questions = getProviderQuestions(engineResult, buildUserInputs(state));
+
+    return (
+      <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
+        <View className="px-4 pt-1">
+          <BackButton onPress={handleBack} />
+        </View>
+        <ResultsScreen
+          results={engineResult}
+          symptomDetails={symptomDetails}
+          questions={questions}
+          emergencyNumber={emergencyNumber}
+          helplines={helplines}
+          onTrack={onTrack}
+          onFindCare={onFindCare}
+          onLearn={onLearn}
+          onStartOver={() => dispatch({ type: 'RESET' })}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // ── Input steps (welcome → domains → symptoms → details → safety) ───────────────
+  const current = orderedSelected[state.detailIndex];
+
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <View className="px-4 pt-1">
-        <BackButton onPress={handleBack} />
+        {state.step === 'welcome' ? null : <BackButton onPress={handleBack} />}
       </View>
-      <ScrollView contentContainerClassName="gap-4 px-4 pb-10 pt-2" keyboardShouldPersistTaps="handled">
-        {state.step === 'area' &&
-          AREAS.map((a) => (
-            <ChipXL key={a.area} label={a.label} onPress={() => dispatch({ type: 'SELECT_AREA', area: a.area })} />
-          ))}
 
-        {state.step === 'symptoms' && state.area !== null && (
-          <SymptomStep
-            symptoms={symptoms}
-            area={state.area}
+      <Animated.View
+        key={`${state.step}:${state.detailIndex}`}
+        entering={stepEnter(direction, reduced)}
+        className="flex-1"
+      >
+        {state.step === 'welcome' ? <WelcomeScreen onStart={() => dispatch({ type: 'START' })} /> : null}
+
+        {state.step === 'domains' ? (
+          <DomainSelectionScreen
+            selected={state.selectedDomains}
+            onToggle={(domain) => dispatch({ type: 'TOGGLE_DOMAIN', domain })}
+            onSelectAll={() => dispatch({ type: 'SELECT_ALL_DOMAINS', domains: ALL_DOMAINS })}
+            onNext={() => dispatch({ type: 'DOMAINS_NEXT' })}
+          />
+        ) : null}
+
+        {state.step === 'symptoms' ? (
+          <SymptomSelectionScreen
+            symptoms={domainSymptoms}
             selectedIds={state.selectedSymptomIds}
-            searching={searching}
+            emergencyNumber={emergencyNumber}
             onToggle={(id) => dispatch({ type: 'TOGGLE_SYMPTOM', id })}
-            onToggleSearch={() => setSearching((s) => !s)}
-            onPickFromSearch={(id) => {
-              dispatch({ type: 'TOGGLE_SYMPTOM', id });
-              setSearching(false);
-            }}
+            onAddMany={(ids) => dispatch({ type: 'ADD_SYMPTOMS', ids })}
+            onRemoveMany={(ids) => dispatch({ type: 'REMOVE_SYMPTOMS', ids })}
             onContinue={() => dispatch({ type: 'SYMPTOMS_NEXT' })}
           />
-        )}
+        ) : null}
 
-        {state.step === 'clarifier' &&
-          (() => {
-            const q = clarifiers[state.clarifierIndex];
-            if (!q) return null;
-            return (
-              <View className="gap-4">
-                <Text variant="headingLg" accessibilityRole="header">
-                  {q.prompt}
-                </Text>
-                {q.options.map((o) => (
-                  <ChipXL
-                    key={o.value}
-                    label={o.label}
-                    onPress={() => dispatch({ type: 'ANSWER_CLARIFIER', value: o.value })}
-                  />
-                ))}
-              </View>
-            );
-          })()}
+        {state.step === 'details' && current ? (
+          <DetailScreen
+            symptom={current}
+            index={state.detailIndex}
+            total={orderedSelected.length}
+            detail={state.details[current.id]}
+            onSet={(patch) => dispatch({ type: 'SET_DETAIL', id: current.id, patch })}
+            onNext={() => dispatch({ type: 'DETAIL_NEXT' })}
+          />
+        ) : null}
 
-        {state.step === 'severity' && (
-          <View className="gap-4">
+        {state.step === 'safety' ? (
+          <ScrollView contentContainerClassName="gap-4 px-4 pb-10 pt-2">
             <Text variant="headingLg" accessibilityRole="header">
-              {SEVERITY_QUESTION}
+              {NAVIGATOR_COPY.severityQuestion}
             </Text>
             <ChipXL
               label={NAVIGATOR_COPY.severityNo}
-              onPress={() => dispatch({ type: 'ANSWER_SEVERITY', answer: 'no' })}
+              onPress={() => dispatch({ type: 'ANSWER_SAFETY', answer: 'no' })}
             />
             <ChipXL
               label={NAVIGATOR_COPY.severityYes}
-              onPress={() => dispatch({ type: 'ANSWER_SEVERITY', answer: 'yes' })}
+              onPress={() => dispatch({ type: 'ANSWER_SAFETY', answer: 'yes' })}
             />
-          </View>
-        )}
-      </ScrollView>
+          </ScrollView>
+        ) : null}
+      </Animated.View>
     </SafeAreaView>
-  );
-}
-
-function SymptomStep({
-  symptoms,
-  area,
-  selectedIds,
-  searching,
-  onToggle,
-  onToggleSearch,
-  onPickFromSearch,
-  onContinue,
-}: {
-  symptoms: readonly SymptomOption[];
-  area: NavigatorArea;
-  selectedIds: readonly string[];
-  searching: boolean;
-  onToggle: (id: string) => void;
-  onToggleSearch: () => void;
-  onPickFromSearch: (id: string) => void;
-  onContinue: () => void;
-}) {
-  if (searching) {
-    return (
-      <View className="h-[420px]">
-        <SearchableList
-          items={symptoms}
-          getKey={(s) => s.id}
-          getLabel={(s) => s.name}
-          onSelect={(s) => onPickFromSearch(s.id)}
-          accentColor={colors.teal[700]}
-          searchPlaceholder={SEARCH_PLACEHOLDER}
-          searchAccessibilityLabel={SEARCH_A11Y}
-          noMatchLabel={NO_MATCH}
-        />
-      </View>
-    );
-  }
-
-  const areaSyms = symptomsForArea(symptoms, area);
-  const extras = symptoms.filter(
-    (s) => selectedIds.includes(s.id) && !areaSyms.some((a) => a.id === s.id),
-  );
-  const display = [...areaSyms, ...extras];
-
-  return (
-    <View className="gap-3">
-      {display.map((s) => (
-        <SymptomChip
-          key={s.id}
-          label={s.name}
-          selected={selectedIds.includes(s.id)}
-          onToggle={() => onToggle(s.id)}
-        />
-      ))}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={SOMETHING_ELSE}
-        onPress={onToggleSearch}
-        hitSlop={6}
-        className="min-h-[44px] justify-center"
-      >
-        <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
-          {SOMETHING_ELSE}
-        </Text>
-      </Pressable>
-      <Button variant="primary" disabled={selectedIds.length === 0} onPress={onContinue} className="mt-2">
-        {CONTINUE_LABEL}
-      </Button>
-    </View>
   );
 }
