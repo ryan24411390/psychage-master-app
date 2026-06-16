@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import { View, type ViewProps } from 'react-native';
+import type React from 'react';
+import { useEffect } from 'react';
+import type { ViewProps } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -10,8 +11,9 @@ import Animated, {
   FadeInUp,
 } from 'react-native-reanimated';
 import { Text } from './Text';
+import { Mascot } from '@/components/home/Mascot';
+import { MASCOT_CONTEXTUAL } from '@/features/mascot';
 import { useReducedMotion } from '@/lib/motion';
-import { Search } from 'lucide-react-native';
 
 export interface AnimatedEmptyStateProps extends ViewProps {
   title: string;
@@ -54,8 +56,10 @@ export function AnimatedEmptyState({
       className={['flex-1 items-center justify-center p-8', className].filter(Boolean).join(' ')}
       {...props}
     >
-      <Animated.View style={animatedIconStyle} className="mb-6 opacity-80">
-        {icon || <Search size={64} color="#A8A29E" strokeWidth={1.5} />}
+      <Animated.View style={animatedIconStyle} className="mb-6">
+        {/* Contextual placement (see MASCOT_CONTEXTUAL): generic / first-run empty → 'open'.
+            Callers may override via the `icon` prop for surface-specific states. */}
+        {icon || <Mascot state={MASCOT_CONTEXTUAL.emptyGeneric} size={120} />}
       </Animated.View>
       <Text variant="heading" className="text-center mb-2 text-text-primary dark:text-text-primary-dark">
         {title}

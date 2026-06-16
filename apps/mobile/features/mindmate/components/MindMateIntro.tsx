@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 
 import { Mascot } from '@/components/home/Mascot';
+import { MASCOT_CONTEXTUAL } from '@/features/mascot';
 import { Text } from '@/components/ui/Text';
 
 import { MINDMATE_COPY } from '../copy';
@@ -10,7 +11,9 @@ import { MINDMATE_COPY } from '../copy';
 export function MindMateIntro() {
   return (
     <View className="items-center gap-4 px-6 py-10" testID="mindmate-intro">
-      <Mascot testID="mindmate-mascot" />
+      {/* Contextual placement (see MASCOT_CONTEXTUAL): MindMate idle surface → 'listening',
+          explicit because /tools/mindmate is not a route-auto presence. */}
+      <Mascot testID="mindmate-mascot" state={MASCOT_CONTEXTUAL.mindmateIdle} />
       <Text
         variant="headingLg"
         accessibilityRole="header"

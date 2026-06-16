@@ -1,3 +1,5 @@
+import { Image } from 'expo-image';
+import { usePathname } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { useEffect } from 'react';
 import Animated, {
@@ -8,45 +10,57 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Circle, Ellipse, Rect } from 'react-native-svg';
 
-import { colorForScheme, resolveColorRef, type ThemedColor } from '@/lib/a1-tokens';
+import { MASCOT_IDLE_STATES, MASCOT_SOURCES, type MascotState } from '@/features/mascot/manifest';
+import { resolveMascotState } from '@/features/mascot/mascot.surfaces';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 
-// Mascot — the founder-delivered asset belongs in apps/mobile/assets/mascot/. That
-// directory does NOT exist yet, so this renders a correctly-dimensioned clay-figure
-// PLACEHOLDER (ported from the v5 mascot SVG). FLAGGED: swap for the real asset when
-// it lands. Breathing is the mascot-breathing motion verb — a slow scale loop over
-// motion.duration.breath; reduced motion = static. Decorative, hidden from VoiceOver.
-// (Tilt-on-save + return-tilt are sub-slice E.)
+// Mascot — the route-aware presence layer over the founder-delivered clay-figure assets
+// (apps/mobile/assets/mascot/, manifest in @/features/mascot). Replaces the prior SVG
+// placeholder. Two modes:
+//   • no `state` prop → reads the active route and renders MASCOT_BY_ROUTE[route]
+//     (with the Today time-of-day / dark-theme override);
+//   • explicit `state` prop → renders that state (contextual sites: empty/error/etc.).
+// ALWAYS renders null on a MASCOT_FORBIDDEN route (crisis / Navigator / delete-account)
+// or when `suppressed` (Storm Check sub-state) — regardless of any explicit state.
+// Breathing scale-loop runs only on idle states; tilt-on-save (tiltSignal) is preserved.
+// Decorative, hidden from VoiceOver.
 
-const WIDTH = 76;
-const HEIGHT = 88;
+const DEFAULT_WIDTH = 96;
+const ASPECT = 1.15; // height ≈ 1.15× width — roughly the figure's standing footprint
 const BREATHE_SCALE = 1.03;
 
 type MascotProps = {
   testID?: string;
+  /** Explicit state for contextual render sites. Omit for route-driven presence. */
+  state?: MascotState;
+  /** Storm Check (and future) sub-state guard — forces null regardless of route/state. */
+  suppressed?: boolean;
+  /** Rendered width in px (height derived by aspect). */
+  size?: number;
   /** Bumps to fire a single tilt — on save, and the one return tilt after an absence. */
   tiltSignal?: number;
 };
 
-export function Mascot({ testID, tiltSignal = 0 }: MascotProps) {
+export function Mascot({ testID, state, suppressed, size = DEFAULT_WIDTH, tiltSignal = 0 }: MascotProps) {
   const reduced = useReducedMotion();
+  const pathname = usePathname();
   const { colorScheme } = useColorScheme();
-  const pick = (themed: ThemedColor) => colorForScheme(themed, colorScheme);
 
-  const clay = pick(resolveColorRef('color.border.default'));
-  const stroke = pick(resolveColorRef('color.border.hover'));
-  const eyes = pick(resolveColorRef('color.text.tertiary'));
-  const teal = pick(resolveColorRef('color.primary.default'));
-  // Grounding ellipse: a warm-dark drop-shadow reads on the light canvas but is
-  // invisible on true black, so dark mode uses a faint light halo instead. (The
-  // clay placeholder swaps for the founder asset — see header.)
-  const shadowFill = colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(46,44,40,0.08)';
+  const resolved = resolveMascotState({
+    pathname,
+    state,
+    suppressed,
+    hour: new Date().getHours(),
+    isDark: colorScheme === 'dark',
+  });
+
+  const isIdle = resolved !== null && MASCOT_IDLE_STATES.has(resolved);
 
   const scale = useSharedValue(1);
   useEffect(() => {
-    if (reduced) {
+    if (reduced || !isIdle) {
+      cancelAnimation(scale);
       scale.value = 1;
       return;
     }
@@ -56,7 +70,7 @@ export function Mascot({ testID, tiltSignal = 0 }: MascotProps) {
       true,
     );
     return () => cancelAnimation(scale);
-  }, [reduced, scale]);
+  }, [reduced, isIdle, scale]);
 
   const tilt = useSharedValue(0);
   useEffect(() => {
@@ -67,25 +81,30 @@ export function Mascot({ testID, tiltSignal = 0 }: MascotProps) {
     );
   }, [tiltSignal, reduced, tilt]);
 
-  const breathingStyle = useAnimatedStyle(() => ({
+  const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }, { rotate: `${tilt.value}rad` }],
   }));
 
+  // Sacred Rule: forbidden routes and suppressed sub-states get NO mascot, ever.
+  if (resolved === null) return null;
+
+  const width = size;
+  const height = Math.round(size * ASPECT);
+
   return (
     <Animated.View
-      style={breathingStyle}
+      style={animatedStyle}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       testID={testID}
     >
-      <Svg width={WIDTH} height={HEIGHT} viewBox="0 0 80 92">
-        <Ellipse cx={40} cy={86} rx={20} ry={4} fill={shadowFill} />
-        <Rect x={26} y={52} width={28} height={34} rx={13} fill={clay} stroke={stroke} />
-        <Circle cx={40} cy={30} r={26} fill={clay} stroke={stroke} />
-        <Circle cx={32} cy={30} r={2.6} fill={eyes} />
-        <Circle cx={48} cy={30} r={2.6} fill={eyes} />
-        <Circle cx={40} cy={62} r={3.4} fill={teal} />
-      </Svg>
+      <Image
+        source={MASCOT_SOURCES[resolved]}
+        style={{ width, height }}
+        contentFit="contain"
+        // Decorative — keep transitions cheap; the figure never animates between states.
+        transition={0}
+      />
     </Animated.View>
   );
 }

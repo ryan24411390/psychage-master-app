@@ -6,12 +6,12 @@
 
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { BookmarkPlus } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
+import { Mascot } from '@/components/home/Mascot';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
-import { useThemeColors } from '@/lib/use-theme-colors';
+import { MASCOT_CONTEXTUAL } from '@/features/mascot';
 import { BOOKMARKS_COPY } from './copy';
 import { useBookmarks } from './hooks';
 import { SavedRow } from './SavedRow';
@@ -51,10 +51,10 @@ function Chip({ label, selected, onPress }: { label: string; selected: boolean; 
 }
 
 function EmptyState() {
-  const tc = useThemeColors();
   return (
     <View className="items-center gap-3 px-6 py-16">
-      <BookmarkPlus size={40} color={tc.inkSecondary} strokeWidth={1.5} />
+      {/* Contextual placement (see MASCOT_CONTEXTUAL): empty library / bookmarks → 'looking-up'. */}
+      <Mascot state={MASCOT_CONTEXTUAL.emptyLibrary} size={120} />
       <Text variant="bodyBold" className="text-center text-text-primary dark:text-text-primary-dark">
         {BOOKMARKS_COPY.empty.title}
       </Text>

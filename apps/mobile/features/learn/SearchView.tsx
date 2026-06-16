@@ -5,10 +5,12 @@ import { ChevronLeft, Search, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 
+import { Mascot } from '@/components/home/Mascot';
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { ArticleListCard } from '@/features/content/ArticleListCard';
+import { MASCOT_CONTEXTUAL } from '@/features/mascot';
 import { CT4_LEARN } from '@/features/learn/copy';
 import { searchArticles } from '@/lib/articles';
 import type { ArticleListItem } from '@/lib/articles';
@@ -105,14 +107,21 @@ export function SearchView() {
               {isLoading ? (
                 <AppLoader />
               ) : (
-                <Text
-                  variant="body"
-                  className="text-center text-text-secondary dark:text-text-secondary-dark"
-                >
-                  {isError
-                    ? 'Search is unavailable right now. Please try again.'
-                    : `No guides match “${query}”.`}
-                </Text>
+                <>
+                  {/* Contextual placement (see MASCOT_CONTEXTUAL): empty search / no
+                      results → 'searching'. Not shown on the error branch. */}
+                  {!isError && (
+                    <Mascot state={MASCOT_CONTEXTUAL.emptySearch} size={120} testID="search-empty-mascot" />
+                  )}
+                  <Text
+                    variant="body"
+                    className="mt-3 text-center text-text-secondary dark:text-text-secondary-dark"
+                  >
+                    {isError
+                      ? 'Search is unavailable right now. Please try again.'
+                      : `No guides match “${query}”.`}
+                  </Text>
+                </>
               )}
             </View>
           }
