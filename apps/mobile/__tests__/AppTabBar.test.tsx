@@ -10,11 +10,12 @@ import { renderWithProviders } from './_helpers';
 // and asserts: four tabs (each reachable by its accessibility label), ONLY the
 // focused tab shows a visible text label (inactive tabs are icon-only), the active
 // tab carries selected semantics, and pressing an inactive tab navigates.
+// Route names are the tab group-folder names after the nested-stack restructure.
 const ROUTES = [
-  { key: 'index-1', name: 'index' },
-  { key: 'learn-1', name: 'learn' },
-  { key: 'compass-1', name: 'compass' },
-  { key: 'find-1', name: 'find' },
+  { key: 'today-1', name: '(today)' },
+  { key: 'learn-1', name: '(learn)' },
+  { key: 'compass-1', name: '(compass)' },
+  { key: 'find-1', name: '(find)' },
 ];
 const TITLES = ['Today', 'Learn', 'Compass', 'Find'];
 
@@ -59,6 +60,6 @@ describe('AppTabBar', () => {
     const navigate = jest.fn();
     renderWithProviders(<AppTabBar {...makeProps(0, navigate)} />, { haptics: true });
     fireEvent.press(screen.getByLabelText('Learn'));
-    expect(navigate).toHaveBeenCalledWith('learn');
+    expect(navigate).toHaveBeenCalledWith('(learn)');
   });
 });

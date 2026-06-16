@@ -17,11 +17,13 @@ import { DURATION, useReducedMotion } from '@/lib/motion';
 // mode swaps it; the pill tint, hairline, paper bar and label teal are NativeWind
 // arbitrary-value classes because an alpha tint and the #157F73 label teal have no
 // existing token leaf (a tab-bar-local choice, not a shared palette edit).
+// Keyed by the tab route names, which are the group-folder names after the
+// per-tab nested-stack restructure ((today)/(learn)/(compass)/(find)).
 const ICONS: Record<string, LucideIcon> = {
-  index: Sun,
-  learn: BookOpen,
-  compass: Compass,
-  find: MapPin,
+  '(today)': Sun,
+  '(learn)': BookOpen,
+  '(compass)': Compass,
+  '(find)': MapPin,
 };
 
 const ICON_SIZE = 23;

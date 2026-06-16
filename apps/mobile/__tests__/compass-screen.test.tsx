@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn() } }));
 
-import CompassScreen from '@/app/(tabs)/compass';
+import CompassScreen from '@/app/(tabs)/(compass)/compass';
 import { COMPASS_ROUTES } from '@/features/compass/routes';
 
 import { renderWithProviders } from './_helpers';
