@@ -2,7 +2,10 @@
   "expo": {
     "name": "mobile",
     "slug": "mobile",
-    "scheme": "psychage",
+    "scheme": [
+      "psychage",
+      "com.googleusercontent.apps.369007537232-jutu7kb6jtd4kauvptd7rr0dh8349tpo"
+    ],
     "version": "1.0.0",
     "owner": "OWNER_PLACEHOLDER",
     "runtimeVersion": {

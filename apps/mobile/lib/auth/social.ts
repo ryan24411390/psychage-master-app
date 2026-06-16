@@ -22,7 +22,6 @@ import * as AuthSession from 'expo-auth-session';
 import * as Crypto from 'expo-crypto';
 
 import type { SocialProvider } from '@/features/auth/auth-service';
-import { AUTH_SCHEME } from '@/lib/auth/redirects';
 
 export type ProviderCredential =
   | { readonly cancelled: true }
@@ -64,7 +63,11 @@ async function getGoogleCredential(): Promise<ProviderCredential> {
   if (!clientId) throw new Error('Google OAuth client id not configured');
 
   const rawNonce = Crypto.randomUUID();
-  const redirectUri = AuthSession.makeRedirectUri({ scheme: AUTH_SCHEME });
+  // Google iOS OAuth requires the reversed-client-id redirect scheme (not the app's
+  // `psychage://`). The matching scheme is registered in app.json so the redirect
+  // deep-links back into the app.
+  const reversed = `com.googleusercontent.apps.${clientId.replace(/\.apps\.googleusercontent\.com$/, '')}`;
+  const redirectUri = AuthSession.makeRedirectUri({ native: `${reversed}:/oauth2redirect` });
 
   const request = new AuthSession.AuthRequest({
     clientId,
