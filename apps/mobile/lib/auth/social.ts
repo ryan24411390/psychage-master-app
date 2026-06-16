@@ -25,10 +25,13 @@ import type { SocialProvider } from '@/features/auth/auth-service';
 
 export type ProviderCredential =
   | { readonly cancelled: true }
-  | { readonly provider: SocialProvider; readonly idToken: string; readonly nonce: string };
+  // `nonce` is Apple-only (its replay-protection contract). Google uses the auth-code
+  // flow, whose id-token isn't nonce-bound here — omitted for Google.
+  | { readonly provider: SocialProvider; readonly idToken: string; readonly nonce?: string };
 
 const GOOGLE_DISCOVERY: AuthSession.DiscoveryDocument = {
   authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+  tokenEndpoint: 'https://oauth2.googleapis.com/token',
 };
 
 async function sha256(value: string): Promise<string> {
@@ -62,10 +65,13 @@ async function getGoogleCredential(): Promise<ProviderCredential> {
   const clientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
   if (!clientId) throw new Error('Google OAuth client id not configured');
 
-  const rawNonce = Crypto.randomUUID();
-  // Google iOS OAuth requires the reversed-client-id redirect scheme (not the app's
-  // `psychage://`). The matching scheme is registered in app.json so the redirect
-  // deep-links back into the app.
+  // Authorization-code flow + PKCE — Google's required "secure flow". The implicit
+  // id_token flow is disabled by Google (Error 400 unsupported_response_type). We get a
+  // code, then exchange it (with the PKCE verifier; iOS clients are public, no secret)
+  // for the id_token, which Supabase verifies.
+  //
+  // Google iOS OAuth requires the reversed-client-id redirect scheme (registered in
+  // app.json / Info.plist so the redirect deep-links back into the app).
   const reversed = `com.googleusercontent.apps.${clientId.replace(/\.apps\.googleusercontent\.com$/, '')}`;
   const redirectUri = AuthSession.makeRedirectUri({ native: `${reversed}:/oauth2redirect` });
 
@@ -73,18 +79,26 @@ async function getGoogleCredential(): Promise<ProviderCredential> {
     clientId,
     scopes: ['openid', 'email', 'profile'],
     redirectUri,
-    responseType: AuthSession.ResponseType.IdToken,
-    // id_token implicit flow: PKCE adds code_challenge(_method), which Google rejects
-    // for this response type ("Parameter not allowed... code_challenge_method").
-    usePKCE: false,
-    extraParams: { nonce: rawNonce },
+    responseType: AuthSession.ResponseType.Code,
+    usePKCE: true,
   });
 
   const result = await request.promptAsync(GOOGLE_DISCOVERY);
-  if (result.type !== 'success') return { cancelled: true };
-  const idToken = result.params.id_token;
+  if (result.type !== 'success' || !result.params.code) return { cancelled: true };
+
+  const tokenResult = await AuthSession.exchangeCodeAsync(
+    {
+      clientId,
+      code: result.params.code,
+      redirectUri,
+      extraParams: request.codeVerifier ? { code_verifier: request.codeVerifier } : {},
+    },
+    GOOGLE_DISCOVERY,
+  );
+
+  const idToken = tokenResult.idToken;
   if (!idToken) return { cancelled: true };
-  return { provider: 'google', idToken, nonce: rawNonce };
+  return { provider: 'google', idToken };
 }
 
 /** Drive the OS sheet for the given provider and return its id-token (or cancel). */

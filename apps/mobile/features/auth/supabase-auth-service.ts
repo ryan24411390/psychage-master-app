@@ -37,7 +37,7 @@ type AuthEventType = 'sign_up' | 'sign_in' | 'sign_out';
 /** Native id-token acquisition seam — see lib/auth/social.ts. Injected in tests. */
 type ProviderCredential =
   | { readonly cancelled: true }
-  | { readonly provider: SocialProvider; readonly idToken: string; readonly nonce: string };
+  | { readonly provider: SocialProvider; readonly idToken: string; readonly nonce?: string };
 type GetProviderCredential = (provider: SocialProvider) => Promise<ProviderCredential>;
 
 // Map a supabase-js Session to the lightweight AuthSession the UI reads. The same
@@ -119,7 +119,8 @@ export function createSupabaseAuthService(deps: SupabaseAuthServiceDeps = {}): A
         const { data, error } = await client.auth.signInWithIdToken({
           provider,
           token: credential.idToken,
-          nonce: credential.nonce,
+          // Apple binds a nonce; Google (auth-code flow) does not — only send when present.
+          ...(credential.nonce ? { nonce: credential.nonce } : {}),
         });
         if (error) {
           return { ok: false, error: isNetworkError(error) ? 'offline' : 'invalid-credentials' };
