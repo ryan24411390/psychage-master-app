@@ -319,12 +319,18 @@ export async function getFeaturedProviders(limit = 12): Promise<ProviderCardData
 // to an option always matches the result list that selecting it produces (the
 // "filters can't dead-end the user" rule). Empty map on any failure — never faked.
 
-/** Provider count per state (2-char code → count), primary-location based. */
+/**
+ * Provider count per state (2-char code → count), primary-location based.
+ * THROWS on RPC error so the query surfaces `isError` (data undefined) rather than
+ * an empty map: an empty map would make the picker disable EVERY state as "None
+ * listed". On failure the picker leaves states tappable with no count instead.
+ */
 export async function getStateCounts(): Promise<Record<string, number>> {
   const client = getSupabaseClient();
   if (!client) return {};
   const { data, error } = await client.rpc('directory_state_counts');
-  if (error || !data) return {};
+  if (error) throw error;
+  if (!data) return {};
   const out: Record<string, number> = {};
   for (const row of data as { state: string; provider_count: number }[]) {
     if (row.state) out[row.state.toUpperCase()] = Number(row.provider_count) || 0;
