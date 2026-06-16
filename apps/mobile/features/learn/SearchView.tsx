@@ -3,9 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronLeft, Search, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { ArticleListCard } from '@/features/content/ArticleListCard';
@@ -47,7 +48,7 @@ export function SearchView() {
       <GlobalHeader />
 
       <View className="flex-row items-center gap-2 px-2 py-1">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={() => router.back()}
@@ -56,7 +57,7 @@ export function SearchView() {
           className="min-h-[44px] w-10 items-center justify-center"
         >
           <ChevronLeft size={22} color={tc.inkSecondary} strokeWidth={2} />
-        </Pressable>
+        </AnimatedPressable>
 
         <View className="min-h-[44px] flex-1 flex-row items-center gap-2.5 rounded-full border border-border-hairline bg-surface px-4 dark:border-border-dark dark:bg-surface-dark">
           <Search size={18} color={tc.inkTertiary} strokeWidth={2} />
@@ -72,14 +73,14 @@ export function SearchView() {
             className="flex-1 font-sans text-[15px] text-text-primary dark:text-text-primary-dark"
           />
           {raw.length > 0 ? (
-            <Pressable
+            <AnimatedPressable
               accessibilityRole="button"
               accessibilityLabel="Clear search"
               onPress={() => setRaw('')}
               hitSlop={8}
             >
               <X size={18} color={tc.inkTertiary} strokeWidth={2} />
-            </Pressable>
+            </AnimatedPressable>
           ) : null}
         </View>
       </View>

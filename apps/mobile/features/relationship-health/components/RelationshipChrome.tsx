@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
@@ -27,7 +28,7 @@ export function RelationshipChrome({ children, onBack, onHelp, backLabel }: Rela
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <View className="flex-row items-center justify-between px-4 pt-1">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel={backLabel ?? t.back}
           onPress={onBack}
@@ -38,7 +39,7 @@ export function RelationshipChrome({ children, onBack, onHelp, backLabel }: Rela
           <Text variant="bodyMedium" className="text-[15px] text-text-secondary dark:text-text-secondary-dark">
             {backLabel ?? t.back}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
 
         <Pressable
           accessibilityRole="button"

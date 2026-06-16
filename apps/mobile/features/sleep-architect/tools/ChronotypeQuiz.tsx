@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { type ChronotypeResult, scoreChronotype } from '@psychage/shared/sleep';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
@@ -67,7 +68,7 @@ export function ChronotypeQuiz({ onSaveTargets }: ChronotypeQuizProps) {
           {q.options.map((opt) => {
             const selected = answers[q.id] === opt.value;
             return (
-              <Pressable
+              <AnimatedPressable
                 key={opt.label}
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
@@ -85,7 +86,7 @@ export function ChronotypeQuiz({ onSaveTargets }: ChronotypeQuizProps) {
                 >
                   {opt.label}
                 </Text>
-              </Pressable>
+              </AnimatedPressable>
             );
           })}
         </View>

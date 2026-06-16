@@ -1,8 +1,9 @@
 import { ArrowLeft } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
@@ -44,7 +45,7 @@ export interface ResultsViewProps {
 
 function OnwardLink({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
@@ -55,7 +56,7 @@ function OnwardLink({ label, onPress }: { label: string; onPress: () => void }) 
       <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
         {label}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -74,7 +75,7 @@ export function ResultsView({
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <View className="px-4 pt-1">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel={NAVIGATOR_COPY.back}
           onPress={onBack}
@@ -82,7 +83,7 @@ export function ResultsView({
           className="min-h-[44px] w-11 justify-center"
         >
           <ArrowLeft size={24} color={ink} strokeWidth={2} />
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       <ScrollView contentContainerClassName="gap-6 px-4 pb-10">

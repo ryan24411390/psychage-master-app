@@ -1,8 +1,9 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { Mascot } from '@/components/home/Mascot';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
@@ -44,18 +45,18 @@ export function RecordTrustView({ onCheckIn, onLookAround }: RecordTrustViewProp
         <Button variant="primary" size="lg" className="w-full" onPress={onCheckIn}>
           {PRIMARY}
         </Button>
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel={SECONDARY}
           onPress={onLookAround}
           hitSlop={8}
-          className="min-h-[52px] items-center justify-center active:scale-[0.98]"
+          className="min-h-[52px] items-center justify-center"
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
             {SECONDARY}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </SafeAreaView>
     </View>
   );

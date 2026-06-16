@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import type { ChronotypeResult, SleepEntry, SleepSettings } from '@psychage/shared/sleep';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
@@ -35,7 +36,7 @@ export function SleepTools({ entries, settings, onSaveTargets }: SleepToolsProps
     return (
       <View className="gap-3">
         {items.map((item) => (
-          <Pressable
+          <AnimatedPressable
             key={item.key}
             accessibilityRole="button"
             accessibilityLabel={item.title}
@@ -46,7 +47,7 @@ export function SleepTools({ entries, settings, onSaveTargets }: SleepToolsProps
             <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               {item.sub}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         ))}
       </View>
     );

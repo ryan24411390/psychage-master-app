@@ -2,9 +2,10 @@ import { FlashList } from '@shopify/flash-list';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { ArticleListCard } from '@/features/content/ArticleListCard';
@@ -33,19 +34,21 @@ export function CategoryArticlesView({ id }: { id: string }) {
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
       <View className="flex-row items-center px-2">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={() => router.back()}
           hitSlop={8}
           testID="category-back"
           className="min-h-[44px] flex-row items-center gap-1 px-2"
+          scaleTo={0.98}
+          springPreset="subtle"
         >
           <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             Back
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       <FlashList

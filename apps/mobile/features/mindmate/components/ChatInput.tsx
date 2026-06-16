@@ -1,7 +1,8 @@
 import { Send } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { useHaptics } from '@/lib/haptic-context';
 import { colors } from '@/lib/colors';
 
@@ -42,7 +43,7 @@ export function ChatInput({
         accessibilityLabel={MINDMATE_COPY.inputPlaceholder}
         testID="mindmate-input"
       />
-      <Pressable
+      <AnimatedPressable
         accessibilityRole="button"
         accessibilityLabel={MINDMATE_COPY.sendLabel}
         accessibilityState={{ disabled: !canSend }}
@@ -53,7 +54,7 @@ export function ChatInput({
         testID="mindmate-send"
       >
         <Send size={20} color={colors.charcoal[50]} strokeWidth={2} />
-      </Pressable>
+      </AnimatedPressable>
     </View>
   );
 }

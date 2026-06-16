@@ -29,6 +29,7 @@ import { useColorScheme } from 'nativewind';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HeaderAvatar } from '@/components/HeaderAvatar';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { useBookmarkedIds, useCurrentUserId, useToggleBookmark } from '@/features/bookmarks/hooks';
 import { dial } from '@/features/crisis/dialer';
@@ -465,7 +466,7 @@ export default function FindCareScreen() {
     const dist = p.distance_miles != null ? ` · ${p.distance_miles.toFixed(1)} mi` : '';
     return (
       <Animated.View entering={enter()} className="flex-row bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-2xl mb-4 overflow-hidden shadow-sm dark:shadow-none">
-        <Pressable className="flex-1" onPress={() => { recordRecentlyViewed({ id: p.id, name, photoUrl: p.photo_url }); setActiveId(p.id); setStep('profile'); }}>
+        <AnimatedPressable className="flex-1" onPress={() => { recordRecentlyViewed({ id: p.id, name, photoUrl: p.photo_url }); setActiveId(p.id); setStep('profile'); }}>
           <View className="flex-row gap-3 p-[15px]">
             <View style={{ backgroundColor: colorFor(p.id) }} className="w-[46px] h-[46px] rounded-full items-center justify-center"><Text className="font-sans-bold text-white text-base">{initials(name)}</Text></View>
             <View className="flex-1">
@@ -477,7 +478,7 @@ export default function FindCareScreen() {
               </View>
             </View>
           </View>
-        </Pressable>
+        </AnimatedPressable>
         <Tap onPress={() => toggleSave(p.id)}><View className="px-3.5 h-full justify-center border-l border-border dark:border-border-dark"><Bookmark size={18} color={sv ? teal : faint} fill={sv ? teal : 'transparent'} /></View></Tap>
       </Animated.View>
     );

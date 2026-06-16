@@ -2,6 +2,7 @@ import { ChevronRight } from 'lucide-react-native';
 import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { CT4_LEARN, LEARN_PATHS } from '@/features/learn/copy';
 import { useHaptics } from '@/lib/haptic-context';
@@ -57,7 +58,7 @@ export function PathPickerSheet({ visible, onClose, onPick }: PathPickerSheetPro
 
           <View className="mt-1 gap-2">
             {LEARN_PATHS.map((p) => (
-              <Pressable
+              <AnimatedPressable
                 key={p.id}
                 accessibilityRole="button"
                 accessibilityLabel={p.label}
@@ -73,11 +74,11 @@ export function PathPickerSheet({ visible, onClose, onPick }: PathPickerSheetPro
                   <Text variant="bodyMedium">{p.label}</Text>
                 </View>
                 <ChevronRight size={18} color={tc.inkTertiary} strokeWidth={2} />
-              </Pressable>
+              </AnimatedPressable>
             ))}
           </View>
 
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel={t.pickerSkip}
             onPress={onClose}
@@ -87,7 +88,7 @@ export function PathPickerSheet({ visible, onClose, onPick }: PathPickerSheetPro
             <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark underline">
               {t.pickerSkip}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         </Pressable>
       </Pressable>
     </Modal>

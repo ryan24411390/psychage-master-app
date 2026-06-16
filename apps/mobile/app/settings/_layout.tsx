@@ -1,7 +1,7 @@
 import { Stack, router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { Pressable } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { CT4_SETTINGS } from '@/features/settings/copy';
 import { useThemeColors } from '@/lib/use-theme-colors';
 import { useReducedMotion } from '@/lib/motion';
@@ -32,7 +32,7 @@ export default function SettingsLayout() {
           // The settings stack is pushed over the tabs, so router.back() pops back
           // to wherever the user opened Settings from (GlobalHeader avatar → tabs).
           headerLeft: () => (
-            <Pressable
+            <AnimatedPressable
               accessibilityRole="button"
               accessibilityLabel="Back"
               onPress={() => router.back()}
@@ -40,7 +40,7 @@ export default function SettingsLayout() {
               className="h-11 w-11 items-center justify-center"
             >
               <ChevronLeft size={24} color={tc.ink} strokeWidth={1.75} />
-            </Pressable>
+            </AnimatedPressable>
           ),
         }}
       />

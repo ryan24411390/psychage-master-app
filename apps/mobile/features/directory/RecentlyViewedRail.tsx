@@ -1,5 +1,6 @@
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import type { RecentProvider } from '@/lib/persistence/recently-viewed';
 
@@ -32,7 +33,7 @@ export function RecentlyViewedRail({
         keyboardShouldPersistTaps="handled"
       >
         {items.map((p) => (
-          <Pressable
+          <AnimatedPressable
             key={p.id}
             accessibilityRole="button"
             accessibilityLabel={p.name}
@@ -49,7 +50,7 @@ export function RecentlyViewedRail({
             >
               {p.name}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         ))}
       </ScrollView>
     </View>

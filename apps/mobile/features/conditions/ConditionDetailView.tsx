@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { CONDITIONS_COPY } from '@/features/conditions/copy';
 import { selectConditionDetail } from '@/features/conditions/select';
@@ -23,7 +24,7 @@ export function ConditionDetailView({ slug }: { slug: string }) {
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
       <View className="flex-row items-center px-2">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel={t.back}
           onPress={() => router.back()}
@@ -35,7 +36,7 @@ export function ConditionDetailView({ slug }: { slug: string }) {
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       {detail == null ? (
@@ -74,7 +75,7 @@ export function ConditionDetailView({ slug }: { slug: string }) {
             </View>
           ) : null}
 
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel={t.browseLabel}
             onPress={() => router.push('/library')}
@@ -85,13 +86,13 @@ export function ConditionDetailView({ slug }: { slug: string }) {
             <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
               {t.browseLabel}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
 
           {detail.related.length > 0 ? (
             <View className="gap-2 pt-2" testID="condition-related">
               <Text variant="bodyMedium">{t.relatedLabel}</Text>
               {detail.related.map((rel) => (
-                <Pressable
+                <AnimatedPressable
                   key={rel.slug}
                   accessibilityRole="button"
                   accessibilityLabel={rel.name}
@@ -101,7 +102,7 @@ export function ConditionDetailView({ slug }: { slug: string }) {
                   style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
                 >
                   <Text variant="body">{rel.name}</Text>
-                </Pressable>
+                </AnimatedPressable>
               ))}
             </View>
           ) : null}

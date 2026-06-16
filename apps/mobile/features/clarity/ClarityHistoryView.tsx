@@ -1,5 +1,6 @@
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 
@@ -60,7 +61,7 @@ export function ClarityHistoryView({ snapshots, onStartNew }: ClarityHistoryView
         })
       )}
 
-      <Pressable
+      <AnimatedPressable
         accessibilityRole="button"
         accessibilityLabel="Take a new reflection"
         onPress={onStartNew}
@@ -71,7 +72,7 @@ export function ClarityHistoryView({ snapshots, onStartNew }: ClarityHistoryView
         <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
           Take a new reflection
         </Text>
-      </Pressable>
+      </AnimatedPressable>
     </ScrollView>
   );
 }

@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { CRISIS_DATASET } from '@/features/crisis/helplines.fixtures';
@@ -82,7 +83,7 @@ export function MindMateView({
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
       <View className="flex-row items-center px-2">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={onBack}
@@ -94,7 +95,7 @@ export function MindMateView({
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             Back
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       <KeyboardAvoidingView

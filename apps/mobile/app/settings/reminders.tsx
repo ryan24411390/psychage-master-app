@@ -2,11 +2,12 @@ import DateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { SettingsRow } from '@/components/settings/SettingsRow';
 import { SettingsSection } from '@/components/settings/SettingsSection';
 import { SettingsToggleRow } from '@/components/settings/SettingsToggleRow';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
 import { CT4_SETTINGS } from '@/features/settings/copy';
@@ -101,16 +102,16 @@ export default function RemindersScreen() {
           </Text>
         ) : (
           <View className="flex-row gap-4 px-1 pt-2">
-            <Pressable accessibilityRole="button" onPress={onNotNow} testID="reminder-not-now">
+            <AnimatedPressable accessibilityRole="button" onPress={onNotNow} testID="reminder-not-now">
               <Text variant="bodyMedium" className="text-text-tertiary dark:text-text-tertiary-dark">
                 {t.notNow}
               </Text>
-            </Pressable>
-            <Pressable accessibilityRole="button" onPress={onNever} testID="reminder-never">
+            </AnimatedPressable>
+            <AnimatedPressable accessibilityRole="button" onPress={onNever} testID="reminder-never">
               <Text variant="bodyMedium" className="text-text-tertiary dark:text-text-tertiary-dark">
                 {t.never}
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
         )}
 

@@ -1,6 +1,7 @@
 import { BookOpen } from 'lucide-react-native';
-import { Linking, Pressable, View } from 'react-native';
+import { Linking, View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { WV_ORIGIN } from '@/features/webview/wv-url';
 import { useThemeColors } from '@/lib/use-theme-colors';
@@ -36,7 +37,7 @@ export function Citations({
       </Text>
       <View className="gap-1.5">
         {citations.map((c) => (
-          <Pressable
+          <AnimatedPressable
             key={c.id}
             accessibilityRole="link"
             accessibilityLabel={c.title}
@@ -52,7 +53,7 @@ export function Citations({
             >
               {c.title}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         ))}
       </View>
     </View>

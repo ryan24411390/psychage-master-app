@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, Platform, ScrollView, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Check } from 'lucide-react-native';
 
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { PasswordStrengthMeter } from '@/components/auth/PasswordStrengthMeter';
 import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
@@ -159,7 +160,7 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
             </View>
 
             <View className="gap-1.5">
-              <Pressable
+              <AnimatedPressable
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: accepted }}
                 accessibilityLabel={`${AUTH_COPY.termsPrefix}${AUTH_COPY.termsLink}${AUTH_COPY.termsAnd}${AUTH_COPY.privacyLink}`}
@@ -197,7 +198,7 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
                     {AUTH_COPY.privacyLink}
                   </Text>
                 </Text>
-              </Pressable>
+              </AnimatedPressable>
               {termsError ? (
                 <Text variant="bodySm" className="text-error dark:text-error-dark">
                   {AUTH_COPY.termsRequiredLine}

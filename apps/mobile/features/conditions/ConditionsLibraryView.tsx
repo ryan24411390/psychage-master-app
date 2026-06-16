@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { CONDITIONS_COPY } from '@/features/conditions/copy';
 import { selectConditionCategories } from '@/features/conditions/select';
@@ -23,7 +24,7 @@ export function ConditionsLibraryView() {
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
       <View className="flex-row items-center px-2">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel={t.back}
           onPress={() => router.back()}
@@ -35,7 +36,7 @@ export function ConditionsLibraryView() {
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       <ScrollView contentContainerClassName="gap-3 px-5 pb-12" showsVerticalScrollIndicator={false}>
@@ -45,12 +46,14 @@ export function ConditionsLibraryView() {
         </Text>
 
         {categories.map((cat) => (
-          <Pressable
+          <AnimatedPressable
             key={cat.slug}
             accessibilityRole="button"
             accessibilityLabel={cat.name}
             onPress={() => router.push(`/conditions/${cat.slug}`)}
             testID={`condition-row-${cat.slug}`}
+            scaleTo={0.98}
+            springPreset="subtle"
             className="min-h-[44px] flex-row items-center justify-between gap-3 rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
@@ -58,7 +61,7 @@ export function ConditionsLibraryView() {
               {cat.name}
             </Text>
             <ChevronRight size={18} color={colors.charcoal[600]} strokeWidth={2} />
-          </Pressable>
+          </AnimatedPressable>
         ))}
 
         <Text variant="caption" className="px-1 pt-2">

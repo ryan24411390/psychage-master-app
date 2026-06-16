@@ -1,5 +1,6 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { CT4_SUPPORTER } from '@/features/supporter/copy';
 import { SUPPORTER_TIERS } from '@/features/supporter/tiers';
@@ -18,11 +19,13 @@ export function SupporterTiers({ onSelect }: SupporterTiersProps) {
       {SUPPORTER_TIERS.map((tier) => {
         const name = CT4_SUPPORTER.tiers[tier.nameKey];
         return (
-          <Pressable
+          <AnimatedPressable
             key={tier.id}
             accessibilityRole="button"
             accessibilityLabel={`${name}, ${tier.priceLabel}`}
             onPress={() => onSelect(tier.id)}
+            scaleTo={0.98}
+            springPreset="subtle"
             testID={`supporter-tier-${tier.id}`}
             className="min-h-[44px] flex-row items-center justify-between rounded-lg border border-border px-4 py-3 dark:border-border-dark"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
@@ -31,7 +34,7 @@ export function SupporterTiers({ onSelect }: SupporterTiersProps) {
             <Text variant="bodyMedium" className="text-text-secondary dark:text-text-secondary-dark">
               {tier.priceLabel}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         );
       })}
     </View>

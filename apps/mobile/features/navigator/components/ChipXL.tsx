@@ -1,5 +1,6 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 
 // C-CHIP-XL — a full-width ≥60px pill for the single-select screens (S13 area, S15
@@ -14,7 +15,7 @@ export interface ChipXLProps {
 
 export function ChipXL({ label, onPress, accessibilityLabel }: ChipXLProps) {
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       onPress={onPress}
@@ -24,6 +25,6 @@ export function ChipXL({ label, onPress, accessibilityLabel }: ChipXLProps) {
       <View className="items-center">
         <Text variant="bodyMedium">{label}</Text>
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

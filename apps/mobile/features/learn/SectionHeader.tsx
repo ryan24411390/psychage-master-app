@@ -1,6 +1,7 @@
 import { ArrowRight } from 'lucide-react-native';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { useHaptics } from '@/lib/haptic-context';
 import { useThemeColors } from '@/lib/use-theme-colors';
@@ -56,7 +57,7 @@ export function SectionHeader({
       </View>
 
       {onSeeAll ? (
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel={`${seeAllLabel}: ${title}`}
           onPress={() => {
@@ -71,7 +72,7 @@ export function SectionHeader({
             {seeAllLabel}
           </Text>
           <ArrowRight size={15} color={tc.primary} strokeWidth={2} />
-        </Pressable>
+        </AnimatedPressable>
       ) : null}
     </View>
   );

@@ -1,9 +1,10 @@
 import { ArrowLeft, LifeBuoy } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import type { ReactNode } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
 
@@ -28,7 +29,7 @@ export function ClarityChrome({ children, onHelp, onBack }: ClarityChromeProps) 
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <View className="flex-row items-center justify-between px-4 pt-1">
         {onBack ? (
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel="Back"
             onPress={onBack}
@@ -36,12 +37,12 @@ export function ClarityChrome({ children, onHelp, onBack }: ClarityChromeProps) 
             className="min-h-[44px] w-11 justify-center"
           >
             <ArrowLeft size={24} color={ink} strokeWidth={2} />
-          </Pressable>
+          </AnimatedPressable>
         ) : (
           <View className="w-11" />
         )}
 
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Help now"
           onPress={onHelp}
@@ -52,7 +53,7 @@ export function ClarityChrome({ children, onHelp, onBack }: ClarityChromeProps) 
           <Text variant="bodyMedium" className="text-[13px] text-crisis">
             Help now
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       <View className="flex-1">{children}</View>

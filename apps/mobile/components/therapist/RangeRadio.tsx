@@ -1,7 +1,8 @@
 import { Check } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { colorForScheme, resolveColorRef } from '@/lib/a1-tokens';
 
@@ -31,12 +32,14 @@ export function RangeRadio({ options, value, onChange }: RangeRadioProps) {
       {options.map((option) => {
         const isSelected = value === option.key;
         return (
-          <Pressable
+          <AnimatedPressable
             key={option.key}
             accessibilityRole="radio"
             accessibilityState={{ checked: isSelected }}
             accessibilityLabel={option.label}
             onPress={() => onChange(option.key)}
+            scaleTo={0.98}
+            springPreset="subtle"
             className={`min-h-[44px] flex-row items-center gap-3 rounded-lg border-2 px-3 py-2 ${
               isSelected
                 ? 'border-primary dark:border-primary-dark'
@@ -47,7 +50,7 @@ export function RangeRadio({ options, value, onChange }: RangeRadioProps) {
               {option.label}
             </Text>
             {isSelected ? <Check size={20} color={checkColor} strokeWidth={2.25} /> : null}
-          </Pressable>
+          </AnimatedPressable>
         );
       })}
     </View>

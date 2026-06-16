@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
@@ -25,16 +26,16 @@ export function ExerciseChrome({ children, onHelp, onClose }: ExerciseChromeProp
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <View className="flex-row items-center justify-between px-4 pt-1">
         {onClose ? (
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel="Close"
             onPress={onClose}
             hitSlop={8}
-            className="min-h-[44px] w-11 justify-center active:scale-[0.96]"
+            className="min-h-[44px] w-11 justify-center"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
             <X size={22} color={tc.inkSecondary} strokeWidth={1.75} />
-          </Pressable>
+          </AnimatedPressable>
         ) : (
           <View className="w-11" />
         )}

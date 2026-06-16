@@ -1,10 +1,11 @@
 import { ArrowLeft } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { ScrollView, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Terrain } from '@/components/terrain/Terrain';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
@@ -46,7 +47,7 @@ export function ReflectionView({
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <View className="px-4 pt-1">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={onBack}
@@ -54,7 +55,7 @@ export function ReflectionView({
           className="min-h-[44px] w-11 justify-center"
         >
           <ArrowLeft size={24} color={ink} strokeWidth={2} />
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       <Settle {...settleProps} className="flex-1">
@@ -82,30 +83,30 @@ export function ReflectionView({
           ) : null}
 
           <View className="gap-1 border-t border-border pt-4 dark:border-border-dark">
-            <Pressable
+            <AnimatedPressable
               accessibilityRole="button"
               accessibilityLabel="See the full record"
               onPress={onFullRecord}
               hitSlop={8}
-              className="min-h-[44px] justify-center active:scale-[0.98]"
+              className="min-h-[44px] justify-center"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
               <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
                 See the full record
               </Text>
-            </Pressable>
-            <Pressable
+            </AnimatedPressable>
+            <AnimatedPressable
               accessibilityRole="button"
               accessibilityLabel="Earlier weeks"
               onPress={onEarlier}
               hitSlop={8}
-              className="min-h-[44px] justify-center active:scale-[0.98]"
+              className="min-h-[44px] justify-center"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
               <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
                 Earlier weeks
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
         </ScrollView>
       </Settle>

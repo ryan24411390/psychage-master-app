@@ -1,6 +1,6 @@
 import { useColorScheme } from 'nativewind';
 import { useState } from 'react';
-import { Pressable, useWindowDimensions, View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 
 import {
   bandForScore,
@@ -15,6 +15,7 @@ import {
   windowByDays,
 } from '@psychage/shared/sleep';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
@@ -173,7 +174,7 @@ function RangeSelector({ value, onChange }: { value: number; onChange: (days: nu
       {RANGE_OPTIONS.map((opt) => {
         const active = opt.days === value;
         return (
-          <Pressable
+          <AnimatedPressable
             key={opt.days}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
@@ -192,7 +193,7 @@ function RangeSelector({ value, onChange }: { value: number; onChange: (days: nu
             >
               {opt.label}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         );
       })}
     </View>

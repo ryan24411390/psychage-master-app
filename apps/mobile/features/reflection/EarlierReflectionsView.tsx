@@ -1,8 +1,9 @@
 import { ArrowLeft } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
@@ -26,7 +27,7 @@ export function EarlierReflectionsView({ weeks, onBack }: EarlierReflectionsView
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <View className="px-4 pt-1">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={onBack}
@@ -34,7 +35,7 @@ export function EarlierReflectionsView({ weeks, onBack }: EarlierReflectionsView
           className="min-h-[44px] w-11 justify-center"
         >
           <ArrowLeft size={24} color={ink} strokeWidth={2} />
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       <ScrollView contentContainerClassName="gap-4 px-4 pb-10 pt-2">

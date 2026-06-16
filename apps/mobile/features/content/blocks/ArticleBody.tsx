@@ -3,7 +3,6 @@ import { type ReactNode, useMemo, useState } from 'react';
 import {
   Image,
   Linking,
-  Pressable,
   ScrollView,
   useColorScheme,
   useWindowDimensions,
@@ -11,6 +10,7 @@ import {
 } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import {
   type NElement,
@@ -394,7 +394,7 @@ function AccordionBlock({ node }: { node: NElement }) {
             key={i}
             className="overflow-hidden rounded-lg border border-border dark:border-border-dark"
           >
-            <Pressable
+            <AnimatedPressable
               accessibilityRole="button"
               accessibilityState={{ expanded }}
               onPress={() => setOpen(expanded ? null : i)}
@@ -410,7 +410,7 @@ function AccordionBlock({ node }: { node: NElement }) {
                 strokeWidth={2}
                 style={{ transform: [{ rotate: expanded ? '180deg' : '0deg' }] }}
               />
-            </Pressable>
+            </AnimatedPressable>
             {expanded ? (
               <View className="gap-2 px-4 py-3">
                 <RenderBlocks nodes={item.content} />
@@ -436,7 +436,7 @@ function TabsBlock({ node }: { node: NElement }) {
           {tabs.map((tab, i) => {
             const selected = i === active;
             return (
-              <Pressable
+              <AnimatedPressable
                 // biome-ignore lint/suspicious/noArrayIndexKey: tabs are positional, parsed once, never reordered
                 key={i}
                 accessibilityRole="tab"
@@ -445,7 +445,7 @@ function TabsBlock({ node }: { node: NElement }) {
                 className={`min-h-[36px] justify-center rounded-full px-3 ${selected ? 'bg-surface-active dark:bg-surface-active-dark' : ''}`}
               >
                 <Text variant={selected ? 'bodyMedium' : 'bodySm'}>{tab.label}</Text>
-              </Pressable>
+              </AnimatedPressable>
             );
           })}
         </View>

@@ -5,6 +5,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { formatEntryDate } from '@/features/history/continuum';
 import { MoodGlyphFace } from '@/components/icon-system/mood';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { STATE_LABELS } from '@/lib/check-in-labels';
@@ -49,14 +50,14 @@ export function EntryDetailSheet({ entry, onEdit, onClose }: EntryDetailSheetPro
           >
             {formatEntryDate(entry.date)}
           </Text>
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel="Close"
             hitSlop={8}
             onPress={onClose}
           >
             <X size={22} color={tc.inkSecondary} />
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         <View className="flex-row items-center gap-3">

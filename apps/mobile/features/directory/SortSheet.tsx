@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react-native';
-import { Modal, Pressable, View } from 'react-native';
+import { Modal, View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
@@ -41,11 +42,11 @@ export function SortSheet({
         <View className="rounded-t-2xl bg-background px-4 pb-6 pt-4 dark:bg-background-dark">
           <View className="mb-1 flex-row items-center justify-between">
             <Text variant="heading">{t.sortTitle}</Text>
-            <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={onClose} hitSlop={8}>
+            <AnimatedPressable accessibilityRole="button" accessibilityLabel="Close" onPress={onClose} hitSlop={8}>
               <Text variant="bodySm" className="text-primary dark:text-primary-dark">
                 Done
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
           <Text variant="caption" className="mb-2 text-text-tertiary dark:text-text-tertiary-dark">
             {t.sortNote}
@@ -54,18 +55,20 @@ export function SortSheet({
           {options.map((o) => {
             const selected = o.key === value;
             return (
-              <Pressable
+              <AnimatedPressable
                 key={o.key}
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 accessibilityLabel={o.label}
                 onPress={() => onSelect(o.key)}
                 testID={`sort-${o.key}`}
+                scaleTo={0.98}
+                springPreset="subtle"
                 className="min-h-[44px] flex-row items-center justify-between border-b border-border py-3 dark:border-border-dark"
               >
                 <Text variant="body">{o.label}</Text>
                 {selected ? <Check size={18} color={tc.primary} strokeWidth={2} /> : null}
-              </Pressable>
+              </AnimatedPressable>
             );
           })}
         </View>

@@ -2,10 +2,11 @@ import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useCallback, useEffect, useReducer, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { AUTH_SIGN_IN_ROUTE, type WvtIssuer, stubWvtIssuer } from '@/features/webview/auth-handshake';
 import { CT4_WEBVIEW } from '@/features/webview/copy';
@@ -106,7 +107,7 @@ export function WebViewSurface({ surface, params, issuer = stubWvtIssuer }: WebV
     <View className="flex-1 bg-background dark:bg-background-dark" style={{ backgroundColor: baseBg }}>
       <GlobalHeader />
       <View className="flex-row items-center px-2">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel={CT4_WEBVIEW.back}
           onPress={() => router.back()}
@@ -122,7 +123,7 @@ export function WebViewSurface({ surface, params, issuer = stubWvtIssuer }: WebV
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             {CT4_WEBVIEW.back}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       {!online ? (

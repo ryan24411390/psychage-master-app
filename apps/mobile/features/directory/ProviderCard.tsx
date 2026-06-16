@@ -1,6 +1,7 @@
 import { memo } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
 
@@ -62,11 +63,13 @@ export const ProviderCard = memo(function ProviderCard({
 
   return (
     <View className="flex-row items-center gap-2 border-b border-border py-3 dark:border-border-dark">
-      <Pressable
+      <AnimatedPressable
         accessibilityRole="button"
         accessibilityLabel={a11y}
         onPress={() => onPress(provider.id)}
         testID={`provider-card-${provider.id}`}
+        scaleTo={0.98}
+        springPreset="subtle"
         className="min-h-[44px] flex-1 flex-row items-center gap-3"
         style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
       >
@@ -111,7 +114,7 @@ export const ProviderCard = memo(function ProviderCard({
             </View>
           )}
         </View>
-      </Pressable>
+      </AnimatedPressable>
 
       {/* Save from the list — anon tap opens the sign-in sheet (BookmarkSaveSlot). */}
       <BookmarkSaveSlot resourceType="provider" resourceId={provider.id} testID={`provider-card-save-${provider.id}`} />

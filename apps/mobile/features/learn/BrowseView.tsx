@@ -3,9 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { ScrollView, useWindowDimensions, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { ArticleListCard } from '@/features/content/ArticleListCard';
@@ -34,19 +35,21 @@ export function BrowseView() {
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
       <View className="flex-row items-center px-2 py-1">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={() => (category ? setCatId(null) : router.back())}
           hitSlop={8}
           testID="browse-back"
           className="min-h-[44px] flex-row items-center gap-1 px-2"
+          scaleTo={0.98}
+          springPreset="subtle"
         >
           <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             {category ? 'All topics' : 'Back'}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       {category ? (
@@ -71,7 +74,7 @@ function Tier1({ onPick }: { onPick: (id: string) => void }) {
       <View className="flex-row flex-wrap gap-3">
         {LEARN_CATEGORIES.map((cat) => (
           <View key={cat.id} style={{ width: colW }}>
-            <Pressable
+            <AnimatedPressable
               accessibilityRole="button"
               accessibilityLabel={cat.label}
               testID={`browse-cat-${cat.id}`}
@@ -86,7 +89,7 @@ function Tier1({ onPick }: { onPick: (id: string) => void }) {
               <View className="flex-1">
                 <Text variant="bodyMedium">{cat.label}</Text>
               </View>
-            </Pressable>
+            </AnimatedPressable>
           </View>
         ))}
       </View>
@@ -189,7 +192,7 @@ function Tier2({ category }: { category: LearnCategory }) {
 
 function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
       accessibilityLabel={label}
@@ -207,13 +210,13 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
       >
         {label}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
 function Filter({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
       accessibilityLabel={label}
@@ -229,6 +232,6 @@ function Filter({ label, active, onPress }: { label: string; active: boolean; on
       >
         {label}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

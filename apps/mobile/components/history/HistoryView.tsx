@@ -6,6 +6,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import type { ContinuumWeek } from '@/features/history/continuum';
 import { Terrain } from '@/components/terrain/Terrain';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
@@ -50,16 +51,16 @@ export function HistoryView({
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
       <View className="flex-row items-center gap-1 px-4 pt-1">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={onBack}
           hitSlop={8}
-          className="min-h-[44px] w-11 justify-center active:scale-[0.96]"
+          className="min-h-[44px] w-11 justify-center"
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <ArrowLeft size={24} color={ink} strokeWidth={2} />
-        </Pressable>
+        </AnimatedPressable>
         <Text variant="heading" accessibilityRole="header">
           Your record
         </Text>
@@ -68,17 +69,19 @@ export function HistoryView({
       <Settle {...settleProps} className="flex-1">
         <ScrollView contentContainerClassName="gap-6 px-4 pb-10 pt-2">
           {reflectionAvailable ? (
-            <Pressable
+            <AnimatedPressable
               accessibilityRole="button"
               accessibilityLabel="This week’s reflection is ready."
               onPress={onReflection}
               hitSlop={8}
-              className="min-h-[52px] justify-center p-5 rounded-xl border border-border-accent/40 bg-surface-accent/20 shadow-sm active:scale-[0.98] dark:border-border-accent-dark/40 dark:bg-surface-accent-dark/10"
+              scaleTo={0.98}
+              springPreset="subtle"
+              className="min-h-[52px] justify-center p-5 rounded-xl border border-border-accent/40 bg-surface-accent/20 shadow-sm dark:border-border-accent-dark/40 dark:bg-surface-accent-dark/10"
             >
               <Text variant="bodyMedium" className="text-primary dark:text-primary-dark font-sans-medium">
                 This week’s reflection is ready.
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           ) : null}
 
           {weeks.map((week) => (

@@ -1,5 +1,6 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { ArtPanel } from '@/features/learn/ArtPanel';
 import { useHaptics } from '@/lib/haptic-context';
@@ -20,7 +21,7 @@ type TopicTileProps = {
 export function TopicTile({ label, count, artKey, onPress, className }: TopicTileProps) {
   const { fireHaptic } = useHaptics();
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={count ? `${label}, ${count}` : label}
       onPress={() => {
@@ -51,6 +52,6 @@ export function TopicTile({ label, count, artKey, onPress, className }: TopicTil
           </Text>
         ) : null}
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

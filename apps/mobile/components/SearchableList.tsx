@@ -2,7 +2,7 @@ import { FlashList } from '@shopify/flash-list';
 import { Check, Search, XCircle } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useMemo, useState, useEffect } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   FadeInDown,
@@ -12,6 +12,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
 import { useReducedMotion } from '@/lib/motion';
@@ -104,7 +105,7 @@ export function SearchableList<T>({
           className="min-h-[44px] flex-1 font-sans text-base text-text-primary dark:text-text-primary-dark"
         />
         {query.length > 0 && (
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel="Clear search"
             onPress={() => setQuery('')}
@@ -112,7 +113,7 @@ export function SearchableList<T>({
             className="p-1"
           >
             <XCircle size={18} color={colors.charcoal[400]} strokeWidth={1.75} />
-          </Pressable>
+          </AnimatedPressable>
         )}
       </Animated.View>
 
@@ -138,10 +139,12 @@ export function SearchableList<T>({
 
           return (
             <Animated.View entering={entering}>
-              <Pressable
+              <AnimatedPressable
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 onPress={() => onSelect(item)}
+                scaleTo={0.98}
+                springPreset="subtle"
                 className="min-h-[44px] flex-row items-center justify-between border-b border-border py-3 dark:border-border-dark gap-3"
                 style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
               >
@@ -156,7 +159,7 @@ export function SearchableList<T>({
                   ) : null}
                 </View>
                 {selected ? <Check size={18} color={accentColor} strokeWidth={2} /> : <View style={{ width: 18 }} />}
-              </Pressable>
+              </AnimatedPressable>
             </Animated.View>
           );
         }}

@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { memo } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
@@ -25,7 +26,7 @@ export const FeaturedCard = memo(function FeaturedCard({ article }: { article: A
 
   return (
     <View>
-      <Pressable
+      <AnimatedPressable
         accessibilityRole="button"
         accessibilityLabel={article.title}
         onPress={open}
@@ -38,7 +39,7 @@ export const FeaturedCard = memo(function FeaturedCard({ article }: { article: A
           readTime={article.readTime}
           className="aspect-[16/10] rounded-2xl border border-border shadow-sm dark:border-border-dark dark:shadow-none"
         />
-      </Pressable>
+      </AnimatedPressable>
 
       <View className="gap-1.5 px-0.5 pt-3.5">
         <Text
@@ -47,11 +48,11 @@ export const FeaturedCard = memo(function FeaturedCard({ article }: { article: A
         >
           {article.categoryName}
         </Text>
-        <Pressable accessibilityRole="link" accessibilityLabel={article.title} onPress={open}>
+        <AnimatedPressable accessibilityRole="link" accessibilityLabel={article.title} onPress={open}>
           <Text variant="heading" numberOfLines={1} ellipsizeMode="tail">
             {article.title}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
         {article.seoDescription ? (
           <Text
             variant="bodySm"

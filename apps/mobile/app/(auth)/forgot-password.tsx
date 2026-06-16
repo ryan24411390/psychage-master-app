@@ -1,11 +1,12 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { MailCheck } from 'lucide-react-native';
 
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { AuthStatePanel } from '@/components/auth/AuthStatePanel';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
@@ -101,7 +102,7 @@ export default function ForgotPasswordScreen() {
             <Button variant="primary" disabled={submitting} onPress={handleSubmit}>
               {AUTH_COPY.forgotPrimary}
             </Button>
-            <Pressable
+            <AnimatedPressable
               accessibilityRole="button"
               hitSlop={6}
               onPress={() => router.back()}
@@ -110,7 +111,7 @@ export default function ForgotPasswordScreen() {
               <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
                 {AUTH_COPY.forgotBackToSignIn}
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
         </Animated.View>
       </KeyboardAvoidingView>

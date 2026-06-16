@@ -1,5 +1,6 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { useHaptics } from '@/lib/haptic-context';
 
@@ -27,7 +28,7 @@ export function QuestionCard({ question, value, onSelect }: QuestionCardProps) {
         {LIKERT_OPTIONS.map((option) => {
           const selected = value === option.value;
           return (
-            <Pressable
+            <AnimatedPressable
               key={option.value}
               accessibilityRole="radio"
               accessibilityState={{ selected }}
@@ -57,7 +58,7 @@ export function QuestionCard({ question, value, onSelect }: QuestionCardProps) {
               >
                 {option.label}
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           );
         })}
       </View>

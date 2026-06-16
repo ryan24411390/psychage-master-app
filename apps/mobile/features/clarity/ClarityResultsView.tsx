@@ -1,5 +1,6 @@
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 
 import { DOMAIN_BAND_WORD, TIER_COPY, groupDomains, recommendations } from './bands';
@@ -31,7 +32,7 @@ export interface ClarityResultsViewProps {
 
 function OnwardLink({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
@@ -42,7 +43,7 @@ function OnwardLink({ label, onPress }: { label: string; onPress: () => void }) 
       <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
         {label}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 

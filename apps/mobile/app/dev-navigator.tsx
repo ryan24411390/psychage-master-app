@@ -6,9 +6,10 @@
 // device output is byte-comparable to the node test (web parity check).
 
 import { useState } from 'react';
-import { Platform, Pressable, ScrollView, Text as RNText, View } from 'react-native';
+import { Platform, ScrollView, Text as RNText, View } from 'react-native';
 import { Stack } from 'expo-router';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
 import { isTierEnabled, storage } from '@/lib/adapters';
@@ -136,22 +137,22 @@ export default function DevNavigatorScreen() {
               .map(([t, on]) => `T${t}:${on ? 'on' : 'off'}`)
               .join(' · ')}
           </Text>
-          <Pressable
+          <AnimatedPressable
             onPress={toggleTier4}
             className="bg-primary dark:bg-primary-dark rounded-lg p-3"
           >
             <Text variant="body" className="text-white text-center">
               Toggle Tier 4 ({tierFlags[4] ? 'on→off' : 'off→on'})
             </Text>
-          </Pressable>
-          <Pressable
+          </AnimatedPressable>
+          <AnimatedPressable
             onPress={reseed}
             className="border border-border dark:border-border-dark rounded-lg p-3"
           >
             <Text variant="body" className="text-center">
               Reseed (remove key + reload defaults)
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         {/* Navigator results — verifies shared package + DI seam on-device. */}

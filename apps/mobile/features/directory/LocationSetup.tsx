@@ -2,8 +2,9 @@ import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { ChevronLeft, ChevronRight, LifeBuoy, Search } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { CT4_FIND } from '@/features/find/copy';
@@ -38,11 +39,13 @@ function Row({
 }) {
   const tc = useThemeColors();
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
       testID={testID}
+      scaleTo={0.98}
+      springPreset="subtle"
       className="min-h-[44px] flex-row items-center justify-between border-b border-border py-3.5 dark:border-border-dark"
       style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
     >
@@ -55,7 +58,7 @@ function Row({
         ) : null}
         <ChevronRight size={18} color={tc.inkSecondary} strokeWidth={1.75} />
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -98,7 +101,7 @@ export function LocationSetup() {
   if (step === 'outside') {
     return (
       <View className="flex-1 bg-background dark:bg-background-dark px-4 pt-2">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={() => setStep('state')}
@@ -109,7 +112,7 @@ export function LocationSetup() {
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             {t.outsideBack}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
 
         <Text variant="headingLg" className="mt-2">
           {t.outsideTitle}
@@ -141,7 +144,7 @@ export function LocationSetup() {
     const typed = cityQ.trim();
     return (
       <View className="flex-1 bg-background dark:bg-background-dark px-4 pt-2">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back to states"
           onPress={() => setStep('state')}
@@ -152,7 +155,7 @@ export function LocationSetup() {
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             {stateName}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
 
         <Text variant="headingLg" className="mt-2">
           {t.setupCityTitle}

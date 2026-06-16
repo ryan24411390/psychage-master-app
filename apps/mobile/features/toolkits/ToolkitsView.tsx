@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
@@ -28,7 +29,7 @@ export function ToolkitsView() {
       <GlobalHeader />
 
       <View className="flex-row items-center px-2">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel={t.back}
           onPress={() => router.back()}
@@ -40,7 +41,7 @@ export function ToolkitsView() {
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       <ScrollView

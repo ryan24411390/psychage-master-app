@@ -2,9 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { CalendarCheck, ChevronLeft, Globe, Mail, MapPin, Navigation, Phone } from 'lucide-react-native';
 import { useEffect } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { AppLoader } from '@/components/ui/AppLoader';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
@@ -55,7 +56,7 @@ function Chrome({ children }: { children: React.ReactNode }) {
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
       <View className="flex-row items-center px-2">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={() => router.back()}
@@ -67,7 +68,7 @@ function Chrome({ children }: { children: React.ReactNode }) {
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             Back
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
       {children}
     </View>
@@ -90,7 +91,7 @@ function ContactActionTile({
 }) {
   const { fireHaptic } = useHaptics();
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={() => {
@@ -105,7 +106,7 @@ function ContactActionTile({
       <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
         {label}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 

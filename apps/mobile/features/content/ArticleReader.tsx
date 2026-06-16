@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
@@ -41,20 +42,20 @@ export function ArticleReader({ slug }: { slug: string }) {
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
       <View className="flex-row items-center justify-between px-2">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel={t.back}
           onPress={() => router.back()}
           hitSlop={8}
           testID="article-back"
-          className="min-h-[44px] flex-row items-center gap-1 px-2 active:scale-[0.96]"
+          className="min-h-[44px] flex-row items-center gap-1 px-2"
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
           <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
         {/* Save this article — resource_id is the slug (T-007). */}
         <BookmarkSaveSlot resourceType="article" resourceId={slug} testID="article-save" />
       </View>

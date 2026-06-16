@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
@@ -102,7 +103,7 @@ export function SignInForm({
                 autoCorrect={false}
                 textContentType="password"
               />
-              <Pressable
+              <AnimatedPressable
                 accessibilityRole="button"
                 hitSlop={6}
                 onPress={onForgotPassword}
@@ -111,7 +112,7 @@ export function SignInForm({
                 <Text variant="bodySm" className="text-primary dark:text-primary-dark">
                   {AUTH_COPY.forgotLink}
                 </Text>
-              </Pressable>
+              </AnimatedPressable>
             </View>
 
             <View className="gap-2">

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Pressable, TextInput, View, type TextInputProps } from 'react-native';
+import { TextInput, View, type TextInputProps } from 'react-native';
 import { useColorScheme } from 'nativewind';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { colorForScheme, resolveColorRef } from '@/lib/a1-tokens';
 
@@ -75,7 +76,7 @@ export function AuthTextField({
           {...props}
         />
         {hasToggle ? (
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel={visible ? hideLabel : showLabel}
             hitSlop={8}
@@ -85,7 +86,7 @@ export function AuthTextField({
             <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
               {visible ? hideLabel : showLabel}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         ) : null}
       </View>
       {hasError ? (

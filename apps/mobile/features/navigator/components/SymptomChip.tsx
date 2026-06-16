@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react-native';
-import { Pressable } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
 
@@ -16,7 +16,7 @@ export interface SymptomChipProps {
 
 export function SymptomChip({ label, selected, onToggle }: SymptomChipProps) {
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
       accessibilityLabel={label}
@@ -35,6 +35,6 @@ export function SymptomChip({ label, selected, onToggle }: SymptomChipProps) {
         {label}
       </Text>
       {selected ? <Check size={20} color={colors.teal[700]} strokeWidth={2} /> : null}
-    </Pressable>
+    </AnimatedPressable>
   );
 }

@@ -1,7 +1,8 @@
 import { Image } from 'expo-image';
 import { Layers } from 'lucide-react-native';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
@@ -21,7 +22,7 @@ type ToolkitCardProps = {
 export function ToolkitCard({ toolkit, onPress, coverUrl }: ToolkitCardProps) {
   const tc = useThemeColors();
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={toolkit.theme_title}
       onPress={() => onPress(toolkit.id)}
@@ -54,6 +55,6 @@ export function ToolkitCard({ toolkit, onPress, coverUrl }: ToolkitCardProps) {
           </Text>
         ) : null}
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type {
@@ -11,6 +11,7 @@ import type {
   SleepRecordStore,
 } from '@psychage/shared/sleep';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { CrisisPill } from '@/components/CrisisPill';
 import { Text } from '@/components/ui/Text';
@@ -87,16 +88,16 @@ export function SleepArchitectView({
       <View className="flex-row items-center justify-between px-4 py-2">
         <View className="flex-row items-center gap-1">
           {onClose ? (
-            <Pressable
+            <AnimatedPressable
               accessibilityRole="button"
               accessibilityLabel="Back"
               onPress={onClose}
               hitSlop={8}
-              className="min-h-[44px] w-9 justify-center active:scale-[0.96]"
+              className="min-h-[44px] w-9 justify-center"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
               <ArrowLeft size={24} color={ink} strokeWidth={2} />
-            </Pressable>
+            </AnimatedPressable>
           ) : null}
           <Text variant="heading" accessibilityRole="header">
             {CT4_SLEEP.title}
@@ -194,7 +195,7 @@ function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
       {items.map((item) => {
         const active = item.key === tab;
         return (
-          <Pressable
+          <AnimatedPressable
             key={item.key}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
@@ -210,7 +211,7 @@ function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
             >
               {item.label}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         );
       })}
     </ScrollView>

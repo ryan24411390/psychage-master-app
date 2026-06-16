@@ -1,6 +1,7 @@
 import { Trash2 } from 'lucide-react-native';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
@@ -56,7 +57,7 @@ export function HistoryView({ history, onSelect, onDelete, onStartNew }: History
       </View>
 
       {history.map((r) => (
-        <Pressable
+        <AnimatedPressable
           key={r.id}
           accessibilityRole="button"
           accessibilityLabel={`${formatDate(r.createdAt)}, overall ${r.compositeScore}`}
@@ -76,7 +77,7 @@ export function HistoryView({ history, onSelect, onDelete, onStartNew }: History
               {r.tierLabel}
             </Text>
           </View>
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel={`${t.delete} ${formatDate(r.createdAt)}`}
             onPress={() => onDelete(r.id)}
@@ -84,8 +85,8 @@ export function HistoryView({ history, onSelect, onDelete, onStartNew }: History
             className="min-h-[44px] min-w-[44px] items-center justify-center"
           >
             <Trash2 size={18} color={colors.charcoal[500]} strokeWidth={1.75} />
-          </Pressable>
-        </Pressable>
+          </AnimatedPressable>
+        </AnimatedPressable>
       ))}
 
       <Button variant="ghost" onPress={onStartNew} className="mt-2 self-center">

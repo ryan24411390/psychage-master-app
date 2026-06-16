@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { useHaptics } from '@/lib/haptic-context';
 import type { ArticleListItem } from '@/lib/articles';
@@ -17,7 +18,7 @@ export function MostReadList({ articles }: { articles: readonly ArticleListItem[
   return (
     <View>
       {articles.map((article, i) => (
-        <Pressable
+        <AnimatedPressable
           key={article.slug}
           accessibilityRole="button"
           accessibilityLabel={`${i + 1}. ${article.title}`}
@@ -29,6 +30,8 @@ export function MostReadList({ articles }: { articles: readonly ArticleListItem[
           }}
           className="flex-row items-center gap-4 border-b border-border py-3.5 dark:border-border-dark"
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          scaleTo={0.98}
+          springPreset="subtle"
         >
           <Text variant="heading" className="w-9 text-text-tertiary dark:text-text-tertiary-dark">
             {String(i + 1).padStart(2, '0')}
@@ -43,7 +46,7 @@ export function MostReadList({ articles }: { articles: readonly ArticleListItem[
                 .join(' · ')}
             </Text>
           </View>
-        </Pressable>
+        </AnimatedPressable>
       ))}
     </View>
   );

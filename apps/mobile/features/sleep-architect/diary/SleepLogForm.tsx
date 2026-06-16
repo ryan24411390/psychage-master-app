@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useColorScheme } from 'nativewind';
-import { Pressable, ScrollView, Switch, TextInput, View } from 'react-native';
+import { ScrollView, Switch, TextInput, View } from 'react-native';
 
 import {
   detectCrisisContent,
@@ -9,6 +9,7 @@ import {
   type SleepRating,
 } from '@psychage/shared/sleep';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { CrisisPill } from '@/components/CrisisPill';
 import { Text } from '@/components/ui/Text';
@@ -316,7 +317,7 @@ function RatingField({
           const selected = r === value;
           const scaleLabel = CT4_SLEEP.ratingScale[r - 1] ?? String(r);
           return (
-            <Pressable
+            <AnimatedPressable
               key={r}
               accessibilityRole="button"
               accessibilityState={{ selected }}
@@ -334,7 +335,7 @@ function RatingField({
               >
                 {r}
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           );
         })}
       </View>

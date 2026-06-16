@@ -1,7 +1,8 @@
 import { X } from 'lucide-react-native';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { SettingsToggleRow } from '@/components/settings/SettingsToggleRow';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
@@ -34,7 +35,7 @@ export function ConsentBanner({ onDismiss }: { onDismiss?: () => void }) {
           {MINDMATE_COPY.consentTitle}
         </Text>
         {onDismiss ? (
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel="Dismiss"
             onPress={onDismiss}
@@ -42,7 +43,7 @@ export function ConsentBanner({ onDismiss }: { onDismiss?: () => void }) {
             testID="mindmate-consent-dismiss"
           >
             <X size={18} color={tc.inkSecondary} strokeWidth={2} />
-          </Pressable>
+          </AnimatedPressable>
         ) : null}
       </View>
       <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">

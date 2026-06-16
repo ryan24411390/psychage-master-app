@@ -1,5 +1,6 @@
-import { Linking, Pressable, View } from 'react-native';
+import { Linking, View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { CT4_CONTENT } from '@/features/content/copy';
 import type { Citation } from '@/lib/articles';
@@ -52,7 +53,7 @@ export function Citations({ items }: { items: readonly Citation[] }) {
                 </Text>
               ) : null}
               {href ? (
-                <Pressable
+                <AnimatedPressable
                   accessibilityRole="link"
                   accessibilityLabel={CT4_CONTENT.viewSource}
                   onPress={() => void Linking.openURL(href).catch(() => {})}
@@ -64,7 +65,7 @@ export function Citations({ items }: { items: readonly Citation[] }) {
                   >
                     {CT4_CONTENT.viewSource}
                   </Text>
-                </Pressable>
+                </AnimatedPressable>
               ) : null}
             </View>
           </View>

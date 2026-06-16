@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { Search, Sparkles } from 'lucide-react-native';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { CT4_LEARN } from '@/features/learn/copy';
 import { useHaptics } from '@/lib/haptic-context';
@@ -22,7 +23,7 @@ export function LearnHero({ onFindPath }: { onFindPath: () => void }) {
         {t.heroTitle}
       </Text>
 
-      <Pressable
+      <AnimatedPressable
         accessibilityRole="search"
         accessibilityLabel={t.searchPlaceholder}
         testID="learn-search-trigger"
@@ -37,9 +38,9 @@ export function LearnHero({ onFindPath }: { onFindPath: () => void }) {
         <Text variant="body" className="text-text-tertiary dark:text-text-tertiary-dark">
           {t.searchPlaceholder}
         </Text>
-      </Pressable>
+      </AnimatedPressable>
 
-      <Pressable
+      <AnimatedPressable
         accessibilityRole="button"
         accessibilityLabel={t.findPath}
         testID="learn-find-path"
@@ -55,7 +56,7 @@ export function LearnHero({ onFindPath }: { onFindPath: () => void }) {
         <Text variant="bodyMedium" className="text-teal-700 dark:text-primary-dark">
           {t.findPath}
         </Text>
-      </Pressable>
+      </AnimatedPressable>
     </View>
   );
 }

@@ -8,13 +8,13 @@
  */
 
 import { Bookmark, BookmarkPlus } from 'lucide-react-native';
-import { Pressable } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { useHaptics } from '@/lib/haptic-context';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 import { useThemeColors } from '@/lib/use-theme-colors';
@@ -69,7 +69,7 @@ export function SaveButton({ resourceType, resourceId, onRequestSignIn, testID }
   };
 
   return (
-    <Pressable
+    <AnimatedPressable
       testID={testID}
       accessibilityRole="button"
       accessibilityState={{ selected: isSaved }}
@@ -85,6 +85,6 @@ export function SaveButton({ resourceType, resourceId, onRequestSignIn, testID }
           <BookmarkPlus size={22} color={tc.inkSecondary} strokeWidth={1.75} />
         )}
       </Animated.View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

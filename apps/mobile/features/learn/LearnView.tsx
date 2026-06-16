@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { ScrollView, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { FeaturedCard } from '@/features/learn/FeaturedCard';
 import { LearnHero } from '@/features/learn/LearnHero';
@@ -111,30 +112,34 @@ export function LearnView() {
 
           {/* Conditions + full library entries (retained from the original Learn). */}
           <View className="gap-3 px-4 pt-8">
-            <Pressable
+            <AnimatedPressable
               accessibilityRole="button"
               accessibilityLabel={t.conditionsLabel}
               onPress={() => router.push('/conditions')}
               testID="learn-conditions-entry"
               className="min-h-[52px] flex-row items-center justify-center rounded-xl border border-border px-4 dark:border-border-dark"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              scaleTo={0.98}
+              springPreset="subtle"
             >
               <Text variant="bodyMedium" className="text-teal-700 dark:text-primary-dark">
                 {t.conditionsLabel}
               </Text>
-            </Pressable>
-            <Pressable
+            </AnimatedPressable>
+            <AnimatedPressable
               accessibilityRole="button"
               accessibilityLabel={t.libraryLabel}
               onPress={() => router.push('/library')}
               testID="learn-library-entry"
               className="min-h-[52px] flex-row items-center justify-center rounded-xl border border-border px-4 dark:border-border-dark"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              scaleTo={0.98}
+              springPreset="subtle"
             >
               <Text variant="bodyMedium" className="text-teal-700 dark:text-primary-dark">
                 {t.libraryLabel}
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
 
           <Text

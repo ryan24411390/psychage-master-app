@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { memo } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { ArtPanel } from '@/features/learn/ArtPanel';
 import { useHaptics } from '@/lib/haptic-context';
@@ -19,7 +20,7 @@ export const ReadRow = memo(function ReadRow({ article }: { article: ArticleList
     .join(' · ');
 
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={article.title}
       accessibilityHint={article.categoryName}
@@ -30,6 +31,8 @@ export const ReadRow = memo(function ReadRow({ article }: { article: ArticleList
       }}
       className="flex-row items-center gap-4 border-b border-border-hairline py-3.5 last:border-b-0"
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+      scaleTo={0.98}
+      springPreset="subtle"
     >
       <ArtPanel
         artKey={article.slug}
@@ -46,6 +49,6 @@ export const ReadRow = memo(function ReadRow({ article }: { article: ArticleList
           </Text>
         ) : null}
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 });

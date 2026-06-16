@@ -1,8 +1,9 @@
 import { FlashList } from '@shopify/flash-list';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { calculateMetrics, formatDuration, type SleepEntry } from '@psychage/shared/sleep';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
@@ -49,10 +50,12 @@ export function SleepDiary({ entries, onLog, onSelect }: SleepDiaryProps) {
 function DiaryRow({ entry, onPress }: { entry: SleepEntry; onPress: () => void }) {
   const metrics = calculateMetrics(entry);
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={`${entry.date}, ${formatDuration(metrics.total_sleep_minutes)} asleep`}
       onPress={onPress}
+      scaleTo={0.98}
+      springPreset="subtle"
       className="min-h-[44px] flex-row items-center justify-between rounded-xl border border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark"
     >
       <View className="gap-0.5">
@@ -62,6 +65,6 @@ function DiaryRow({ entry, onPress }: { entry: SleepEntry; onPress: () => void }
         </Text>
       </View>
       <Text variant="bodyBold">{formatDuration(metrics.total_sleep_minutes)}</Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

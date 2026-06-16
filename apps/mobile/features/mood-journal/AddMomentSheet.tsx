@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { TagChip } from '@/features/mood-journal/components/TagChip';
@@ -97,14 +98,14 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
           <Text variant="heading" className="flex-1 pr-3">
             {step === 0 ? t.valenceHeading : t.heading}
           </Text>
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel={t.close}
             hitSlop={8}
             onPress={onClose}
           >
             <X size={22} color={colors.charcoal[600]} />
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         {/* Step indicator — two dots, current step in teal. */}

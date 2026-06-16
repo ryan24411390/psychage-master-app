@@ -8,7 +8,8 @@ import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { BookmarkPlus } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { useThemeColors } from '@/lib/use-theme-colors';
@@ -28,7 +29,7 @@ const FILTERS: ReadonlyArray<{ key: FilterKey; label: string }> = [
 
 function Chip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
       onPress={onPress}
@@ -46,7 +47,7 @@ function Chip({ label, selected, onPress }: { label: string; selected: boolean; 
       >
         {label}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 

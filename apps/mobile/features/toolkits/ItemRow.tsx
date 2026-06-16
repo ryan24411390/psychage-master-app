@@ -1,7 +1,8 @@
 import { Check } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
@@ -48,7 +49,7 @@ export function ItemRow({ item, progress, onOpen, onToggleDone, onRate }: ItemRo
       className="gap-3 rounded-xl border border-border bg-surface p-3 dark:border-border-dark dark:bg-surface-dark"
     >
       <View className="flex-row items-center gap-3">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="checkbox"
           accessibilityState={{ checked: done }}
           accessibilityLabel={done ? t.done : t.markDone}
@@ -62,7 +63,7 @@ export function ItemRow({ item, progress, onOpen, onToggleDone, onRate }: ItemRo
           }`}
         >
           {done ? <Check size={14} color={onPrimary} strokeWidth={3} /> : null}
-        </Pressable>
+        </AnimatedPressable>
 
         <View className="flex-1 gap-1">
           <Text variant="bodyMedium" numberOfLines={2}>
@@ -116,7 +117,7 @@ function RatingChip({
 }) {
   const { fireHaptic } = useHaptics();
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
       accessibilityLabel={label}
@@ -141,6 +142,6 @@ function RatingChip({
       >
         {label}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

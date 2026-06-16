@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { User } from 'lucide-react-native';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
 // C0.1 avatar — a 44px clay (color.border.default) circle. ANONYMOUS state shows
@@ -14,7 +15,7 @@ export function HeaderAvatar() {
   // registers (charcoal-600 would vanish against the dark border fill on black).
   const tc = useThemeColors();
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel="Account"
       // Wave B2 (S42): the avatar opens Settings (Flow 18) — the calm list that
@@ -26,6 +27,6 @@ export function HeaderAvatar() {
       <View className="h-11 w-11 items-center justify-center rounded-full bg-border dark:bg-border-dark">
         <User size={20} color={tc.inkSecondary} strokeWidth={1.75} />
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

@@ -2,9 +2,10 @@ import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { ArrowUpDown, ChevronDown, ChevronLeft, MapPin, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
+import { ActivityIndicator, TextInput, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { useBookmarkedIds } from '@/features/bookmarks/hooks';
@@ -174,7 +175,7 @@ export function DirectoryView({
 
       {embedded ? null : (
         <View className="flex-row items-center px-2">
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel="Back"
             onPress={() => router.back()}
@@ -186,7 +187,7 @@ export function DirectoryView({
             <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
               Back
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       )}
 
@@ -195,7 +196,7 @@ export function DirectoryView({
 
         {/* Scope chip — shows the home location and re-opens setup on tap. */}
         {embedded && onEditLocation ? (
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel={t.editScope}
             onPress={onEditLocation}
@@ -207,7 +208,7 @@ export function DirectoryView({
               {scopeLabel || t.scopeAllStates}
             </Text>
             <ChevronDown size={14} color={colors.charcoal[500]} strokeWidth={2} />
-          </Pressable>
+          </AnimatedPressable>
         ) : null}
 
         {/* Search */}
@@ -232,7 +233,7 @@ export function DirectoryView({
 
         {/* Near me + Filters */}
         <View className="flex-row items-center gap-2">
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityState={{ selected: !!coords }}
             accessibilityLabel={t.nearMe}
@@ -253,9 +254,9 @@ export function DirectoryView({
             >
               {t.nearMe}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
 
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel={t.filtersButton}
             onPress={() => setSheetOpen(true)}
@@ -266,9 +267,9 @@ export function DirectoryView({
             <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
               {filterCount > 0 ? `${t.filtersButton} (${filterCount})` : t.filtersButton}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
 
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel={t.sortButton}
             onPress={() => setSortOpen(true)}
@@ -279,14 +280,14 @@ export function DirectoryView({
             <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
               {t.sortButton}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         {/* Specialty quick-suggestions */}
         {suggestions.length > 0 ? (
           <View className="flex-row flex-wrap gap-2">
             {suggestions.map((s) => (
-              <Pressable
+              <AnimatedPressable
                 key={s.slug}
                 accessibilityRole="button"
                 accessibilityLabel={t.searchSpecialtyHint(s.label)}
@@ -298,7 +299,7 @@ export function DirectoryView({
                 <Text variant="bodySm" className="text-primary dark:text-primary-dark">
                   {s.label}
                 </Text>
-              </Pressable>
+              </AnimatedPressable>
             ))}
           </View>
         ) : null}
@@ -326,7 +327,7 @@ export function DirectoryView({
             <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
               {t.coverageNote(scopeLabel || filters.state, search.total)}
             </Text>
-            <Pressable
+            <AnimatedPressable
               accessibilityRole="button"
               accessibilityLabel={t.coverageAction}
               onPress={() => setFilters((f) => ({ ...f, state: '' }))}
@@ -335,7 +336,7 @@ export function DirectoryView({
               <Text variant="bodySm" className="text-primary dark:text-primary-dark">
                 {t.coverageAction}
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
         ) : null}
       </View>

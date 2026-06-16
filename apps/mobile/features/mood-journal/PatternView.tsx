@@ -6,8 +6,9 @@ import {
 } from '@psychage/shared/mood-journal';
 import { Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
@@ -131,7 +132,7 @@ function MomentRow({ moment, onDelete }: { moment: MomentEntry; onDelete: (id: s
         </View>
 
         {!confirming ? (
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel={t.delete}
             hitSlop={8}
@@ -139,7 +140,7 @@ function MomentRow({ moment, onDelete }: { moment: MomentEntry; onDelete: (id: s
             testID={`mood-journal-delete-${moment.id}`}
           >
             <Trash2 size={18} color={tc.inkTertiary} />
-          </Pressable>
+          </AnimatedPressable>
         ) : null}
       </View>
 

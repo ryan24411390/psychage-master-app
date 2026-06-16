@@ -1,12 +1,13 @@
 import { ArrowLeft } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useMemo, useReducer, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { NavigatorResults, UserSymptomInput } from '@psychage/shared/navigator';
 
 import { SearchableList } from '@/components/SearchableList';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import type { HelplineRow } from '@/features/crisis/helpline-schema';
@@ -65,7 +66,7 @@ function BackButton({ onPress }: { onPress: () => void }) {
   const { colorScheme } = useColorScheme();
   const ink = colorScheme === 'dark' ? colors.text.primary.dark : colors.text.primary.light;
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={NAVIGATOR_COPY.back}
       onPress={onPress}
@@ -73,7 +74,7 @@ function BackButton({ onPress }: { onPress: () => void }) {
       className="min-h-[44px] w-11 justify-center"
     >
       <ArrowLeft size={24} color={ink} strokeWidth={2} />
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -253,7 +254,7 @@ function SymptomStep({
           onToggle={() => onToggle(s.id)}
         />
       ))}
-      <Pressable
+      <AnimatedPressable
         accessibilityRole="button"
         accessibilityLabel={SOMETHING_ELSE}
         onPress={onToggleSearch}
@@ -263,7 +264,7 @@ function SymptomStep({
         <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
           {SOMETHING_ELSE}
         </Text>
-      </Pressable>
+      </AnimatedPressable>
       <Button variant="primary" disabled={selectedIds.length === 0} onPress={onContinue} className="mt-2">
         {CONTINUE_LABEL}
       </Button>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Modal, ScrollView, TextInput, View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/lib/colors';
@@ -29,7 +30,7 @@ function Chip({
   onPress: () => void;
 }) {
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
       onPress={onPress}
@@ -43,7 +44,7 @@ function Chip({
       >
         {label}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -84,11 +85,11 @@ export function DirectoryFilters({
         <View className="max-h-[80%] rounded-t-2xl bg-background px-4 pb-6 pt-4 dark:bg-background-dark">
           <View className="mb-3 flex-row items-center justify-between">
             <Text variant="heading">Filters</Text>
-            <Pressable accessibilityRole="button" accessibilityLabel="Clear filters" onPress={clearAll} hitSlop={8}>
+            <AnimatedPressable accessibilityRole="button" accessibilityLabel="Clear filters" onPress={clearAll} hitSlop={8}>
               <Text variant="bodySm" className="text-primary dark:text-primary-dark">
                 Clear all
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-5 pb-2">

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import {
   Pressable,
   type PressableProps,
@@ -21,7 +21,12 @@ const AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);
 // CompassTile passing a staggeredEnter() builder. We Pick only those three from
 // AnimatedProps rather than spreading the whole thing, which would otherwise wrap
 // every callback (onPressIn, …) as a possible SharedValue and break the handlers.
-export type AnimatedPressableProps = PressableProps &
+//
+// `style` and `children` are Omitted from PressableProps and re-declared below so
+// there is a SINGLE definition of each — intersecting a second `style` onto
+// PressableProps' own makes the union ambiguous and breaks `pressed` inference in
+// `style={({ pressed }) => …}` callers (TS7031).
+export type AnimatedPressableProps = Omit<PressableProps, 'style' | 'children'> &
   Pick<AnimatedProps<PressableProps>, 'entering' | 'exiting' | 'layout'> & {
     children: React.ReactNode | ((state: { pressed: boolean }) => React.ReactNode);
     scaleTo?: number;

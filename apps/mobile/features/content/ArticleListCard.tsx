@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { memo } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { ArtPanel } from '@/features/learn/ArtPanel';
 import type { ArticleListItem } from '@/lib/articles';
@@ -15,7 +16,7 @@ import type { ArticleListItem } from '@/lib/articles';
 export const ArticleListCard = memo(function ArticleListCard({ article }: { article: ArticleListItem }) {
   const subTopic = article.tags[0] ?? article.categoryName;
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={article.title}
       testID={`article-card-${article.slug}`}
@@ -47,6 +48,6 @@ export const ArticleListCard = memo(function ArticleListCard({ article }: { arti
           ) : null}
         </View>
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 });

@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { memo } from 'react';
-import { Pressable } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { ArtPanel } from '@/features/learn/ArtPanel';
 import { useHaptics } from '@/lib/haptic-context';
 import type { ArticleListItem } from '@/lib/articles';
@@ -24,7 +24,7 @@ export const ArticleCard = memo(function ArticleCard({ article, className }: Art
   const { fireHaptic } = useHaptics();
 
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={article.title}
       accessibilityHint={article.categoryName}
@@ -42,6 +42,6 @@ export const ArticleCard = memo(function ArticleCard({ article, className }: Art
         readTime={article.readTime}
         className="aspect-[16/10] rounded-2xl border border-border shadow-sm dark:border-border-dark dark:shadow-none"
       />
-    </Pressable>
+    </AnimatedPressable>
   );
 });

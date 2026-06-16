@@ -6,6 +6,7 @@ import { Pressable, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 import { StateRows } from '@/components/check-in/StateRows';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { CHECK_IN_COPY } from '@/features/check-in/copy';
@@ -100,14 +101,14 @@ export function CheckInSheet({
               </Text>
             )}
           </View>
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel={CHECK_IN_COPY.close}
             hitSlop={8}
             onPress={onClose}
           >
             <X size={22} color={colorForScheme(resolveColorRef('color.text.secondary'), colorScheme)} />
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         <StateRows

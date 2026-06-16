@@ -8,7 +8,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Bookmark, FileText, MapPin, Wrench } from 'lucide-react-native';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { getProviderById } from '@/features/directory/queries';
 import { getArticleBySlug } from '@/lib/articles';
@@ -84,10 +85,12 @@ export function SavedRow({ item }: { item: BookmarkItem }) {
   const display = isLoading ? '…' : (title ?? BOOKMARKS_COPY.row.unavailable);
 
   return (
-    <Pressable
+    <AnimatedPressable
       testID={`saved-row-${item.id}`}
       onPress={open}
       disabled={unavailable}
+      scaleTo={0.98}
+      springPreset="subtle"
       accessibilityRole="button"
       accessibilityLabel={`${display}, ${TYPE_LABEL[item.resource_type]}. Saved.`}
       className="min-h-[64px] flex-row items-center gap-4 px-2 py-3 active:bg-surface-active dark:active:bg-surface-active-dark border-b border-border-hairline last:border-b-0"
@@ -101,7 +104,7 @@ export function SavedRow({ item }: { item: BookmarkItem }) {
           {unavailable ? BOOKMARKS_COPY.row.unavailable : TYPE_LABEL[item.resource_type]}
         </Text>
       </View>
-      <Pressable
+      <AnimatedPressable
         onPress={remove}
         hitSlop={8}
         accessibilityRole="button"
@@ -109,7 +112,7 @@ export function SavedRow({ item }: { item: BookmarkItem }) {
         className="h-11 w-11 items-center justify-center"
       >
         <Bookmark size={20} color={tc.primary} fill={tc.primary} strokeWidth={1.75} />
-      </Pressable>
-    </Pressable>
+      </AnimatedPressable>
+    </AnimatedPressable>
   );
 }
