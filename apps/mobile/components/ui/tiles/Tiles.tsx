@@ -134,10 +134,12 @@ export function ClarityTile({ title, feature, icon: Icon, onPress, testID }: Til
       className="min-h-[44px] w-full flex-row items-center justify-between rounded-[20px] bg-[#1A1A2E] p-[15px]"
     >
       <View className="flex-1 pr-3">
-        <Text className="font-sans-medium text-[15px] text-[#F0ECE3]" numberOfLines={2}>
+        {/* Named utilities (text-white / text-teal-400) reliably override the Text
+            variant's base color; arbitrary hex on a dark tile did not. */}
+        <Text className="font-sans-medium text-[15px] text-white" numberOfLines={2}>
           {title}
         </Text>
-        <Text className="mt-0.5 font-sans text-[10.5px] text-[#7FD8C6]">{feature}</Text>
+        <Text className="mt-0.5 font-sans text-[10.5px] text-teal-400">{feature}</Text>
       </View>
       <Icon size={30} color={TEAL} strokeWidth={1.75} />
     </AnimatedPressable>
