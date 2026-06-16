@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide-react-native';
+import { CheckCircle, ChevronDown, X } from 'lucide-react-native';
 import { type ReactNode, useMemo, useState } from 'react';
 import {
   Image,
@@ -24,6 +24,10 @@ import {
   calloutTone,
   classifyBlock,
   extractAccordion,
+  extractBeforeAfter,
+  extractMythFact,
+  extractStats,
+  extractSteps,
   extractTabs,
   isCitation,
 } from '@/features/content/html/classify';
@@ -149,6 +153,16 @@ function Block({ node }: { node: NElement }): ReactNode {
       return <AccordionBlock node={node} />;
     case 'tabs':
       return <TabsBlock node={node} />;
+    case 'statcard':
+      return <StatCardBlock node={node} />;
+    case 'steps':
+      return <StepsBlock node={node} />;
+    case 'beforeafter':
+      return <BeforeAfterBlock node={node} />;
+    case 'mythfact':
+      return <MythFactBlock node={node} />;
+    case 'highlight':
+      return <HighlightBlock node={node} />;
     case 'generic':
       return <RenderBlocks nodes={node.children} />;
     default:
@@ -453,6 +467,146 @@ function TabsBlock({ node }: { node: NElement }) {
       <View className="gap-2">
         <RenderBlocks nodes={current.content} />
       </View>
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Rich PEAF blocks. Each recovers structure from the web's class-signature soup
+// (see classify.ts) and renders natively from existing primitives. When the
+// extractor finds nothing the block degrades to generic prose, so content is
+// never lost (same contract as Accordion/Tabs above).
+// ---------------------------------------------------------------------------
+
+function StatCardBlock({ node }: { node: NElement }) {
+  const stats = useMemo(() => extractStats(node), [node]);
+  if (stats.length === 0) return <RenderBlocks nodes={node.children} />;
+  return (
+    <View className="my-1 flex-row flex-wrap gap-3">
+      {stats.map((s, i) => (
+        <View
+          // biome-ignore lint/suspicious/noArrayIndexKey: stats are positional, parsed once, never reordered
+          key={i}
+          className="min-w-[44%] flex-1 items-center rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
+        >
+          <Text variant="headingLg" className="text-primary dark:text-primary-dark">
+            {s.value}
+          </Text>
+          {s.label ? (
+            <Text
+              variant="caption"
+              className="mt-1 text-center text-text-secondary dark:text-text-secondary-dark"
+            >
+              {s.label}
+            </Text>
+          ) : null}
+          {s.description ? (
+            <Text
+              variant="caption"
+              className="mt-0.5 text-center text-text-tertiary dark:text-text-tertiary-dark"
+            >
+              {s.description}
+            </Text>
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function StepsBlock({ node }: { node: NElement }) {
+  const steps = useMemo(() => extractSteps(node), [node]);
+  if (steps.length === 0) return <RenderBlocks nodes={node.children} />;
+  return (
+    <View className="my-1 gap-4">
+      {steps.map((s, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: steps are positional, parsed once, never reordered
+        <View key={i} className="flex-row gap-3">
+          <View className="h-7 w-7 items-center justify-center rounded-full bg-surface-active dark:bg-surface-active-dark">
+            <Text variant="bodySm" className="font-sans-bold text-primary dark:text-primary-dark">
+              {i + 1}
+            </Text>
+          </View>
+          <View className="flex-1 gap-1">
+            <Text variant="bodyBold">{s.title}</Text>
+            <RenderBlocks nodes={s.content} />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function BeforeAfterBlock({ node }: { node: NElement }) {
+  const scheme = useColorScheme();
+  const panels = useMemo(() => extractBeforeAfter(node), [node]);
+  if (panels.length === 0) return <RenderBlocks nodes={node.children} />;
+  return (
+    <View className="my-1 gap-2">
+      {panels.map((p, i) => {
+        const palette = CALLOUT_PALETTE[p.tone === 'before' ? 'rose' : 'teal'][
+          scheme === 'dark' ? 'dark' : 'light'
+        ];
+        return (
+          <View
+            // biome-ignore lint/suspicious/noArrayIndexKey: panels are positional, parsed once, never reordered
+            key={i}
+            className="gap-2 rounded-xl p-4"
+            style={{ backgroundColor: palette.bg }}
+          >
+            <Text variant="caption" className="font-sans-bold uppercase" style={{ color: palette.icon }}>
+              {p.label}
+            </Text>
+            <RenderBlocks nodes={p.content} />
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function MythFactBlock({ node }: { node: NElement }) {
+  const scheme = useColorScheme();
+  const data = useMemo(() => extractMythFact(node), [node]);
+  if (!data) return <RenderBlocks nodes={node.children} />;
+  const dark = scheme === 'dark';
+  const rose = CALLOUT_PALETTE.rose[dark ? 'dark' : 'light'];
+  const teal = CALLOUT_PALETTE.teal[dark ? 'dark' : 'light'];
+  return (
+    <View className="my-1 gap-2">
+      <View className="gap-2 rounded-xl p-4" style={{ backgroundColor: rose.bg }}>
+        <View className="flex-row items-center gap-2">
+          <X size={16} color={rose.icon} strokeWidth={3} />
+          <Text variant="caption" className="font-sans-bold uppercase" style={{ color: rose.icon }}>
+            Myth
+          </Text>
+        </View>
+        <Text variant="body" className="leading-7">
+          {data.myth}
+        </Text>
+      </View>
+      <View className="gap-2 rounded-xl p-4" style={{ backgroundColor: teal.bg }}>
+        <View className="flex-row items-center gap-2">
+          <CheckCircle size={16} color={teal.icon} strokeWidth={3} />
+          <Text variant="caption" className="font-sans-bold uppercase" style={{ color: teal.icon }}>
+            Fact
+          </Text>
+        </View>
+        <Text variant="body" className="leading-7">
+          {data.fact}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function HighlightBlock({ node }: { node: NElement }) {
+  const scheme = useColorScheme();
+  // Tint follows the web variant (teal / violet / amber) carried in the classes.
+  const palette = CALLOUT_PALETTE[calloutTone(node.classes)][scheme === 'dark' ? 'dark' : 'light'];
+  return (
+    <View className="my-1 gap-2 rounded-xl p-5" style={{ backgroundColor: palette.bg }}>
+      <RenderBlocks nodes={node.children} />
     </View>
   );
 }

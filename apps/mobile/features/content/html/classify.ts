@@ -21,6 +21,16 @@ export type BlockRole =
   | 'card'
   | 'accordion'
   | 'tabs'
+  // Rich PEAF blocks recovered from the web's class-signature soup. The web JSX
+  // (StatCard/ProgressSteps/BeforeAfter/MythVsFactBlock/HighlightBox) is flattened
+  // to plain HTML by renderToStaticMarkup; the component's Tailwind classes survive
+  // and identify the block. Each renderer falls back to generic prose when its
+  // extractor finds nothing, so prose is never dropped.
+  | 'statcard'
+  | 'steps'
+  | 'beforeafter'
+  | 'mythfact'
+  | 'highlight'
   | 'generic'
   | 'skip';
 
@@ -101,6 +111,66 @@ function isAccordionRoot(node: NElement): boolean {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Rich PEAF block detection. Signatures derived from the web block components
+// (psychage-v2/src/components/article/blocks/*) and the classes they emit through
+// renderToStaticMarkup. All of these would otherwise match isCardClasses, so they
+// MUST be tested before the card/generic fallthrough. Detection keys on the
+// block's distinctive *inner* signature, which only appears inside the real block.
+// ---------------------------------------------------------------------------
+
+function hasDescendantClassStartingWith(node: NElement, prefixes: string[]): boolean {
+  return descendantElements(node).some((e) => startsWithAny(e.classes, prefixes));
+}
+
+// StatCard — gradient card whose stat values carry `tabular-nums` (unique to it).
+function isStatCard(node: NElement): boolean {
+  return (
+    node.classes.includes('not-prose') &&
+    descendantElements(node).some((e) => e.classes.includes('tabular-nums'))
+  );
+}
+
+// HighlightBox — emphasis box with `bg-gradient-to-br from-{teal,violet,amber}-50`.
+// StatCard uses `from-surface`, so the from-tint disambiguates (and StatCard is
+// matched first regardless).
+function isHighlightBox(node: NElement): boolean {
+  return (
+    node.classes.includes('bg-gradient-to-br') &&
+    startsWithAny(node.classes, ['from-teal-5', 'from-violet-5', 'from-amber-5'])
+  );
+}
+
+// MythVsFactBlock — paired red (myth) + teal (fact) panels. The `not-prose` gate
+// (present on the web outer) keeps a generic wrapper that merely *contains* the
+// block from matching and swallowing sibling prose.
+function isMythVsFact(node: NElement): boolean {
+  return (
+    node.classes.includes('not-prose') &&
+    hasDescendantClassStartingWith(node, ['bg-red-50']) &&
+    hasDescendantClassStartingWith(node, ['bg-teal-50'])
+  );
+}
+
+// BeforeAfter — paired red (before) + emerald (after) panels. The emerald tint is
+// what separates it from MythVsFact (which uses teal for the second panel); the
+// `not-prose` gate prevents wrapper-swallow as above.
+function isBeforeAfter(node: NElement): boolean {
+  return (
+    node.classes.includes('not-prose') &&
+    hasDescendantClassStartingWith(node, ['bg-red-50']) &&
+    hasDescendantClassStartingWith(node, ['bg-emerald-50'])
+  );
+}
+
+// ProgressSteps — numbered teal step circles (`rounded-full bg-teal-100`).
+function isProgressSteps(node: NElement): boolean {
+  if (!node.classes.includes('not-prose')) return false;
+  return descendantElements(node).some(
+    (e) => e.classes.includes('rounded-full') && startsWithAny(e.classes, ['bg-teal-100']),
+  );
+}
+
 const CONTAINER_TAGS = new Set(['div', 'section', 'aside', 'article', 'main']);
 
 export function classifyBlock(node: NNode): BlockRole {
@@ -136,6 +206,12 @@ export function classifyBlock(node: NNode): BlockRole {
   if (CONTAINER_TAGS.has(node.tag)) {
     if (isTabsRoot(node)) return 'tabs';
     if (isAccordionRoot(node)) return 'accordion';
+    // Rich PEAF blocks — before callout/card (they'd otherwise match isCardClasses).
+    if (isStatCard(node)) return 'statcard';
+    if (isHighlightBox(node)) return 'highlight';
+    if (isMythVsFact(node)) return 'mythfact';
+    if (isBeforeAfter(node)) return 'beforeafter';
+    if (isProgressSteps(node)) return 'steps';
     if (isCalloutClasses(node.classes)) return 'callout';
     if (isCardClasses(node.classes)) return 'card';
     return 'generic';
@@ -221,4 +297,99 @@ function subtreeContains(node: NNode, target: NElement): boolean {
   if (node === target) return true;
   if (!isElement(node)) return false;
   return node.children.some((c) => subtreeContains(c, target));
+}
+
+// ---------------------------------------------------------------------------
+// Rich PEAF block extraction. Best-effort; each caller renders generic prose
+// when extraction yields nothing, so prose is never lost.
+// ---------------------------------------------------------------------------
+
+export type StatCell = { value: string; label: string; description?: string };
+
+export function extractStats(node: NElement): StatCell[] {
+  // Each StatValue cell is a centered flex column with padding (`flex flex-col
+  // items-center text-center p-6`), a big-number value (`tabular-nums` / text-4xl)
+  // and a label <p>.
+  const cells = descendantElements(node).filter(
+    (e) =>
+      e.classes.includes('flex-col') &&
+      e.classes.includes('items-center') &&
+      startsWithAny(e.classes, ['p-6', 'p-4', 'p-5']),
+  );
+  const out: StatCell[] = [];
+  for (const cell of cells) {
+    const valueEl = descendantElements(cell).find(
+      (e) => e.classes.includes('tabular-nums') || startsWithAny(e.classes, ['text-4xl', 'text-5xl']),
+    );
+    const ps = descendantElements(cell).filter((e) => e.tag === 'p');
+    const value = valueEl ? textOf(valueEl).trim() : '';
+    const label = ps[0] ? textOf(ps[0]).trim() : '';
+    const description = ps[1] ? textOf(ps[1]).trim() : undefined;
+    if (value || label) out.push({ value, label, description });
+  }
+  return out;
+}
+
+export type StepItem = { title: string; content: readonly NNode[] };
+
+export function extractSteps(node: NElement): StepItem[] {
+  // Each step is an <h4> title followed (in document order) by its content block.
+  // <h4> has no element children, so the next element in the depth-first list is
+  // the sibling content div.
+  const els = descendantElements(node);
+  const out: StepItem[] = [];
+  for (const [i, el] of els.entries()) {
+    if (el.tag !== 'h4') continue;
+    const title = textOf(el).trim();
+    if (!title) continue;
+    const next = els[i + 1];
+    out.push({ title, content: next ? [next] : [] });
+  }
+  return out;
+}
+
+export type BeforeAfterPanel = { label: string; tone: 'before' | 'after'; content: readonly NNode[] };
+
+export function extractBeforeAfter(node: NElement): BeforeAfterPanel[] {
+  const els = descendantElements(node);
+  const before = els.find((e) => startsWithAny(e.classes, ['bg-red-50']) && e.classes.includes('p-6'));
+  const after = els.find(
+    (e) => startsWithAny(e.classes, ['bg-emerald-50']) && e.classes.includes('p-6'),
+  );
+  const panels: BeforeAfterPanel[] = [];
+  for (const [panel, tone] of [
+    [before, 'before'],
+    [after, 'after'],
+  ] as const) {
+    if (!panel) continue;
+    const span = descendantElements(panel).find((e) => e.tag === 'span');
+    const label = span ? textOf(span).trim() : tone === 'before' ? 'Before' : 'After';
+    // The panel's content lives in its `text-sm` body div (excludes the label header).
+    const body = descendantElements(panel).find(
+      (e) => e.tag === 'div' && startsWithAny(e.classes, ['text-sm']),
+    );
+    panels.push({ label, tone, content: body ? body.children : [] });
+  }
+  return panels;
+}
+
+export type MythFact = { myth: string; fact: string };
+
+export function extractMythFact(node: NElement): MythFact | null {
+  const els = descendantElements(node);
+  const mythPanel = els.find(
+    (e) => startsWithAny(e.classes, ['bg-red-50']) && e.classes.includes('rounded-2xl'),
+  );
+  const factPanel = els.find(
+    (e) => startsWithAny(e.classes, ['bg-teal-50']) && e.classes.includes('rounded-2xl'),
+  );
+  const textFromPanel = (panel: NElement | undefined): string => {
+    if (!panel) return '';
+    const p = descendantElements(panel).find((e) => e.tag === 'p');
+    return textOf(p ?? panel).trim();
+  };
+  const myth = textFromPanel(mythPanel);
+  const fact = textFromPanel(factPanel);
+  if (!myth && !fact) return null;
+  return { myth, fact };
 }

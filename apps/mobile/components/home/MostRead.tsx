@@ -43,7 +43,7 @@ export function MostRead() {
       ) : (
         articles.map((a, i) => (
           <React.Fragment key={a.id}>
-            <Link href={{ pathname: '/read/[id]', params: { id: a.id } }} asChild>
+            <Link href={{ pathname: '/article/[slug]', params: { slug: a.id } }} asChild>
               <Pressable className="flex-row justify-between items-center py-3 active:opacity-70">
                 <View className="flex-1 pr-4">
                   <Text variant="caption" className="text-primary dark:text-primary-dark font-sans-medium mb-1">{a.topic}</Text>

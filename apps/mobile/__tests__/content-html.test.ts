@@ -5,6 +5,10 @@ import {
   calloutTone,
   classifyBlock,
   extractAccordion,
+  extractBeforeAfter,
+  extractMythFact,
+  extractStats,
+  extractSteps,
   extractTabs,
   isCitation,
 } from '@/features/content/html/classify';
@@ -147,5 +151,86 @@ describe('tabs / accordion extraction', () => {
     const items = extractAccordion(el);
     expect(items[0]?.heading).toBe('Question?');
     expect(textOf(wrap(items[0]?.content ?? []))).toContain('Answer prose.');
+  });
+});
+
+// Rich PEAF blocks — signatures derived from the web block components
+// (psychage-v2/src/components/article/blocks/*) as flattened by renderToStaticMarkup.
+describe('rich PEAF block classification', () => {
+  const STATCARD =
+    '<div class="not-prose rounded-2xl bg-gradient-to-br from-surface to-white border border-border">' +
+    '<div class="grid grid-cols-2 divide-x divide-border">' +
+    '<div class="flex flex-col items-center text-center p-6">' +
+    '<div class="text-4xl font-bold tabular-nums">30%</div>' +
+    '<p class="text-sm">Adults affected</p></div></div></div>';
+
+  const STEPS =
+    '<div class="not-prose my-8"><div class="relative pl-8"><div class="space-y-8">' +
+    '<div class="relative"><div class="rounded-full bg-teal-100"><span class="font-bold text-teal-600">1</span></div>' +
+    '<div class="pl-4"><h4>Step one</h4><div class="text-sm text-text-secondary"><p>Do this first.</p></div></div>' +
+    '</div></div></div></div>';
+
+  const BEFORE_AFTER =
+    '<div class="not-prose my-8"><div class="grid grid-cols-2 rounded-2xl border border-border">' +
+    '<div class="bg-red-50 p-6"><div class="flex"><span class="bg-red-100 text-red-700 uppercase">Before</span></div>' +
+    '<div class="text-sm text-text-secondary"><ul><li>old habit</li></ul></div></div>' +
+    '<div class="bg-emerald-50 p-6"><div class="flex"><span class="bg-emerald-100 text-emerald-700 uppercase">After</span></div>' +
+    '<div class="text-sm text-text-secondary"><ul><li>new habit</li></ul></div></div></div></div>';
+
+  const MYTH_FACT =
+    '<div class="not-prose my-8 scroll-mt-32"><div class="grid">' +
+    '<div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6"><span class="uppercase text-red-700">Myth</span>' +
+    '<p class="text-base">Depression is just sadness.</p></div>' +
+    '<div class="bg-teal-50 border-2 border-teal-200 rounded-2xl p-6"><span class="uppercase text-teal-700">Fact</span>' +
+    '<p class="text-base">Depression is a health condition.</p></div></div></div>';
+
+  const HIGHLIGHT =
+    '<div class="not-prose my-8 py-8 px-8 rounded-2xl bg-gradient-to-br from-teal-50 to-white border border-teal-100 text-center">' +
+    '<div class="space-y-3"><p>You are not alone.</p></div></div>';
+
+  it('classifies each rich block by its signature', () => {
+    expect(classifyBlock(node0(STATCARD))).toBe('statcard');
+    expect(classifyBlock(node0(STEPS))).toBe('steps');
+    expect(classifyBlock(node0(BEFORE_AFTER))).toBe('beforeafter');
+    expect(classifyBlock(node0(MYTH_FACT))).toBe('mythfact');
+    expect(classifyBlock(node0(HIGHLIGHT))).toBe('highlight');
+  });
+
+  it('separates StatCard (from-surface) from HighlightBox (from-teal-50)', () => {
+    // StatCard's tabular-nums wins; a gradient card WITHOUT it and with from-teal is a highlight.
+    expect(classifyBlock(node0(STATCARD))).toBe('statcard');
+    expect(classifyBlock(node0(HIGHLIGHT))).toBe('highlight');
+  });
+
+  it('does NOT match a generic wrapper that merely contains a myth/fact (no not-prose)', () => {
+    const wrapped =
+      '<div><p>intro</p><div class="grid"><div class="bg-red-50 rounded-2xl p-6"><p>m</p></div>' +
+      '<div class="bg-teal-50 rounded-2xl p-6"><p>f</p></div></div></div>';
+    expect(classifyBlock(node0(wrapped))).toBe('generic');
+  });
+
+  it('extracts stat values + labels', () => {
+    const stats = extractStats(el0(STATCARD));
+    expect(stats).toEqual([{ value: '30%', label: 'Adults affected', description: undefined }]);
+  });
+
+  it('extracts step titles + content prose', () => {
+    const steps = extractSteps(el0(STEPS));
+    expect(steps[0]?.title).toBe('Step one');
+    expect(textOf(wrap(steps[0]?.content ?? []))).toContain('Do this first.');
+  });
+
+  it('extracts before/after panels with their prose', () => {
+    const panels = extractBeforeAfter(el0(BEFORE_AFTER));
+    expect(panels.map((p) => p.tone)).toEqual(['before', 'after']);
+    expect(panels[0]?.label).toBe('Before');
+    expect(textOf(wrap(panels[0]?.content ?? []))).toContain('old habit');
+    expect(textOf(wrap(panels[1]?.content ?? []))).toContain('new habit');
+  });
+
+  it('extracts the myth and the fact text', () => {
+    const data = extractMythFact(el0(MYTH_FACT));
+    expect(data?.myth).toBe('Depression is just sadness.');
+    expect(data?.fact).toBe('Depression is a health condition.');
   });
 });
