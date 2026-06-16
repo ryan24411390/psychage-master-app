@@ -1,37 +1,52 @@
 // ClarityResultStore — the local-only history of completed Clarity snapshots.
 //
 // LOCAL-ONLY (SR-4). Writes to the injected Storage seam and nowhere else: no
-// Supabase, no network, no sync, no analytics, no Sentry. Unlike the Check-In store
-// there is NO push-backup carve-out — the SR-4 ADR covers consented mood
-// self-tracking only; assessment tools stay on the device, full stop.
+// Supabase, no network, no sync, no analytics, no Sentry. Assessment tool results stay
+// on the device, full stop.
 //
 // WHAT IS PERSISTED: composite (0–100), tier, the five domain scores, a device-local
-// calendar date, and an id. The raw item-level `answers` are NEVER persisted — they
-// live only in the flow reducer's in-memory state and vanish when the flow unmounts.
+// calendar date, and an id. The raw item-level `answers` are NEVER persisted.
 //
-// Versioned + forward-only migrator (SR-13): a corrupt/foreign blob is quarantined
-// (preserved verbatim under a unique key) rather than silently lost, then the store
-// continues on a best-effort recovered subset. Pure (no React, no RN) → Vitest; the
-// DI seam (storage / clock / id) keeps the date rule and migration deterministic.
+// SCHEMA v2 (web-parity override): tier vocabulary is now the web's
+// (thriving/balanced/struggling/distressed/crisis) and domain keys are the web's
+// (emotional/vitality/social/cognitive/functioning). A forward-only v1→v2 migrator
+// upgrades pre-override snapshots in place (SR-13): old tiers map mixed→struggling,
+// strained→distressed, reachOut→crisis; old domain keys map wellbeing→vitality,
+// stress→cognitive. Anything unrecognizable is quarantined verbatim, never lost.
 
 import type { Storage } from '@/lib/adapters/storage';
 
-import type { ClarityDomainScores, ClarityResult, ClarityTier } from './types';
+import type { ClarityDomainScores, ClarityResult, ScoreTier } from './types';
+
+type ClarityTierLocal = ScoreTier;
 
 export const CLARITY_STORAGE_KEY = 'mobile:clarity-results';
 export const CLARITY_QUARANTINE_PREFIX = `${CLARITY_STORAGE_KEY}:quarantine:`;
-export const CLARITY_SCHEMA_VERSION = 1 as const;
+export const CLARITY_SCHEMA_VERSION = 2 as const;
 /** Keep at most this many snapshots locally (newest retained). */
 export const CLARITY_HISTORY_CAP = 100;
 
-const TIERS: ReadonlySet<string> = new Set<ClarityTier>([
+const TIERS: ReadonlySet<string> = new Set<ClarityTierLocal>([
   'thriving',
   'balanced',
-  'mixed',
-  'strained',
-  'reachOut',
+  'struggling',
+  'distressed',
+  'crisis',
 ]);
+const DOMAIN_KEYS = ['emotional', 'vitality', 'social', 'cognitive', 'functioning'] as const;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+// ── v1 (pre-override) vocab, for the migrator only ───────────────────────────────
+const V1_TIERS = ['thriving', 'balanced', 'mixed', 'strained', 'reachOut'] as const;
+type V1Tier = (typeof V1_TIERS)[number];
+const V1_DOMAIN_KEYS = ['emotional', 'wellbeing', 'social', 'stress', 'functioning'] as const;
+const V1_TIER_MAP: Record<V1Tier, ClarityTierLocal> = {
+  thriving: 'thriving',
+  balanced: 'balanced',
+  mixed: 'struggling',
+  strained: 'distressed',
+  reachOut: 'crisis',
+};
 
 /** One persisted assessment result. `id` + `date` are minted at save and immutable. */
 export interface ClaritySnapshot {
@@ -39,7 +54,7 @@ export interface ClaritySnapshot {
   /** Device-local calendar day, `YYYY-MM-DD`. */
   readonly date: string;
   readonly composite: number;
-  readonly tier: ClarityTier;
+  readonly tier: ScoreTier;
   readonly domains: ClarityDomainScores;
 }
 
@@ -65,9 +80,7 @@ function toLocalDate(date: Date): string {
 function isDomainScores(value: unknown): value is ClarityDomainScores {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
-  return (['emotional', 'wellbeing', 'social', 'stress', 'functioning'] as const).every(
-    (k) => typeof v[k] === 'number' && Number.isFinite(v[k] as number),
-  );
+  return DOMAIN_KEYS.every((k) => typeof v[k] === 'number' && Number.isFinite(v[k] as number));
 }
 
 function isSnapshot(value: unknown): value is ClaritySnapshot {
@@ -95,21 +108,52 @@ function canonical(s: ClaritySnapshot): ClaritySnapshot {
     tier: s.tier,
     domains: {
       emotional: s.domains.emotional,
-      wellbeing: s.domains.wellbeing,
+      vitality: s.domains.vitality,
       social: s.domains.social,
-      stress: s.domains.stress,
+      cognitive: s.domains.cognitive,
       functioning: s.domains.functioning,
     },
   };
 }
 
+/** Migrate one v1 entry (old tier vocab + old domain keys) to a v2 snapshot, or null. */
+function migrateV1Entry(value: unknown): ClaritySnapshot | null {
+  if (typeof value !== 'object' || value === null) return null;
+  const v = value as Record<string, unknown>;
+  if (typeof v.id !== 'string' || v.id.length === 0) return null;
+  if (typeof v.date !== 'string' || !DATE_RE.test(v.date)) return null;
+  if (typeof v.composite !== 'number' || !Number.isFinite(v.composite)) return null;
+  if (typeof v.tier !== 'string' || !(V1_TIERS as readonly string[]).includes(v.tier)) return null;
+
+  const d = v.domains;
+  if (typeof d !== 'object' || d === null) return null;
+  const dv = d as Record<string, unknown>;
+  if (!V1_DOMAIN_KEYS.every((k) => typeof dv[k] === 'number' && Number.isFinite(dv[k] as number))) {
+    return null;
+  }
+
+  return {
+    id: v.id,
+    date: v.date,
+    composite: v.composite,
+    tier: V1_TIER_MAP[v.tier as V1Tier],
+    domains: {
+      emotional: dv.emotional as number,
+      vitality: dv.wellbeing as number, // renamed
+      social: dv.social as number,
+      cognitive: dv.stress as number, // renamed
+      functioning: dv.functioning as number,
+    },
+  };
+}
+
 type LoadOutcome =
-  | { status: 'clean'; entries: ClaritySnapshot[] }
+  | { status: 'clean'; entries: ClaritySnapshot[]; migrated: boolean }
   | { status: 'anomaly'; entries: ClaritySnapshot[]; raw: string };
 
-/** Parse + validate the persisted blob. Forward-only; v1 is the first schema. */
+/** Parse + validate the persisted blob. v2 is current; v1 is migrated forward. */
 function loadBlob(raw: string | null): LoadOutcome {
-  if (raw === null) return { status: 'clean', entries: [] };
+  if (raw === null) return { status: 'clean', entries: [], migrated: false };
 
   let parsed: unknown;
   try {
@@ -122,8 +166,25 @@ function loadBlob(raw: string | null): LoadOutcome {
   }
 
   const env = parsed as { version?: unknown; entries?: unknown };
+
+  // v1 → v2 forward migration.
+  if (env.version === 1) {
+    if (!Array.isArray(env.entries)) return { status: 'anomaly', entries: [], raw };
+    const entries: ClaritySnapshot[] = [];
+    let dropped = false;
+    for (const candidate of env.entries) {
+      const migrated = migrateV1Entry(candidate);
+      if (migrated) entries.push(migrated);
+      else dropped = true;
+    }
+    // A clean migration re-persists as v2; a partial one also quarantines the raw v1 blob.
+    return dropped
+      ? { status: 'anomaly', entries, raw }
+      : { status: 'clean', entries, migrated: true };
+  }
+
   if (env.version !== CLARITY_SCHEMA_VERSION) {
-    // Missing / older / newer version: no migration path yet — preserve, recover none.
+    // Missing / older-unknown / newer version: no migration path — preserve, recover none.
     return { status: 'anomaly', entries: [], raw };
   }
   if (!Array.isArray(env.entries)) {
@@ -136,7 +197,9 @@ function loadBlob(raw: string | null): LoadOutcome {
     if (isSnapshot(candidate)) entries.push(canonical(candidate));
     else dropped = true;
   }
-  return dropped ? { status: 'anomaly', entries, raw } : { status: 'clean', entries };
+  return dropped
+    ? { status: 'anomaly', entries, raw }
+    : { status: 'clean', entries, migrated: false };
 }
 
 export class ClarityResultStore {
@@ -157,9 +220,9 @@ export class ClarityResultStore {
     const snapshot: ClaritySnapshot = {
       id: this.generateId(),
       date: toLocalDate(this.now()),
-      composite: result.composite,
+      composite: result.totalScore,
       tier: result.tier,
-      domains: result.domains,
+      domains: result.domainScores,
     };
     this.entries.push(snapshot);
     if (this.entries.length > CLARITY_HISTORY_CAP) {
@@ -195,6 +258,9 @@ export class ClarityResultStore {
       // then rewrite the primary key to the recovered subset so the next launch is clean.
       const stamp = `${this.now().toISOString()}-${this.generateId()}`;
       this.storage.set(`${CLARITY_QUARANTINE_PREFIX}${stamp}`, outcome.raw);
+      this.persist();
+    } else if (outcome.migrated) {
+      // Clean v1→v2 upgrade: rewrite the primary key as a v2 envelope.
       this.persist();
     }
   }

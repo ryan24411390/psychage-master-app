@@ -1,6 +1,5 @@
 import { fireEvent, screen } from '@testing-library/react-native';
 
-import { TIER_COPY } from '@/features/clarity/bands';
 import { ClarityFlow } from '@/features/clarity/ClarityFlow';
 import { CLARITY_QUESTIONS } from '@/features/clarity/questions';
 import { scoreClarity } from '@/features/clarity/scoring';
@@ -14,10 +13,11 @@ function req<T>(value: T | undefined, label: string): T {
   return value;
 }
 
-// Render tests for the native flow. The store is INJECTED via saveResult (a jest.fn),
-// so this never touches the real MMKV-backed store. Asserts the mobile rails: the
-// Help-now pill is on every screen (SR-2), the crisis interstitial blocks after a
-// crisis q4 (SR-2), and the results screen shows BANDS — no raw number, no progressbar.
+// Render tests for the native flow under the web-parity override. The store is INJECTED
+// via saveResult (a jest.fn), so this never touches the real MMKV store. Asserts: the
+// Help-now pill is on every screen (SR-2), the crisis interstitial blocks after a crisis
+// q4 (SR-2), and the results dashboard shows the RAW score + "/ 100" + the web tier label
+// after the 2s calculating interlude.
 
 function renderFlow() {
   const saveResult = jest.fn<number | null, [ClarityResult]>(() => null);
@@ -57,14 +57,13 @@ describe('ClarityFlow', () => {
 
     expect(screen.getByText('Support is available')).toBeTruthy();
     expect(screen.getByLabelText('Help now')).toBeTruthy();
-    // the questions are NOT shown behind it — forward progress is blocked
     expect(screen.queryByText('Question 5 of 20')).toBeNull();
 
-    press(/safe right now/); // "I’m safe right now — continue"
+    press(/safe right now/);
     expect(screen.getByText('Question 5 of 20')).toBeTruthy();
   });
 
-  it('completing all 20 (no crisis) shows the bands result — no number, no bar — and saves once', () => {
+  it('completing all 20 (no crisis) calculates, then shows the raw score dashboard and saves once', async () => {
     const handlers = renderFlow();
     press('Begin');
     for (const q of CLARITY_QUESTIONS) {
@@ -75,20 +74,20 @@ describe('ClarityFlow', () => {
     for (const q of CLARITY_QUESTIONS) answers[q.id] = req(q.options[0], q.id).value;
     const expected = scoreClarity(answers);
 
-    expect(screen.getByText('Your snapshot')).toBeTruthy();
-    expect(screen.getByText(TIER_COPY[expected.tier].label)).toBeTruthy();
-    expect(screen.getByText('What might help')).toBeTruthy();
+    // The 2s calculating interlude shows first.
+    expect(screen.getByText('Analyzing your responses…')).toBeTruthy();
 
-    // The no-verdict rail: never the raw composite, never a "/100", never a meter.
-    expect(screen.queryByText(String(expected.composite))).toBeNull();
-    expect(screen.queryByText(/\/100/)).toBeNull();
-    expect(screen.queryByRole('progressbar')).toBeNull();
+    // After the timer elapses, the dashboard reveals the raw composite + "/ 100" + label.
+    await screen.findByText('/ 100', {}, { timeout: 4000 });
+    expect(screen.getAllByText(String(expected.totalScore)).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(expected.label).length).toBeGreaterThan(0);
+    expect(screen.getByText('Overview')).toBeTruthy();
 
-    // Saved exactly once, with a ClarityResult that carries no raw answers (SR-4).
+    // Saved exactly once with the completed result.
     expect(handlers.saveResult).toHaveBeenCalledTimes(1);
     const saved = req(handlers.saveResult.mock.calls[0], 'save call')[0];
-    expect(saved).not.toHaveProperty('answers');
-    expect(saved).not.toHaveProperty('rawScores');
+    expect(saved.totalScore).toBe(expected.totalScore);
+    expect(saved.tier).toBe(expected.tier);
   });
 
   it('the crisis interstitial routes to the crisis surface', () => {

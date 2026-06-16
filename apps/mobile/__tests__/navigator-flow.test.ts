@@ -1,100 +1,144 @@
 import { describe, expect, it } from 'vitest';
 
-import { CLARIFIERS } from '@/features/navigator/clarifiers';
 import {
   buildUserInputs,
-  createNavigatorReducer,
   initialNavigatorState,
   isExitOnBack,
   type NavigatorState,
+  navigatorReducer as reducer,
 } from '@/features/navigator/flow';
-
-const reducer = createNavigatorReducer(CLARIFIERS);
 
 function drive(actions: Parameters<typeof reducer>[1][]): NavigatorState {
   return actions.reduce((s, a) => reducer(s, a), initialNavigatorState);
 }
 
-describe('navigator flow reducer', () => {
-  it('single-select area advances to symptoms and resets downstream', () => {
-    const s = reducer(initialNavigatorState, { type: 'SELECT_AREA', area: 'mind' });
-    expect(s.step).toBe('symptoms');
-    expect(s.area).toBe('mind');
-    expect(s.selectedSymptomIds).toEqual([]);
+describe('navigator flow reducer (web-parity step model)', () => {
+  it('START advances welcome → domains', () => {
+    const s = reducer(initialNavigatorState, { type: 'START' });
+    expect(s.step).toBe('domains');
   });
 
-  it('toggles symptoms on and off (multi-select)', () => {
-    let s = reducer({ ...initialNavigatorState, step: 'symptoms', area: 'mind' }, {
-      type: 'TOGGLE_SYMPTOM',
-      id: 'low_mood',
+  it('multi-selects domains and advances on DOMAINS_NEXT', () => {
+    let s = reducer({ ...initialNavigatorState, step: 'domains' }, {
+      type: 'TOGGLE_DOMAIN',
+      domain: 'emotional',
     });
-    s = reducer(s, { type: 'TOGGLE_SYMPTOM', id: 'worry' });
-    expect(s.selectedSymptomIds).toEqual(['low_mood', 'worry']);
-    s = reducer(s, { type: 'TOGGLE_SYMPTOM', id: 'low_mood' });
-    expect(s.selectedSymptomIds).toEqual(['worry']);
-  });
-
-  it('blocks SYMPTOMS_NEXT with zero selections', () => {
-    const s = reducer({ ...initialNavigatorState, step: 'symptoms', area: 'mind' }, {
-      type: 'SYMPTOMS_NEXT',
-    });
+    s = reducer(s, { type: 'TOGGLE_DOMAIN', domain: 'physical' });
+    expect(s.selectedDomains).toEqual(['emotional', 'physical']);
+    s = reducer(s, { type: 'TOGGLE_DOMAIN', domain: 'emotional' });
+    expect(s.selectedDomains).toEqual(['physical']);
+    s = reducer(s, { type: 'DOMAINS_NEXT' });
     expect(s.step).toBe('symptoms');
   });
 
-  it('walks clarifier → clarifier → severity, recording answers', () => {
-    const s = drive([
-      { type: 'SELECT_AREA', area: 'mind' },
-      { type: 'TOGGLE_SYMPTOM', id: 'low_mood' },
-      { type: 'SYMPTOMS_NEXT' },
-      { type: 'ANSWER_CLARIFIER', value: 'less_than_1_week' },
-      { type: 'ANSWER_CLARIFIER', value: 'often' },
-    ]);
-    expect(s.step).toBe('severity');
-    expect(s.answers).toEqual({ duration: 'less_than_1_week', frequency: 'often' });
+  it('blocks DOMAINS_NEXT with zero domains', () => {
+    const s = reducer({ ...initialNavigatorState, step: 'domains' }, { type: 'DOMAINS_NEXT' });
+    expect(s.step).toBe('domains');
   });
 
-  it('SR-2: "Yes" on severity ALWAYS halts (haltUnsafe), "No" goes to evaluate', () => {
-    const base = drive([
-      { type: 'SELECT_AREA', area: 'mind' },
-      { type: 'TOGGLE_SYMPTOM', id: 'low_mood' },
-      { type: 'SYMPTOMS_NEXT' },
-      { type: 'ANSWER_CLARIFIER', value: 'less_than_1_week' },
-      { type: 'ANSWER_CLARIFIER', value: 'often' },
-    ]);
-    expect(reducer(base, { type: 'ANSWER_SEVERITY', answer: 'yes' }).step).toBe('haltUnsafe');
-    expect(reducer(base, { type: 'ANSWER_SEVERITY', answer: 'no' }).step).toBe('evaluate');
+  it('SELECT_ALL_DOMAINS picks all and jumps to symptoms', () => {
+    const s = reducer({ ...initialNavigatorState, step: 'domains' }, {
+      type: 'SELECT_ALL_DOMAINS',
+      domains: ['emotional', 'physical', 'cognitive', 'behavioral'],
+    });
+    expect(s.selectedDomains).toHaveLength(4);
+    expect(s.step).toBe('symptoms');
   });
 
-  it('BACK past a halt re-opens the severity question (never silently resumes)', () => {
+  it('toggles symptoms and bulk add/remove', () => {
+    let s: NavigatorState = { ...initialNavigatorState, step: 'symptoms' };
+    s = reducer(s, { type: 'TOGGLE_SYMPTOM', id: 'MOD_001' });
+    s = reducer(s, { type: 'ADD_SYMPTOMS', ids: ['MOD_002', 'ENR_001', 'MOD_001'] });
+    expect(s.selectedSymptomIds).toEqual(['MOD_001', 'MOD_002', 'ENR_001']); // dedup
+    s = reducer(s, { type: 'REMOVE_SYMPTOMS', ids: ['MOD_002'] });
+    expect(s.selectedSymptomIds).toEqual(['MOD_001', 'ENR_001']);
+  });
+
+  it('blocks SYMPTOMS_NEXT with zero selections, advances to details otherwise', () => {
+    let s: NavigatorState = { ...initialNavigatorState, step: 'symptoms' };
+    expect(reducer(s, { type: 'SYMPTOMS_NEXT' }).step).toBe('symptoms');
+    s = reducer(s, { type: 'TOGGLE_SYMPTOM', id: 'MOD_001' });
+    s = reducer(s, { type: 'SYMPTOMS_NEXT' });
+    expect(s.step).toBe('details');
+    expect(s.detailIndex).toBe(0);
+  });
+
+  it('pages through details then advances to safety', () => {
+    let s: NavigatorState = {
+      ...initialNavigatorState,
+      step: 'details',
+      selectedSymptomIds: ['MOD_001', 'MOD_002'],
+    };
+    s = reducer(s, { type: 'DETAIL_NEXT' });
+    expect(s).toMatchObject({ step: 'details', detailIndex: 1 });
+    s = reducer(s, { type: 'DETAIL_NEXT' });
+    expect(s.step).toBe('safety');
+  });
+
+  it('records per-symptom detail patches (merged)', () => {
+    let s: NavigatorState = {
+      ...initialNavigatorState,
+      step: 'details',
+      selectedSymptomIds: ['MOD_001'],
+    };
+    s = reducer(s, { type: 'SET_DETAIL', id: 'MOD_001', patch: { severity: 8 } });
+    s = reducer(s, { type: 'SET_DETAIL', id: 'MOD_001', patch: { duration: 'more_than_1_year' } });
+    expect(s.details.MOD_001).toEqual({ severity: 8, duration: 'more_than_1_year' });
+  });
+
+  it('SR-2/SR-3: safety "Yes" ALWAYS halts; "No" proceeds to processing', () => {
+    const base: NavigatorState = { ...initialNavigatorState, step: 'safety' };
+    expect(reducer(base, { type: 'ANSWER_SAFETY', answer: 'yes' }).step).toBe('halt');
+    expect(reducer(base, { type: 'ANSWER_SAFETY', answer: 'no' }).step).toBe('processing');
+  });
+
+  it('walking back past a halt re-opens safety and clears the answer (never resumes)', () => {
     const halted: NavigatorState = {
       ...initialNavigatorState,
-      step: 'haltUnsafe',
+      step: 'halt',
       severityAnswer: 'yes',
     };
-    const back = reducer(halted, { type: 'BACK' });
-    expect(back.step).toBe('severity');
-    expect(back.severityAnswer).toBeNull();
+    const s = reducer(halted, { type: 'BACK' });
+    expect(s).toMatchObject({ step: 'safety', severityAnswer: null });
   });
 
-  it('BACK steps clarifier index down, then to symptoms, then exits at area', () => {
-    expect(reducer({ ...initialNavigatorState, step: 'clarifier', clarifierIndex: 1 }, { type: 'BACK' }).clarifierIndex).toBe(0);
-    expect(reducer({ ...initialNavigatorState, step: 'clarifier', clarifierIndex: 0 }, { type: 'BACK' }).step).toBe('symptoms');
-    expect(reducer({ ...initialNavigatorState, step: 'symptoms' }, { type: 'BACK' }).step).toBe('area');
-    expect(isExitOnBack({ ...initialNavigatorState, step: 'area' })).toBe(true);
+  it('isExitOnBack only at welcome', () => {
+    expect(isExitOnBack(initialNavigatorState)).toBe(true);
+    expect(isExitOnBack({ ...initialNavigatorState, step: 'symptoms' })).toBe(false);
   });
 
-  it('buildUserInputs attaches session duration/frequency to each selected symptom', () => {
+  it('RESET returns to the initial welcome state', () => {
     const s = drive([
-      { type: 'SELECT_AREA', area: 'mind' },
-      { type: 'TOGGLE_SYMPTOM', id: 'low_mood' },
-      { type: 'TOGGLE_SYMPTOM', id: 'worry' },
-      { type: 'SYMPTOMS_NEXT' },
-      { type: 'ANSWER_CLARIFIER', value: 'more_than_1_year' },
-      { type: 'ANSWER_CLARIFIER', value: 'always' },
+      { type: 'START' },
+      { type: 'TOGGLE_DOMAIN', domain: 'emotional' },
+      { type: 'RESET' },
     ]);
-    expect(buildUserInputs(s)).toEqual([
-      { symptom_id: 'low_mood', duration: 'more_than_1_year', frequency: 'always' },
-      { symptom_id: 'worry', duration: 'more_than_1_year', frequency: 'always' },
+    expect(s).toEqual(initialNavigatorState);
+  });
+});
+
+describe('buildUserInputs (the scoring-parity fix)', () => {
+  it('carries severity, duration, and frequency per symptom', () => {
+    const state: NavigatorState = {
+      ...initialNavigatorState,
+      selectedSymptomIds: ['MOD_001', 'ENR_001'],
+      details: {
+        MOD_001: { severity: 9, duration: 'more_than_1_year', frequency: 'always' },
+        ENR_001: { severity: 4 },
+      },
+    };
+    expect(buildUserInputs(state)).toEqual([
+      { symptom_id: 'MOD_001', severity: 9, duration: 'more_than_1_year', frequency: 'always' },
+      { symptom_id: 'ENR_001', severity: 4 },
     ]);
+  });
+
+  it('omits undefined fields so the engine applies its own defaults', () => {
+    const state: NavigatorState = {
+      ...initialNavigatorState,
+      selectedSymptomIds: ['MOD_001'],
+      details: {},
+    };
+    expect(buildUserInputs(state)).toEqual([{ symptom_id: 'MOD_001' }]);
   });
 });

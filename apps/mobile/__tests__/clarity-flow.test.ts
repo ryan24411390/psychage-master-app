@@ -29,12 +29,23 @@ describe('happy path — intro → 20 questions → results', () => {
     expect(s.index).toBe(0);
   });
 
-  it('a calm run (no crisis) answers all 20 and lands on results', () => {
+  it('a calm run (no crisis) answers all 20 and enters the calculating interlude', () => {
     const s = run([{ type: 'START' }, ...answers(0, CLARITY_QUESTION_COUNT)]);
-    expect(s.step).toBe('results');
+    expect(s.step).toBe('calculating');
     expect(Object.keys(s.answers)).toHaveLength(CLARITY_QUESTION_COUNT);
     expect(s.answers.q1).toBe(0);
     expect(s.answers.q20).toBe(0);
+  });
+
+  it('FINISH_CALCULATING moves calculating → results', () => {
+    const s = run([{ type: 'START' }, ...answers(0, CLARITY_QUESTION_COUNT), { type: 'FINISH_CALCULATING' }]);
+    expect(s.step).toBe('results');
+  });
+
+  it('FINISH_CALCULATING is a no-op outside the calculating step', () => {
+    const s = run([{ type: 'START' }, { type: 'FINISH_CALCULATING' }]);
+    expect(s.step).toBe('question');
+    expect(s.index).toBe(0);
   });
 
   it('answers are keyed q1..q20 in order', () => {
