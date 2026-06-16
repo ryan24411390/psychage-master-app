@@ -444,7 +444,7 @@ export default function FindCareScreen() {
         <View className="px-5 pt-2">
           <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark mb-2.5">The directory is U.S.-only for now</Text>
           <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-2">We currently list NPI-registered providers in the United States. We're working on more regions.</Text>
-          <View className="bg-[#FBE9E7] dark:bg-[#3D2523] rounded-2xl p-4 my-2">
+          <View className="bg-crisis/10 dark:bg-crisis-dark/20 rounded-2xl p-4 my-2">
             <View className="flex-row items-center gap-2 mb-1.5"><LifeBuoy size={18} color={red} /><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">In crisis right now?</Text></View>
             <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5">You can still reach help. If you're in immediate danger, contact your local emergency number.</Text>
             <View className="mt-3"><Primary label="See crisis resources" color={red} onPress={() => setSheet('crisis')} /></View>
@@ -565,7 +565,7 @@ export default function FindCareScreen() {
 
       {savedIds.length >= 2 && !loading ? (
         <Animated.View entering={enter()} className="absolute left-[18px] right-[18px] bottom-[24px]">
-          <Tap onPress={() => setStep('compare')}><View className="bg-[#16897A] rounded-[13px] py-4 flex-row items-center justify-center gap-1.5"><Text className="font-sans-bold text-white text-base">Compare {Math.min(savedIds.length, 3)} selected</Text><ChevronRight size={18} color="#fff" /></View></Tap>
+          <Tap onPress={() => setStep('compare')}><View className="bg-primary rounded-[13px] py-4 flex-row items-center justify-center gap-1.5"><Text className="font-sans-bold text-white text-base">Compare {Math.min(savedIds.length, 3)} selected</Text><ChevronRight size={18} color="#fff" /></View></Tap>
         </Animated.View>
       ) : null}
 
@@ -719,7 +719,7 @@ function CrisisSheet({ visible, onClose }: { visible: boolean; onClose: () => vo
             <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5 mb-1">If you're in immediate danger, call your local emergency number now.</Text>
             {rows.map((r) => (
               <View key={r.t} className="flex-row items-center gap-3.5 py-4 border-b border-border dark:border-border-dark">
-                <View className="w-10 h-10 rounded-[10px] bg-[#FBE9E7] dark:bg-[#3D2523] items-center justify-center"><r.I size={18} color={red} /></View>
+                <View className="w-10 h-10 rounded-[10px] bg-crisis/10 dark:bg-crisis-dark/20 items-center justify-center"><r.I size={18} color={red} /></View>
                 <View><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">{r.t}</Text><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm">{r.s}</Text></View>
               </View>
             ))}

@@ -58,7 +58,7 @@ export function HeroTile({ title, feature, icon: Icon, onPress, testID }: TilePr
       hitSlop={4}
       testID={testID}
       style={press.style}
-      className="min-h-[44px] flex-1 justify-between rounded-[20px] border border-[rgba(26,155,140,0.22)] bg-[rgba(26,155,140,0.08)] p-4 dark:border-border-dark dark:bg-surface-dark"
+      className="min-h-[44px] flex-1 justify-between rounded-[20px] border border-primary/20 bg-primary/10 p-4 dark:border-border-dark dark:bg-surface-dark"
     >
       <View className="flex-row items-start justify-between">
         <Icon size={27} color={TEAL} strokeWidth={1.75} />
@@ -72,12 +72,12 @@ export function HeroTile({ title, feature, icon: Icon, onPress, testID }: TilePr
       </View>
       <View className="mt-12">
         <Text
-          className="font-sans-medium text-[15.5px] text-text-primary dark:text-text-primary-dark"
+          className="font-sans-medium text-base text-text-primary dark:text-text-primary-dark"
           numberOfLines={2}
         >
           {title}
         </Text>
-        <Text className="mt-0.5 font-sans text-[10.5px] text-text-secondary dark:text-text-secondary-dark">
+        <Text className="mt-0.5 font-sans text-xs text-text-secondary dark:text-text-secondary-dark">
           {feature}
         </Text>
       </View>
@@ -98,17 +98,17 @@ export function SmallTile({ title, feature, icon: Icon, onPress, testID }: TileP
       hitSlop={4}
       testID={testID}
       style={press.style}
-      className="min-h-[44px] justify-between rounded-[20px] border border-[#EDE7DB] bg-white p-4 dark:border-border-dark dark:bg-surface-dark"
+      className="min-h-[44px] justify-between rounded-[20px] border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
     >
       <Icon size={21} color={TEAL} strokeWidth={1.75} />
       <View className="mt-3">
         <Text
-          className="font-sans-medium text-[12px] text-text-primary dark:text-text-primary-dark"
+          className="font-sans-medium text-sm text-text-primary dark:text-text-primary-dark"
           numberOfLines={2}
         >
           {title}
         </Text>
-        <Text className="mt-0.5 font-sans text-[10.5px] text-text-secondary dark:text-text-secondary-dark">
+        <Text className="mt-0.5 font-sans text-xs text-text-secondary dark:text-text-secondary-dark">
           {feature}
         </Text>
       </View>
@@ -129,13 +129,13 @@ export function ClarityTile({ title, feature, icon: Icon, onPress, testID }: Til
       hitSlop={4}
       testID={testID}
       style={press.style}
-      className="min-h-[44px] w-full flex-row items-center justify-between rounded-[20px] bg-[#1A1A2E] p-[15px]"
+      className="min-h-[44px] w-full flex-row items-center justify-between rounded-[20px] bg-charcoal-900 p-[15px]"
     >
       <View className="flex-1 pr-3">
-        <Text className="font-sans-bold text-[15px] text-white" numberOfLines={2}>
+        <Text className="font-sans-bold text-base text-white" numberOfLines={2}>
           {title}
         </Text>
-        <Text className="mt-0.5 font-sans-medium text-[10.5px] text-teal-400">{feature}</Text>
+        <Text className="mt-0.5 font-sans-medium text-xs text-teal-400">{feature}</Text>
       </View>
       <Icon size={30} color={TEAL} strokeWidth={1.75} />
     </AnimatedPressable>
@@ -155,7 +155,7 @@ export function DeepDiveCard({ title, feature, icon: Icon, onPress, testID }: Ti
       hitSlop={4}
       testID={testID}
       style={press.style}
-      className="min-h-[44px] w-full overflow-hidden rounded-[20px] border border-[#EDE7DB] bg-white p-4 dark:border-border-dark dark:bg-surface-dark"
+      className="min-h-[44px] w-full overflow-hidden rounded-[20px] border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
     >
       <View
         className="absolute -bottom-2 -right-2 opacity-[0.09]"
@@ -167,10 +167,10 @@ export function DeepDiveCard({ title, feature, icon: Icon, onPress, testID }: Ti
       </View>
       <Icon size={24} color={TEAL} strokeWidth={1.75} />
       <View className="mt-10">
-        <Text className="font-sans-medium text-[15px] text-text-primary dark:text-text-primary-dark">
+        <Text className="font-sans-medium text-base text-text-primary dark:text-text-primary-dark">
           {title}
         </Text>
-        <Text className="mt-0.5 font-sans text-[10.5px] text-text-secondary dark:text-text-secondary-dark">
+        <Text className="mt-0.5 font-sans text-xs text-text-secondary dark:text-text-secondary-dark">
           {feature}
         </Text>
       </View>

@@ -45,7 +45,7 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
   return (
     <SafeAreaView
       edges={['bottom']}
-      className="border-t border-[#EFE9DD] bg-paper dark:border-border-dark dark:bg-surface-dark"
+      className="border-t border-border bg-paper dark:border-border-dark dark:bg-surface-dark"
     >
       <View className="min-h-[56px] flex-row items-center justify-around px-2">
         {state.routes.map((route, index) => {
@@ -88,7 +88,7 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
                 layout={reduced ? undefined : LinearTransition.duration(DURATION.base)}
                 className={
                   isActive
-                    ? 'flex-row items-center gap-2 rounded-full bg-[rgba(26,155,140,0.14)] px-4 py-[9px] dark:bg-[rgba(32,184,166,0.18)]'
+                    ? 'flex-row items-center gap-2 rounded-full bg-primary/15 px-4 py-[9px] dark:bg-primary-dark/20'
                     : 'items-center justify-center px-3'
                 }
               >
@@ -100,7 +100,7 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
                   >
                     <Text
                       variant="caption"
-                      className="font-sans-medium text-[13px] tracking-normal text-[#157F73] dark:text-[#2DD4BF]"
+                      className="font-sans-medium text-[13px] tracking-normal text-teal-900 dark:text-teal-400"
                     >
                       {label}
                     </Text>
