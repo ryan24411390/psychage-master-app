@@ -5,10 +5,11 @@ import { AppTabBar } from '@/components/AppTabBar';
 
 import { renderWithProviders } from './_helpers';
 
-// C0.2 — the custom tab bar. Builds a minimal BottomTabBarProps fixture (the
-// shape react-navigation hands a custom `tabBar`) and asserts: four tabs, labels
-// ALWAYS visible, the active tab carries selected semantics, and pressing an
-// inactive tab navigates.
+// C0.2 — the custom tab bar (active-pill redesign). Builds a minimal
+// BottomTabBarProps fixture (the shape react-navigation hands a custom `tabBar`)
+// and asserts: four tabs (each reachable by its accessibility label), ONLY the
+// focused tab shows a visible text label (inactive tabs are icon-only), the active
+// tab carries selected semantics, and pressing an inactive tab navigates.
 const ROUTES = [
   { key: 'index-1', name: 'index' },
   { key: 'learn-1', name: 'learn' },
@@ -32,12 +33,20 @@ function makeProps(activeIndex: number, navigate: (name: string) => void): Botto
 }
 
 describe('AppTabBar', () => {
-  it('renders four tabs with always-visible labels', () => {
+  it('renders four tabs, each reachable by its accessibility label', () => {
     renderWithProviders(<AppTabBar {...makeProps(0, () => {})} />, { haptics: true });
     for (const title of TITLES) {
-      expect(screen.getByText(title)).toBeTruthy();
+      expect(screen.getByLabelText(title)).toBeTruthy();
     }
     expect(screen.getAllByRole('tab')).toHaveLength(4);
+  });
+
+  it('shows a visible label only on the focused tab (others are icon-only)', () => {
+    renderWithProviders(<AppTabBar {...makeProps(0, () => {})} />, { haptics: true });
+    expect(screen.getByText('Today')).toBeTruthy();
+    expect(screen.queryByText('Learn')).toBeNull();
+    expect(screen.queryByText('Compass')).toBeNull();
+    expect(screen.queryByText('Find')).toBeNull();
   });
 
   it('marks the active tab as selected', () => {
