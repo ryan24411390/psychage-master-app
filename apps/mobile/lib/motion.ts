@@ -1,6 +1,14 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { AccessibilityInfo } from 'react-native';
-import { Easing } from 'react-native-reanimated';
+import {
+  Easing,
+  FadeIn,
+  FadeInUp,
+  FadeOut,
+  FadeOutDown,
+  LinearTransition,
+  ReduceMotion,
+} from 'react-native-reanimated';
 
 // Wave B2 (S45): the in-app reduced-motion override. ADDITIVE — OR-ed with the OS
 // setting below so the signature is unchanged and every existing caller keeps
@@ -83,4 +91,105 @@ export function useReducedMotion(): boolean {
   );
 
   return osReduced || appOverride;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Entrance / layout factories (the reusable motion vocabulary).
+//
+// These centralise the entering/exiting/layout animations every screen uses so
+// the same element animates IDENTICALLY everywhere. They are PURE functions that
+// take `reduced` explicitly (from useReducedMotion()) rather than calling the
+// hook themselves — this keeps them testable, callable outside React, and — most
+// importantly — honours BOTH reduce-motion sources (OS *and* the in-app S45
+// toggle, which Reanimated's built-in ReduceMotion.System cannot see). We set
+// `.reduceMotion(ReduceMotion.Never)` on every builder precisely because the
+// branch below already does the gating; we never want Reanimated second-guessing.
+//
+// Reduced path = the project-canonical 200ms cross-fade
+// (tokens/mobile.tokens.json motion._reducedMotion.essential), never a spatial
+// translate. Spring presets stay the single source of truth (SPRING_PRESETS).
+
+/** ms between sequential list-item entrances. */
+export const STAGGER_MS = 50;
+/** Cap on stagger index so the last visible item lands by ~400ms (8 × 50ms). */
+export const STAGGER_CAP = 8;
+/**
+ * Reduced-motion essential cross-fade duration.
+ * Source: tokens/mobile.tokens.json → motion._reducedMotion.essential.durationMs.
+ */
+export const REDUCED_MOTION_FADE_MS = 200;
+
+type EnterOpts = {
+  /** Spring preset for the spatial part. Default `calm` (= spec "smooth"). */
+  preset?: keyof typeof SPRING_PRESETS;
+  /** Small upward translate distance in px. Default 12 (spec: 8–12px). */
+  translateY?: number;
+  /** Extra delay before the entrance starts (used by staggeredEnter). */
+  delayMs?: number;
+};
+
+type ExitOpts = {
+  preset?: keyof typeof SPRING_PRESETS;
+};
+
+/**
+ * Reduce-motion-aware screen/content entrance: fade + a small upward translate,
+ * spring-driven. When `reduced`, collapses to a plain 200ms cross-fade.
+ */
+export function enter(reduced: boolean, opts: EnterOpts = {}) {
+  if (reduced) {
+    return FadeIn.duration(REDUCED_MOTION_FADE_MS).reduceMotion(ReduceMotion.Never);
+  }
+  const { preset = 'calm', translateY = 12, delayMs = 0 } = opts;
+  const s = SPRING_PRESETS[preset];
+  const anim = FadeInUp.springify()
+    .damping(s.damping)
+    .stiffness(s.stiffness)
+    .mass(s.mass)
+    .withInitialValues({ opacity: 0, transform: [{ translateY }] })
+    .reduceMotion(ReduceMotion.Never);
+  return delayMs > 0 ? anim.delay(delayMs) : anim;
+}
+
+/** Matching exit for `enter`: fade + small downward translate (reduced: 200ms fade). */
+export function exit(reduced: boolean, opts: ExitOpts = {}) {
+  if (reduced) {
+    return FadeOut.duration(REDUCED_MOTION_FADE_MS).reduceMotion(ReduceMotion.Never);
+  }
+  const { preset = 'calm' } = opts;
+  const s = SPRING_PRESETS[preset];
+  return FadeOutDown.springify()
+    .damping(s.damping)
+    .stiffness(s.stiffness)
+    .mass(s.mass)
+    .reduceMotion(ReduceMotion.Never);
+}
+
+/**
+ * Staggered list/grid entrance. Delay = min(index, STAGGER_CAP) × STAGGER_MS so
+ * the last visible row is never delayed past ~400ms. Reduced: 200ms fade, no delay.
+ */
+export function staggeredEnter(index: number, reduced: boolean, opts: EnterOpts = {}) {
+  if (reduced) {
+    return FadeIn.duration(REDUCED_MOTION_FADE_MS).reduceMotion(ReduceMotion.Never);
+  }
+  const clamped = Math.min(Math.max(index, 0), STAGGER_CAP);
+  return enter(false, { ...opts, delayMs: clamped * STAGGER_MS });
+}
+
+/**
+ * Shared layout transition for lists that reorder / insert / delete. Returns
+ * `undefined` under reduced motion so the list reflows instantly instead of
+ * springing. Pass straight to a component's `layout` prop.
+ */
+export function listLayout(reduced: boolean) {
+  if (reduced) {
+    return undefined;
+  }
+  const s = SPRING_PRESETS.calm;
+  return LinearTransition.springify()
+    .damping(s.damping)
+    .stiffness(s.stiffness)
+    .mass(s.mass)
+    .reduceMotion(ReduceMotion.Never);
 }

@@ -12,6 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import { colorScheme, useColorScheme } from 'nativewind';
 import { useEffect } from 'react';
 import { View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import '../global.css';
 
 // Side-effect import: loading featureFlags.ts executes loadTierFlags(storage)
@@ -83,9 +84,14 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <HapticProvider>
-        <AppearanceSync />
+    // GestureHandlerRootView must wrap the whole tree so react-native-gesture-handler
+    // pans register (AnimatedSheet drag-to-dismiss). The official setup uses an inline
+    // `{ flex: 1 }` here — a sanctioned exception to convention #9 (NativeWind className
+    // is not wired onto this third-party host wrapper), matching the reanimated carve-out.
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <HapticProvider>
+          <AppearanceSync />
         <ThemedStatusBar />
         {/* App-wide auth context (web parity): one provider at the root so every
             screen — Settings included — reads the same hydrated session. Replaces
@@ -106,6 +112,7 @@ export default function RootLayout() {
           </View>
         </AuthProvider>
       </HapticProvider>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }
