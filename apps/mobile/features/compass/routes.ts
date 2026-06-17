@@ -9,6 +9,8 @@ export const COMPASS_ROUTES = {
   relationship: '/tools/relationship-health', // native Relationship Health tool
   mindmate: '/tools/mindmate', // S-MM — MindMate AI companion (native chat)
   clarity: '/tools/clarity', // S32 — Clarity Score (native flow)
+  clarityHistory: '/tools/clarity-history', // past Clarity snapshots (local-only)
+  relationshipHistory: '/tools/relationship-history', // past Relationship results (local-only)
   moodJournal: '/tools/mood-journal', // Mood Journal — patterns & triggers
   sleep: '/tools/sleep', // S29 Sleep Architect (native)
   toolkits: '/toolkits', // Toolkits Library (PLURAL — published toolkit list)
