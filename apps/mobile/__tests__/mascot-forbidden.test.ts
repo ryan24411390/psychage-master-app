@@ -58,10 +58,14 @@ describe('Storm Check sub-state guard', () => {
 
 describe('route-driven presence', () => {
   it('auto-selects the bound state for mapped routes', () => {
+    // Onboarding arc bound to its intended named states (all assets shipped). S4 = 'tilt'
+    // is valence-blind (registers the act); see mascot.surfaces.ts.
     expect(resolveMascotState({ pathname: '/onboarding/welcome' })).toBe('hi');
-    expect(resolveMascotState({ pathname: '/onboarding/naming' })).toBe('thoughtful');
-    expect(resolveMascotState({ pathname: '/onboarding/moment' })).toBe('seated');
-    expect(resolveMascotState({ pathname: '/onboarding/acknowledge' })).toBe('neutral');
+    expect(resolveMascotState({ pathname: '/onboarding/naming' })).toBe('guiding');
+    expect(resolveMascotState({ pathname: '/onboarding/moment' })).toBe('listening');
+    expect(resolveMascotState({ pathname: '/onboarding/acknowledge' })).toBe('tilt');
+    expect(resolveMascotState({ pathname: '/onboarding/orient' })).toBe('encouraging');
+    expect(resolveMascotState({ pathname: '/onboarding/founder' })).toBe('friendly');
     expect(resolveMascotState({ pathname: '/settings' })).toBe('friendly');
   });
 

@@ -14,21 +14,22 @@ export const TODAY_ROUTES: readonly string[] = ['/', '/today'];
 // Route-driven presence: a bare <Mascot /> (no props) auto-selects by active pathname.
 export const MASCOT_BY_ROUTE: Record<string, MascotState> = {
   // Onboarding Flow 1 (Welcome → naming → first Moment → acknowledge → orient → founder).
-  // The mascot arcs from host greeting, steps back to reflect, RECEDES while the user
-  // captures, RETURNS to settle, reinforces (host idle), then a warm closing beat.
-  // ASSET GAPS (flagged — no founder PNGs for these exact beats; mapped to the nearest
-  // shipped pose): there is no dedicated "recede / small-edge" pose ('seated' approximates)
-  // and no "acknowledge / slow-blink" pose ('neutral' + a single tiltSignal on S4
-  // approximates the tilt; the teal pulse is the single teal element's state change). The
-  // close screens have the same gap: no "scene" / "look-toward" / "founder" pose exists —
-  // S6 reuses 'neutral' (host idle, breathes; the look-toward is layout, not a pose) and
-  // S7 reuses 'friendly' (the warm secondary-neutral), the nearest shipped warmth.
+  // The host mascot carries the whole arc through its NAMED states — all assets shipped
+  // (mascot-<state>.png, see manifest.ts), so these are the intended poses, not stand-ins:
+  // greet → guide toward the act of naming → recede and listen while the user names →
+  // register the act → open warmly to the ready space → a warm closing beat. These are
+  // expressive poses, not idle neutrals, so none breathe (breath is reserved for the idle
+  // set in manifest.ts); the only motion on this arc is S4's one-shot tilt + the teal pulse.
+  // Reduced motion: every pose is already static.
+  //
+  // VALENCE-BLIND (S4): 'tilt' registers the ACT of naming and is identical for any feeling.
+  // Never 'accomplished'/'encouraging' on S4 — those would read as evaluating the feeling.
   '/onboarding/welcome': 'hi', // host greeting (one arm raised, waving)
-  '/onboarding/naming': 'thoughtful', // "what naming does" — steps back to reflect
-  '/onboarding/moment': 'seated', // receded while the user captures (calm, edge of frame)
-  '/onboarding/acknowledge': 'neutral', // returns + settles (idle → breathes); S4 fires the tilt
-  '/onboarding/orient': 'neutral', // S6 reinforcement — host idle (breathes); look-toward via layout
-  '/onboarding/founder': 'friendly', // S7 founder beat — warm secondary-neutral (no "scene" asset)
+  '/onboarding/naming': 'guiding', // directs the user toward the act of naming
+  '/onboarding/moment': 'listening', // recedes + listens; the user has the floor (never interferes)
+  '/onboarding/acknowledge': 'tilt', // registers the ACT (valence-blind); S4 also fires tiltSignal + teal pulse
+  '/onboarding/orient': 'encouraging', // warm host opening to the ready space
+  '/onboarding/founder': 'friendly', // warm closing beat
   '/settings': 'friendly',
   // Insights is a calm, reflective read surface — a fixed, non-reactive 'thoughtful' pose.
   // No time/theme override (not a Today route); resolveMascotState never reads logged mood.

@@ -13,16 +13,15 @@ import { ONBOARDING_COPY } from './copy';
 // S6 — orient reinforcement (Flow 1, the close). After the acknowledgment settles, one
 // calm screen restates the EVENT-INITIATED model: a Moment is noticed when the person
 // chooses, never on a schedule. This is NOT covered by the #132 tour (which introduces the
-// tabs), so it earns its own screen. The mascot returns to a host idle: route-auto
-// 'neutral' (an idle state → breathes) at host scale; the "look-toward the continue
-// action" is the layout (mascot above, primary in the thumb zone), not a pose — no
-// dedicated "look-toward" asset exists (flagged in mascot.surfaces.ts).
+// tabs), so it earns its own screen. The mascot opens warmly to the ready space: route-auto
+// 'encouraging' (a non-idle pose, so static) at host scale; the inviting read toward the
+// continue action is the layout (mascot above, primary in the thumb zone), not a pose.
 //
 // VALENCE-BLIND: takes no moment / valence / label input; the copy names no feeling.
 // Reduced motion: mascot static, settle fade skipped. Copy from ./copy (provisional
 // pending Dr. Dobson — see copy.ts header).
 
-const ORIENT_MASCOT_WIDTH = 110; // host idle, matching the settled scale of S4
+const ORIENT_MASCOT_WIDTH = 110; // host scale, matching S4
 
 export interface OrientViewProps {
   readonly reduced: boolean;
