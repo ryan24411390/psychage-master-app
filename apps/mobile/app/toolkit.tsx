@@ -2,6 +2,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 
 import { ExerciseFlow } from '@/features/toolkit/ExerciseFlow';
 import { resolveExercise } from '@/features/toolkit/exercises';
+import { goBackOr } from '@/lib/nav';
 
 // Toolkit route (S19–S21). Pushed full-screen, outside the tabs → chrome-minimal (no
 // tab bar). Reached from the Navigator's "Something steadying now" (S18) and, in future,
@@ -15,7 +16,7 @@ export default function ToolkitScreen() {
       <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
       <ExerciseFlow
         exercise={resolveExercise(exercise)}
-        onExit={() => router.back()}
+        onExit={() => goBackOr('/compass')}
         onHelp={() => router.push('/crisis')}
       />
     </>

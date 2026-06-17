@@ -156,7 +156,11 @@ export default function FindCareScreen() {
 
   const { fireHaptic } = useHaptics();
 
-  const [step, setStep] = useState<Step>(dl.configured && dl.stateName ? 'results' : 'location');
+  // Returning users with a saved location still pass through the needs-selection
+  // step (provider type) rather than being dumped straight onto the list — the
+  // location fast-path is preserved (no re-entering state), but "what kind of care"
+  // is asked each visit. First-time / unconfigured users start at location.
+  const [step, setStep] = useState<Step>(dl.configured && dl.stateName ? 'type' : 'location');
   const [loc, setLoc] = useState<string | null>(dl.stateName);
   const [city, setCity] = useState<string | null>(dl.city);
   const [typeSel, setTypeSel] = useState<{ id: string; label: string } | null>(null);
