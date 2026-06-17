@@ -12,7 +12,7 @@ import { goBackOr } from '@/lib/nav';
 // GlobalHeader keeps the crisis Help-now pill one tap away (SR-2). LOCAL-ONLY (SR-4).
 export default function InsightsRoute() {
   return (
-    <View>
+    <View className="flex-1 bg-background dark:bg-background-dark">
       <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
       <GlobalHeader />
       <InsightsView
