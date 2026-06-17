@@ -1,0 +1,26 @@
+apply plugin: 'com.android.library'
+
+group = 'expo.modules.psychagehaptics'
+version = '1.0.0'
+
+buildscript {
+  def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
+  if (expoModulesCorePlugin.exists()) {
+    apply from: expoModulesCorePlugin
+    applyKotlinExpoModulesCorePlugin()
+  }
+}
+
+android {
+  namespace "expo.modules.psychagehaptics"
+  compileSdkVersion 34
+
+  defaultConfig {
+    minSdkVersion 23
+    targetSdkVersion 34
+  }
+}
+
+dependencies {
+  implementation project(':expo-modules-core')
+}
