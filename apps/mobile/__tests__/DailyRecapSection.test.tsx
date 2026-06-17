@@ -8,7 +8,7 @@ import type { DailyEntry } from '@/lib/daily-rollup';
 // SR rails: no percentage / score / verdict in the rendered tree.
 
 const TODAY = () => new Date(2026, 5, 17); // 2026-06-17
-const entry = (date: string): DailyEntry => ({ id: date, date, state: 2 });
+const entry = (date: string): DailyEntry => ({ id: date, date, state: 2, low: 2, high: 2, count: 1 });
 
 describe('DailyRecapSection', () => {
   it('renders the presence calendar, factual weekly line, and energy note', () => {

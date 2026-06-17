@@ -13,6 +13,7 @@ import {
 import {
   connectingSegments,
   entryDotY,
+  hasBand,
   TERRAIN_BASELINE_Y,
   TERRAIN_HEIGHT,
   type TerrainDay,
@@ -191,8 +192,12 @@ function buildTerrainSvg(days: readonly TerrainDay[]): string {
     .map((day, i) => {
       const x = round(xFor(i, count, SVG_WIDTH));
       if (typeof day.value === 'number') {
-        // Entry dot: tint fill + INK RING (the grayscale-safe rescue), height = state.
-        return `<circle cx="${x}" cy="${round(entryDotY(day.value))}" r="${terrainTokens.dot.radius}" fill="${moodTint(day.value)}" stroke="${INK_RING}" stroke-width="${terrainTokens.dot.ringWidth}"/>`;
+        // Multi-modal day → a low→high capsule (height-encoded ⇒ grayscale-safe), under the dot.
+        const band = hasBand(day)
+          ? `<line x1="${x}" y1="${round(entryDotY(day.high))}" x2="${x}" y2="${round(entryDotY(day.value))}" stroke="${moodTint(day.value)}" stroke-width="${terrainTokens.dot.radius}" stroke-linecap="round"/>`
+          : '';
+        // Entry dot: tint fill + INK RING (the grayscale-safe rescue), height = worst-of-day state.
+        return `${band}<circle cx="${x}" cy="${round(entryDotY(day.value))}" r="${terrainTokens.dot.radius}" fill="${moodTint(day.value)}" stroke="${INK_RING}" stroke-width="${terrainTokens.dot.ringWidth}"/>`;
       }
       // No-entry day: hollow ink ring at the baseline (never omitted).
       return `<circle cx="${x}" cy="${TERRAIN_BASELINE_Y}" r="${terrainTokens.noEntryDot.radius}" fill="none" stroke="${INK_RING}" stroke-width="1.2"/>`;
@@ -293,7 +298,8 @@ export function buildTherapistPdfHtml(input: TherapistPdfInput): string {
   const days = enumerateDays(from, to);
   const terrainDays: TerrainDay[] = days.map((d) => {
     const e = byDate.get(d);
-    return { label: d.slice(8, 10), value: e ? e.state : null };
+    const high = e && e.high > e.state ? e.high : undefined;
+    return { label: d.slice(8, 10), value: e ? e.state : null, ...(high !== undefined ? { high } : {}) };
   });
 
   const dayCount = days.length;

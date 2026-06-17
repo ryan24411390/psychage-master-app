@@ -31,7 +31,13 @@ export type TerrainDay = {
   readonly label: string;
   /** Full day name for VoiceOver, e.g. "Tuesday"; defaults to `label`. */
   readonly fullLabel?: string;
+  /** Worst-of-day state (the dot sits here). For a multi-modal day this is the LOW end. */
   readonly value: TerrainValue;
+  /**
+   * Best-of-day state, present only for numeric days that spanned a range (`high > value`).
+   * When set the day renders as a low→high band, not a single dot — the honest span.
+   */
+  readonly high?: DailyState;
 };
 
 export type TerrainPoint = { readonly x: number; readonly y: number };
@@ -87,10 +93,16 @@ export function connectingSegments(
   return segments;
 }
 
-/** Tonally-flat VoiceOver label for a day. */
+/** Whether this day spans a range (low→high) and should render as a band, not a dot. */
+export function hasBand(day: TerrainDay): day is TerrainDay & { value: DailyState; high: DailyState } {
+  return typeof day.value === 'number' && day.high !== undefined && day.high > day.value;
+}
+
+/** Tonally-flat VoiceOver label for a day. Banded days read low→high (e.g. "Low to Good"). */
 export function dayA11yLabel(day: TerrainDay): string {
   const full = day.fullLabel ?? day.label;
   if (day.value === 'today') return 'Today: not yet.';
   if (day.value === null) return `${full}: no entry.`;
+  if (hasBand(day)) return `${full}: ${STATE_LABELS[day.value]} to ${STATE_LABELS[day.high]}.`;
   return `${full}: ${STATE_LABELS[day.value]}.`;
 }

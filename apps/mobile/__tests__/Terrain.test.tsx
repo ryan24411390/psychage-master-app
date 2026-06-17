@@ -2,6 +2,7 @@ import { render } from '@testing-library/react-native';
 
 import { Terrain } from '@/components/terrain/Terrain';
 import {
+  entryDotY,
   TERRAIN_BASELINE_Y,
   TERRAIN_MIDLINE_Y,
   type TerrainDay,
@@ -22,6 +23,22 @@ function collectCircles(node: any, out: Record<string, number>[] = []): Record<s
       out.push(node.props ?? {});
     }
     if (node.children) collectCircles(node.children, out);
+  }
+  return out;
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: walking the untyped RNTL JSON tree
+function collectLines(node: any, out: Record<string, number>[] = []): Record<string, number>[] {
+  if (!node) return out;
+  if (Array.isArray(node)) {
+    for (const child of node) collectLines(child, out);
+    return out;
+  }
+  if (typeof node === 'object') {
+    if (typeof node.type === 'string' && node.type.toLowerCase().includes('line')) {
+      out.push(node.props ?? {});
+    }
+    if (node.children) collectLines(node.children, out);
   }
   return out;
 }
@@ -80,5 +97,23 @@ describe('Terrain', () => {
     expect(Number(today?.cy)).toBeCloseTo(TERRAIN_MIDLINE_Y, 5);
     // baseline is the bottom band — distinctly below (greater y than) the midline
     expect(TERRAIN_BASELINE_Y).toBeGreaterThan(TERRAIN_MIDLINE_Y);
+  });
+
+  // A multi-modal day renders the honest low→high span: a vertical capsule from the
+  // worst-of-day dot up to the best, plus the spanned VoiceOver label.
+  it('renders a low→high band (a vertical line) for a multi-modal day', () => {
+    const banded: TerrainDay[] = [
+      { label: 'Fr', fullLabel: 'Friday', value: 1, high: 3 },
+      { label: 'Sa', fullLabel: 'Saturday', value: 2 },
+      { label: 'Su', fullLabel: 'Sunday', value: 'today' },
+    ];
+    const tree = render(<Terrain days={banded} width={318} />).toJSON();
+    expect(JSON.stringify(tree)).toContain('Friday: Low to Good.');
+    // The baseline is a horizontal line (y1 === y2); the band is vertical (x1 === x2),
+    // spanning from entryDotY(high) up to entryDotY(low).
+    const vertical = collectLines(tree).find((l) => Number(l.x1) === Number(l.x2));
+    expect(vertical).toBeDefined();
+    expect(Number(vertical?.y1)).toBeCloseTo(entryDotY(3), 5); // top = high
+    expect(Number(vertical?.y2)).toBeCloseTo(entryDotY(1), 5); // bottom = worst-of-day
   });
 });

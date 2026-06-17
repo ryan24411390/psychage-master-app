@@ -3,11 +3,14 @@ import { describe, expect, it } from 'vitest';
 
 import { buildEarlierWeeks, buildWeekReflection, type RangeStore } from '@/features/reflection/week';
 
-function entry(date: string, state: number, note?: string): CheckInEntry {
+function entry(date: string, state: number, note?: string, high: number = state): CheckInEntry {
   return {
     id: date,
     date: date as CheckInEntry['date'],
     state: state as CheckInEntry['state'],
+    low: state as CheckInEntry['state'],
+    high: high as CheckInEntry['state'],
+    count: high > state ? 2 : 1,
     ...(note ? { note } : {}),
   };
 }

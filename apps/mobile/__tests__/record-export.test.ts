@@ -4,20 +4,29 @@ import { describe, expect, it } from 'vitest';
 
 import { EXPORT_FORMAT_VERSION, readAllEntries, toCSV, toJSON } from '@/lib/export/record-export';
 
-const entry = (date: string, state: number, note?: string): CheckInEntry => ({
+const entry = (
+  date: string,
+  state: number,
+  note?: string,
+  high: number = state,
+): CheckInEntry => ({
   id: date,
   date: date as LocalCalendarDate,
   state: state as CheckInState,
+  low: state as CheckInState,
+  high: high as CheckInState,
+  count: high > state ? 2 : 1,
   ...(note !== undefined ? { note } : {}),
 });
 
 const ENTRIES = [entry('2026-06-13', 2), entry('2026-06-14', 4, 'felt, "ok", today\nyes')];
 
 describe('toJSON', () => {
-  it('serializes entries under the export format version', () => {
-    const parsed = JSON.parse(toJSON(ENTRIES));
-    expect(parsed.exportFormatVersion).toBe(EXPORT_FORMAT_VERSION);
-    expect(parsed.entries).toHaveLength(2);
+  it('serializes entries under the export format version, carrying the day range', () => {
+    const parsed = JSON.parse(toJSON([entry('2026-06-15', 1, undefined, 4)]));
+    expect(EXPORT_FORMAT_VERSION).toBe(2);
+    expect(parsed.exportFormatVersion).toBe(2);
+    expect(parsed.entries[0]).toMatchObject({ state: 1, low: 1, high: 4, count: 2 });
   });
 
   it('empty record → empty entries array', () => {
@@ -29,14 +38,21 @@ describe('toCSV', () => {
   it('emits the header and RFC4180-escapes a note with commas/quotes/newlines', () => {
     const csv = toCSV(ENTRIES);
     const lines = csv.split('\n');
-    expect(lines[0]).toBe('date,state,stateLabel,note');
-    expect(csv).toContain('2026-06-13,2,Okay,');
+    expect(lines[0]).toBe('date,state,stateLabel,high,highLabel,count,note');
+    // single-state day: state == high, count 1, empty note
+    expect(csv).toContain('2026-06-13,2,Okay,2,Okay,1,');
     // comma + doubled quotes + embedded newline, all inside one quoted field
     expect(csv).toContain('"felt, ""ok"", today\nyes"');
   });
 
+  it('a multi-modal day exports the worst→best span and the count', () => {
+    // state = worst-of-day (Very low), high = best-of-day (Good), 3 moments
+    const csv = toCSV([{ ...entry('2026-06-15', 0, undefined, 3), count: 3 }]);
+    expect(csv).toContain('2026-06-15,0,Very low,3,Good,3,');
+  });
+
   it('empty record → header only', () => {
-    expect(toCSV([])).toBe('date,state,stateLabel,note');
+    expect(toCSV([])).toBe('date,state,stateLabel,high,highLabel,count,note');
   });
 });
 

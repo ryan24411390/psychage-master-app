@@ -82,9 +82,10 @@ describe('HomeContainer (S3 live flow)', () => {
     expect(screen.queryByText('How are you right now?')).toBeNull();
   });
 
-  it('acute handoff (SR-2): lowest valence + a crisis word routes INTO crisis support', () => {
+  it('acute handoff (SR-2): lowest valence + a crisis word PERSISTS then routes INTO crisis support', () => {
     const crisisSpy = jest.fn();
-    renderWithProviders(<HomeContainer store={makeStore()} navigateToCrisis={crisisSpy} />, {
+    const store = makeStore();
+    renderWithProviders(<HomeContainer store={store} navigateToCrisis={crisisSpy} />, {
       haptics: true,
     });
 
@@ -94,6 +95,13 @@ describe('HomeContainer (S3 live flow)', () => {
     fireEvent.press(screen.getByRole('button', { name: 'Save this moment' }));
 
     expect(crisisSpy).toHaveBeenCalledTimes(1);
+    // Persist-then-route (the most clinically important moment is NEVER dropped for the
+    // route): the acute moment is in the store — present in history + the export rollup —
+    // carrying the flag.
+    const saved = store.getAll();
+    expect(saved).toHaveLength(1);
+    expect(saved[0]?.valence).toBe(1);
+    expect(saved[0]?.routedToSupport).toBe(true);
   });
 
   it('steadying bridge: Breathing chip navigates and "Not now" dismisses it', () => {

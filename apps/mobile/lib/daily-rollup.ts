@@ -7,16 +7,22 @@ import {
 // The day-rollup adapter — the bridge that lets the DAY-BASED surfaces (home view-
 // model, history continuum, reflection, cross-tool insights, therapist export) read
 // the EVENT-BASED Moments store without a redesign. It collapses the moment stream
-// into one representative entry per local calendar day:
+// into one entry per local calendar day that carries the day's RANGE, not a single
+// "representative" tap:
 //
-//   • state   = the latest moment of that day's valence, mapped 1..5 → 0..4
-//   • note    = the latest moment of that day's note (if any)
-//   • date/id = the local calendar day (id == date; one entry per day)
+//   • low/high = lowest / highest valence among that day's moments, mapped 1..5 → 0..4
+//   • state    = worst-of-day (== `low`) — the single scalar the grid/threshold/export
+//                surfaces use. NEVER the latest tap, NEVER a mean: a rough evening can
+//                never be hidden behind a later calm moment (the daily-collapse the
+//                momentary model exists to avoid).
+//   • count    = how many moments that day
+//   • note     = the worst-of-day moment's note (so the surfaced state + note are the
+//                SAME moment)
+//   • date/id  = the local calendar day (id == date; one entry per day)
 //
-// This is the SAME shape (`{ id, date, state, note }`) the retired CheckInEntry had,
-// so the downstream pure functions are unchanged — only their data source moved from
-// the check-in store to the Moments store. Read-only: there is no per-day write here
-// (capture appends a Moment; there is no daily edit).
+// `state` stays the ex-CheckInEntry scalar so the many `.state` consumers are unchanged;
+// surfaces that can show a span (the terrain band) read `low`/`high`. Read-only: there
+// is no per-day write here (capture appends a Moment; there is no daily edit).
 
 /** A 0..4 ordinal — the day-level affect the day-based surfaces consume (ex-CheckInState). */
 export type DailyState = 0 | 1 | 2 | 3 | 4;
@@ -34,12 +40,20 @@ export const DAILY_STATE_LABELS: readonly [string, string, string, string, strin
   'Very good',
 ];
 
-/** One representative entry per local calendar day, derived from that day's moments. */
+/** One entry per local calendar day, carrying that day's affect RANGE. */
 export interface DailyEntry {
   readonly id: string;
   /** Local calendar day `YYYY-MM-DD`. */
   readonly date: string;
+  /** Worst-of-day scalar (== `low`) — the single value the grid/threshold/export surfaces use. */
   readonly state: DailyState;
+  /** Lowest valence-state among the day's moments (worst-of-day). */
+  readonly low: DailyState;
+  /** Highest valence-state among the day's moments (best-of-day). */
+  readonly high: DailyState;
+  /** How many moments were captured that day (≥ 1). */
+  readonly count: number;
+  /** The worst-of-day moment's note, if any. */
   readonly note?: string;
 }
 
@@ -63,22 +77,41 @@ function localDateNow(now: Date): string {
 }
 
 /**
- * Collapse moments into one DailyEntry per local calendar day, oldest first. The
- * latest-timestamp moment of each day is the representative (its valence → state, its
- * note → note) — matching the day-rollup's representative rule.
+ * Collapse moments into one DailyEntry per local calendar day, oldest first. Each day
+ * carries its RANGE: `low`/`high` are the lowest/highest valence-state that day, `state`
+ * is worst-of-day (== `low`), `count` is the number of moments, and `note` is the
+ * worst-of-day moment's note. Never the latest tap, never a mean.
  */
 export function momentsToDailyEntries(moments: readonly Moment[]): DailyEntry[] {
   const ascending = [...moments].sort((a, b) =>
     a.timestamp < b.timestamp ? -1 : a.timestamp > b.timestamp ? 1 : 0,
   );
-  // Iterating ascending and overwriting per day leaves the LATEST moment as the value.
-  const latestByDay = new Map<string, Moment>();
-  for (const m of ascending) latestByDay.set(timestampToLocalCalendarDate(m.timestamp), m);
+  // Group EVERY moment by its local calendar day (ascending within each day).
+  const byDay = new Map<string, Moment[]>();
+  for (const m of ascending) {
+    const day = timestampToLocalCalendarDate(m.timestamp);
+    const bucket = byDay.get(day);
+    if (bucket) bucket.push(m);
+    else byDay.set(day, [m]);
+  }
 
   const entries: DailyEntry[] = [];
-  for (const [date, m] of latestByDay) {
-    const base = { id: date, date, state: valenceToState(m.valence) };
-    entries.push(m.note !== undefined && m.note.length > 0 ? { ...base, note: m.note } : base);
+  for (const [date, dayMoments] of byDay) {
+    // dayMoments is non-empty (a day exists only because a moment landed in it).
+    let worst = dayMoments[0] as Moment;
+    let low = valenceToState(worst.valence);
+    let high = low;
+    for (const m of dayMoments) {
+      const s = valenceToState(m.valence);
+      if (s < low) low = s;
+      if (s > high) high = s;
+      // `<=` keeps the LATEST moment among the lowest (ascending iteration), so `note`
+      // is the most recent expression of the day's worst.
+      if (s <= valenceToState(worst.valence)) worst = m;
+    }
+    const base = { id: date, date, state: low, low, high, count: dayMoments.length };
+    const note = worst.note;
+    entries.push(note !== undefined && note.length > 0 ? { ...base, note } : base);
   }
   return entries.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 }

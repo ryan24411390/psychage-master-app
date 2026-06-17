@@ -23,8 +23,13 @@ import {
 function ymd(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
-function entry(id: string, date: Date, state: 0 | 1 | 2 | 3 | 4): CheckInEntry {
-  return { id, date: asLocalCalendarDate(ymd(date)), state };
+function entry(
+  id: string,
+  date: Date,
+  state: 0 | 1 | 2 | 3 | 4,
+  high: 0 | 1 | 2 | 3 | 4 = state,
+): CheckInEntry {
+  return { id, date: asLocalCalendarDate(ymd(date)), state, low: state, high, count: high > state ? 2 : 1 };
 }
 
 function memStorage(): Storage {
@@ -204,6 +209,14 @@ describe('buildTerrainDaysFromEntries', () => {
     expect(days).toHaveLength(14);
     expect(days[13]?.value).toBe('today');
     expect(days[0]?.value).toBeNull();
+  });
+
+  it('carries a multi-modal day as a worst→best band (value = worst, high = best)', () => {
+    const today = new Date(2026, 5, 14);
+    // a day that ranged from Very low (0) up to Good (3)
+    const days = buildTerrainDaysFromEntries([entry('a', today, 0, 3)], today);
+    expect(days[13]?.value).toBe(0); // dot anchored at worst-of-day
+    expect(days[13]?.high).toBe(3); // band reaches the best
   });
 });
 
