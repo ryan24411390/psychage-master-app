@@ -1,5 +1,6 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Check } from 'lucide-react-native';
 
@@ -29,9 +30,8 @@ import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 // AUTH IS CALM: inline error lines under fields, never a shake. `onSubmit` fires only
 // when every field validates locally AND the terms are accepted.
 
-// Legal link targets are placeholders pending legal/Dr. Dobson (CLAUDE.md §7).
-const TERMS_URL = 'https://psychage.app/terms';
-const PRIVACY_URL = 'https://psychage.app/privacy';
+// Terms/Privacy now open the in-app screens (app/settings/terms, privacy-policy)
+// instead of external URLs. Their copy is FIXTURE pending legal/Dr. Dobson (CLAUDE.md §7).
 
 const NAME_LINE: Record<NameError, string> = { empty: AUTH_COPY.nameEmptyLine };
 const EMAIL_LINE: Record<EmailError, string> = {
@@ -184,7 +184,7 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
                   <Text
                     variant="bodySm"
                     className="text-primary underline dark:text-primary-dark"
-                    onPress={() => void Linking.openURL(TERMS_URL)}
+                    onPress={() => router.push('/settings/terms')}
                   >
                     {AUTH_COPY.termsLink}
                   </Text>
@@ -192,7 +192,7 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
                   <Text
                     variant="bodySm"
                     className="text-primary underline dark:text-primary-dark"
-                    onPress={() => void Linking.openURL(PRIVACY_URL)}
+                    onPress={() => router.push('/settings/privacy-policy')}
                   >
                     {AUTH_COPY.privacyLink}
                   </Text>
