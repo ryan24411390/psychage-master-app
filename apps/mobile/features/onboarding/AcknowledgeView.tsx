@@ -28,7 +28,7 @@ import { ONBOARDING_COPY } from './copy';
 // the 'tilt' registers the ACT of naming, not the valence of what was named. Never
 // 'accomplished'/'encouraging' here (those would read as evaluating the feeling).
 
-const ACK_MASCOT_WIDTH = 110;
+const ACK_MASCOT_WIDTH = 143;
 
 export interface AcknowledgeViewProps {
   readonly reduced: boolean;

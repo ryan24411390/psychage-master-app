@@ -33,7 +33,7 @@ export interface OnboardingMomentCaptureProps {
   readonly navigateToCrisis?: () => void;
 }
 
-const RECEDED_WIDTH = 56; // small, edge-of-frame — the capture sheet has the focus
+const RECEDED_WIDTH = 73; // small, edge-of-frame — the capture sheet has the focus
 
 export function OnboardingMomentCapture({
   store,

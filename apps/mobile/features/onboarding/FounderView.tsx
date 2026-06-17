@@ -24,7 +24,7 @@ import { ONBOARDING_COPY } from './copy';
 // (moment.tsx); continue only replaces to home. Reduced motion: mascot static, settle fade
 // skipped. Copy from ./copy (provisional pending Dr. Dobson — see copy.ts header).
 
-const FOUNDER_MASCOT_WIDTH = 110;
+const FOUNDER_MASCOT_WIDTH = 143;
 
 export interface FounderViewProps {
   readonly reduced: boolean;
