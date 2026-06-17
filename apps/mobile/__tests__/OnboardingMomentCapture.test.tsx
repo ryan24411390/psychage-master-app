@@ -50,7 +50,10 @@ const { OnboardingMomentCapture } = require('@/features/onboarding/OnboardingMom
 
 function makeStore() {
   const append = jest.fn((draft: unknown) => ({ id: 'm0', ...(draft as object) }));
-  return { append } as unknown as EngagementStore & { append: jest.Mock };
+  // getAll backs the silent milestone-1 mark on save (recordCount reads the total).
+  return { append, getAll: () => [{ id: 'm0' }] } as unknown as EngagementStore & {
+    append: jest.Mock;
+  };
 }
 
 describe('OnboardingMomentCapture (S3)', () => {
