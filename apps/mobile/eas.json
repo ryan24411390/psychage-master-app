@@ -1,10 +1,18 @@
 {
   "cli": {
-    "version": ">=20.0.0",
+    "version": "20.2.0",
     "appVersionSource": "remote",
     "requireCommit": false
   },
   "build": {
+    "simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "node": "22.22.3",
+      "ios": {
+        "simulator": true
+      }
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",
