@@ -13,16 +13,22 @@ export const TODAY_ROUTES: readonly string[] = ['/', '/today'];
 
 // Route-driven presence: a bare <Mascot /> (no props) auto-selects by active pathname.
 export const MASCOT_BY_ROUTE: Record<string, MascotState> = {
-  // Onboarding Flow 1 (Welcome → naming → first Moment → acknowledge). The mascot arcs from
-  // host greeting, steps back to reflect, RECEDES while the user captures, then RETURNS.
+  // Onboarding Flow 1 (Welcome → naming → first Moment → acknowledge → orient → founder).
+  // The mascot arcs from host greeting, steps back to reflect, RECEDES while the user
+  // captures, RETURNS to settle, reinforces (host idle), then a warm closing beat.
   // ASSET GAPS (flagged — no founder PNGs for these exact beats; mapped to the nearest
   // shipped pose): there is no dedicated "recede / small-edge" pose ('seated' approximates)
   // and no "acknowledge / slow-blink" pose ('neutral' + a single tiltSignal on S4
-  // approximates the tilt; the teal pulse is the single teal element's state change).
+  // approximates the tilt; the teal pulse is the single teal element's state change). The
+  // close screens have the same gap: no "scene" / "look-toward" / "founder" pose exists —
+  // S6 reuses 'neutral' (host idle, breathes; the look-toward is layout, not a pose) and
+  // S7 reuses 'friendly' (the warm secondary-neutral), the nearest shipped warmth.
   '/onboarding/welcome': 'hi', // host greeting (one arm raised, waving)
   '/onboarding/naming': 'thoughtful', // "what naming does" — steps back to reflect
   '/onboarding/moment': 'seated', // receded while the user captures (calm, edge of frame)
   '/onboarding/acknowledge': 'neutral', // returns + settles (idle → breathes); S4 fires the tilt
+  '/onboarding/orient': 'neutral', // S6 reinforcement — host idle (breathes); look-toward via layout
+  '/onboarding/founder': 'friendly', // S7 founder beat — warm secondary-neutral (no "scene" asset)
   '/settings': 'friendly',
   // Insights is a calm, reflective read surface — a fixed, non-reactive 'thoughtful' pose.
   // No time/theme override (not a Today route); resolveMascotState never reads logged mood.
