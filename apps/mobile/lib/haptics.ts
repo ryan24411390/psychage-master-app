@@ -75,21 +75,25 @@ export function fireHaptic(event: HapticEvent, isEnabled: () => boolean): void {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); // → haptic.error._expo
       return;
     case 'complete':
-      if (Platform.OS === 'ios' && PsychageHapticsModule) {
+      // Guard the METHOD, not just the module: requireOptionalNativeModule returns null
+      // when the native module is absent (Android, or an iOS binary built before the
+      // Swift module existed), and a version-skewed binary may expose the module without
+      // this method. Either way, fall back to the JS sequence rather than throw.
+      if (Platform.OS === 'ios' && PsychageHapticsModule?.playCompleteSequence) {
         PsychageHapticsModule.playCompleteSequence();
       } else {
         runSequence(sequences[event], isEnabled);
       }
       return;
     case 'breathIn':
-      if (Platform.OS === 'ios' && PsychageHapticsModule) {
+      if (Platform.OS === 'ios' && PsychageHapticsModule?.playBreathIn) {
         PsychageHapticsModule.playBreathIn();
       } else {
         runSequence(sequences[event], isEnabled);
       }
       return;
     case 'breathOut':
-      if (Platform.OS === 'ios' && PsychageHapticsModule) {
+      if (Platform.OS === 'ios' && PsychageHapticsModule?.playBreathOut) {
         PsychageHapticsModule.playBreathOut();
       } else {
         runSequence(sequences[event], isEnabled);
