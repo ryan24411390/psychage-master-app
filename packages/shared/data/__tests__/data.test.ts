@@ -15,6 +15,12 @@ import {
   CHECKIN_PERSISTENCE_ENABLED,
   writeCheckIn,
 } from '../checkin-gate';
+import {
+  MOMENT_CONFLICT_TARGET,
+  MOMENT_PERSISTENCE_ENABLED,
+  readMoments,
+  writeMoment,
+} from '../moment-gate';
 import * as barrel from '../index';
 import { DATA_SCHEMA_VERSION, migratorCount, runForwardMigrations } from '../migrations';
 import type { WriteContext } from '../types';
@@ -139,6 +145,64 @@ describe('check-in gate', () => {
     expect('writeCheckIn' in barrel).toBe(true);
     expect('CHECKIN_PERSISTENCE_ENABLED' in barrel).toBe(true);
     expect('CHECK_IN_DAY_CONFLICT_TARGET' in barrel).toBe(true);
+  });
+});
+
+// ── Moments gate (ON — the evolved check-in, ADR-001 / SR-4 carve-out) ────────
+
+describe('moments gate', () => {
+  it('MOMENT_PERSISTENCE_ENABLED is true', () => {
+    expect(MOMENT_PERSISTENCE_ENABLED).toBe(true);
+  });
+
+  it('writeMoment upserts the stamped row on the client-minted id (idempotent)', async () => {
+    const capture = emptyCapture();
+    const client = makeClient({ single: { id: 'mm1' } }, capture);
+    await writeMoment(
+      client,
+      {
+        id: 'mm1',
+        user_id: 'u1',
+        experienced_at: '2026-06-17T09:00:00.000Z',
+        valence: 4,
+        labels: ['steady'],
+        context: ['work'],
+        routed_to_support: false,
+      },
+      ctx,
+    );
+    expect(capture.table).toBe('moments');
+    expect(capture.upsert).toMatchObject({
+      id: 'mm1',
+      user_id: 'u1',
+      valence: 4,
+      labels: ['steady'],
+      context: ['work'],
+      routed_to_support: false,
+      device_id: 'dev-1',
+      client_version: 'mobile@1.0.0',
+      schema_version: DATA_SCHEMA_VERSION,
+    });
+    // Idempotency: a re-push of the same moment collides on the primary key.
+    expect(capture.upsertOptions).toEqual({ onConflict: MOMENT_CONFLICT_TARGET });
+    expect(MOMENT_CONFLICT_TARGET).toBe('id');
+    expect(capture.upsert).not.toHaveProperty('created_at');
+  });
+
+  it('readMoments selects from moments filtered by user (pull/restore lane)', async () => {
+    const capture = emptyCapture();
+    const rows = [{ id: 'm1', user_id: 'u1' }];
+    const client = makeClient({ rows }, capture);
+    const out = await readMoments(client, 'u1');
+    expect(capture.table).toBe('moments');
+    expect(capture.eq).toContainEqual(['user_id', 'u1']);
+    expect(out).toBe(rows);
+  });
+
+  it('writeMoment + readMoments are on the public barrel surface', () => {
+    expect('writeMoment' in barrel).toBe(true);
+    expect('readMoments' in barrel).toBe(true);
+    expect('MOMENT_PERSISTENCE_ENABLED' in barrel).toBe(true);
   });
 });
 

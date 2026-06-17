@@ -27,7 +27,7 @@ export {
 } from './auth-service';
 export { AuthProvider, useAuth } from './use-auth';
 export { useSocialSignIn } from './use-social-sign-in';
-export { mergeCheckInRecords, type MergeResult } from './migration/merge';
+export { mergeMomentRecords, type MergeResult } from './migration/merge';
 export {
   lastSevenDayWindow,
   runMigration,

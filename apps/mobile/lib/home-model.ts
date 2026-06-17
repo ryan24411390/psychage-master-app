@@ -1,4 +1,4 @@
-import type { CheckInEntry, CheckInState } from '@psychage/shared/check-in';
+import type { DailyEntry, DailyState } from '@/lib/daily-rollup';
 
 import type { ToolSummary } from '@/features/insights/aggregate';
 import type { HomeCard } from '@/components/home/home-card';
@@ -188,19 +188,18 @@ export function generateMoodInsight(days: TerrainDay[]): { headline: string; con
 
 // --- Live derivation from the RecordStore (sub-slice E) --------------------------
 
-// The subset of CheckInRecordStore the home consumes. Declared structurally so the
-// container can be render-tested with an in-memory double without importing the
-// shared package's runtime (Jest does not transform the workspace TS package).
+// The subset of the day-rollup reader the home consumes (READ-ONLY). The Moments
+// engine replaced the check-in: capture appends a Moment via the capture sheet, so
+// the home no longer writes through this surface. Declared structurally so the
+// container can be render-tested with an in-memory double.
 export interface HomeStore {
-  getToday(): CheckInEntry | undefined;
-  getRecent(n: number): CheckInEntry[];
-  saveToday(state: CheckInState, note?: string): CheckInEntry;
+  getToday(): DailyEntry | undefined;
+  getRecent(n: number): DailyEntry[];
   /**
-   * Entries within `[from, to]` inclusive (YYYY-MM-DD local-day strings), oldest
-   * first. Mirrors CheckInRecordStore.getRange — a read-only addition to the home's
-   * structural view of the store (the store's public op contract is unchanged).
+   * Day entries within `[from, to]` inclusive (YYYY-MM-DD local-day strings), oldest
+   * first. Mirrors the day-rollup reader's getRange.
    */
-  getRange(from: string, to: string): CheckInEntry[];
+  getRange(from: string, to: string): DailyEntry[];
 }
 
 /** Local YYYY-MM-DD — must match the RecordStore's toLocalCalendarDate so dates compare. */
@@ -219,7 +218,7 @@ export function deriveKind(hasAnyEntry: boolean, hasTodayEntry: boolean): HomeSt
 }
 
 /** Bridge card after a Low/Very-low check-in today; night register + very-low crisis append. */
-export function bridgeCardFor(todayState: CheckInState | undefined, hour: number): HomeCard | null {
+export function bridgeCardFor(todayState: DailyState | undefined, hour: number): HomeCard | null {
   if (todayState === undefined || todayState > 1) return null;
   return {
     kind: 'bridge',
@@ -230,11 +229,11 @@ export function bridgeCardFor(todayState: CheckInState | undefined, hour: number
 
 /** Build the terrain from RecordStore entries: entry → state, today gap → 'today', else null. */
 export function buildTerrainDaysFromEntries(
-  entries: readonly CheckInEntry[],
+  entries: readonly DailyEntry[],
   today: Date,
   n = 14,
 ): TerrainDay[] {
-  const byDate = new Map<string, CheckInState>();
+  const byDate = new Map<string, DailyState>();
   for (const e of entries) byDate.set(e.date, e.state);
   const todayStr = localCalendarDate(today);
   const labels = lastNDayLabels(today, n);

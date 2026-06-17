@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Alert } from 'react-native';
 
 jest.mock('expo-router', () => ({ router: { replace: jest.fn(), back: jest.fn() } }));
-jest.mock('@/lib/check-in-store', () => ({ resetCheckInStore: jest.fn() }));
+jest.mock('@/lib/moment-store', () => ({ resetMomentStore: jest.fn() }));
 jest.mock('@/lib/persistence/account-deletion', () => ({
   requestRemoteAccountDeletion: jest.fn(() => Promise.resolve({ ok: true, deleted: true })),
   clearAuthSessionLocal: jest.fn(() => Promise.resolve()),
@@ -12,12 +12,12 @@ jest.mock('@/lib/persistence/account-deletion', () => ({
 import DeleteConfirmScreen from '@/app/settings/delete-confirm';
 import { CT4_SETTINGS } from '@/features/settings/copy';
 import { storage } from '@/lib/adapters/storage';
-import { resetCheckInStore } from '@/lib/check-in-store';
+import { resetMomentStore } from '@/lib/moment-store';
 import { clearAuthSessionLocal, requestRemoteAccountDeletion } from '@/lib/persistence/account-deletion';
 
 import { renderWithProviders } from './_helpers';
 
-const resetMock = resetCheckInStore as jest.Mock;
+const resetMock = resetMomentStore as jest.Mock;
 const remoteMock = requestRemoteAccountDeletion as jest.Mock;
 const clearMock = clearAuthSessionLocal as jest.Mock;
 

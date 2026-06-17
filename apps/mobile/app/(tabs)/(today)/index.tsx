@@ -5,7 +5,7 @@ import { HomeContainer } from '@/components/home/HomeContainer';
 import { FirstRunTour } from '@/features/onboarding/FirstRunTour';
 import { useAuth } from '@/features/auth';
 import { storage } from '@/lib/adapters/storage';
-import { getCheckInStore } from '@/lib/check-in-store';
+import { getMomentStore } from '@/lib/moment-store';
 import { isOnboardingSeen, isWelcomeSeen } from '@/lib/persistence/onboarding';
 import { isTourSeen, markTourSeen } from '@/lib/persistence/tour';
 
@@ -23,7 +23,7 @@ import { isTourSeen, markTourSeen } from '@/lib/persistence/tour';
 export default function TodayScreen() {
   const { checkin } = useLocalSearchParams<{ checkin?: string }>();
   const { session } = useAuth();
-  const store = getCheckInStore();
+  const store = getMomentStore();
   const firstRun = store.getRecent(1).length === 0;
   const arrivingFromOnboarding = checkin === '1';
   // One-time cross-tab tour: after onboarding, on a normal launch (never over the

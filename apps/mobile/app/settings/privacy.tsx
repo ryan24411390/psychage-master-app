@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/Button';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
 import { CT4_SETTINGS } from '@/features/settings/copy';
-import { getCheckInStore, resetCheckInStore } from '@/lib/check-in-store';
+import { dailyRollupReader } from '@/lib/daily-rollup';
+import { getMomentStore, resetMomentStore } from '@/lib/moment-store';
 import { storage } from '@/lib/adapters/storage';
 import { readAllEntries, toCSV, toJSON } from '@/lib/export/record-export';
 import { type ExportFormat, shareRecordFile } from '@/lib/export/share-record';
 import { setReadingTextSize } from '@/lib/persistence/reading-text-size';
-import { setCheckInSyncConsent } from '@/lib/persistence/sync-consent';
+import { setMomentSyncConsent } from '@/lib/persistence/sync-consent';
 import { wipeLocalData } from '@/lib/persistence/wipe-local-data';
 import { useSyncConsent } from '@/lib/use-sync-consent';
 
@@ -29,13 +30,13 @@ export default function PrivacyScreen() {
   const [busy, setBusy] = useState(false);
   const [confirmingClear, setConfirmingClear] = useState(false);
   const [cleared, setCleared] = useState(false);
-  const { checkInSyncConsent, setCheckInSyncConsent: setConsent } = useSyncConsent();
+  const { momentSyncConsent, setMomentSyncConsent: setConsent } = useSyncConsent();
 
   const onExport = async (format: ExportFormat) => {
     if (busy) return;
     setBusy(true);
     try {
-      const entries = readAllEntries(getCheckInStore());
+      const entries = readAllEntries(dailyRollupReader(getMomentStore()));
       const content = format === 'json' ? toJSON(entries) : toCSV(entries);
       await shareRecordFile(format, content);
     } finally {
@@ -49,8 +50,8 @@ export default function PrivacyScreen() {
   // full account/remote cascade is the separate "Delete my record" flow (S47/S48).
   const onClear = () => {
     wipeLocalData(storage);
-    resetCheckInStore();
-    setCheckInSyncConsent(false);
+    resetMomentStore();
+    setMomentSyncConsent(false);
     setReadingTextSize('default');
     setConfirmingClear(false);
     setCleared(true);
@@ -67,7 +68,7 @@ export default function PrivacyScreen() {
           <SettingsToggleRow
             label={t.syncConsentLabel}
             description={t.syncConsentDescription}
-            value={checkInSyncConsent}
+            value={momentSyncConsent}
             onValueChange={setConsent}
             testID="sync-consent-toggle"
           />

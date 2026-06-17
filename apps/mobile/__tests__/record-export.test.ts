@@ -1,4 +1,5 @@
-import type { CheckInEntry, CheckInState, LocalCalendarDate } from '@psychage/shared/check-in';
+import type { DailyEntry as CheckInEntry, DailyState as CheckInState } from '@/lib/daily-rollup';
+import type { LocalCalendarDate } from '@psychage/shared/engagement';
 import { describe, expect, it } from 'vitest';
 
 import { EXPORT_FORMAT_VERSION, readAllEntries, toCSV, toJSON } from '@/lib/export/record-export';

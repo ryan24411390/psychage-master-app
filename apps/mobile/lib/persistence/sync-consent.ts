@@ -16,23 +16,32 @@
 import { storage } from '@/lib/adapters/storage';
 import type { Storage } from '@/lib/adapters/storage';
 
-export const SCHEMA_VERSION = 1 as const;
+// SCHEMA v2 (2026-06-17): adds `momentSyncConsent` — the SEPARATE consent gate for
+// the Moments engine (the evolved check-in). Moments sync is independent of the
+// legacy check-in sync, so it has its own flag; both default OFF (opt-in). The
+// v1→v2 migrator PRESERVES an existing checkInSyncConsent rather than reseeding it,
+// so a user who already opted into check-in backup isn't silently turned off.
+export const SCHEMA_VERSION = 2 as const;
 export const STORAGE_KEY = 'mobile:sync-consent';
 
 export interface SyncConsentState {
   readonly version: number;
+  /** Legacy check-in cloud-backup consent (check-in is being retired; kept for migration). */
   readonly checkInSyncConsent: boolean;
+  /** Moments cloud-sync consent (SR-4 / ADR-001 — the evolved check-in). Default OFF. */
+  readonly momentSyncConsent: boolean;
 }
 
 function seed(): SyncConsentState {
-  // Default OFF — explicit opt-in. No check-in leaves the device until consented.
-  return { version: SCHEMA_VERSION, checkInSyncConsent: false };
+  // Default OFF on both — explicit opt-in. Nothing leaves the device until consented.
+  return { version: SCHEMA_VERSION, checkInSyncConsent: false, momentSyncConsent: false };
 }
 
 /**
  * Parse + migrate the raw persisted JSON into the current schema.
  * - null / parse failure / non-object / missing version / future version → seed (OFF).
- * - matching version → pass-through (consent normalized to a strict boolean).
+ * - v1 → forward-migrate: keep checkInSyncConsent, add momentSyncConsent = false.
+ * - v2 → pass-through (each consent normalized to a strict boolean).
  */
 export function migrate(rawJson: string | null): SyncConsentState {
   if (rawJson === null) return seed();
@@ -46,11 +55,31 @@ export function migrate(rawJson: string | null): SyncConsentState {
 
   if (typeof parsed !== 'object' || parsed === null) return seed();
 
-  const e = parsed as { version?: unknown; checkInSyncConsent?: unknown };
+  const e = parsed as {
+    version?: unknown;
+    checkInSyncConsent?: unknown;
+    momentSyncConsent?: unknown;
+  };
   if (typeof e.version !== 'number') return seed();
+
+  // v1 → v2: a pre-Moments install carried only checkInSyncConsent. Forward-migrate
+  // by preserving it and defaulting the new moment consent OFF (never silently lose
+  // an explicit opt-in; never silently turn one ON).
+  if (e.version === 1) {
+    return {
+      version: SCHEMA_VERSION,
+      checkInSyncConsent: e.checkInSyncConsent === true,
+      momentSyncConsent: false,
+    };
+  }
+
   if (e.version !== SCHEMA_VERSION) return seed();
 
-  return { version: SCHEMA_VERSION, checkInSyncConsent: e.checkInSyncConsent === true };
+  return {
+    version: SCHEMA_VERSION,
+    checkInSyncConsent: e.checkInSyncConsent === true,
+    momentSyncConsent: e.momentSyncConsent === true,
+  };
 }
 
 /** DI-style read → migrate → write-back-if-needed (mirrors loadAppearance). */
@@ -95,9 +124,18 @@ export function setCheckInSyncConsent(on: boolean): void {
   write({ ...ensureLoaded(), checkInSyncConsent: on });
 }
 
+export function setMomentSyncConsent(on: boolean): void {
+  write({ ...ensureLoaded(), momentSyncConsent: on });
+}
+
 /** Pure read for the push gate (no React) — the user's check-in cloud-backup consent. */
 export function getCheckInSyncConsent(): boolean {
   return ensureLoaded().checkInSyncConsent;
+}
+
+/** Pure read for the Moments push/pull gate (no React) — the user's moment-sync consent. */
+export function getMomentSyncConsent(): boolean {
+  return ensureLoaded().momentSyncConsent;
 }
 
 /** Test seam: drop the in-memory cache + listeners so a fresh-storage test re-hydrates. */

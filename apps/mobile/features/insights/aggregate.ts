@@ -6,10 +6,10 @@
 // Educational framing only (SR-2/SR-3): no diagnostic language, no condition claims.
 // Navigator confidence is never surfaced here (SR-1 lives in the Navigator views).
 
-import type { CheckInEntry } from '@psychage/shared/check-in';
 import type { MomentEntry } from '@psychage/shared/mood-journal';
 import type { SleepEntry } from '@psychage/shared/sleep';
 
+import type { DailyEntry } from '@/lib/daily-rollup';
 import type { ClaritySnapshot } from '@/features/clarity/result-store';
 import type { NavigatorSnapshot } from '@/features/navigator/result-store';
 import type { RelationshipHealthResult } from '@/features/relationship-health/types';
@@ -32,7 +32,7 @@ export interface ToolSummary {
 
 /** Raw, already-read store records. Caller reads the singletons; this stays pure. */
 export interface InsightsInput {
-  readonly checkins: readonly CheckInEntry[];
+  readonly checkins: readonly DailyEntry[];
   readonly clarity: readonly ClaritySnapshot[];
   readonly navigator: readonly NavigatorSnapshot[];
   readonly relationship: readonly RelationshipHealthResult[];
@@ -41,7 +41,7 @@ export interface InsightsInput {
 }
 
 const TOOL_NAMES: Record<ToolKey, string> = {
-  checkin: 'Daily check-in',
+  checkin: 'Moments',
   clarity: 'Clarity Score',
   navigator: 'Symptom Navigator',
   relationship: 'Relationship Health',
@@ -99,7 +99,7 @@ export function buildToolSummaries(input: InsightsInput): ToolSummary[] {
     out.push({
       key: 'checkin',
       name: TOOL_NAMES.checkin,
-      metric: `${input.checkins.length} check-in${input.checkins.length === 1 ? '' : 's'}`,
+      metric: `${input.checkins.length} day${input.checkins.length === 1 ? '' : 's'} recorded`,
       count: input.checkins.length,
       lastAt,
       route: TOOL_ROUTES.checkin,

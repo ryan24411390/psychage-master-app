@@ -1,8 +1,8 @@
-import { CheckInRecordStore } from '@psychage/shared/check-in';
+import { MomentStore } from '@psychage/shared/engagement';
 import { describe, expect, it } from 'vitest';
 
 import type { Storage } from '@/lib/adapters/storage';
-import { CHECK_IN_STORAGE_KEY, KNOWN_LOCAL_KEYS } from '@/lib/persistence/known-keys';
+import { MOMENTS_STORAGE_KEY, KNOWN_LOCAL_KEYS } from '@/lib/persistence/known-keys';
 import { wipeLocalData } from '@/lib/persistence/wipe-local-data';
 
 function memStorage(): Storage {
@@ -24,15 +24,15 @@ describe('wipeLocalData (S48 local delete)', () => {
     const storage = memStorage();
     let clock = new Date(2026, 5, 14, 9, 0, 0);
     let n = 0;
-    const store = new CheckInRecordStore({
+    const store = new MomentStore({
       storage,
       now: () => clock,
       generateId: () => `id-${++n}`,
     });
 
-    store.saveToday(2);
+    store.append({ valence: 3 });
     clock = new Date(2026, 5, 15, 9, 0, 0);
-    store.saveToday(4);
+    store.append({ valence: 5 });
     expect(store.getRecent(50).length).toBe(2);
 
     // seed the other known pref keys
@@ -52,15 +52,15 @@ describe('wipeLocalData (S48 local delete)', () => {
 
     // A fresh store bound to the now-empty disk has no entries (proves the disk
     // wipe independently of any live-instance reset).
-    const fresh = new CheckInRecordStore({ storage, now: () => clock, generateId: () => 'x' });
+    const fresh = new MomentStore({ storage, now: () => clock, generateId: () => 'x' });
     expect(fresh.getRecent(50)).toEqual([]);
-    expect(fresh.getToday()).toBeUndefined();
+    expect(fresh.getAll()).toEqual([]);
   });
 
   it('sweeps dynamic :quarantine: keys that have no static registry entry', () => {
     const storage = memStorage();
     // A corrupt-blob quarantine key — dynamically suffixed, not in KNOWN_LOCAL_KEYS.
-    const quarantineKey = `${CHECK_IN_STORAGE_KEY}:quarantine:2026-06-15T00:00:00.000Z-abc123`;
+    const quarantineKey = `${MOMENTS_STORAGE_KEY}:quarantine:2026-06-15T00:00:00.000Z-abc123`;
     storage.set(quarantineKey, JSON.stringify({ corrupt: true }));
     storage.set('mobile:appearance', JSON.stringify({ version: 1, mode: 'night' }));
 

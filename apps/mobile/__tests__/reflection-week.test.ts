@@ -1,4 +1,4 @@
-import type { CheckInEntry } from '@psychage/shared/check-in';
+import type { DailyEntry as CheckInEntry } from '@/lib/daily-rollup';
 import { describe, expect, it } from 'vitest';
 
 import { buildEarlierWeeks, buildWeekReflection, type RangeStore } from '@/features/reflection/week';

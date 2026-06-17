@@ -22,6 +22,7 @@ export type {
   OnboardingReason,
   PremiumStatus,
   CheckInRecord,
+  MomentRecord,
   DurationCategory,
   MatchedConditionSummary,
   NavigatorHistoryRecord,
@@ -56,6 +57,16 @@ export {
   CheckInPersistenceDisabledError,
   writeCheckIn,
 } from './checkin-gate';
+
+// ── Moments WRITE + READ path (the evolved check-in — ADR-001 / SR-4 carve-out) ─
+export {
+  type MomentInput,
+  MOMENT_PERSISTENCE_ENABLED,
+  MOMENT_CONFLICT_TARGET,
+  MomentPersistenceDisabledError,
+  writeMoment,
+  readMoments,
+} from './moment-gate';
 
 // ── Live read/write wrappers ──────────────────────────────────────────────────
 export {

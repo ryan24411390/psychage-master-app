@@ -1,7 +1,7 @@
-import type { CheckInState } from '@psychage/shared/check-in';
+import type { DailyState } from '@/lib/daily-rollup';
 
 import { terrainTokens } from '@/lib/a1-tokens';
-import { STATE_LABELS } from '@/lib/check-in-labels';
+import { DAILY_STATE_LABELS as STATE_LABELS } from '@/lib/daily-rollup';
 
 // Pure port of the v5 renderTerrain() math, parameterized for row COUNT + WIDTH
 // (the order's two parameters; height is fixed to v5's proportions). React-free
@@ -24,7 +24,7 @@ import { STATE_LABELS } from '@/lib/check-in-labels';
 //    token and the render agree on "baseline"; the code keeps reading baselineFraction
 //    because that is what the no-entry dot must sit ON.
 
-export type TerrainValue = CheckInState | null | 'today';
+export type TerrainValue = DailyState | null | 'today';
 
 export type TerrainDay = {
   /** Visual column label, e.g. "Tu". */
@@ -55,7 +55,7 @@ export function xFor(index: number, count: number, width: number): number {
 }
 
 /** Entry dot center y for a state, from its proportional fill (higher = up). */
-export function entryDotY(state: CheckInState): number {
+export function entryDotY(state: DailyState): number {
   const fill = terrainTokens.fillByState[state] / 100;
   return TERRAIN_BASELINE_Y - fill * (TERRAIN_BASELINE_Y - TOP_INSET);
 }

@@ -8,7 +8,7 @@ import { lastSevenDayWindow, runMigration, type MigrationStatus } from '@/featur
 // transitive check-in-store → Supabase/MMKV chain never loads in Jest-rendered
 // paths that import the barrel (check-in-store.ts header).
 import { productionMigrationRemote } from '@/features/auth/migration/remote';
-import { getCheckInStore } from '@/lib/check-in-store';
+import { getMomentStore } from '@/lib/moment-store';
 
 // S36 — Migration progress (THE LAUNCH-BLOCKER SURFACE). Reads the local record
 // (last 7 days, the TTL window — rules/auth.md §4) and runs the merge LOCALLY, then
@@ -28,7 +28,7 @@ export default function MigrateScreen() {
     void runMigration({
       readLocalEntries: () => {
         const { from, to } = lastSevenDayWindow(new Date());
-        return getCheckInStore().getRange(from, to);
+        return getMomentStore().getRange(from, to);
       },
       remote: productionMigrationRemote,
     }).then((outcome) => {

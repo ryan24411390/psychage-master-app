@@ -1,4 +1,4 @@
-import type { CheckInEntry, CheckInState } from '@psychage/shared/check-in';
+import type { DailyEntry, DailyState } from '@/lib/daily-rollup';
 
 import type { TerrainDay } from '@/components/terrain/terrain-geometry';
 import { priorWeekBounds, REFLECTION_MIN_ENTRIES } from '@/lib/home-model';
@@ -24,7 +24,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 /** The minimal store surface S9/S10 consume — just the inclusive range read. */
 export interface RangeStore {
-  getRange(from: string, to: string): CheckInEntry[];
+  getRange(from: string, to: string): DailyEntry[];
 }
 
 export interface ReflectionNote {
@@ -70,7 +70,7 @@ export function buildWeekReflection(
   weekStartIso: string,
   weekEndIso: string,
 ): WeekReflection {
-  const byDate = new Map<string, CheckInEntry>();
+  const byDate = new Map<string, DailyEntry>();
   for (const e of store.getRange(weekStartIso, weekEndIso)) {
     byDate.set(e.date as string, e);
   }
@@ -78,7 +78,7 @@ export function buildWeekReflection(
   const start = parseIso(weekStartIso);
   const days: TerrainDay[] = [];
   const notes: ReflectionNote[] = [];
-  const states: CheckInState[] = [];
+  const states: DailyState[] = [];
 
   DAYS.forEach(([abbr, full], i) => {
     const iso = toIso(addDays(start, i));

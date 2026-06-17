@@ -1,6 +1,4 @@
-import type { CheckInEntry, LocalCalendarDate } from '@psychage/shared/check-in';
-
-import { STATE_LABELS } from '@/lib/check-in-labels';
+import { DAILY_STATE_LABELS as STATE_LABELS, type DailyEntry as CheckInEntry } from '@/lib/daily-rollup';
 
 // S46 export serialization — pure, Vitest-testable. TYPE-ONLY import of the shared
 // types (erased at compile) so this module loads in a Jest render path without
@@ -14,15 +12,13 @@ import { STATE_LABELS } from '@/lib/check-in-labels';
 // this module needs no runtime import from the shared package.
 export const EXPORT_FORMAT_VERSION = 1 as const;
 
-// Wide lexical bounds: LocalCalendarDate is fixed-width YYYY-MM-DD, so lexical
-// order == chronological. getRange is inclusive, so this captures every entry.
-// Cast (not asLocalCalendarDate) keeps the import type-only — both strings are
-// valid calendar dates, and getRange only string-compares.
-const MIN_DATE = '0000-01-01' as LocalCalendarDate;
-const MAX_DATE = '9999-12-31' as LocalCalendarDate;
+// Wide lexical bounds: the day key is fixed-width YYYY-MM-DD, so lexical order ==
+// chronological. getRange is inclusive, so this captures every day entry.
+const MIN_DATE = '0000-01-01';
+const MAX_DATE = '9999-12-31';
 
 interface ReadableStore {
-  getRange(from: LocalCalendarDate, to: LocalCalendarDate): CheckInEntry[];
+  getRange(from: string, to: string): CheckInEntry[];
 }
 
 /** Read every entry (oldest first) — the sanctioned all-entries read path. */

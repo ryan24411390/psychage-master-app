@@ -15,7 +15,7 @@ import { ScrollView, View } from 'react-native';
 import { MoodGlyphFace, MOOD_STATES } from '@/components/icon-system/mood';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
-import { STATE_LABELS } from '@/lib/check-in-labels';
+import { DAILY_STATE_LABELS as STATE_LABELS } from '@/lib/daily-rollup';
 
 function MoodRow() {
   return (

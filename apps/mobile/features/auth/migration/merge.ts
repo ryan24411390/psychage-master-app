@@ -1,46 +1,30 @@
-import type { CheckInEntry, LocalCalendarDate } from '@psychage/shared/check-in';
+import { type Moment, mergeMoments } from '@psychage/shared/engagement';
 
-// Anonymous → account check-in MERGE. LOCAL + Vitest-testable; this is the part of
-// the upgrade (Flow 9 / SYS-S5) that must NEVER lose an entry — losing a single
-// local entry during upgrade is a launch blocker.
+// Anonymous → account MOMENTS merge. LOCAL + Vitest-testable; this is the part of the
+// upgrade (Flow 9 / SYS-S5) that must NEVER lose a moment — losing local data during
+// upgrade is a launch blocker.
 //
-// Rule: union by calendar DATE. Every distinct date from either set appears exactly
-// once in the result — no entry is discarded. On a same-day collision the LOCAL
-// (upgrade-time) entry wins.
-//
-// FLAGGED TIEBREAKER: the brief says "same-day conflicts keep the newer save", but
-// CheckInEntry is {id,date,state,note?} with NO savedAt timestamp, and a single store
-// holds at most one entry per day (date is its Map key). A true same-day collision can
-// only arise across two SETS (local vs account). With no per-entry timestamp, "newer
-// save" is interpreted as the LOCAL set — the data the user is actively upgrading is
-// the most recent truth at the upgrade moment. In V1 the account side is empty (a fresh
-// account; rules/auth.md §4 — one-way, one-time, no account-merge), so no real collision
-// occurs; this resolution is the forward-looking generalisation. If true timestamp LWW
-// is ever required, that needs a `savedAt` field + a versioned migrator (Sacred Rule #13).
+// Moments are append-only and carry a CLIENT-MINTED id, so the merge is a union BY ID
+// (not by calendar day, as the retired check-in merge was): every distinct id from
+// either set appears once. A shared id means the same capture exists on both sides
+// (the local copy already synced); local wins the tie. In V1 the account side is empty
+// (a fresh account; rules/auth.md §4 — one-way, one-time, no account-merge), so no real
+// collision occurs; this is the forward-looking generalisation.
 
 export interface MergeResult {
-  /** Union of both sets, one entry per date, sorted ascending by date. */
-  readonly merged: readonly CheckInEntry[];
-  /** Count of dates present in BOTH sets (resolved local-wins). */
+  /** Union of both sets, one moment per id, sorted ascending by timestamp. */
+  readonly merged: readonly Moment[];
+  /** Count of ids present in BOTH sets (resolved local-wins). */
   readonly conflictsResolved: number;
 }
 
-export function mergeCheckInRecords(
-  accountEntries: readonly CheckInEntry[],
-  localEntries: readonly CheckInEntry[],
+export function mergeMomentRecords(
+  accountMoments: readonly Moment[],
+  localMoments: readonly Moment[],
 ): MergeResult {
-  const byDate = new Map<LocalCalendarDate, CheckInEntry>();
-  for (const entry of accountEntries) byDate.set(entry.date, entry);
-
+  const accountIds = new Set(accountMoments.map((m) => m.id));
   let conflictsResolved = 0;
-  for (const entry of localEntries) {
-    if (byDate.has(entry.date)) conflictsResolved += 1; // local overrides account same-day
-    byDate.set(entry.date, entry);
-  }
+  for (const m of localMoments) if (accountIds.has(m.id)) conflictsResolved += 1;
 
-  // YYYY-MM-DD is fixed-width, so lexical order equals chronological order.
-  const merged = [...byDate.values()].sort((a, b) =>
-    a.date < b.date ? -1 : a.date > b.date ? 1 : 0,
-  );
-  return { merged, conflictsResolved };
+  return { merged: mergeMoments(localMoments, accountMoments), conflictsResolved };
 }

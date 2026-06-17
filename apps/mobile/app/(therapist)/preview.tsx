@@ -13,8 +13,9 @@ import {
 } from '@/features/therapist';
 import type { TherapistToolSummaries } from '@/features/therapist/pdf/build-html';
 import { expoPdfPrinter } from '@/features/therapist/pdf/expo-printer';
-import type { LocalCalendarDate } from '@psychage/shared/check-in';
-import { getCheckInStore } from '@/lib/check-in-store';
+import type { LocalCalendarDate } from '@psychage/shared/engagement';
+import { dailyRollupReader } from '@/lib/daily-rollup';
+import { getMomentStore } from '@/lib/moment-store';
 import { getClarityStore } from '@/lib/clarity-store';
 import { getMoodJournalStore } from '@/lib/mood-journal-store';
 import { getNavigatorStore } from '@/lib/navigator-store';
@@ -104,7 +105,7 @@ export default function PreviewScreen() {
 
   const data = useMemo(() => {
     const { from, to } = windowForDays(new Date(), days);
-    const entries = getCheckInStore().getRange(from, to);
+    const entries = dailyRollupReader(getMomentStore()).getRange(from, to);
     const byDate = new Map(entries.map((entry) => [entry.date, entry]));
     const terrainDays: TerrainDay[] = enumerateDays(from, to).map((d) => {
       const entry = byDate.get(d);

@@ -1,8 +1,8 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import type { CheckInEntry } from '@psychage/shared/check-in';
-import { getCheckInStore } from '@/lib/check-in-store';
+import { type DailyEntry, dailyRollupReader } from '@/lib/daily-rollup';
+import { getMomentStore } from '@/lib/moment-store';
 import {
   Activity,
   Anchor,
@@ -27,12 +27,12 @@ const HEADING = 'ml-0.5 font-display text-[16px] text-text-primary dark:text-tex
 export default function CompassScreen() {
   const t = CT4_COMPASS;
   const tcPrimary = useThemeColors().primary;
-  const [recent, setRecent] = useState<CheckInEntry[]>([]);
+  const [recent, setRecent] = useState<DailyEntry[]>([]);
 
   useFocusEffect(
     useCallback(() => {
-      const store = getCheckInStore();
-      setRecent(store.getRecent(3));
+      const reader = dailyRollupReader(getMomentStore());
+      setRecent(reader.getRecent(3));
     }, [])
   );
 
