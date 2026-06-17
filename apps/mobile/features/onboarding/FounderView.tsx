@@ -20,9 +20,9 @@ import { ONBOARDING_COPY } from './copy';
 // pending the founder + Dr. Dobson, not fabricated).
 //
 // VALENCE-BLIND: takes no moment / valence / label input; the copy names no feeling.
-// markOnboardingSeen fires at THIS screen's continue (the route owns that) and nowhere
-// earlier on the happy path. Reduced motion: mascot static, settle fade skipped. Copy from
-// ./copy (provisional pending Dr. Dobson — see copy.ts header).
+// markOnboardingSeen is NOT set here — it is anchored to the first Moment save in S3
+// (moment.tsx); continue only replaces to home. Reduced motion: mascot static, settle fade
+// skipped. Copy from ./copy (provisional pending Dr. Dobson — see copy.ts header).
 
 const FOUNDER_MASCOT_WIDTH = 110;
 

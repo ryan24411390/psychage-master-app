@@ -7,11 +7,13 @@ import { markOnboardingSeen } from '@/lib/persistence/onboarding';
 
 // S3 route — the first Moment capture. getMomentStore() imports the shared package at
 // runtime (off the Jest path; the container takes the store as a prop so render tests
-// inject a double). A non-acute save ADVANCES into the close (S4 acknowledge → S6 orient →
-// S7 founder) WITHOUT marking onboarding seen — the happy path commits "onboarding done"
-// once, at the founder screen (S7). The two terminal escape hatches that bypass the close
-// — dismissing (onExit) and an acute → crisis handoff (navigateToCrisis) — DO mark seen, so
-// the home index won't redirect a person who left early back into onboarding.
+// inject a double). Mark-seen is anchored to the VALUE MOMENT: every path that leaves this
+// screen marks onboarding seen, because the capture sheet persists the Moment BEFORE this
+// screen branches (OnboardingMomentCapture.handleSave: append → branch). So a saved Moment
+// — non-acute (onNamed → S4) or acute (navigateToCrisis → /crisis, SR-2) — always commits
+// "onboarding done", and "look around first" (onExit) is an explicit opt-out. There is no
+// state where a captured Moment exists but onboarding isn't marked, so a force-quit during
+// the close (S4→S7) can never re-onboard. The mark is NOT deferred to the founder screen.
 
 export default function MomentScreen() {
   const store = getMomentStore();
@@ -24,7 +26,11 @@ export default function MomentScreen() {
       <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
       <OnboardingMomentCapture
         store={store}
-        onNamed={() => router.replace('/onboarding/acknowledge')}
+        onNamed={() => {
+          // First successful (non-acute) save: a Moment now exists → onboarding is done.
+          markOnboardingSeen(storage);
+          router.replace('/onboarding/acknowledge');
+        }}
         onExit={exit}
         navigateToCrisis={() => {
           // Acute (SR-2): mark seen so the crisis route is never re-walled by onboarding,

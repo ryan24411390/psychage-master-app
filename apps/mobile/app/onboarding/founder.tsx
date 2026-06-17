@@ -1,28 +1,21 @@
 import { router, Stack } from 'expo-router';
 
 import { FounderView } from '@/features/onboarding/FounderView';
-import { storage } from '@/lib/adapters/storage';
 import { useReducedMotion } from '@/lib/motion';
-import { markOnboardingSeen } from '@/lib/persistence/onboarding';
 
-// S7 route — founder / intention beat. The TERMINAL onboarding screen: Continue marks
-// onboarding seen (moved here from S3/S4 — the happy path now commits "onboarding done"
-// exactly once, at this screen) and replaces to the first-run home WITHOUT the ?checkin
-// seam (the Moment is already captured — no sheet to auto-open; the #132 tour then fires on
-// home as before, because arrivingFromOnboarding stays false).
+// S7 route — founder / intention beat. The terminal onboarding screen: Continue just
+// replaces to the first-run home WITHOUT the ?checkin seam (the Moment is already captured —
+// no sheet to auto-open; the #132 tour then fires on home as before, because
+// arrivingFromOnboarding stays false). Mark-seen is NOT set here — it is anchored to the
+// first Moment save in S3 (moment.tsx), and every route to this screen passes through that
+// save, so onboarding is already marked seen by the time the founder beat renders.
 
 export default function FounderScreen() {
   const reduced = useReducedMotion();
   return (
     <>
       <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
-      <FounderView
-        reduced={reduced}
-        onContinue={() => {
-          markOnboardingSeen(storage);
-          router.replace('/');
-        }}
-      />
+      <FounderView reduced={reduced} onContinue={() => router.replace('/')} />
     </>
   );
 }

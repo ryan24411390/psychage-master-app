@@ -18,8 +18,11 @@ interface Slide {
   readonly body: string;
 }
 
+// Slide copy is provisional pending Dr. Dobson (CLAUDE.md §7), consistent with copy.ts.
+// The Today slide is aligned to the event-initiated Moments model (matching the Orient
+// screen) — no "daily"/"check-in"/scheduled cadence (the daily check-in was retired, #138).
 const SLIDES: readonly Slide[] = [
-  { icon: Home, tab: 'Today', body: 'A 30-second check-in and a calm starting point each day.' },
+  { icon: Home, tab: 'Today', body: 'A calm home base — notice a moment whenever you want.' },
   { icon: BookOpen, tab: 'Learn', body: 'Plain-language guides on what you might be experiencing.' },
   { icon: Compass, tab: 'Compass', body: 'Tools to explore patterns over time, at your own pace.' },
   { icon: MapPin, tab: 'Find', body: 'Search for licensed providers near you, whenever you’re ready.' },
