@@ -104,7 +104,8 @@ describe('PdfPreview (S41)', () => {
     expect(screen.getByText('Jun 1 – Jun 18 · 18 days, 14 entries')).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText(THERAPIST_COPY.previewNameLabel), '  Sam Doe ');
     fireEvent.press(screen.getByRole('button', { name: THERAPIST_COPY.sharePrimary }));
-    expect(onShare).toHaveBeenCalledWith('Sam Doe');
+    // Second arg = includeTools opt-in, default OFF (check-ins-only share, matching consent).
+    expect(onShare).toHaveBeenCalledWith('Sam Doe', false);
   });
 
   it('shows the honest empty-range line', () => {
