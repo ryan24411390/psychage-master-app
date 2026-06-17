@@ -2,9 +2,10 @@ import { fireEvent, screen } from '@testing-library/react-native';
 import { router } from 'expo-router';
 
 // Route-level wiring for the onboarding close (S4 acknowledge → S6 orient → S7 founder).
-// The contract under test: on the HAPPY PATH, markOnboardingSeen fires exactly once — at
-// the founder screen (S7) — and nowhere earlier. Acknowledge and orient are pass-throughs.
-// (usePathname is stubbed so the route-auto <Mascot> resolves a state and renders.)
+// The contract under test: the close screens are ALL pass-throughs — none of them mark
+// onboarding seen. Mark-seen is anchored upstream to the first Moment save in S3 (see
+// onboarding-moment-routing.test.tsx); by the time the close renders, onboarding is already
+// marked. (usePathname is stubbed so the route-auto <Mascot> resolves a state and renders.)
 jest.mock('expo-router', () => ({
   router: { replace: jest.fn(), push: jest.fn() },
   Stack: { Screen: () => null },
@@ -22,7 +23,7 @@ import { renderWithProviders } from './_helpers';
 const replaceMock = router.replace as jest.Mock;
 const seenMock = markOnboardingSeen as jest.Mock;
 
-describe('onboarding close routing — markOnboardingSeen fires only at the founder screen', () => {
+describe('onboarding close routing — the close screens never mark seen (anchored at S3 save)', () => {
   beforeEach(() => {
     replaceMock.mockClear();
     seenMock.mockClear();
@@ -42,10 +43,10 @@ describe('onboarding close routing — markOnboardingSeen fires only at the foun
     expect(seenMock).not.toHaveBeenCalled();
   });
 
-  it('S7 founder Continue → marks seen, then replaces to the first-run home', () => {
+  it('S7 founder Continue → replaces to the first-run home and does NOT mark seen', () => {
     renderWithProviders(<FounderScreen />, { haptics: true });
     fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
-    expect(seenMock).toHaveBeenCalledTimes(1);
     expect(replaceMock).toHaveBeenCalledWith('/');
+    expect(seenMock).not.toHaveBeenCalled();
   });
 });
