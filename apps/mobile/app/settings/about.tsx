@@ -39,6 +39,21 @@ export default function AboutScreen() {
 
         <SettingsSection>
           <SettingsRow
+            label={t.rows.disclaimer}
+            onPress={() => router.push('/settings/disclaimer')}
+            testID="about-row-disclaimer"
+          />
+          <SettingsRow
+            label={t.rows.terms}
+            onPress={() => router.push('/settings/terms')}
+            testID="about-row-terms"
+          />
+          <SettingsRow
+            label={t.rows.privacy}
+            onPress={() => router.push('/settings/privacy-policy')}
+            testID="about-row-privacy"
+          />
+          <SettingsRow
             label={t.rows.acknowledgments}
             onPress={() => router.push('/settings/acknowledgments')}
             testID="about-row-acknowledgments"

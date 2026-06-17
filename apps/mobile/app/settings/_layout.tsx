@@ -55,6 +55,9 @@ export default function SettingsLayout() {
       />
       <Stack.Screen name="appearance" options={{ title: t.appearance.title }} />
       <Stack.Screen name="about" options={{ title: t.about.title }} />
+      <Stack.Screen name="terms" options={{ title: t.legal.termsTitle }} />
+      <Stack.Screen name="privacy-policy" options={{ title: t.legal.privacyTitle }} />
+      <Stack.Screen name="disclaimer" options={{ title: t.legal.disclaimerTitle }} />
       <Stack.Screen name="acknowledgments" options={{ title: t.acknowledgments.title }} />
       {/* PR B */}
       <Stack.Screen name="privacy" options={{ title: t.hub.rows.privacy }} />
