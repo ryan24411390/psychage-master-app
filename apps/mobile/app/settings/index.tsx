@@ -8,6 +8,7 @@ import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/features/auth';
 import { BOOKMARKS_COPY } from '@/features/bookmarks/copy';
 import { CT4_SETTINGS } from '@/features/settings/copy';
+import { THERAPIST_COPY } from '@/features/therapist/copy';
 import { storage } from '@/lib/adapters/storage';
 import { loadPersonalization } from '@/lib/persistence/personalization';
 
@@ -54,6 +55,13 @@ export default function SettingsHubScreen() {
         </SettingsSection>
 
         <SettingsSection>
+          <SettingsRow
+            // The person's own session-prep summary — generated on demand and shared by
+            // them (system share sheet; Psychage never transmits — SR-4).
+            label={THERAPIST_COPY.sessionPrep.navLabel}
+            onPress={() => router.push('/settings/session-prep')}
+            testID="settings-row-session-prep"
+          />
           <SettingsRow
             label={t.hub.rows.privacy}
             onPress={() => router.push('/settings/privacy')}
