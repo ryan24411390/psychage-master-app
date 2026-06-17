@@ -2,7 +2,8 @@ import { router, Stack } from 'expo-router';
 
 import { ReflectionView } from '@/features/reflection/ReflectionView';
 import { buildPriorWeekReflection } from '@/features/reflection/week';
-import { getCheckInStore } from '@/lib/check-in-store';
+import { dailyRollupReader } from '@/lib/daily-rollup';
+import { getMomentStore } from '@/lib/moment-store';
 import { useReducedMotion } from '@/lib/motion';
 
 // S9 route. Computed ON-DEVICE from the local RecordStore (offline-complete). Reached
@@ -10,7 +11,7 @@ import { useReducedMotion } from '@/lib/motion';
 
 export default function ReflectionScreen() {
   const reduced = useReducedMotion();
-  const week = buildPriorWeekReflection(getCheckInStore(), new Date());
+  const week = buildPriorWeekReflection(dailyRollupReader(getMomentStore()), new Date());
 
   return (
     <>

@@ -1,4 +1,5 @@
-import { asLocalCalendarDate, type CheckInEntry, type CheckInState } from '@psychage/shared/check-in';
+import { asLocalCalendarDate } from '@psychage/shared/engagement';
+import type { DailyEntry as CheckInEntry, DailyState as CheckInState } from '@/lib/daily-rollup';
 import { describe, expect, it } from 'vitest';
 
 import {

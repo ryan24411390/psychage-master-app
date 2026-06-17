@@ -48,12 +48,12 @@ describe('buildToolSummaries', () => {
 
   it('pluralizes counts correctly', () => {
     const one = buildToolSummaries({ ...EMPTY, checkins: [checkin('2026-06-01')] });
-    expect(one[0]?.metric).toBe('1 check-in');
+    expect(one[0]?.metric).toBe('1 day recorded');
     const many = buildToolSummaries({
       ...EMPTY,
       checkins: [checkin('2026-06-01'), checkin('2026-06-02')],
     });
-    expect(many[0]?.metric).toBe('2 check-ins');
+    expect(many[0]?.metric).toBe('2 days recorded');
   });
 
   it('surfaces the most-noted emotion for the mood journal', () => {

@@ -1,4 +1,4 @@
-import type { CheckInEntry, CheckInState } from '@psychage/shared/check-in';
+import type { DailyEntry as CheckInEntry, DailyState as CheckInState } from '@/lib/daily-rollup';
 import { describe, expect, it } from 'vitest';
 
 import { buildContinuum } from '@/features/history/continuum';

@@ -1,100 +1,115 @@
-import type { CheckInEntry, CheckInState } from '@psychage/shared/check-in';
+import type { EngagementStore, Moment, MomentDraft } from '@psychage/shared/engagement';
 import { fireEvent, screen } from '@testing-library/react-native';
 
 import { HomeContainer } from '@/components/home/HomeContainer';
-import type { HomeStore } from '@/lib/home-model';
+import { priorWeekBounds } from '@/lib/home-model';
 
 import { renderWithProviders } from './_helpers';
 
-// End-to-end live flow (sub-slice E) with an in-memory store double — the real store
+// End-to-end live flow with an in-memory EngagementStore double — the real store
 // imports the shared package at runtime, which Jest doesn't transform, so we inject a
-// double here and exercise the real store separately under Vitest (check-in-store.test).
-function ymd(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+// double here and exercise the real store separately under Vitest (moment-store.test).
+//
+// HomeContainer derives its day view-model through dailyRollupReader(store), so the
+// double only needs to back getAll()/append(); the reader collapses moments to days.
 
-function makeFakeStore(): HomeStore {
-  const today = ymd(new Date());
-  const entries: { id: string; date: string; state: CheckInState }[] = [];
+function makeStore(initial: Moment[] = []): EngagementStore {
+  const moments = [...initial];
   let n = 0;
   return {
-    getToday: () => entries.find((e) => e.date === today) as unknown as CheckInEntry | undefined,
-    getRecent: (count) =>
-      [...entries]
-        .sort((a, b) => b.date.localeCompare(a.date))
-        .slice(0, count) as unknown as CheckInEntry[],
-    saveToday: (state) => {
-      const existing = entries.find((e) => e.date === today);
-      if (existing) {
-        existing.state = state;
-        return existing as unknown as CheckInEntry;
-      }
-      const created = { id: `id${n++}`, date: today, state };
-      entries.push(created);
-      return created as unknown as CheckInEntry;
+    append: (draft: MomentDraft) => {
+      const m: Moment = {
+        id: `m${n++}`,
+        timestamp: new Date().toISOString(),
+        valence: draft.valence,
+        labels: draft.labels ?? [],
+        context: draft.context ?? [],
+        routedToSupport: draft.routedToSupport ?? false,
+        ...(draft.note !== undefined ? { note: draft.note } : {}),
+      };
+      moments.push(m);
+      return m;
     },
-    // No prior-week history in this fixture → reflection never available (no row).
-    getRange: () => [],
+    getAll: () => [...moments],
+    getRecent: (count) => [...moments].slice(-count).reverse(),
+    getRange: () => [...moments],
+    dayRollup: () => [],
+    ingestRemote: () => {},
   };
 }
 
-// A live store whose prior week holds ≥3 entries → the reflection row is available.
-// getRange ignores its bounds (isReflectionAvailable only checks the count); contents
-// are irrelevant, so plain casts avoid a shared-package runtime import on the Jest path.
-function makeAvailableStore(): HomeStore {
-  const three = [{}, {}, {}] as unknown as CheckInEntry[];
-  return {
-    getToday: () => undefined,
-    getRecent: () => [{ id: 'r1', date: '2026-01-01', state: 2 }] as unknown as CheckInEntry[],
-    saveToday: (state) => ({ id: 's', date: '2026-01-01', state }) as unknown as CheckInEntry,
-    getRange: () => three,
-  };
+function moment(id: string, ts: string, valence: Moment['valence']): Moment {
+  return { id, timestamp: ts, valence, labels: [], context: [], routedToSupport: false };
+}
+
+// A store whose prior Mon–Sun week holds ≥3 moments → the reflection row is available.
+// Built from the real prior-week bounds so isReflectionAvailable (which reads through
+// the rollup reader's getRange) sees three distinct recorded days in that window.
+function makeAvailableStore(): EngagementStore {
+  const { from } = priorWeekBounds(new Date());
+  const [y, mo, d] = from.split('-').map(Number);
+  const noon = (offset: number) =>
+    new Date(y ?? 2026, (mo ?? 1) - 1, (d ?? 1) + offset, 12, 0, 0).toISOString();
+  return makeStore([
+    moment('a', noon(0), 3),
+    moment('b', noon(1), 3),
+    moment('c', noon(2), 3),
+  ]);
 }
 
 const REFLECTION_COPY = 'This week’s reflection is ready.';
 
 describe('HomeContainer (S3 live flow)', () => {
-  it('first-run → check in Low → checked-in + bridge; the check-in CTA is replaced', () => {
-    renderWithProviders(<HomeContainer store={makeFakeStore()} />, { haptics: true });
+  it('first-run → capture Low → checked-in + bridge; the capture CTA is replaced', () => {
+    renderWithProviders(<HomeContainer store={makeStore()} />, { haptics: true });
 
     // first-run (empty store)
     expect(screen.getByText('This is your space. It starts whenever you’re ready.')).toBeTruthy();
 
-    // open the minimal S4, choose Low, save
+    // open capture, pick valence 2 (→ DailyState 1 = Low), save
     fireEvent.press(screen.getByRole('button', { name: 'Check in — 30 seconds' }));
     expect(screen.getByText('How are you right now?')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('Low'));
-    fireEvent.press(screen.getByRole('button', { name: 'Save today’s entry' }));
+    fireEvent.press(screen.getByLabelText('Level 2 of 5'));
+    fireEvent.press(screen.getByRole('button', { name: 'Save this moment' }));
 
     // checked-in + the bridge (Low triggers it)
     expect(screen.getByText('Checked in · Low. Your record has begun.')).toBeTruthy();
     expect(screen.getByText('Would something steadying help right now?')).toBeTruthy();
 
-    // The adaptive PrimaryAction takes over once today is checked in: the check-in CTA
-    // is gone (replaced by the re-engagement nudge / "Checked in today" — this design
-    // has no same-day "Update today's check-in" button; same-day edits live elsewhere).
+    // The adaptive PrimaryAction takes over once today is checked in: the capture CTA
+    // is gone and the sheet is closed.
     expect(screen.queryByRole('button', { name: 'Check in — 30 seconds' })).toBeNull();
     expect(screen.queryByText('How are you right now?')).toBeNull();
   });
 
-  it('steadying bridge: Breathing chip navigates and "Not now" dismisses it', () => {
-    const breathSpy = jest.fn(); // nav seam — never touch the real router in a render test
-    renderWithProviders(
-      <HomeContainer store={makeFakeStore()} navigateToBreathing={breathSpy} />,
-      { haptics: true },
-    );
+  it('acute handoff (SR-2): lowest valence + a crisis word routes INTO crisis support', () => {
+    const crisisSpy = jest.fn();
+    renderWithProviders(<HomeContainer store={makeStore()} navigateToCrisis={crisisSpy} />, {
+      haptics: true,
+    });
 
-    // Check in Low → the bridge surfaces.
     fireEvent.press(screen.getByRole('button', { name: 'Check in — 30 seconds' }));
-    fireEvent.press(screen.getByLabelText('Low'));
-    fireEvent.press(screen.getByRole('button', { name: 'Save today’s entry' }));
+    fireEvent.press(screen.getByLabelText('Level 1 of 5'));
+    fireEvent.press(screen.getByRole('button', { name: 'Hopeless' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Save this moment' }));
+
+    expect(crisisSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('steadying bridge: Breathing chip navigates and "Not now" dismisses it', () => {
+    const breathSpy = jest.fn();
+    renderWithProviders(<HomeContainer store={makeStore()} navigateToBreathing={breathSpy} />, {
+      haptics: true,
+    });
+
+    fireEvent.press(screen.getByRole('button', { name: 'Check in — 30 seconds' }));
+    fireEvent.press(screen.getByLabelText('Level 2 of 5'));
+    fireEvent.press(screen.getByRole('button', { name: 'Save this moment' }));
     expect(screen.getByText('Would something steadying help right now?')).toBeTruthy();
 
-    // Breathing chip opens the real breathing flow (via the injected seam).
     fireEvent.press(screen.getByRole('button', { name: 'Breathing · 1 min' }));
     expect(breathSpy).toHaveBeenCalledTimes(1);
 
-    // "Not now" dismisses the bridge for the session.
     fireEvent.press(screen.getByRole('button', { name: 'Not now' }));
     expect(screen.queryByText('Would something steadying help right now?')).toBeNull();
   });
@@ -109,23 +124,17 @@ describe('HomeContainer — reflection-ready row (Flow 12, one-time)', () => {
         opened = true;
       },
     };
-    const navSpy = jest.fn(); // A2/PR-D: nav seam — never touch the real router in a render test
+    const navSpy = jest.fn();
     renderWithProviders(
-      <HomeContainer
-        store={makeAvailableStore()}
-        reflectionGate={gate}
-        navigateToReflection={navSpy}
-      />,
+      <HomeContainer store={makeAvailableStore()} reflectionGate={gate} navigateToReflection={navSpy} />,
       { haptics: true },
     );
 
     expect(screen.getByText(REFLECTION_COPY)).toBeTruthy();
-
     fireEvent.press(screen.getByRole('button', { name: REFLECTION_COPY }));
-
-    expect(opened).toBe(true); // dismissal persisted via the gate
-    expect(navSpy).toHaveBeenCalledTimes(1); // A2/PR-D: and navigates to S9
-    expect(screen.queryByText(REFLECTION_COPY)).toBeNull(); // and gone, in place
+    expect(opened).toBe(true);
+    expect(navSpy).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText(REFLECTION_COPY)).toBeNull();
   });
 
   it('does not show the row once it has already been opened', () => {
@@ -137,16 +146,14 @@ describe('HomeContainer — reflection-ready row (Flow 12, one-time)', () => {
   });
 });
 
-// A2/PR-E: onboarding's "Do your first check-in" arrives with ?checkin=1, which the
-// index route maps to autoOpenCheckIn → S4 opens over the first-run home on mount.
-describe('HomeContainer — autoOpenCheckIn (onboarding → S4)', () => {
-  it('opens the check-in sheet on mount when autoOpenCheckIn is set', () => {
-    renderWithProviders(<HomeContainer store={makeFakeStore()} autoOpenCheckIn />, { haptics: true });
+describe('HomeContainer — autoOpenCheckIn (onboarding → capture)', () => {
+  it('opens the capture sheet on mount when autoOpenCheckIn is set', () => {
+    renderWithProviders(<HomeContainer store={makeStore()} autoOpenCheckIn />, { haptics: true });
     expect(screen.getByText('How are you right now?')).toBeTruthy();
   });
 
   it('does not open the sheet by default', () => {
-    renderWithProviders(<HomeContainer store={makeFakeStore()} />, { haptics: true });
+    renderWithProviders(<HomeContainer store={makeStore()} />, { haptics: true });
     expect(screen.queryByText('How are you right now?')).toBeNull();
   });
 });

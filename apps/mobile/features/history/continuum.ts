@@ -1,7 +1,5 @@
-import type { CheckInEntry, CheckInState } from '@psychage/shared/check-in';
-
 import type { TerrainDay } from '@/components/terrain/terrain-geometry';
-import { STATE_LABELS } from '@/lib/check-in-labels';
+import { DAILY_STATE_LABELS as STATE_LABELS, type DailyEntry, type DailyState } from '@/lib/daily-rollup';
 
 // S7 History continuum derivation — pure (no React) → Vitest/Jest. Buckets the local
 // record into Monday–Sunday week rows, NEWEST WEEK FIRST, from the current week back to
@@ -41,7 +39,7 @@ const MONTHS_FULL = [
 /** One day cell in a continuum week. `entry` non-null ⇒ a tappable dot (→ S8). */
 export interface ContinuumDay {
   readonly day: TerrainDay;
-  readonly entry: CheckInEntry | null;
+  readonly entry: DailyEntry | null;
   /** Verbatim VoiceOver template, e.g. "Tuesday 4 June: Good, with a note: tired." */
   readonly a11yLabel: string;
 }
@@ -84,7 +82,7 @@ export function formatEntryDate(iso: string): string {
 }
 
 /** Verbatim VoiceOver label for an entry day, e.g. "Tuesday 4 June: Good, with a note: tired." */
-function entryA11yLabel(fullDay: string, iso: string, state: CheckInState, note?: string): string {
+function entryA11yLabel(fullDay: string, iso: string, state: DailyState, note?: string): string {
   const dt = parseIso(iso);
   const dateLabel = `${fullDay} ${dt.getDate()} ${MONTHS_FULL[dt.getMonth()]}`;
   const base = `${dateLabel}: ${STATE_LABELS[state]}`;
@@ -97,10 +95,10 @@ function entryA11yLabel(fullDay: string, iso: string, state: CheckInState, note?
  * the current week alone (honest hollows, no "add more to unlock" copy — Flow 11).
  */
 export function buildContinuum(
-  entries: readonly CheckInEntry[],
+  entries: readonly DailyEntry[],
   today: Date,
 ): ContinuumWeek[] {
-  const byDate = new Map<string, CheckInEntry>();
+  const byDate = new Map<string, DailyEntry>();
   for (const e of entries) byDate.set(e.date as string, e);
 
   const todayIso = toIso(today);

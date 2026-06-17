@@ -1,10 +1,7 @@
-import {
-  asLocalCalendarDate,
-  type CheckInEntry,
-  CheckInRecordStore,
-  type Storage,
-} from '@psychage/shared/check-in';
+import { asLocalCalendarDate, MomentStore, type Storage } from '@psychage/shared/engagement';
 import { describe, expect, it } from 'vitest';
+
+import { type DailyEntry as CheckInEntry, dailyRollupReader } from '@/lib/daily-rollup';
 
 import {
   bridgeCardFor,
@@ -43,20 +40,24 @@ function memStorage(): Storage {
   };
 }
 
-/** A real store seeded with one check-in per date (saveToday keys to the clock — Date Rule 1). */
-function storeSeededOn(dates: Date[]): CheckInRecordStore {
+/**
+ * A day-rollup reader over a MomentStore seeded with one moment per date (each at
+ * local noon so it can't cross a UTC midnight). valence 3 → DailyState 2, matching
+ * the prior one-check-in-per-day fixture. `getRange` is what isReflectionAvailable reads.
+ */
+function storeSeededOn(dates: Date[]): ReturnType<typeof dailyRollupReader> {
   let clock = new Date(2026, 0, 1);
   let n = 0;
-  const store = new CheckInRecordStore({
+  const store = new MomentStore({
     storage: memStorage(),
     now: () => clock,
     generateId: () => `id${n++}`,
   });
   for (const d of dates) {
-    clock = d;
-    store.saveToday(2);
+    clock = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
+    store.append({ valence: 3 });
   }
-  return store;
+  return dailyRollupReader(store);
 }
 
 describe('partOfDay', () => {

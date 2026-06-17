@@ -1,4 +1,4 @@
-import type { CheckInState } from '@psychage/shared/check-in';
+import type { DailyState } from '@/lib/daily-rollup';
 
 // S9's ONE descriptive line — TEMPLATE-SELECTED by simple SHAPE RULES over a single
 // week's states, never free-generated and never evaluative. The selector's only input
@@ -36,7 +36,7 @@ export const REFLECTION_LINES: Record<ReflectionLineKey, string> = {
  * (Only ever called with ≥ 3 states — reflection availability guarantees it — but a
  * 0-length input falls through to `mixed` rather than throwing on min/max.)
  */
-export function selectReflectionLine(states: readonly CheckInState[]): ReflectionLineKey {
+export function selectReflectionLine(states: readonly DailyState[]): ReflectionLineKey {
   const count = states.length;
   if (count === 0) return 'mixed';
   if (count >= 7) return 'every_day';

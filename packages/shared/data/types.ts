@@ -97,6 +97,28 @@ export interface CheckInRecord extends ForwardCompatFields {
   readonly context: Record<string, unknown>;
 }
 
+/**
+ * `moments` — momentary affect capture (the EVOLVED check-in; mobile-written in V1).
+ * Unlike `check_ins` (one row per calendar day), a Moment is event-based: many per
+ * day, each with its own `experienced_at`. Inherits ADR-001's SR-4 carve-out
+ * (user-owned consented self-tracking, NOT telemetry). `id` is client-minted so the
+ * push upserts on the primary key for idempotency (re-push updates, never duplicates).
+ */
+export interface MomentRecord extends ForwardCompatFields {
+  /** When the moment happened (full instant). */
+  readonly experienced_at: string;
+  /** 5-point affect valence, 1..5 (DB check constraint). */
+  readonly valence: number;
+  /** 0..3 curated affect-word keys. */
+  readonly labels: readonly string[];
+  /** 0..n context-domain keys. */
+  readonly context: readonly string[];
+  /** Optional one-line free text, ≤ 2000 chars (DB check constraint). */
+  readonly note?: string;
+  /** Acute-handoff flag — service-quality only; never carries crisis content. */
+  readonly routed_to_support: boolean;
+}
+
 /** Bucketed duration (ARCHITECTURE.md §3 — never an exact figure). */
 export type DurationCategory = 'acute' | 'subacute' | 'chronic';
 

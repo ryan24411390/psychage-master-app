@@ -2,8 +2,8 @@ import { Stack } from 'expo-router';
 import { View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
-import { HistoryContainer } from '@/components/history/HistoryContainer';
-import { getCheckInStore } from '@/lib/check-in-store';
+import { MomentsHistoryContainer } from '@/components/moments/MomentsHistoryContainer';
+import { getMomentStore } from '@/lib/moment-store';
 
 // S7 route — the full record (History continuum). Pushed full-screen OUTSIDE the tabs;
 // renders the C0.1 GlobalHeader itself (crisis pill ≤1 tap) above the continuum. Reached
@@ -17,7 +17,7 @@ export default function HistoryScreen() {
     <View className="flex-1 bg-background dark:bg-background-dark">
       <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
       <GlobalHeader />
-      <HistoryContainer store={getCheckInStore()} />
+      <MomentsHistoryContainer store={getMomentStore()} />
     </View>
   );
 }

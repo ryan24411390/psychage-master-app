@@ -1,4 +1,4 @@
-import type { CheckInState } from '@psychage/shared/check-in';
+import type { DailyState as CheckInState } from '@/lib/daily-rollup';
 import { describe, expect, it } from 'vitest';
 
 import { selectReflectionLine } from '@/features/reflection/reflection-line';

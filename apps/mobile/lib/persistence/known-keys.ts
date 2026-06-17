@@ -2,25 +2,22 @@
 // "delete my record" (S48) can erase all of it through the {get,set,remove}
 // storage seam — which has NO key enumeration.
 
-// The check-in store's storage key. RE-DECLARED here, NOT imported: the shared
-// barrel (packages/shared/check-in) deliberately does NOT export STORAGE_KEY, to
-// stop a consumer WRITING past the store's validators. We only ever .remove() it
-// (a delete, not a write), so that foot-gun does not apply. A coupling test
-// (__tests__/check-in-key-coupling.test.ts) saves a real entry and asserts it
-// persists under this exact string, so a future rename in the shared package
-// fails loudly here.
-export const CHECK_IN_STORAGE_KEY = 'mobile:check-in-entries';
+// The Moments store's storage key. RE-DECLARED here, NOT imported: the shared barrel
+// (packages/shared/engagement) deliberately does NOT export STORAGE_KEY, to stop a
+// consumer WRITING past the store's validators. We only ever .remove() it (a delete,
+// not a write), so that foot-gun does not apply.
+export const MOMENTS_STORAGE_KEY = 'mobile:moments';
 
 // Every namespaced key the app owns. Keep in sync when a new persisted key lands.
 export const KNOWN_LOCAL_KEYS = [
-  CHECK_IN_STORAGE_KEY, // shared check-in entries (re-declared above)
+  MOMENTS_STORAGE_KEY, // Moments engine entries (re-declared above)
   'mobile:tier-flags', // A1 lib/persistence/tier-flags
   'mobile:reflection-row-opened', // A1 lib/persistence/reflection-row
   'mobile:haptics-enabled', // A1 haptics (key reserved by the storage adapter)
   'mobile:reminder-settings', // B2 lib/persistence/reminder-settings
   'mobile:appearance', // B2 lib/persistence/appearance
   'mobile:personalization', // B2 lib/persistence/personalization
-  'mobile:sync-consent', // settings lib/persistence/sync-consent (check-in backup consent)
+  'mobile:sync-consent', // settings lib/persistence/sync-consent (moment + check-in consent)
   'mobile:reading-text-size', // settings lib/persistence/reading-text-size
   'mobile:directory-location', // find lib/persistence/directory-location (home browse scope)
   'mobile:recently-viewed-providers', // find lib/persistence/recently-viewed (directory rail)
@@ -36,9 +33,8 @@ export const KNOWN_LOCAL_KEYS = [
   'mobile:sleep-architect-entries', // shared sleep record-store
 ] as const;
 
-// The check-in store quarantines a corrupt blob under a dynamically-suffixed key
-// `${CHECK_IN_STORAGE_KEY}:quarantine:<iso>-<uuid>`. These have no static entry
-// here, so wipeLocalData reaches them by enumerating getAllKeys() and removing any
-// key carrying the `:quarantine:` segment (gap previously FLAGGED here is now
-// closed — the Storage adapter exposes getAllKeys()).
-export const QUARANTINE_KEY_PREFIX = `${CHECK_IN_STORAGE_KEY}:quarantine:`;
+// The Moments store quarantines a corrupt blob under a dynamically-suffixed key
+// `${MOMENTS_STORAGE_KEY}:quarantine:<iso>-<uuid>`. These have no static entry here,
+// so wipeLocalData reaches them by enumerating getAllKeys() and removing any key
+// carrying the `:quarantine:` segment.
+export const QUARANTINE_KEY_PREFIX = `${MOMENTS_STORAGE_KEY}:quarantine:`;

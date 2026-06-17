@@ -5,7 +5,8 @@
 // LOCAL-ONLY (SR-4/SR-11): every read is from an on-device store; nothing here
 // touches the network, Supabase, analytics or Sentry.
 
-import { getCheckInStore } from '@/lib/check-in-store';
+import { dailyRollupReader } from '@/lib/daily-rollup';
+import { getMomentStore } from '@/lib/moment-store';
 import { getClarityStore } from '@/lib/clarity-store';
 import { getMoodJournalStore } from '@/lib/mood-journal-store';
 import { getNavigatorStore } from '@/lib/navigator-store';
@@ -17,7 +18,7 @@ import { buildToolSummaries, type InsightsInput, type ToolSummary } from './aggr
 /** Read every tool's local history into one structure (generous caps — all local). */
 export function readInsightsInput(): InsightsInput {
   return {
-    checkins: getCheckInStore().getRecent(400),
+    checkins: dailyRollupReader(getMomentStore()).getRecent(400),
     clarity: getClarityStore().getRecent(100),
     navigator: getNavigatorStore().getRecent(50),
     relationship: getRelationshipStore().loadHistory(),

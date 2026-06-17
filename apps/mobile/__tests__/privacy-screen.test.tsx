@@ -2,9 +2,9 @@ import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { router } from 'expo-router';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn() } }));
-jest.mock('@/lib/check-in-store', () => ({
-  getCheckInStore: () => ({ getRange: () => [] }),
-  resetCheckInStore: jest.fn(),
+jest.mock('@/lib/moment-store', () => ({
+  getMomentStore: () => ({ getAll: () => [] }),
+  resetMomentStore: jest.fn(),
 }));
 jest.mock('@/lib/export/share-record', () => ({ shareRecordFile: jest.fn(() => Promise.resolve()) }));
 
@@ -12,7 +12,7 @@ import PrivacyScreen from '@/app/settings/privacy';
 import { shareRecordFile } from '@/lib/export/share-record';
 import {
   __resetSyncConsentCacheForTests,
-  getCheckInSyncConsent,
+  getMomentSyncConsent,
 } from '@/lib/persistence/sync-consent';
 
 import { renderWithProviders } from './_helpers';
@@ -32,10 +32,10 @@ describe('S46 Privacy & your data', () => {
     await waitFor(() => expect(shareMock).toHaveBeenCalledWith('json', expect.any(String)));
   });
 
-  it('check-in backup consent defaults OFF and flips on (gates the sync)', () => {
-    expect(getCheckInSyncConsent()).toBe(false);
+  it('moment sync consent defaults OFF and flips on (gates the sync)', () => {
+    expect(getMomentSyncConsent()).toBe(false);
     renderWithProviders(<PrivacyScreen />, { haptics: true });
     fireEvent(screen.getByTestId('sync-consent-toggle'), 'valueChange', true);
-    expect(getCheckInSyncConsent()).toBe(true);
+    expect(getMomentSyncConsent()).toBe(true);
   });
 });

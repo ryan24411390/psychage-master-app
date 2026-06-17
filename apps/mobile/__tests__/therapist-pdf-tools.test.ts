@@ -1,4 +1,5 @@
-import { asLocalCalendarDate, type CheckInEntry } from '@psychage/shared/check-in';
+import { asLocalCalendarDate } from '@psychage/shared/engagement';
+import type { DailyEntry as CheckInEntry } from '@/lib/daily-rollup';
 import { describe, expect, it } from 'vitest';
 
 import { buildTherapistPdfHtml, type TherapistToolSummaries } from '@/features/therapist/pdf/build-html';

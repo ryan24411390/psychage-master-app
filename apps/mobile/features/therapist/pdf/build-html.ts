@@ -1,13 +1,15 @@
 import {
   asLocalCalendarDate,
-  type CheckInEntry,
-  type CheckInState,
   type LocalCalendarDate,
   toLocalCalendarDate,
-} from '@psychage/shared/check-in';
+} from '@psychage/shared/engagement';
 
 import { resolveColorRef, terrainTokens } from '@/lib/a1-tokens';
-import { STATE_LABELS } from '@/lib/check-in-labels';
+import {
+  DAILY_STATE_LABELS as STATE_LABELS,
+  type DailyEntry as CheckInEntry,
+  type DailyState as CheckInState,
+} from '@/lib/daily-rollup';
 import {
   connectingSegments,
   entryDotY,
@@ -202,7 +204,7 @@ function buildTerrainSvg(days: readonly TerrainDay[]): string {
 
 function buildRows(
   days: readonly LocalCalendarDate[],
-  byDate: Map<LocalCalendarDate, CheckInEntry>,
+  byDate: Map<string, CheckInEntry>,
 ): string {
   return days
     .map((date) => {
@@ -287,7 +289,7 @@ export function buildTherapistPdfHtml(input: TherapistPdfInput): string {
   const to = asLocalCalendarDate(input.to);
 
   const inRange = input.entries.filter((e) => e.date >= from && e.date <= to);
-  const byDate = new Map<LocalCalendarDate, CheckInEntry>(inRange.map((e) => [e.date, e]));
+  const byDate = new Map<string, CheckInEntry>(inRange.map((e) => [e.date, e]));
   const days = enumerateDays(from, to);
   const terrainDays: TerrainDay[] = days.map((d) => {
     const e = byDate.get(d);

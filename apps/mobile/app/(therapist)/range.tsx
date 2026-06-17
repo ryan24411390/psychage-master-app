@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react';
 import type { RangeOption } from '@/components/therapist/RangeRadio';
 import { RangePicker } from '@/components/therapist/RangePicker';
 import { summarizeRange, THERAPIST_COPY, windowForDays } from '@/features/therapist';
-import { getCheckInStore } from '@/lib/check-in-store';
+import { dailyRollupReader } from '@/lib/daily-rollup';
+import { getMomentStore } from '@/lib/moment-store';
 
 // S40 — Date range. Thin route: presets + the HONEST count for the selected range,
 // read from the local RecordStore (the same store the PDF reads). Advances to preview.
@@ -22,7 +23,7 @@ export default function RangeScreen() {
     const option = OPTIONS.find((o) => o.key === selected);
     if (!option) return null;
     const { from, to } = windowForDays(new Date(), option.days);
-    const entries = getCheckInStore().getRange(from, to);
+    const entries = dailyRollupReader(getMomentStore()).getRange(from, to);
     const { dayCount, entryCount } = summarizeRange(from, to, entries);
     return THERAPIST_COPY.rangeCountLine(dayCount, entryCount);
   }, [selected]);
