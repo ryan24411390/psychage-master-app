@@ -24,6 +24,7 @@ export const KNOWN_LOCAL_KEYS = [
   'mobile:reading-text-size', // settings lib/persistence/reading-text-size
   'mobile:directory-location', // find lib/persistence/directory-location (home browse scope)
   'mobile:recently-viewed-providers', // find lib/persistence/recently-viewed (directory rail)
+  'mobile:tour-seen', // first-run cross-tab tour flag (lib/persistence/tour)
   // Local-only assessment/tool result stores (SR-4). Each is also re-declared in its
   // own store module; these literals were previously MISSING here, so "delete my
   // record" left the data on disk — now closed. Coupling is by string match; a store

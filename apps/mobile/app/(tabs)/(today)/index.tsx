@@ -1,10 +1,13 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 
 import { HomeContainer } from '@/components/home/HomeContainer';
+import { FirstRunTour } from '@/features/onboarding/FirstRunTour';
 import { useAuth } from '@/features/auth';
 import { storage } from '@/lib/adapters/storage';
 import { getCheckInStore } from '@/lib/check-in-store';
 import { isOnboardingSeen, isWelcomeSeen } from '@/lib/persistence/onboarding';
+import { isTourSeen, markTourSeen } from '@/lib/persistence/tour';
 
 // S3 "Today" home. Binds the real (MMKV-backed) CheckInRecordStore to HomeContainer.
 //
@@ -23,6 +26,9 @@ export default function TodayScreen() {
   const store = getCheckInStore();
   const firstRun = store.getRecent(1).length === 0;
   const arrivingFromOnboarding = checkin === '1';
+  // One-time cross-tab tour: after onboarding, on a normal launch (never over the
+  // auto-opened first check-in sheet). Skippable; never blocks crisis.
+  const [showTour, setShowTour] = useState(() => !arrivingFromOnboarding && !isTourSeen(storage));
 
   if (!session && !arrivingFromOnboarding && !isWelcomeSeen(storage)) {
     return <Redirect href="/welcome" />;
@@ -32,5 +38,17 @@ export default function TodayScreen() {
     return <Redirect href="/onboarding/welcome" />;
   }
 
-  return <HomeContainer store={store} autoOpenCheckIn={arrivingFromOnboarding} />;
+  return (
+    <>
+      <HomeContainer store={store} autoOpenCheckIn={arrivingFromOnboarding} />
+      {showTour && (
+        <FirstRunTour
+          onDone={() => {
+            markTourSeen(storage);
+            setShowTour(false);
+          }}
+        />
+      )}
+    </>
+  );
 }
