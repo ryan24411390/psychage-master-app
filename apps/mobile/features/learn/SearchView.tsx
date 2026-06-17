@@ -111,7 +111,7 @@ export function SearchView() {
                   {/* Contextual placement (see MASCOT_CONTEXTUAL): empty search / no
                       results → 'searching'. Not shown on the error branch. */}
                   {!isError && (
-                    <Mascot state={MASCOT_CONTEXTUAL.emptySearch} size={120} testID="search-empty-mascot" />
+                    <Mascot state={MASCOT_CONTEXTUAL.emptySearch} size={156} testID="search-empty-mascot" />
                   )}
                   <Text
                     variant="body"

@@ -21,7 +21,7 @@ import { ONBOARDING_COPY } from './copy';
 // Reduced motion: mascot static, settle fade skipped. Copy from ./copy (provisional
 // pending Dr. Dobson — see copy.ts header).
 
-const ORIENT_MASCOT_WIDTH = 110; // host scale, matching S4
+const ORIENT_MASCOT_WIDTH = 143; // host scale, matching S4
 
 export interface OrientViewProps {
   readonly reduced: boolean;
