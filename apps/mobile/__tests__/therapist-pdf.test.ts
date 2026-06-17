@@ -16,8 +16,8 @@ import { THERAPIST_COPY } from '@/features/therapist/copy';
 // counts + the two print-exclusive edge labels + the verbatim footer + a page count,
 // holds the 8.5pt type floor, and carries no aggregates/clinical vocabulary.
 
-function entry(date: string, state: CheckInState, note?: string): CheckInEntry {
-  const base = { id: `id-${date}`, date: asLocalCalendarDate(date), state };
+function entry(date: string, state: CheckInState, note?: string, high: CheckInState = state): CheckInEntry {
+  const base = { id: `id-${date}`, date: asLocalCalendarDate(date), state, low: state, high, count: high > state ? 2 : 1 };
   return note === undefined ? base : { ...base, note };
 }
 
@@ -78,6 +78,19 @@ describe('buildTherapistPdfHtml', () => {
     const circles = htmlFor().match(/<circle\b[^>]*>/g) ?? [];
     expect(circles.length).toBeGreaterThan(0);
     expect(circles.every((c) => /stroke="/.test(c))).toBe(true);
+  });
+
+  it('renders a low→high band (a round-capped line) for a multi-modal day', () => {
+    // a single day spanning Very low (0) → Good (3) over the 1-day range
+    const html = buildTherapistPdfHtml({
+      fullName: 'Alex Rivers',
+      from: asLocalCalendarDate('2026-06-01'),
+      to: asLocalCalendarDate('2026-06-01'),
+      entries: [entry('2026-06-01', 0, undefined, 3)],
+    });
+    const lines = html.match(/<line\b[^>]*>/g) ?? [];
+    // the day band is the vertical, round-capped line (the baseline is a plain line)
+    expect(lines.some((l) => /stroke-linecap="round"/.test(l))).toBe(true);
   });
 
   it('carries the verbatim footer and a per-page page count', () => {

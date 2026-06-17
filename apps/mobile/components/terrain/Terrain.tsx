@@ -13,6 +13,7 @@ import {
   connectingSegments,
   dayA11yLabel,
   entryDotY,
+  hasBand,
   TERRAIN_BASELINE_Y,
   TERRAIN_HEIGHT,
   TERRAIN_LABEL_Y,
@@ -75,14 +76,28 @@ export function Terrain({ days, width }: TerrainProps) {
           // biome-ignore lint/suspicious/noArrayIndexKey: terrain day slots are positional (slot N is always day N) and never reorder; labels repeat across longer ranges so the index is the stable identity
           <G key={`day-${day.label}-${i}`} accessible accessibilityLabel={dayA11yLabel(day)}>
             {typeof day.value === 'number' ? (
-              <Circle
-                cx={x}
-                cy={entryDotY(day.value)}
-                r={terrainTokens.dot.radius}
-                fill={pick(terrainTokens.color.moodTint[day.value])}
-                stroke={ringColor}
-                strokeWidth={terrainTokens.dot.ringWidth}
-              />
+              <>
+                {/* Multi-modal day → a low→high capsule (the honest span), dot anchored at the worst. */}
+                {hasBand(day) && (
+                  <Line
+                    x1={x}
+                    y1={entryDotY(day.high)}
+                    x2={x}
+                    y2={entryDotY(day.value)}
+                    stroke={pick(terrainTokens.color.moodTint[day.value])}
+                    strokeWidth={terrainTokens.dot.radius}
+                    strokeLinecap="round"
+                  />
+                )}
+                <Circle
+                  cx={x}
+                  cy={entryDotY(day.value)}
+                  r={terrainTokens.dot.radius}
+                  fill={pick(terrainTokens.color.moodTint[day.value])}
+                  stroke={ringColor}
+                  strokeWidth={terrainTokens.dot.ringWidth}
+                />
+              </>
             ) : day.value === null ? (
               <Circle
                 cx={x}

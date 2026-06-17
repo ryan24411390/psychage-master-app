@@ -4,6 +4,7 @@ import {
   connectingSegments,
   dayA11yLabel,
   entryDotY,
+  hasBand,
   TERRAIN_BASELINE_Y,
   TERRAIN_MIDLINE_Y,
   type TerrainDay,
@@ -73,5 +74,21 @@ describe('dayA11yLabel', () => {
 
   it('falls back to the short label when no full name is given', () => {
     expect(dayA11yLabel({ label: 'Mo', value: 2 })).toBe('Mo: Okay.');
+  });
+
+  it('reads a multi-modal day as its low→high span', () => {
+    expect(dayA11yLabel({ label: 'Sa', fullLabel: 'Saturday', value: 1, high: 3 })).toBe(
+      'Saturday: Low to Good.',
+    );
+  });
+});
+
+describe('hasBand', () => {
+  it('is true only for a numeric day whose high exceeds its (worst-of-day) value', () => {
+    expect(hasBand({ label: 'x', value: 1, high: 3 })).toBe(true);
+    expect(hasBand({ label: 'x', value: 2, high: 2 })).toBe(false); // single-state day
+    expect(hasBand({ label: 'x', value: 2 })).toBe(false); // no high
+    expect(hasBand({ label: 'x', value: null })).toBe(false);
+    expect(hasBand({ label: 'x', value: 'today' })).toBe(false);
   });
 });

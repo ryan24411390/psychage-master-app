@@ -110,8 +110,10 @@ export class MomentStore implements EngagementStore {
 
   /**
    * Per-day summaries (oldest first), optionally bounded to `[from, to]`. The bridge
-   * for the day-based surfaces: groups the event-based stream by local calendar day,
-   * with `valence` taken from the latest-timestamp moment that day (representative).
+   * for the day-based surfaces: groups the event-based stream by local calendar day and
+   * carries the day's RANGE — `low`/`high` are the lowest/highest valence that day and
+   * `valence` is worst-of-day (== `low`). NEVER the latest tap, NEVER a mean: a rough
+   * moment can never be hidden behind a later calm one.
    */
   dayRollup(from?: LocalCalendarDate, to?: LocalCalendarDate): DayRollup[] {
     const byDay = new Map<LocalCalendarDate, Moment[]>();
@@ -126,20 +128,24 @@ export class MomentStore implements EngagementStore {
 
     const rollups: DayRollup[] = [];
     for (const [date, moments] of byDay) {
-      // `moments` is ascending (sortedAscending preserved into the bucket), so the
-      // last element is the latest instant that day → the representative valence.
-      const latest = moments[moments.length - 1] as Moment;
+      const first = moments[0] as Moment;
+      let low: MomentValence = first.valence;
+      let high: MomentValence = first.valence;
       const labels = new Set<string>();
       const context = new Set<string>();
       let hasNote = false;
       for (const m of moments) {
+        if (m.valence < low) low = m.valence;
+        if (m.valence > high) high = m.valence;
         for (const l of m.labels) labels.add(l);
         for (const c of m.context) context.add(c);
         if (m.note !== undefined && m.note.length > 0) hasNote = true;
       }
       rollups.push({
         date,
-        valence: latest.valence,
+        valence: low, // worst-of-day scalar
+        low,
+        high,
         momentCount: moments.length,
         hasNote,
         labels: [...labels],

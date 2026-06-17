@@ -83,7 +83,13 @@ export function buildWeekReflection(
   DAYS.forEach(([abbr, full], i) => {
     const iso = toIso(addDays(start, i));
     const entry = byDate.get(iso);
-    days.push({ label: abbr, fullLabel: full, value: entry ? entry.state : null });
+    const high = entry && entry.high > entry.state ? entry.high : undefined;
+    days.push({
+      label: abbr,
+      fullLabel: full,
+      value: entry ? entry.state : null,
+      ...(high !== undefined ? { high } : {}),
+    });
     if (entry) {
       states.push(entry.state);
       if (entry.note) notes.push({ day: full, note: entry.note });

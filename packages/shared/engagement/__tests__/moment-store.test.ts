@@ -160,14 +160,14 @@ describe('reads', () => {
 });
 
 describe('dayRollup (event-based → day-based bridge)', () => {
-  it('groups many moments per day; representative valence = latest that day', () => {
+  it('groups many moments per day; carries the RANGE, scalar = worst-of-day (never latest)', () => {
     const { deps, setMs } = makeDeps();
     const store = new MomentStore(deps);
-    // Two moments on local 2026-06-16 (morning + evening, both safely mid-day so they
-    // can't cross a UTC midnight), one on local 2026-06-17.
+    // Two moments on local 2026-06-16 (a tense morning + an eased evening, both safely
+    // mid-day so they can't cross a UTC midnight), one on local 2026-06-17.
     setMs(localInstant(2026, 6, 16, 9));
     store.append({ valence: 2, labels: ['tense'], context: ['work'] });
-    setMs(localInstant(2026, 6, 16, 18)); // later same local day → representative
+    setMs(localInstant(2026, 6, 16, 18)); // a LATER, calmer tap must NOT become the day
     store.append({ valence: 5, labels: ['eased'], context: ['home'], note: 'better now' });
     setMs(localInstant(2026, 6, 17, 9));
     store.append({ valence: 3, context: ['work'] });
@@ -176,12 +176,18 @@ describe('dayRollup (event-based → day-based bridge)', () => {
     expect(rollups).toHaveLength(2);
     const d16 = rollups[0];
     expect(d16?.date).toBe('2026-06-16');
-    expect(d16?.valence).toBe(5); // latest-of-day, not first or average
+    expect(d16?.valence).toBe(2); // worst-of-day — NOT the later calm tap (5), not an average
+    expect(d16?.low).toBe(2);
+    expect(d16?.high).toBe(5);
     expect(d16?.momentCount).toBe(2);
     expect(d16?.hasNote).toBe(true);
     expect(new Set(d16?.labels)).toEqual(new Set(['tense', 'eased']));
     expect(new Set(d16?.context)).toEqual(new Set(['work', 'home']));
+    // Single-moment day: low == high == valence.
     expect(rollups[1]?.date).toBe('2026-06-17');
+    expect(rollups[1]?.low).toBe(3);
+    expect(rollups[1]?.high).toBe(3);
+    expect(rollups[1]?.valence).toBe(3);
     expect(rollups[1]?.hasNote).toBe(false);
   });
 

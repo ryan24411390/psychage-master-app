@@ -9,8 +9,10 @@ import { DAILY_STATE_LABELS as STATE_LABELS, type DailyEntry as CheckInEntry } f
 // module must never additionally log entries to Sentry/analytics.
 
 // The export's own format version — independent of the store's schema version, so
-// this module needs no runtime import from the shared package.
-export const EXPORT_FORMAT_VERSION = 1 as const;
+// this module needs no runtime import from the shared package. v2 carries the day's
+// RANGE: `state` is worst-of-day (== `low`), and `high`/`highLabel`/`count` are added
+// (CSV columns + JSON fields) so a multi-modal day exports its span, not just one tap.
+export const EXPORT_FORMAT_VERSION = 2 as const;
 
 // Wide lexical bounds: the day key is fixed-width YYYY-MM-DD, so lexical order ==
 // chronological. getRange is inclusive, so this captures every day entry.
@@ -48,11 +50,20 @@ function csvField(value: string): string {
 }
 
 export function toCSV(entries: readonly CheckInEntry[]): string {
-  const header = 'date,state,stateLabel,note';
+  // `state`/`stateLabel` stay worst-of-day (unchanged columns); `high`/`highLabel`/`count`
+  // append the day's span so the export is honest about a multi-modal day.
+  const header = 'date,state,stateLabel,high,highLabel,count,note';
   const rows = entries.map((e) => {
-    const label = STATE_LABELS[e.state];
     const note = e.note ?? '';
-    return [csvField(e.date), String(e.state), csvField(label), csvField(note)].join(',');
+    return [
+      csvField(e.date),
+      String(e.state),
+      csvField(STATE_LABELS[e.state]),
+      String(e.high),
+      csvField(STATE_LABELS[e.high]),
+      String(e.count),
+      csvField(note),
+    ].join(',');
   });
   return [header, ...rows].join('\n');
 }

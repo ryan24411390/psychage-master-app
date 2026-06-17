@@ -227,24 +227,31 @@ export function bridgeCardFor(todayState: DailyState | undefined, hour: number):
   };
 }
 
-/** Build the terrain from RecordStore entries: entry → state, today gap → 'today', else null. */
+/** Build the terrain from RecordStore entries: entry → worst-of-day state + low→high band,
+ * today gap → 'today', else null. */
 export function buildTerrainDaysFromEntries(
   entries: readonly DailyEntry[],
   today: Date,
   n = 14,
 ): TerrainDay[] {
-  const byDate = new Map<string, DailyState>();
-  for (const e of entries) byDate.set(e.date, e.state);
+  const byDate = new Map<string, DailyEntry>();
+  for (const e of entries) byDate.set(e.date, e);
   const todayStr = localCalendarDate(today);
   const labels = lastNDayLabels(today, n);
   const days: TerrainDay[] = [];
   for (let i = 0; i < n; i++) {
     const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (n - 1 - i));
     const dateStr = localCalendarDate(d);
-    const state = byDate.get(dateStr);
-    const value: TerrainValue = state !== undefined ? state : dateStr === todayStr ? 'today' : null;
+    const entry = byDate.get(dateStr);
+    const value: TerrainValue = entry ? entry.state : dateStr === todayStr ? 'today' : null;
+    const high = entry && entry.high > entry.state ? entry.high : undefined;
     const label = labels[i];
-    days.push({ label: label?.short ?? '', fullLabel: label?.full, value });
+    days.push({
+      label: label?.short ?? '',
+      fullLabel: label?.full,
+      value,
+      ...(high !== undefined ? { high } : {}),
+    });
   }
   return days;
 }

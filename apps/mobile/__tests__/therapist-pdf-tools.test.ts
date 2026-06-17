@@ -10,7 +10,9 @@ import { buildTherapistPdfHtml, type TherapistToolSummaries } from '@/features/t
 
 const FROM = asLocalCalendarDate('2026-06-01');
 const TO = asLocalCalendarDate('2026-06-07');
-const ENTRIES: CheckInEntry[] = [{ id: 'a', date: asLocalCalendarDate('2026-06-02'), state: 2 }];
+const ENTRIES: CheckInEntry[] = [
+  { id: 'a', date: asLocalCalendarDate('2026-06-02'), state: 2, low: 2, high: 2, count: 1 },
+];
 
 function html(tools?: TherapistToolSummaries): string {
   return buildTherapistPdfHtml({ fullName: 'Alex Rivers', from: FROM, to: TO, entries: ENTRIES, tools });

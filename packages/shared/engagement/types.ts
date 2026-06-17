@@ -67,12 +67,19 @@ export interface MomentDraft {
 /**
  * A per-day summary derived from many moments — the bridge that lets the day-based
  * surfaces (reflection, terrain, home-model, therapist export) read the event-based
- * Moments store without a redesign. `valence` is REPRESENTATIVE: the valence of the
- * latest-timestamp moment that day.
+ * Moments store without a redesign. Carries the day's RANGE: `low`/`high` are the
+ * lowest/highest valence that day; `valence` is worst-of-day (== `low`) — the single
+ * scalar, NEVER the latest tap, NEVER a mean — so a rough moment can never be hidden
+ * behind a later calm one.
  */
 export interface DayRollup {
   readonly date: LocalCalendarDate;
+  /** Worst-of-day valence (== `low`) — the representative scalar. */
   readonly valence: MomentValence;
+  /** Lowest valence among the day's moments (worst-of-day). */
+  readonly low: MomentValence;
+  /** Highest valence among the day's moments (best-of-day). */
+  readonly high: MomentValence;
   readonly momentCount: number;
   readonly hasNote: boolean;
   /** Union of all labels captured that day. */
