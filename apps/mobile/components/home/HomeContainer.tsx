@@ -5,6 +5,8 @@ import { View } from 'react-native';
 
 import { CheckInSheet } from '@/components/check-in/CheckInSheet';
 import { HomeView } from '@/components/home/HomeView';
+import type { ToolSummary } from '@/features/insights/aggregate';
+import { readToolSummaries } from '@/features/insights/read-stores';
 import { storage } from '@/lib/adapters/storage';
 import { STATE_LABELS } from '@/lib/check-in-labels';
 import { useHaptics } from '@/lib/haptic-context';
@@ -48,7 +50,7 @@ const storageReflectionGate: ReflectionGate = {
   markOpened: () => markReflectionRowOpened(storage),
 };
 
-function buildLiveModel(store: HomeStore, now: Date): HomeViewModel {
+function buildLiveModel(store: HomeStore, now: Date, tools: readonly ToolSummary[]): HomeViewModel {
   const hour = now.getHours();
   const today = store.getToday();
   const recent = store.getRecent(14); // We need 14 days now!
@@ -70,6 +72,7 @@ function buildLiveModel(store: HomeStore, now: Date): HomeViewModel {
     dormantTool: calculateDormantTool(),
     insight: generateMoodInsight(terrainDays),
     inProgressReads: readingProgressStore.getInProgressReads(),
+    tools,
   };
 }
 
@@ -78,10 +81,18 @@ export function HomeContainer({
   reflectionGate = storageReflectionGate,
   navigateToReflection = () => router.push('/reflection'),
   navigateToBreathing = () => router.push('/toolkit'),
+  navigateToInsights = () => router.push('/insights'),
+  readSummaries = readToolSummaries,
   autoOpenCheckIn = false,
 }: {
   store: HomeStore;
   reflectionGate?: ReflectionGate;
+  // Insights nav seam — default pushes the cross-tool Insights screen; render tests
+  // inject a spy so they never touch the real router.
+  navigateToInsights?: () => void;
+  // Cross-tool summary seam — default reads the local tool singletons; render tests
+  // inject `() => []` so they don't touch MMKV/native storage.
+  readSummaries?: () => readonly ToolSummary[];
   // Navigation seam (mirrors reflectionGate): the default pushes S9; render tests
   // inject a spy so they never touch the real router (which throws without a root).
   navigateToReflection?: () => void;
@@ -108,7 +119,7 @@ export function HomeContainer({
   // Derived fresh each render (cheap store reads). After a save, the setState calls in
   // handleSave re-render and re-derive from the now-mutated store — no memo/tick needed.
   const now = new Date();
-  const baseModel = buildLiveModel(store, now);
+  const baseModel = buildLiveModel(store, now, readSummaries());
   // "Not now" dismisses the steadying bridge for this session (display-only — no
   // check-in write). A fresh save re-arms it (handleSave resets the flag).
   const model = bridgeDismissed ? { ...baseModel, card: null } : baseModel;
@@ -147,6 +158,7 @@ export function HomeContainer({
         model={model}
         onCheckIn={() => setSheetOpen(true)}
         onHistory={() => router.push('/history')}
+        onInsights={navigateToInsights}
         onBreathing={navigateToBreathing}
         onDismissBridge={() => setBridgeDismissed(true)}
         imprintSignal={imprintSignal}

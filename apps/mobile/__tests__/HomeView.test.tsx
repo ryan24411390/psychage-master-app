@@ -20,6 +20,7 @@ const REGULAR: HomeViewModel = {
   dormantTool: null,
   insight: null,
   inProgressReads: [],
+  tools: [],
 };
 
 const FIRST_RUN: HomeViewModel = {
@@ -33,6 +34,7 @@ const FIRST_RUN: HomeViewModel = {
   dormantTool: null,
   insight: null,
   inProgressReads: [],
+  tools: [],
 };
 
 function render(model: HomeViewModel) {

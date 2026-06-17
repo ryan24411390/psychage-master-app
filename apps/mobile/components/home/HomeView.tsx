@@ -18,6 +18,7 @@ import { ToolsBento } from '@/components/home/ToolsBento';
 import { MostRead } from '@/components/home/MostRead';
 import { CareAndLearning } from '@/components/home/CareAndLearning';
 import { Text } from '@/components/ui/Text';
+import { ToolSummaryCard } from '@/features/insights/ToolSummaryCard';
 import { ctaLabel, type HomeViewModel } from '@/lib/home-model';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 
@@ -33,6 +34,8 @@ type HomeViewProps = {
   model: HomeViewModel;
   onCheckIn: () => void;
   onHistory: () => void;
+  /** Opens the cross-tool Insights screen (from the "Your tools" summary card). */
+  onInsights?: () => void;
   /** Steadying-bridge "Breathing" chip — opens the real breathing flow. */
   onBreathing?: () => void;
   /** Steadying-bridge "Not now" — dismisses the card for the session. */
@@ -51,6 +54,7 @@ export function HomeView({
   model,
   onCheckIn,
   onHistory,
+  onInsights,
   onBreathing,
   onDismissBridge,
   imprintSignal = 0,
@@ -145,8 +149,11 @@ export function HomeView({
             {reflectionReady && <ReflectionRow onOpen={onReflectionOpen} />}
           </Animated.View>
 
+          {/* YOUR TOOLS — cross-tool summary; taps into the Insights drill-down */}
+          <ToolSummaryCard summaries={model.tools} onOpen={onInsights ?? (() => {})} />
+
           {/* CHECK-IN CTA / ADAPTIVE ACTION */}
-          <PrimaryAction 
+          <PrimaryAction
             checkedInToday={model.ctaLabel === ctaLabel(true)} 
             dormantTool={model.dormantTool} 
             onCheckIn={onCheckIn} 
