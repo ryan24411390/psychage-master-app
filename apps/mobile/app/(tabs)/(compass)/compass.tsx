@@ -1,12 +1,13 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import type { CheckInEntry } from '@psychage/shared/check-in';
 import { getCheckInStore } from '@/lib/check-in-store';
 import {
   Activity,
   Anchor,
   Backpack,
+  ChevronRight,
   Compass,
   HeartHandshake,
   MessageCircle,
@@ -19,11 +20,13 @@ import { Text } from '@/components/ui/Text';
 import { ClarityTile, DeepDiveCard, HeroTile, SmallTile } from '@/features/compass/CompassTile';
 import { CT4_COMPASS } from '@/features/compass/copy';
 import { COMPASS_ROUTES } from '@/features/compass/routes';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
 const HEADING = 'ml-0.5 font-display text-[16px] text-text-primary dark:text-text-primary-dark';
 
 export default function CompassScreen() {
   const t = CT4_COMPASS;
+  const tcPrimary = useThemeColors().primary;
   const [recent, setRecent] = useState<CheckInEntry[]>([]);
 
   useFocusEffect(
@@ -94,6 +97,19 @@ export default function CompassScreen() {
             onPress={() => router.push(COMPASS_ROUTES.clarity)}
             testID="compass-tile-clarity"
           />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="View past Clarity snapshots"
+            onPress={() => router.push(COMPASS_ROUTES.clarityHistory)}
+            hitSlop={6}
+            className="min-h-[40px] flex-row items-center justify-end gap-1 px-1"
+            testID="compass-clarity-history"
+          >
+            <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+              View past snapshots
+            </Text>
+            <ChevronRight size={16} color={tcPrimary} strokeWidth={2} />
+          </Pressable>
           <View className="flex-row gap-3">
             <View className="flex-1">
               <SmallTile

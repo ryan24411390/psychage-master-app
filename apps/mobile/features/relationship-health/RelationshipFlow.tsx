@@ -25,10 +25,12 @@ export interface RelationshipFlowProps {
   readonly onExit: () => void;
   /** Open the crisis surface (router.push('/crisis')) — Help-now + safety links. */
   readonly onCrisis: () => void;
+  /** Initial view — defaults to 'landing'. A dedicated history route passes 'history'. */
+  readonly initialView?: View;
 }
 
-export function RelationshipFlow({ store, onExit, onCrisis }: RelationshipFlowProps) {
-  const [view, setView] = useState<View>('landing');
+export function RelationshipFlow({ store, onExit, onCrisis, initialView = 'landing' }: RelationshipFlowProps) {
+  const [view, setView] = useState<View>(initialView);
   const [skipPartner, setSkipPartner] = useState(false);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [index, setIndex] = useState(0);
