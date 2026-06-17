@@ -3,6 +3,7 @@ import type { Moment } from '@psychage/shared/engagement';
 import { ArrowLeft } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 
+import { MilestonesStrip } from '@/components/milestones/MilestonesStrip';
 import { MomentRow } from '@/components/moments/MomentRow';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
@@ -56,10 +57,17 @@ function buildItems(moments: readonly Moment[], now: Date): HistoryItem[] {
 type MomentsHistoryViewProps = {
   moments: readonly Moment[];
   onBack: () => void;
+  /** Cumulative milestone thresholds already reached (from the milestones store). */
+  reached?: readonly number[];
   now?: Date;
 };
 
-export function MomentsHistoryView({ moments, onBack, now = new Date() }: MomentsHistoryViewProps) {
+export function MomentsHistoryView({
+  moments,
+  onBack,
+  reached = [],
+  now = new Date(),
+}: MomentsHistoryViewProps) {
   const ink = useThemeColors().ink;
   const items = buildItems(moments, now);
 
@@ -93,6 +101,7 @@ export function MomentsHistoryView({ moments, onBack, now = new Date() }: Moment
         >
           {MOMENTS_COPY.historyCount(moments.length)}
         </Text>
+        <MilestonesStrip reached={reached} />
         <FlashList
           data={items}
           keyExtractor={(item) => item.key}

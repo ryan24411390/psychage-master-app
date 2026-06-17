@@ -12,7 +12,11 @@ jest.mock('expo-router', () => ({
 }));
 jest.mock('@/lib/persistence/onboarding', () => ({ markOnboardingSeen: jest.fn() }));
 jest.mock('@/lib/moment-store', () => ({
-  getMomentStore: () => ({ append: jest.fn((d: unknown) => ({ id: 'm0', ...(d as object) })) }),
+  getMomentStore: () => ({
+    append: jest.fn((d: unknown) => ({ id: 'm0', ...(d as object) })),
+    // getAll backs the silent milestone-1 mark on save (recordCount reads the total).
+    getAll: () => [{ id: 'm0' }],
+  }),
 }));
 
 // Deterministic capture-sheet double (lifted from OnboardingMomentCapture.test.tsx): one
