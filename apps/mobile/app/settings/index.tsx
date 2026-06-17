@@ -15,7 +15,7 @@ import { storage } from '@/lib/adapters/storage';
 import { loadPersonalization } from '@/lib/persistence/personalization';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
-// S42 Settings hub. A calm list. The native stack header owns the top inset, so
+// S42 Settings hub. A calm bento grid. The native stack header owns the top inset, so
 // the shell only guards the bottom.
 export default function SettingsHubScreen() {
   const { name } = loadPersonalization(storage);
@@ -27,9 +27,9 @@ export default function SettingsHubScreen() {
     <ScreenShell edges={['bottom']}>
       <ScrollView contentContainerClassName="gap-4 py-4 px-4" showsVerticalScrollIndicator={false}>
         <BentoGrid>
-          <BentoCard 
-            title={t.hub.accountLabel} 
-            icon={<User size={20} color={tc.inkSecondary} />} 
+          <BentoCard
+            title={t.hub.accountLabel}
+            icon={<User size={20} color={tc.inkSecondary} />}
             description="Manage your profile and session"
           >
             <SettingsRow
@@ -65,9 +65,9 @@ export default function SettingsHubScreen() {
             />
           </BentoCard>
 
-          <BentoCard 
-            title="Appearance" 
-            icon={<Palette size={20} color={tc.inkSecondary} />} 
+          <BentoCard
+            title="Appearance"
+            icon={<Palette size={20} color={tc.inkSecondary} />}
             description="Theme and visual settings"
           >
             <SettingsRow
@@ -82,9 +82,9 @@ export default function SettingsHubScreen() {
             />
           </BentoCard>
 
-          <BentoCard 
-            title="Notifications" 
-            icon={<Bell size={20} color={tc.inkSecondary} />} 
+          <BentoCard
+            title="Notifications"
+            icon={<Bell size={20} color={tc.inkSecondary} />}
             description="Alerts and reminders"
           >
             <SettingsRow
@@ -94,9 +94,9 @@ export default function SettingsHubScreen() {
             />
           </BentoCard>
 
-          <BentoCard 
-            title="Privacy" 
-            icon={<Shield size={20} color={tc.inkSecondary} />} 
+          <BentoCard
+            title="Privacy"
+            icon={<Shield size={20} color={tc.inkSecondary} />}
             description="Permissions and security"
           >
             <SettingsRow
@@ -106,9 +106,9 @@ export default function SettingsHubScreen() {
             />
           </BentoCard>
 
-          <BentoCard 
-            title="Data" 
-            icon={<Bookmark size={20} color={tc.inkSecondary} />} 
+          <BentoCard
+            title="Data"
+            icon={<Bookmark size={20} color={tc.inkSecondary} />}
             description="Storage and history"
           >
             <SettingsRow
@@ -117,15 +117,26 @@ export default function SettingsHubScreen() {
               testID="settings-row-saved"
             />
             <SettingsRow
+              // The person's own session-prep summary — generated on demand and shared by
+              // them (system share sheet; Psychage never transmits — SR-4).
               label={THERAPIST_COPY.sessionPrep.navLabel}
               onPress={() => router.push('/settings/session-prep')}
               testID="settings-row-session-prep"
             />
+            <SettingsRow
+              // Share-to-provider flow (S38–S41). Second entry point — Find Care's provider
+              // card is the other. Routes to /add-provider (the live, unambiguous flow start);
+              // NOT '/why', which collides with the auth S33 screen (see use-account-prompt).
+              // Nothing transmits until the person taps the OS share sheet at preview (SR-4).
+              label={THERAPIST_COPY.consentTitle}
+              onPress={() => router.push('/add-provider')}
+              testID="settings-row-therapist-share"
+            />
           </BentoCard>
 
-          <BentoCard 
-            title={t.hub.crisisLabel} 
-            icon={<LifeBuoy size={20} color={tc.inkSecondary} />} 
+          <BentoCard
+            title={t.hub.crisisLabel}
+            icon={<LifeBuoy size={20} color={tc.inkSecondary} />}
             description="Help and feedback"
           >
             <SettingsRow
@@ -139,6 +150,8 @@ export default function SettingsHubScreen() {
               testID="settings-row-supporter"
             />
             <SettingsRow
+              // SR-2: crisis access is always reachable. One more entry point to the
+              // always-on /crisis surface (also on the GlobalHeader Help-now pill).
               label={t.hub.rows.crisis}
               onPress={() => router.push('/crisis')}
               testID="settings-row-crisis"
@@ -147,7 +160,10 @@ export default function SettingsHubScreen() {
         </BentoGrid>
 
         <View className="px-1 pt-6 pb-2">
-          <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark text-center">
+          <Text
+            variant="caption"
+            className="text-text-tertiary dark:text-text-tertiary-dark text-center"
+          >
             {t._marker}
           </Text>
         </View>

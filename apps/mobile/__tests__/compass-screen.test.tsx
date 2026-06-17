@@ -26,6 +26,7 @@ describe('Compass bento landing', () => {
     ['compass-tile-relationship', COMPASS_ROUTES.relationship],
     ['compass-tile-sleep', COMPASS_ROUTES.sleep],
     ['compass-tile-toolkits', COMPASS_ROUTES.toolkits],
+    ['compass-tile-insights', COMPASS_ROUTES.insights],
   ];
 
   it.each(tiles)('tile %s navigates to its tool route', (testID, route) => {

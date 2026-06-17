@@ -20,6 +20,7 @@ describe('S42 Settings hub', () => {
     expect(screen.getByTestId('settings-row-reminders')).toBeTruthy();
     expect(screen.getByTestId('settings-row-appearance')).toBeTruthy();
     expect(screen.getByTestId('settings-row-privacy')).toBeTruthy();
+    expect(screen.getByTestId('settings-row-therapist-share')).toBeTruthy();
     expect(screen.getByTestId('settings-row-supporter')).toBeTruthy();
     expect(screen.getByTestId('settings-row-crisis')).toBeTruthy();
     expect(screen.getByTestId('settings-row-account-status')).toBeTruthy();
@@ -37,6 +38,10 @@ describe('S42 Settings hub', () => {
     expect(pushMock).toHaveBeenCalledWith('/settings/appearance');
     fireEvent.press(screen.getByTestId('settings-row-supporter'));
     expect(pushMock).toHaveBeenCalledWith('/settings/supporter');
+    // Therapist-share enters at /add-provider (the live flow start), NOT '/why'
+    // which collides with the auth S33 route.
+    fireEvent.press(screen.getByTestId('settings-row-therapist-share'));
+    expect(pushMock).toHaveBeenCalledWith('/add-provider');
   });
 
   it('crisis is always reachable (SR-2) — routes to /crisis', () => {

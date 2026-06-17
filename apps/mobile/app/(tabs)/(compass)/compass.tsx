@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Compass,
   HeartHandshake,
+  LineChart,
   MessageCircle,
   Moon,
   Notebook,
@@ -137,6 +138,13 @@ export default function CompassScreen() {
           <Text variant="h2" className={HEADING}>
             {t.headingDeepDives}
           </Text>
+          <DeepDiveCard
+            title={t.insights.title}
+            feature={t.insights.sub}
+            icon={LineChart}
+            onPress={() => router.push(COMPASS_ROUTES.insights)}
+            testID="compass-tile-insights"
+          />
           <DeepDiveCard
             title={t.sleep.title}
             feature={t.sleep.sub}
