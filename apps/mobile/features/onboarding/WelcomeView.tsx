@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -12,19 +12,21 @@ import { OnboardingMascot } from './OnboardingMascot';
 
 // S1 Welcome (Flow 1) — the mascot's host moment. GlobalHeader (Help-now pill reachable
 // before the user has done anything), the host mascot LARGE + breathing, the Fraunces
-// display title, one line of body, and a single primary "Continue" in the thumb zone.
-// Nothing else — no carousel, dots, or skip. Reduced motion: mascot still + settle skipped.
-// All copy VERBATIM Flow Book (now sourced from ./copy — CT4 §1).
+// display title, one line of body, a single primary "Begin" in the thumb zone, and a quiet
+// "Already have a record? Sign in" text-link (link weight only — no wall; the anonymous-
+// first invariant means signing in is optional). Reduced motion: mascot still + settle
+// skipped. Copy from ./copy (provisional pending Dr. Dobson — see copy.ts header).
 
 const TITLE = ONBOARDING_COPY.welcomeTitle;
 const BODY = ONBOARDING_COPY.welcomeBody;
 
 export interface WelcomeViewProps {
   readonly reduced: boolean;
-  readonly onContinue: () => void;
+  readonly onBegin: () => void;
+  readonly onSignIn: () => void;
 }
 
-export function WelcomeView({ reduced, onContinue }: WelcomeViewProps) {
+export function WelcomeView({ reduced, onBegin, onSignIn }: WelcomeViewProps) {
   const Settle = reduced ? View : Animated.View;
   const settleProps = reduced
     ? {}
@@ -44,10 +46,22 @@ export function WelcomeView({ reduced, onContinue }: WelcomeViewProps) {
           {BODY}
         </Text>
       </Settle>
-      <SafeAreaView edges={['bottom']} className="px-5 pb-2">
-        <Button variant="primary" size="lg" className="w-full" onPress={onContinue}>
-          {ONBOARDING_COPY.continue}
+      <SafeAreaView edges={['bottom']} className="gap-3 px-5 pb-2">
+        <Button variant="primary" size="lg" className="w-full" onPress={onBegin}>
+          {ONBOARDING_COPY.begin}
         </Button>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={ONBOARDING_COPY.signIn}
+          onPress={onSignIn}
+          hitSlop={8}
+          className="min-h-[44px] items-center justify-center active:scale-[0.98]"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        >
+          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            {ONBOARDING_COPY.signIn}
+          </Text>
+        </Pressable>
       </SafeAreaView>
     </View>
   );
