@@ -45,3 +45,13 @@ export {
 // STORAGE_KEY is deliberately NOT exported: a consumer holding it plus a Storage
 // instance could write past the store's validation. The store owns its key.
 export { type AnomalyReason, SCHEMA_VERSION } from './migrate';
+
+// Cumulative milestones — pure threshold model (the reward side of the habit loop).
+export {
+  MILESTONE_THRESHOLDS,
+  type MilestoneThreshold,
+  SILENT_MILESTONE,
+  reachedAt,
+  detectNewMilestones,
+  isCelebratedMilestone,
+} from './milestones';

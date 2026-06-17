@@ -3,9 +3,13 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 
+import { isCelebratedMilestone } from '@psychage/shared/engagement';
+
 import { HomeView } from '@/components/home/HomeView';
+import { CelebrationOverlay } from '@/components/milestones/CelebrationOverlay';
 import { MomentCaptureSheet } from '@/components/moments/MomentCaptureSheet';
 import type { ToolSummary } from '@/features/insights/aggregate';
+import { recordCount } from '@/lib/persistence/milestones';
 import { readToolSummaries } from '@/features/insights/read-stores';
 import { storage } from '@/lib/adapters/storage';
 import { DAILY_STATE_LABELS, dailyRollupReader } from '@/lib/daily-rollup';
@@ -105,6 +109,8 @@ export function HomeContainer({
   const [tiltSignal, setTiltSignal] = useState(0);
   const [bridgeDismissed, setBridgeDismissed] = useState(false);
   const [reflectionOpened, setReflectionOpened] = useState(() => reflectionGate.isOpened());
+  // The milestone to celebrate (null = no celebration showing). Cumulative-only reward.
+  const [celebrateThreshold, setCelebrateThreshold] = useState<number | null>(null);
 
   const reader = dailyRollupReader(store);
 
@@ -135,7 +141,16 @@ export function HomeContainer({
       setSheetOpen(false);
       // SR-2: the acute predicate ran in the sheet and stamped the draft; route INTO
       // the ungated crisis surface after persisting (never gates it).
-      if (draft.routedToSupport) navigateToCrisis();
+      if (draft.routedToSupport) {
+        navigateToCrisis();
+        return;
+      }
+      // Cumulative milestones: record the new total, persist what was newly crossed, and
+      // celebrate the highest celebrated rung (the 1st rung is silent — onboarding owns
+      // it). Never celebrates over a crisis route (handled above).
+      const { newly } = recordCount(storage, store.getAll().length);
+      const top = newly.filter(isCelebratedMilestone).at(-1);
+      if (top !== undefined) setCelebrateThreshold(top);
     },
     [store, reader, fireHaptic, navigateToCrisis],
   );
@@ -156,6 +171,13 @@ export function HomeContainer({
       />
 
       {sheetOpen && <MomentCaptureSheet onSave={handleSave} onClose={() => setSheetOpen(false)} />}
+
+      {celebrateThreshold !== null && (
+        <CelebrationOverlay
+          threshold={celebrateThreshold}
+          onDismiss={() => setCelebrateThreshold(null)}
+        />
+      )}
     </View>
   );
 }

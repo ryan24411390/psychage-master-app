@@ -3,7 +3,9 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 import { MomentsHistoryView } from '@/components/moments/MomentsHistoryView';
+import { storage } from '@/lib/adapters/storage';
 import { hydrateMomentsFromRemote } from '@/lib/moment-store';
+import { loadReachedMilestones } from '@/lib/persistence/milestones';
 
 // Stateful Moments history (S7-equivalent). Takes the EngagementStore as a prop so
 // render tests inject an in-memory double (the real store imports the shared package
@@ -40,5 +42,8 @@ export function MomentsHistoryContainer({
   }, [store, hydrate]);
 
   const moments: Moment[] = store.getAll();
-  return <MomentsHistoryView moments={moments} onBack={onBack} />;
+  // Reached milestones are derived from the cumulative count + the persisted set; read
+  // on render so a milestone reached this session (or restored via the pull) shows.
+  const reached = loadReachedMilestones(storage);
+  return <MomentsHistoryView moments={moments} onBack={onBack} reached={reached} />;
 }
