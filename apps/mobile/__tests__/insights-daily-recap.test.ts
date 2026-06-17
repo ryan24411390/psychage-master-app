@@ -17,7 +17,14 @@ import {
 // (Clarity Journal) records through this read model. Vitest only — no RN, no network.
 
 const TODAY = new Date(2026, 5, 17); // 2026-06-17, local
-const entry = (date: string, state: 0 | 1 | 2 | 3 | 4 = 2): DailyEntry => ({ id: date, date, state });
+const entry = (date: string, state: 0 | 1 | 2 | 3 | 4 = 2): DailyEntry => ({
+  id: date,
+  date,
+  state,
+  low: state,
+  high: state,
+  count: 1,
+});
 
 function memStorage(): Storage {
   const m = new Map<string, string>();
