@@ -75,21 +75,21 @@ export function fireHaptic(event: HapticEvent, isEnabled: () => boolean): void {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); // → haptic.error._expo
       return;
     case 'complete':
-      if (Platform.OS === 'ios') {
+      if (Platform.OS === 'ios' && PsychageHapticsModule) {
         PsychageHapticsModule.playCompleteSequence();
       } else {
         runSequence(sequences[event], isEnabled);
       }
       return;
     case 'breathIn':
-      if (Platform.OS === 'ios') {
+      if (Platform.OS === 'ios' && PsychageHapticsModule) {
         PsychageHapticsModule.playBreathIn();
       } else {
         runSequence(sequences[event], isEnabled);
       }
       return;
     case 'breathOut':
-      if (Platform.OS === 'ios') {
+      if (Platform.OS === 'ios' && PsychageHapticsModule) {
         PsychageHapticsModule.playBreathOut();
       } else {
         runSequence(sequences[event], isEnabled);
