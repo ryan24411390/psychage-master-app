@@ -18,6 +18,9 @@ export const MASCOT_BY_ROUTE: Record<string, MascotState> = {
   // check-in imprint moment — the imprint passes an explicit state="accomplished" prop.
   '/onboarding/record': 'thoughtful',
   '/settings': 'friendly',
+  // Insights is a calm, reflective read surface — a fixed, non-reactive 'thoughtful' pose.
+  // No time/theme override (not a Today route); resolveMascotState never reads logged mood.
+  '/insights': 'thoughtful',
   '/': 'neutral',
   '/today': 'neutral',
 };

@@ -11,6 +11,7 @@ const EMPTY: InsightsInput = {
   relationship: [],
   mood: [],
   sleep: [],
+  energy: [],
 };
 
 // Minimal record stubs — only the fields the aggregator reads. Cast keeps the test
