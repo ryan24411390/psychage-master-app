@@ -20,7 +20,7 @@ export { MomentStore, type MomentAnomaly, mergeMoments } from './moment-store';
 export {
   type Moment,
   type MomentDraft,
-  type MomentValence,
+  type MomentIntensity,
   type DayRollup,
   type EngagementStore,
   type MomentStoreDeps,
@@ -28,7 +28,8 @@ export {
   type IdFactory,
   type LocalCalendarDate,
   type Storage,
-  MAX_LABELS,
+  INTENSITY_VALUES,
+  LABEL_MAX_LENGTH,
   NOTE_MAX_LENGTH,
   MomentValidationError,
 } from './types';

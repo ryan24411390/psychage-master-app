@@ -132,9 +132,9 @@ describe('round-trip: existing check-in (Moments) → dailyRollup → recap', ()
     let clock = new Date(2026, 5, 15, 12, 0, 0);
     let n = 0;
     const store = new MomentStore({ storage: memStorage(), now: () => clock, generateId: () => `m${n++}` });
-    store.append({ valence: 3 });
+    store.append({ labelPrimary: 'steady' });
     clock = new Date(2026, 5, 17, 12, 0, 0);
-    store.append({ valence: 4 });
+    store.append({ labelPrimary: 'calm' });
 
     const checkins = dailyRollupReader(store).getRecent(30);
     const recap = buildDailyRecap({ checkins, energy: [] }, TODAY);

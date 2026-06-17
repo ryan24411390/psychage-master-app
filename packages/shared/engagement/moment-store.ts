@@ -1,14 +1,17 @@
 // MomentStore — the local-first source of truth for the Moments engine. The capture
 // flow, history, reflection, compass, insights, and the therapist export all read
-// through this (the day-based surfaces via `dayRollup`).
+// through this (the day-based surfaces via the app's day-rollup adapter over getAll()).
 //
 // LOCAL-FIRST. Writes to the injected Storage seam immediately. The mobile
-// SyncingMomentStore wraps this with a background, consent-gated push (on append)
-// and pull/restore (`ingestRemote`) — but this class never does I/O beyond Storage.
+// SyncingMomentStore wraps this with a background, consent-gated push (on append) and
+// pull/restore (`ingestRemote`) — but this class never does I/O beyond Storage.
 //
-// Moments are EVENT-BASED and APPEND-ONLY: many per day, no edit path in V1. `id`
-// and `timestamp` are minted at capture and immutable. The id is client-minted so
-// the cloud push upserts on the primary key (re-push updates, never duplicates).
+// Moments are EVENT-BASED and APPEND-ONLY: many per day, no edit path in V1. `id` and
+// `timestamp` are minted at capture and immutable. The id is client-minted so the cloud
+// push upserts on the primary key (re-push updates, never duplicates).
+//
+// VOCAB-AGNOSTIC: the store treats `labelPrimary`/`labelSecondary` as opaque word keys.
+// It validates SHAPE (present, length, intensity enum), never a word's MEANING.
 
 import {
   compareByTimestamp,
@@ -24,22 +27,23 @@ import { timestampToLocalCalendarDate } from './dates';
 import {
   type DayRollup,
   type EngagementStore,
+  INTENSITY_VALUES,
+  LABEL_MAX_LENGTH,
   type LocalCalendarDate,
-  MAX_LABELS,
   type Moment,
   type MomentDraft,
+  type MomentIntensity,
   type MomentStoreDeps,
-  type MomentValence,
   MomentValidationError,
   NOTE_MAX_LENGTH,
   type Storage,
 } from './types';
 
 /**
- * A surfaced load anomaly. The raw blob is preserved verbatim at `quarantineKey`;
- * the store continued on a best-effort recovered subset of `recoveredMomentCount`
- * moments. Surfaced (not swallowed) so a later recovery UI / telemetry can act —
- * nothing the user wrote is lost.
+ * A surfaced load anomaly. The raw blob is preserved verbatim at `quarantineKey`; the
+ * store continued on a best-effort recovered subset of `recoveredMomentCount` moments.
+ * Surfaced (not swallowed) so a later recovery UI / telemetry can act — nothing the user
+ * wrote is lost.
  */
 export interface MomentAnomaly {
   readonly reason: AnomalyReason;
@@ -48,20 +52,18 @@ export interface MomentAnomaly {
   readonly detectedAtIso: string;
 }
 
+// A Moment carries only scalars + optional strings (no nested arrays), so a shallow copy
+// is a full defensive copy.
 function cloneMoment(moment: Moment): Moment {
-  return {
-    ...moment,
-    labels: [...moment.labels],
-    context: [...moment.context],
-  };
+  return { ...moment };
 }
 
 /**
  * Merge remote moments into a local set. Last-write-wins by id; since moments are
- * append-only (no edits), a shared id means the local and remote copies are the
- * same capture — local wins the tie (it is the source of truth). Remote-only ids
- * are adopted (this is what restores history after a reinstall). Pure: used by the
- * store's `ingestRemote` and unit-testable in isolation.
+ * append-only (no edits), a shared id means the local and remote copies are the same
+ * capture — local wins the tie (it is the source of truth). Remote-only ids are adopted
+ * (this is what restores history after a reinstall). Pure: used by the store's
+ * `ingestRemote` and unit-testable in isolation.
  */
 export function mergeMoments(local: readonly Moment[], remote: readonly Moment[]): Moment[] {
   const byId = new Map<string, Moment>();
@@ -109,11 +111,12 @@ export class MomentStore implements EngagementStore {
   }
 
   /**
-   * Per-day summaries (oldest first), optionally bounded to `[from, to]`. The bridge
-   * for the day-based surfaces: groups the event-based stream by local calendar day and
-   * carries the day's RANGE — `low`/`high` are the lowest/highest valence that day and
-   * `valence` is worst-of-day (== `low`). NEVER the latest tap, NEVER a mean: a rough
-   * moment can never be hidden behind a later calm one.
+   * Per-day PRESENCE summaries (oldest first), optionally bounded to `[from, to]`. The
+   * vocab-agnostic bridge: groups the event-based stream by local calendar day and carries
+   * presence (count), whether any note was written, and the union of words named that day.
+   * No affect band lives here — a word's band is an app-side vocab property; the app's
+   * day-rollup adapter (apps/mobile/lib/daily-rollup.ts) derives bands for the
+   * affect-bearing surfaces.
    */
   dayRollup(from?: LocalCalendarDate, to?: LocalCalendarDate): DayRollup[] {
     const byDay = new Map<LocalCalendarDate, Moment[]>();
@@ -128,29 +131,19 @@ export class MomentStore implements EngagementStore {
 
     const rollups: DayRollup[] = [];
     for (const [date, moments] of byDay) {
-      const first = moments[0] as Moment;
-      let low: MomentValence = first.valence;
-      let high: MomentValence = first.valence;
-      const labels = new Set<string>();
-      const context = new Set<string>();
+      const labels: string[] = [];
+      const seen = new Set<string>();
       let hasNote = false;
       for (const m of moments) {
-        if (m.valence < low) low = m.valence;
-        if (m.valence > high) high = m.valence;
-        for (const l of m.labels) labels.add(l);
-        for (const c of m.context) context.add(c);
+        for (const word of [m.labelPrimary, m.labelSecondary]) {
+          if (word !== undefined && !seen.has(word)) {
+            seen.add(word);
+            labels.push(word);
+          }
+        }
         if (m.note !== undefined && m.note.length > 0) hasNote = true;
       }
-      rollups.push({
-        date,
-        valence: low, // worst-of-day scalar
-        low,
-        high,
-        momentCount: moments.length,
-        hasNote,
-        labels: [...labels],
-        context: [...context],
-      });
+      rollups.push({ date, momentCount: moments.length, hasNote, labels });
     }
     return rollups.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
   }
@@ -163,23 +156,22 @@ export class MomentStore implements EngagementStore {
   // ── writes ───────────────────────────────────────────────────────────────
 
   /**
-   * Capture a moment. Mints `id` + `timestamp`, validates, persists, and returns the
-   * full Moment. Append-only — a fresh id every call (never overwrites). Throws
+   * Capture a moment. Mints `id` + `timestamp`, validates, persists, and returns the full
+   * Moment. Append-only — a fresh id every call (never overwrites). Throws
    * MomentValidationError on an invalid draft (fail loud, never clamp).
    */
   append(draft: MomentDraft): Moment {
-    const labels = draft.labels ?? [];
-    const context = draft.context ?? [];
-    this.assertValidValence(draft.valence);
-    this.assertValidLabels(labels);
+    this.assertValidLabel('labelPrimary', draft.labelPrimary, true);
+    this.assertValidLabel('labelSecondary', draft.labelSecondary, false);
+    this.assertValidIntensity(draft.intensity);
     this.assertValidNote(draft.note);
 
     const moment = makeMoment(
       this.generateId(),
       this.now().toISOString(),
-      draft.valence,
-      labels,
-      context,
+      draft.labelPrimary,
+      draft.labelSecondary,
+      draft.intensity,
       draft.note,
       draft.routedToSupport ?? false,
     );
@@ -189,17 +181,17 @@ export class MomentStore implements EngagementStore {
   }
 
   /**
-   * Merge remote moments into the local cache (last-write-wins) and persist. This is
-   * the pull/restore half of sync: on a fresh install the local cache is empty and
-   * this repopulates it from the user's account (history survives reinstall).
+   * Merge remote moments into the local cache (last-write-wins) and persist. This is the
+   * pull/restore half of sync: on a fresh install the local cache is empty and this
+   * repopulates it from the user's account (history survives reinstall).
    */
   ingestRemote(remote: readonly Moment[]): void {
     const merged = mergeMoments([...this.byId.values()], remote);
     const before = this.byId.size;
     this.byId.clear();
     for (const m of merged) this.byId.set(m.id, m);
-    // Persist only when the merge actually changed the set (avoids a redundant write
-    // when a pull returns nothing new).
+    // Persist only when the merge actually changed the set (avoids a redundant write when
+    // a pull returns nothing new).
     if (this.byId.size !== before || remote.length > 0) this.persist();
   }
 
@@ -209,15 +201,21 @@ export class MomentStore implements EngagementStore {
     return [...this.byId.values()].sort(compareByTimestamp);
   }
 
-  private assertValidValence(valence: number): void {
-    if (!Number.isInteger(valence) || valence < 1 || valence > 5) {
-      throw new MomentValidationError(`valence must be an integer 1..5, got ${String(valence)}`);
+  private assertValidLabel(field: string, value: string | undefined, required: boolean): void {
+    if (value === undefined) {
+      if (required) throw new MomentValidationError(`${field} is required (the naming is the act)`);
+      return;
+    }
+    if (typeof value !== 'string' || value.length === 0 || value.length > LABEL_MAX_LENGTH) {
+      throw new MomentValidationError(`${field} must be a 1..${LABEL_MAX_LENGTH}-char word key`);
     }
   }
 
-  private assertValidLabels(labels: readonly string[]): void {
-    if (labels.length > MAX_LABELS) {
-      throw new MomentValidationError(`at most ${MAX_LABELS} labels (got ${labels.length})`);
+  private assertValidIntensity(intensity: MomentIntensity | undefined): void {
+    if (intensity !== undefined && !INTENSITY_VALUES.includes(intensity)) {
+      throw new MomentValidationError(
+        `intensity must be one of ${INTENSITY_VALUES.join('/')}, got ${String(intensity)}`,
+      );
     }
   }
 
@@ -249,9 +247,9 @@ export class MomentStore implements EngagementStore {
 
     if (outcome.status === 'anomaly') {
       // Preserve the raw blob (never silently lose user data), then continue on the
-      // best-effort recovered subset and surface the anomaly. The key carries a
-      // unique suffix from generateId() so two anomalies at the same instant cannot
-      // clobber each other (a blind storage.set would otherwise lose the first blob).
+      // best-effort recovered subset and surface the anomaly. The key carries a unique
+      // suffix from generateId() so two anomalies at the same instant cannot clobber each
+      // other (a blind storage.set would otherwise lose the first blob).
       const detectedAtIso = this.now().toISOString();
       const quarantineKey = `${QUARANTINE_KEY_PREFIX}${detectedAtIso}-${this.generateId()}`;
       this.storage.set(quarantineKey, outcome.raw);
@@ -272,23 +270,23 @@ export class MomentStore implements EngagementStore {
   }
 }
 
-/** Build a canonical moment; omit `note` when absent (overwrite-not-merge semantics). */
+/** Build a canonical moment; omit absent optionals (overwrite-not-merge semantics). */
 function makeMoment(
   id: string,
   timestamp: string,
-  valence: MomentValence,
-  labels: readonly string[],
-  context: readonly string[],
+  labelPrimary: string,
+  labelSecondary: string | undefined,
+  intensity: MomentIntensity | undefined,
   note: string | undefined,
   routedToSupport: boolean,
 ): Moment {
-  const base = {
+  return {
     id,
     timestamp,
-    valence,
-    labels: [...labels],
-    context: [...context],
+    labelPrimary,
     routedToSupport,
+    ...(labelSecondary !== undefined ? { labelSecondary } : {}),
+    ...(intensity !== undefined ? { intensity } : {}),
+    ...(note !== undefined ? { note } : {}),
   };
-  return note === undefined ? base : { ...base, note };
 }

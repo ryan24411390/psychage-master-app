@@ -3,11 +3,10 @@ import { fireEvent, screen } from '@testing-library/react-native';
 
 import { renderWithProviders } from './_helpers';
 
-// Mock the shipped capture sheet so we can drive deterministic acute / non-acute drafts
-// without exercising the valence slider UI. The mock exposes one button per outcome plus
-// a close affordance, each calling the real onSave/onClose the container passes in. The
-// draft mirrors what the real sheet stamps (it runs shouldRouteToSupport and sets
-// routedToSupport before handing up — tested separately in moment-acute.test.ts).
+// Mock the shipped capture sheet so we can drive a deterministic save without exercising the
+// word-picker UI. The mock exposes a save button (calls onSave with a new-shape draft) and a
+// close affordance. There is no acute-handoff path — no rule is built; the SR-2 crisis pill
+// is the safety floor.
 jest.mock('@/components/moments/MomentCaptureSheet', () => {
   const { Pressable, Text } = require('react-native');
   return {
@@ -21,21 +20,10 @@ jest.mock('@/components/moments/MomentCaptureSheet', () => {
       <>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="mock-save-calm"
-          onPress={() =>
-            onSave({ valence: 5, labels: ['calm'], context: [], routedToSupport: false })
-          }
+          accessibilityLabel="mock-save"
+          onPress={() => onSave({ labelPrimary: 'calm' })}
         >
-          <Text>save calm</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="mock-save-acute"
-          onPress={() =>
-            onSave({ valence: 1, labels: ['overwhelmed'], context: [], routedToSupport: true })
-          }
-        >
-          <Text>save acute</Text>
+          <Text>save</Text>
         </Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel="mock-close" onPress={onClose}>
           <Text>close</Text>
@@ -63,47 +51,17 @@ describe('OnboardingMomentCapture (S3)', () => {
     expect(screen.getByLabelText('Help now')).toBeTruthy();
   });
 
-  it('a non-acute save persists the Moment and advances to the acknowledgment', () => {
+  it('a save persists the Moment and advances to the acknowledgment', () => {
     const store = makeStore();
     const onNamed = jest.fn();
-    const navigateToCrisis = jest.fn();
     renderWithProviders(
-      <OnboardingMomentCapture
-        store={store}
-        onNamed={onNamed}
-        onExit={() => {}}
-        navigateToCrisis={navigateToCrisis}
-      />,
+      <OnboardingMomentCapture store={store} onNamed={onNamed} onExit={() => {}} />,
       { haptics: true },
     );
-    fireEvent.press(screen.getByLabelText('mock-save-calm'));
+    fireEvent.press(screen.getByLabelText('mock-save'));
     expect(store.append).toHaveBeenCalledTimes(1);
-    expect(store.append).toHaveBeenCalledWith(
-      expect.objectContaining({ valence: 5, routedToSupport: false }),
-    );
+    expect(store.append).toHaveBeenCalledWith(expect.objectContaining({ labelPrimary: 'calm' }));
     expect(onNamed).toHaveBeenCalledTimes(1);
-    expect(navigateToCrisis).not.toHaveBeenCalled();
-  });
-
-  it('an acute save persists the Moment then routes INTO crisis, never to acknowledgment (SR-2)', () => {
-    const store = makeStore();
-    const onNamed = jest.fn();
-    const navigateToCrisis = jest.fn();
-    renderWithProviders(
-      <OnboardingMomentCapture
-        store={store}
-        onNamed={onNamed}
-        onExit={() => {}}
-        navigateToCrisis={navigateToCrisis}
-      />,
-      { haptics: true },
-    );
-    fireEvent.press(screen.getByLabelText('mock-save-acute'));
-    expect(store.append).toHaveBeenCalledWith(
-      expect.objectContaining({ valence: 1, routedToSupport: true }),
-    );
-    expect(navigateToCrisis).toHaveBeenCalledTimes(1);
-    expect(onNamed).not.toHaveBeenCalled();
   });
 
   it('dismissing the sheet exits to the first-run home', () => {

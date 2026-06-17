@@ -1,11 +1,13 @@
-// Moments feature — public surface (copy, clinical-review constants, acute predicate).
+// Moments feature — public surface (copy + the DRAFT curated affect vocabulary).
 export { MOMENTS_COPY } from './copy';
 export {
-  ALL_LABELS,
-  CONTEXT_DOMAINS,
-  CRISIS_ADJACENT_LABEL_KEYS,
-  LOWEST_VALENCE,
-  type MomentLabel,
-  VALENCE_LABELS,
-} from './constants';
-export { shouldRouteToSupport } from './acute';
+  type AffectBand,
+  type AffectFamily,
+  type AffectWord,
+  AFFECT_FAMILIES,
+  ALL_WORDS,
+  BAND_ANCHOR_KEYS,
+  bandForLabel,
+  isAffectWord,
+  wordLabel,
+} from './vocab';

@@ -30,9 +30,9 @@ describe('wipeLocalData (S48 local delete)', () => {
       generateId: () => `id-${++n}`,
     });
 
-    store.append({ valence: 3 });
+    store.append({ labelPrimary: 'steady' });
     clock = new Date(2026, 5, 15, 9, 0, 0);
-    store.append({ valence: 5 });
+    store.append({ labelPrimary: 'joyful' });
     expect(store.getRecent(50).length).toBe(2);
 
     // seed the other known pref keys

@@ -1,4 +1,4 @@
-import type { Moment, MomentValence } from '@psychage/shared/engagement';
+import type { Moment } from '@psychage/shared/engagement';
 import { describe, expect, it, vi } from 'vitest';
 
 import { mergeMomentRecords } from '@/features/auth/migration/merge';
@@ -14,8 +14,12 @@ import {
 // client-minted id, so the merge unions BY ID (a shared id is the same capture; local
 // wins). The REMOTE write is stubbed/gated (SR-4 ADR) — exercised via the stub seam.
 
-function moment(id: string, ts: string, valence: MomentValence): Moment {
-  return { id, timestamp: ts, valence, labels: [], context: [], routedToSupport: false };
+// The 3rd arg is a band 1..5, mapped to that band's anchor WORD — moments are
+// affect-labeled now, so a distinct band gives a distinct `labelPrimary` for the
+// local-wins assertions below.
+const BAND_WORD = ['', 'overwhelmed', 'anxious', 'steady', 'calm', 'joyful'] as const;
+function moment(id: string, ts: string, band: number): Moment {
+  return { id, timestamp: ts, labelPrimary: BAND_WORD[band] ?? 'steady', routedToSupport: false };
 }
 
 const ids = (ms: readonly Moment[]) => ms.map((m) => m.id);
@@ -53,7 +57,7 @@ describe('mergeMomentRecords', () => {
     const { merged, conflictsResolved } = mergeMomentRecords(account, local);
 
     expect(ids(merged).sort()).toEqual(['b', 'shared', 'y']);
-    expect(merged.find((m) => m.id === 'shared')?.valence).toBe(5); // local wins
+    expect(merged.find((m) => m.id === 'shared')?.labelPrimary).toBe('joyful'); // local (band 5) wins
     expect(conflictsResolved).toBe(1);
   });
 });
@@ -79,7 +83,7 @@ describe('runMigration (remote stubbed/gated)', () => {
     expect(outcome.conflictsResolved).toBe(1);
     expect(push).toHaveBeenCalledTimes(1);
     const pushed = push.mock.calls[0]?.[0] ?? [];
-    expect(pushed.find((m) => m.id === 'shared')?.valence).toBe(5);
+    expect(pushed.find((m) => m.id === 'shared')?.labelPrimary).toBe('joyful');
     expect(pushed).toHaveLength(2);
   });
 

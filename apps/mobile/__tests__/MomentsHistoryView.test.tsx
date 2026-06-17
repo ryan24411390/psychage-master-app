@@ -9,7 +9,7 @@ import { renderWithProviders } from './_helpers';
 // and the engagement floor — a gap day is simply absent, never rendered as a "miss".
 
 function moment(id: string, ts: string): Moment {
-  return { id, timestamp: ts, valence: 3, labels: [], context: [], routedToSupport: false };
+  return { id, timestamp: ts, labelPrimary: 'steady', routedToSupport: false };
 }
 
 describe('MomentsHistoryView', () => {

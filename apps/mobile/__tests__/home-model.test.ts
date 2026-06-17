@@ -47,8 +47,8 @@ function memStorage(): Storage {
 
 /**
  * A day-rollup reader over a MomentStore seeded with one moment per date (each at
- * local noon so it can't cross a UTC midnight). valence 3 → DailyState 2, matching
- * the prior one-check-in-per-day fixture. `getRange` is what isReflectionAvailable reads.
+ * local noon so it can't cross a UTC midnight). The word 'steady' → band 3 → DailyState 2,
+ * matching the prior one-check-in-per-day fixture. `getRange` is what isReflectionAvailable reads.
  */
 function storeSeededOn(dates: Date[]): ReturnType<typeof dailyRollupReader> {
   let clock = new Date(2026, 0, 1);
@@ -60,7 +60,7 @@ function storeSeededOn(dates: Date[]): ReturnType<typeof dailyRollupReader> {
   });
   for (const d of dates) {
     clock = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
-    store.append({ valence: 3 });
+    store.append({ labelPrimary: 'steady' });
   }
   return dailyRollupReader(store);
 }

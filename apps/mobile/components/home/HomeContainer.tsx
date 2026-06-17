@@ -84,7 +84,6 @@ export function HomeContainer({
   navigateToReflection = () => router.push('/reflection'),
   navigateToBreathing = () => router.push('/toolkit'),
   navigateToInsights = () => router.push('/insights'),
-  navigateToCrisis = () => router.push('/crisis'),
   readSummaries = readToolSummaries,
   autoOpenCheckIn = false,
 }: {
@@ -94,8 +93,6 @@ export function HomeContainer({
   readSummaries?: () => readonly ToolSummary[];
   navigateToReflection?: () => void;
   navigateToBreathing?: () => void;
-  /** Acute handoff (SR-2): route INTO the ungated crisis surface. Injected for tests. */
-  navigateToCrisis?: () => void;
   // Onboarding's "Capture your first moment" opens the sheet over the first-run home.
   autoOpenCheckIn?: boolean;
 }) {
@@ -126,18 +123,18 @@ export function HomeContainer({
 
   const handleSave = useCallback(
     (draft: MomentDraft) => {
+      // Persist + fire the home reactions. The sheet owns the close: it shows its single
+      // post-capture acknowledgment beat, then calls onClose. No acute-handoff route runs
+      // here — the SR-2 crisis pill (stack header) is the safety floor, and a band-1 day
+      // still surfaces the bridge card below.
       const firstToday = reader.getToday() === undefined;
       store.append(draft);
       fireHaptic('confirm');
       if (firstToday) setImprintSignal((s) => s + 1);
       setTiltSignal((s) => s + 1);
       setBridgeDismissed(false);
-      setSheetOpen(false);
-      // SR-2: the acute predicate ran in the sheet and stamped the draft; route INTO
-      // the ungated crisis surface after persisting (never gates it).
-      if (draft.routedToSupport) navigateToCrisis();
     },
-    [store, reader, fireHaptic, navigateToCrisis],
+    [store, reader, fireHaptic],
   );
 
   return (

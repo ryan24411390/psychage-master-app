@@ -71,6 +71,12 @@ export const MASCOT_CONTEXTUAL = {
   progressComplete: 'encouraging', // progress / completion / Clarity result
   calmSecondary: 'seated', // calm secondary presence / offline
   homeSaveReturn: 'tilt', // check-in save + lapse-return (realized as tiltSignal motion)
+  // Moment capture (affect-labeling) sheet. The mascot is a steady, RECEDED anchor — small,
+  // calm, at the edge while the person does the naming. NEVER valence-matched: it expresses
+  // presence/registration of the ACT, never the logged feeling (memo §6 standing rule). It
+  // recedes further as the person picks a word; a single constant-warmth line acknowledges
+  // the act after save. No mood prop — this is the one and only capture-surface pose.
+  momentCapture: 'seated',
 } satisfies Record<string, MascotState>;
 
 export function isMascotForbidden(pathname: string): boolean {

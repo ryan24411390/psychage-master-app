@@ -1,78 +1,105 @@
-import { type MomentDraft, type MomentValence, MAX_LABELS, NOTE_MAX_LENGTH } from '@psychage/shared/engagement';
+import {
+  INTENSITY_VALUES,
+  type MomentDraft,
+  type MomentIntensity,
+  NOTE_MAX_LENGTH,
+} from '@psychage/shared/engagement';
 import { X } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
+import { Mascot } from '@/components/home/Mascot';
 import { ChipGroup } from '@/components/moments/ChipGroup';
-import { ValenceSlider } from '@/components/moments/ValenceSlider';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
-import { shouldRouteToSupport } from '@/features/moments/acute';
-import { ALL_LABELS, CONTEXT_DOMAINS, VALENCE_LABELS } from '@/features/moments/constants';
+import { MASCOT_CONTEXTUAL } from '@/features/mascot/mascot.surfaces';
 import { MOMENTS_COPY } from '@/features/moments/copy';
+import { AFFECT_FAMILIES } from '@/features/moments/vocab';
 import { colorForScheme, resolveColorRef } from '@/lib/a1-tokens';
 import { DURATION, useReducedMotion } from '@/lib/motion';
 
-// The Moments capture sheet — a bottom-sheet OVERLAY under the global header (the
-// Help-now pill stays reachable above the veil), mirroring the retired CheckInSheet's
-// chrome so it is visually indistinguishable. MOMENTARY copy throughout.
+// The Moments capture sheet — a bottom-sheet OVERLAY under the global header (the Help-now
+// crisis pill stays reachable in the stack header above the veil — SR-2). It is an
+// AFFECT-LABELING surface: the primary act is NAMING a feeling (pick a word), NOT rating a
+// mood. There is no valence slider.
 //
-// Flow: valence slider → "one word, if you want" (valence-narrowed chips + show more)
-//   → "what's having the biggest impact?" context domains → optional one line → save.
-// Minimal capture is 2 taps: pick a valence, press save (labels/context/note optional).
+// Flow: pick a precise word (required — the naming) → optionally a second word (one) →
+//   optionally how strong (low/med/high) → optionally one line → save. Minimal capture is
+//   2 taps: one word, then save. The product OFFERS the vocabulary; it never picks or
+//   guesses the word (SR-3 + the prefrontal "name it" mechanism).
 //
-// Store-agnostic: the container owns the write + any crisis navigation. This sheet
-// runs the acute predicate (shouldRouteToSupport) BEFORE handing the draft up, and
-// stamps `routedToSupport` on it so the persisted moment carries the flag.
+// MASCOT (memo §6 — anchor, never mirror): the ambient, receded mascot lives on the surface
+// BEHIND this sheet (home '/' route pose / onboarding's receded mascot), dimmed by the veil
+// = "recedes during naming". This sheet shows the mascot only for the post-capture
+// ACKNOWLEDGMENT — a single constant-warmth line about the ACT ("You noticed that."),
+// valence-invariant: it never varies with the feeling that was named.
+//
+// Store-agnostic: the container owns the write (onSave). No acute-handoff rule is built —
+// the draft never sets routedToSupport (pending clinical decision); the crisis pill is the
+// safety floor.
+
+const MAX_WORDS = 2; // one primary + one optional secondary (brevity is a safety feature)
+const ACK_MS = 1400; // how long the post-capture acknowledgment lingers before the sheet closes
 
 type MomentCaptureSheetProps = {
   onSave: (draft: MomentDraft) => void;
   onClose: () => void;
+  /**
+   * When true (default), the sheet shows the acknowledgment beat after save, then calls
+   * onClose. When false the caller's onSave drives what happens next (onboarding navigates
+   * to its own acknowledgment screen), so the sheet does not self-close or acknowledge.
+   */
+  acknowledge?: boolean;
 };
 
-export function MomentCaptureSheet({ onSave, onClose }: MomentCaptureSheetProps) {
+export function MomentCaptureSheet({ onSave, onClose, acknowledge = true }: MomentCaptureSheetProps) {
   const reduced = useReducedMotion();
   const { colorScheme } = useColorScheme();
-  const [valence, setValence] = useState<MomentValence | null>(null);
-  const [labels, setLabels] = useState<string[]>([]);
-  const [context, setContext] = useState<string[]>([]);
+  const [words, setWords] = useState<string[]>([]); // [primary, secondary?]
+  const [intensity, setIntensity] = useState<MomentIntensity | null>(null);
   const [note, setNote] = useState('');
-  const [showAllLabels, setShowAllLabels] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
+  const [acknowledged, setAcknowledged] = useState(false);
 
   const placeholderColor = colorForScheme(resolveColorRef('color.text.tertiary'), colorScheme);
   const iconColor = colorForScheme(resolveColorRef('color.text.secondary'), colorScheme);
 
-  // Labels narrow to the chosen valence's band; "show more" reveals the full list.
-  const labelItems = useMemo(() => {
-    if (valence === null) return [];
-    return showAllLabels ? ALL_LABELS : VALENCE_LABELS[valence];
-  }, [valence, showAllLabels]);
+  const named = words.length > 0;
 
-  const toggle = (list: string[], setList: (v: string[]) => void, key: string, max?: number) => {
+  // The post-capture acknowledgment lingers, then the sheet closes itself.
+  useEffect(() => {
+    if (!acknowledged) return;
+    const t = setTimeout(onClose, ACK_MS);
+    return () => clearTimeout(t);
+  }, [acknowledged, onClose]);
+
+  const toggleWord = (key: string) => {
     setSaveFailed(false);
-    if (list.includes(key)) {
-      setList(list.filter((k) => k !== key));
-    } else if (max === undefined || list.length < max) {
-      setList([...list, key]);
-    }
+    setWords((cur) => {
+      if (cur.includes(key)) return cur.filter((k) => k !== key);
+      if (cur.length >= MAX_WORDS) return cur;
+      return [...cur, key];
+    });
   };
 
   const handleSave = () => {
-    if (valence === null) return;
+    const primary = words[0];
+    if (primary === undefined) return;
     const trimmed = note.trim();
     const draft: MomentDraft = {
-      valence,
-      labels,
-      context,
+      labelPrimary: primary,
+      ...(words[1] !== undefined ? { labelSecondary: words[1] } : {}),
+      ...(intensity !== null ? { intensity } : {}),
       ...(trimmed.length > 0 ? { note: trimmed } : {}),
-      // Predicate runs BEFORE persist; the flag is carried on the saved moment.
-      routedToSupport: shouldRouteToSupport({ valence, labels }),
+      // routedToSupport intentionally omitted (defaults false): no acute-handoff rule is
+      // built — that threshold is a pending clinical decision. The SR-2 crisis pill is the
+      // safety floor.
     };
     try {
       onSave(draft);
+      if (acknowledge) setAcknowledged(true);
     } catch {
       setSaveFailed(true);
     }
@@ -88,101 +115,125 @@ export function MomentCaptureSheet({ onSave, onClose }: MomentCaptureSheetProps)
         accessibilityRole="button"
         accessibilityLabel={MOMENTS_COPY.close}
         className="flex-1"
-        onPress={onClose}
+        onPress={acknowledged ? undefined : onClose}
       />
       <Animated.View
         entering={reduced ? undefined : SlideInDown.springify().damping(20).stiffness(200).mass(0.8)}
         exiting={reduced ? undefined : SlideOutDown.springify().damping(20).stiffness(200).mass(0.8)}
         className="max-h-[88%] rounded-t-xl bg-surface px-5 pb-6 pt-5 dark:bg-surface-dark"
       >
-        <View className="mb-1 flex-row items-start justify-between">
-          <View className="flex-1 pr-3">
-            <Text variant="heading">{MOMENTS_COPY.title}</Text>
-            <Text variant="body" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
-              {MOMENTS_COPY.subline}
+        {acknowledged ? (
+          // Post-capture acknowledgment of the ACT — a single constant-warmth beat. The
+          // mascot is present (anchor); the line never varies with the named feeling.
+          <Animated.View
+            entering={reduced ? undefined : FadeIn.duration(DURATION.swift)}
+            className="items-center gap-4 py-10"
+          >
+            <Mascot state={MASCOT_CONTEXTUAL.momentCapture} size={88} />
+            <Text variant="heading" className="text-center">
+              {MOMENTS_COPY.acknowledged}
             </Text>
-          </View>
-          <Pressable accessibilityRole="button" accessibilityLabel={MOMENTS_COPY.close} hitSlop={8} onPress={onClose}>
-            <X size={22} color={iconColor} />
-          </Pressable>
-        </View>
-
-        <ScrollView showsVerticalScrollIndicator={false} className="mt-3">
-          <ValenceSlider
-            value={valence}
-            onChange={(v) => {
-              setValence(v);
-              setSaveFailed(false);
-            }}
-          />
-
-          {valence !== null && (
-            <View className="mt-6 gap-2">
-              <View className="flex-row items-center justify-between">
-                <Text variant="bodyMedium">{MOMENTS_COPY.labelPrompt}</Text>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={showAllLabels ? MOMENTS_COPY.labelShowFewer : MOMENTS_COPY.labelShowMore}
-                  hitSlop={8}
-                  onPress={() => setShowAllLabels((s) => !s)}
-                >
-                  <Text variant="bodySm" className="text-primary dark:text-primary-dark">
-                    {showAllLabels ? MOMENTS_COPY.labelShowFewer : MOMENTS_COPY.labelShowMore}
-                  </Text>
-                </Pressable>
+          </Animated.View>
+        ) : (
+          <>
+            <View className="mb-1 flex-row items-start justify-between">
+              <View className="flex-1 pr-3">
+                <Text variant="heading">{MOMENTS_COPY.title}</Text>
+                <Text variant="body" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
+                  {MOMENTS_COPY.subline}
+                </Text>
               </View>
-              <ChipGroup
-                items={labelItems}
-                selected={labels}
-                max={MAX_LABELS}
-                onToggle={(key) => toggle(labels, setLabels, key, MAX_LABELS)}
-              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={MOMENTS_COPY.close}
+                hitSlop={8}
+                onPress={onClose}
+              >
+                <X size={22} color={iconColor} />
+              </Pressable>
             </View>
-          )}
 
-          {valence !== null && (
-            <View className="mt-6 gap-2">
-              <Text variant="bodyMedium">{MOMENTS_COPY.contextPrompt}</Text>
-              <ChipGroup
-                items={CONTEXT_DOMAINS}
-                selected={context}
-                onToggle={(key) => toggle(context, setContext, key)}
-              />
-            </View>
-          )}
+            <ScrollView showsVerticalScrollIndicator={false} className="mt-3" keyboardShouldPersistTaps="handled">
+              {/* The naming — the primary act. Word families, browse + pick (up to two). */}
+              {AFFECT_FAMILIES.map((family) => (
+                <View key={family.title} className="mb-4 gap-2">
+                  <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+                    {family.title}
+                  </Text>
+                  <ChipGroup
+                    items={family.words}
+                    selected={words}
+                    max={MAX_WORDS}
+                    onToggle={toggleWord}
+                  />
+                </View>
+              ))}
 
-          {valence !== null && (
-            <TextInput
-              accessibilityLabel={MOMENTS_COPY.notePlaceholder}
-              placeholder={MOMENTS_COPY.notePlaceholder}
-              placeholderTextColor={placeholderColor}
-              value={note}
-              onChangeText={(text) => {
-                setNote(text);
-                setSaveFailed(false);
-              }}
-              maxLength={NOTE_MAX_LENGTH}
-              className="mt-6 min-h-[44px] rounded-lg border border-border px-3 py-2 font-sans text-base text-text-primary dark:border-border-dark dark:text-text-primary-dark"
-            />
-          )}
+              {named && words.length < MAX_WORDS && (
+                <Text variant="bodySm" className="mb-4 text-text-tertiary dark:text-text-tertiary-dark">
+                  {MOMENTS_COPY.secondaryPrompt} · {MOMENTS_COPY.secondaryHint.toLowerCase()}
+                </Text>
+              )}
 
-          {saveFailed && (
-            <Text
-              variant="bodySm"
-              className="mt-2 text-text-primary dark:text-text-primary-dark"
-              accessibilityLiveRegion="polite"
-            >
-              {MOMENTS_COPY.saveFailed}
+              {named && (
+                <View className="mt-2 gap-2">
+                  <Text variant="bodyMedium">
+                    {MOMENTS_COPY.intensityPrompt}{' '}
+                    <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+                      {MOMENTS_COPY.intensityHint.toLowerCase()}
+                    </Text>
+                  </Text>
+                  <ChipGroup
+                    items={INTENSITY_VALUES.map((v) => ({ key: v, label: MOMENTS_COPY.intensityLabels[v] }))}
+                    selected={intensity !== null ? [intensity] : []}
+                    max={1}
+                    onToggle={(k) => setIntensity((cur) => (cur === k ? null : (k as MomentIntensity)))}
+                  />
+                </View>
+              )}
+
+              {named && (
+                <View className="mt-6 gap-2">
+                  <Text variant="bodyMedium">
+                    {MOMENTS_COPY.notePrompt}{' '}
+                    <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+                      {MOMENTS_COPY.intensityHint.toLowerCase()}
+                    </Text>
+                  </Text>
+                  <TextInput
+                    accessibilityLabel={MOMENTS_COPY.notePrompt}
+                    placeholder={MOMENTS_COPY.notePlaceholder}
+                    placeholderTextColor={placeholderColor}
+                    value={note}
+                    onChangeText={(text) => {
+                      setNote(text);
+                      setSaveFailed(false);
+                    }}
+                    maxLength={NOTE_MAX_LENGTH}
+                    className="min-h-[44px] rounded-lg border border-border px-3 py-2 font-sans text-base text-text-primary dark:border-border-dark dark:text-text-primary-dark"
+                  />
+                </View>
+              )}
+
+              {saveFailed && (
+                <Text
+                  variant="bodySm"
+                  className="mt-3 text-text-primary dark:text-text-primary-dark"
+                  accessibilityLiveRegion="polite"
+                >
+                  {MOMENTS_COPY.saveFailed}
+                </Text>
+              )}
+            </ScrollView>
+
+            <Button variant="primary" className="mt-4" disabled={!named} onPress={handleSave}>
+              {MOMENTS_COPY.save}
+            </Button>
+            <Text variant="caption" className="mt-2 text-center text-text-tertiary dark:text-text-tertiary-dark">
+              {MOMENTS_COPY.privacyNote}
             </Text>
-          )}
-        </ScrollView>
-
-        <Button variant="primary" className="mt-4" disabled={valence === null} onPress={handleSave}>
-          {MOMENTS_COPY.save}
-        </Button>
-        <Text variant="caption" className="mt-2 text-center text-text-tertiary dark:text-text-tertiary-dark">
-          {MOMENTS_COPY.privacyNote}
-        </Text>
+          </>
+        )}
       </Animated.View>
     </Animated.View>
   );

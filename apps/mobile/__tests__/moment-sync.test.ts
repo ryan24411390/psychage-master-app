@@ -17,9 +17,8 @@ import {
 const MOMENT: Moment = {
   id: 'mm_1',
   timestamp: '2026-06-17T09:00:00.000Z',
-  valence: 4,
-  labels: ['steady'],
-  context: ['work'],
+  labelPrimary: 'calm', // band 4 → server valence 4
+  labelSecondary: 'grateful',
   note: 'a line',
   routedToSupport: false,
 };
@@ -42,14 +41,14 @@ function memStorage(): Storage {
 // ── mappers (pure) ────────────────────────────────────────────────────────────
 
 describe('mapMomentToInput', () => {
-  it('carries the client-minted id (idempotency key) + maps fields; valence is identity', () => {
+  it('carries the client-minted id + maps words to labels; valence is derived from the band', () => {
     expect(mapMomentToInput(MOMENT, 'user-1')).toEqual({
       id: 'mm_1',
       user_id: 'user-1',
       experienced_at: '2026-06-17T09:00:00.000Z',
-      valence: 4,
-      labels: ['steady'],
-      context: ['work'],
+      valence: 4, // bandForLabel('calm')
+      labels: ['calm', 'grateful'], // primary + optional secondary
+      context: [], // retired locally — sent empty
       routed_to_support: false,
       note: 'a line',
     });
@@ -62,7 +61,7 @@ describe('mapMomentToInput', () => {
 });
 
 describe('mapRecordToMoment (pull lane)', () => {
-  it('maps a server record back to a local moment', () => {
+  it('maps a server record back to a local moment (labels → words)', () => {
     const record = {
       id: 'r1',
       user_id: 'user-1',
@@ -73,32 +72,31 @@ describe('mapRecordToMoment (pull lane)', () => {
       schema_version: 1,
       experienced_at: '2026-06-10T09:00:00.000Z',
       valence: 5,
-      labels: ['hopeful'],
+      labels: ['hopeful', 'light'],
       context: [],
       routed_to_support: false,
     } as unknown as MomentRecord;
     expect(mapRecordToMoment(record)).toEqual({
       id: 'r1',
       timestamp: '2026-06-10T09:00:00.000Z',
-      valence: 5,
-      labels: ['hopeful'],
-      context: [],
+      labelPrimary: 'hopeful',
+      labelSecondary: 'light',
       routedToSupport: false,
     });
   });
 
-  it('defensively clamps valence + truncates over-cap labels', () => {
+  it('a word-less legacy row falls back to its band-ANCHOR word (no row lost)', () => {
     const record = {
       id: 'r2',
       experienced_at: '2026-06-10T09:00:00.000Z',
-      valence: 9,
-      labels: ['a', 'b', 'c', 'd'],
+      valence: 1,
+      labels: [],
       context: ['x'],
       routed_to_support: true,
     } as unknown as MomentRecord;
     const m = mapRecordToMoment(record);
-    expect(m.valence).toBe(5);
-    expect(m.labels).toEqual(['a', 'b', 'c']);
+    expect(m.labelPrimary).toBe('overwhelmed'); // band-1 anchor
+    expect(m.labelSecondary).toBeUndefined();
     expect(m.routedToSupport).toBe(true);
   });
 });

@@ -4,13 +4,15 @@ import {
   timestampToLocalCalendarDate,
 } from '@psychage/shared/engagement';
 
+import { type AffectBand, bandForLabel } from '@/features/moments/vocab';
+
 // The day-rollup adapter — the bridge that lets the DAY-BASED surfaces (home view-
 // model, history continuum, reflection, cross-tool insights, therapist export) read
 // the EVENT-BASED Moments store without a redesign. It collapses the moment stream
 // into one entry per local calendar day that carries the day's RANGE, not a single
 // "representative" tap:
 //
-//   • low/high = lowest / highest valence among that day's moments, mapped 1..5 → 0..4
+//   • low/high = lowest / highest BAND among that day's moments, mapped 1..5 → 0..4
 //   • state    = worst-of-day (== `low`) — the single scalar the grid/threshold/export
 //                surfaces use. NEVER the latest tap, NEVER a mean: a rough evening can
 //                never be hidden behind a later calm moment (the daily-collapse the
@@ -20,9 +22,13 @@ import {
 //                SAME moment)
 //   • date/id  = the local calendar day (id == date; one entry per day)
 //
-// `state` stays the ex-CheckInEntry scalar so the many `.state` consumers are unchanged;
-// surfaces that can show a span (the terrain band) read `low`/`high`. Read-only: there
-// is no per-day write here (capture appends a Moment; there is no daily edit).
+// AFFECT IS A PROPERTY OF THE WORD. A Moment carries no valence rating — the affect-
+// labeling primitive names a feeling. A day's band is derived from each moment's PRIMARY
+// WORD via the curated vocab (`bandForLabel`); the person never rated anything, and the
+// product never guessed the word. `state` stays the ex-CheckInEntry 0..4 scalar so the
+// many `.state` consumers (terrain, insights trend, home status) are unchanged; surfaces
+// that can show a span (the terrain band) read `low`/`high`. Read-only: there is no
+// per-day write here (capture appends a Moment; there is no daily edit).
 
 /** A 0..4 ordinal — the day-level affect the day-based surfaces consume (ex-CheckInState). */
 export type DailyState = 0 | 1 | 2 | 3 | 4;
@@ -65,8 +71,14 @@ export interface DailyRollupReader {
   getEntry(id: string): DailyEntry | undefined;
 }
 
-function valenceToState(valence: number): DailyState {
-  return Math.min(4, Math.max(0, valence - 1)) as DailyState;
+/** A 1..5 affect band → the 0..4 DailyState ordinal the day-based surfaces consume. */
+function bandToState(band: AffectBand): DailyState {
+  return (band - 1) as DailyState;
+}
+
+/** A moment's band, derived from its PRIMARY WORD via the curated vocab. */
+function bandOfMoment(m: Moment): AffectBand {
+  return bandForLabel(m.labelPrimary);
 }
 
 function localDateNow(now: Date): string {
@@ -78,9 +90,10 @@ function localDateNow(now: Date): string {
 
 /**
  * Collapse moments into one DailyEntry per local calendar day, oldest first. Each day
- * carries its RANGE: `low`/`high` are the lowest/highest valence-state that day, `state`
- * is worst-of-day (== `low`), `count` is the number of moments, and `note` is the
- * worst-of-day moment's note. Never the latest tap, never a mean.
+ * carries its RANGE: `low`/`high` are the lowest/highest band-state that day, `state` is
+ * worst-of-day (== `low`), `count` is the number of moments, and `note` is the worst-of-day
+ * moment's note. The band of each moment comes from its primary WORD (the curated vocab),
+ * never a rating. Never the latest tap, never a mean.
  */
 export function momentsToDailyEntries(moments: readonly Moment[]): DailyEntry[] {
   const ascending = [...moments].sort((a, b) =>
@@ -99,15 +112,15 @@ export function momentsToDailyEntries(moments: readonly Moment[]): DailyEntry[] 
   for (const [date, dayMoments] of byDay) {
     // dayMoments is non-empty (a day exists only because a moment landed in it).
     let worst = dayMoments[0] as Moment;
-    let low = valenceToState(worst.valence);
+    let low = bandToState(bandOfMoment(worst));
     let high = low;
     for (const m of dayMoments) {
-      const s = valenceToState(m.valence);
+      const s = bandToState(bandOfMoment(m));
       if (s < low) low = s;
       if (s > high) high = s;
       // `<=` keeps the LATEST moment among the lowest (ascending iteration), so `note`
       // is the most recent expression of the day's worst.
-      if (s <= valenceToState(worst.valence)) worst = m;
+      if (s <= bandToState(bandOfMoment(worst))) worst = m;
     }
     const base = { id: date, date, state: low, low, high, count: dayMoments.length };
     const note = worst.note;

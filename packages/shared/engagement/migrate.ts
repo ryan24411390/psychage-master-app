@@ -1,19 +1,27 @@
 // Moments persistence schema + forward-only versioned migrator (Sacred Rule #13:
 // every persisted shape carries a version + an N→N+1 transform from day one).
 //
-// Mirrors packages/shared/check-in/migrate.ts's NEVER-SILENTLY-LOSE-USER-DATA
-// policy: check-ins/moments are user data, so on anomaly the raw blob is preserved
-// under a quarantine key and the failure is surfaced — the store then continues on a
-// best-effort recovered subset. (Unlike derived preferences, which may reseed.)
+// Mirrors packages/shared/check-in/migrate.ts's NEVER-SILENTLY-LOSE-USER-DATA policy:
+// moments are user data, so on anomaly the raw blob is preserved under a quarantine key
+// and the failure is surfaced — the store then continues on a best-effort recovered
+// subset. (Unlike derived preferences, which may reseed.)
+//
+// SCHEMA HISTORY
+//   v1 — valence-rating shape: { valence 1..5, labels[], context[], note?, routedToSupport }.
+//   v2 — affect-labeling shape: { labelPrimary, labelSecondary?, intensity?, note?,
+//        routedToSupport }. The naming (a word) is the primitive; valence is retired
+//        (affect is now a property of the chosen WORD, resolved app-side). See the v1→v2
+//        transform below for the exact, no-data-loss field mapping.
 
 import {
+  INTENSITY_VALUES,
+  LABEL_MAX_LENGTH,
   type Moment,
-  type MomentValence,
-  MAX_LABELS,
+  type MomentIntensity,
   NOTE_MAX_LENGTH,
 } from './types';
 
-export const SCHEMA_VERSION = 1 as const;
+export const SCHEMA_VERSION = 2 as const;
 export const STORAGE_KEY = 'mobile:moments';
 /** Quarantined blobs land at `${STORAGE_KEY}:quarantine:<iso>-<uuid>` (uuid keeps each anomaly distinct). */
 export const QUARANTINE_KEY_PREFIX = `${STORAGE_KEY}:quarantine:`;
@@ -37,29 +45,85 @@ export type MigrateOutcome =
   | { readonly status: 'clean'; readonly value: PersistedMoments }
   | {
       readonly status: 'anomaly';
-      /** Best-effort recovered state (empty unless a v1 envelope yielded salvageable moments). */
+      /** Best-effort recovered state (empty unless an envelope yielded salvageable moments). */
       readonly value: PersistedMoments;
       /** The original blob, preserved verbatim for quarantine. */
       readonly raw: string;
       readonly reason: AnomalyReason;
     };
 
-// Forward-only transform registry, indexed by `from`. Empty: v1 is the first moments
-// schema, so there is no legacy shape to expand. A future v2 adds an entry here;
-// `migrate` already walks it.
+// ── v1 → v2 transform ────────────────────────────────────────────────────────────────
+//
+// The band-ANCHOR word for each retired v1 valence band (1..5). Used ONLY to migrate a
+// v1 moment that carried a valence but NO word (the old "rate, skip the words" minimal
+// capture) — it preserves the affect the person expressed by naming the band's anchor
+// word, so no moment is lost and the rollup band is unchanged. These keys MUST exist in
+// the app vocab (apps/mobile/features/moments/vocab.ts BAND_ANCHOR_KEYS) — duplicated
+// here as plain strings because packages/shared must stay vocab-agnostic + dependency-free.
+const V1_BAND_ANCHOR: Readonly<Record<number, string>> = {
+  1: 'overwhelmed',
+  2: 'anxious',
+  3: 'steady',
+  4: 'calm',
+  5: 'joyful',
+};
+
+/**
+ * Map the v1 `moments` payload to the v2 shape. Field mapping (no data loss):
+ *   labels[0]      → labelPrimary   (or V1_BAND_ANCHOR[valence] when the v1 moment had
+ *                                    no words — preserves the band as the named feeling)
+ *   labels[1]      → labelSecondary (labels[2+] are dropped; v2 caps at one second word)
+ *   (none)         → intensity      (v1 had no intensity)
+ *   valence        → retired        (its band is preserved via labelPrimary/anchor)
+ *   context[]      → retired        (the affect-labeling primitive drops context domains)
+ *   note           → note           (carried verbatim)
+ *   routedToSupport→ routedToSupport (carried verbatim — a recorded historical fact)
+ *
+ * Defensive: per-entry, never throws. A v1 entry that yields no labelPrimary (no words AND
+ * no valid valence) is left without one, so `normalizeMoments` rejects it → quarantine.
+ */
+function transformV1ToV2(payload: unknown): unknown {
+  if (!Array.isArray(payload)) return payload; // normalizeMoments rejects non-arrays
+  return payload.map((entry) => {
+    if (typeof entry !== 'object' || entry === null) return entry;
+    const v = entry as Record<string, unknown>;
+    const labels = Array.isArray(v.labels)
+      ? v.labels.filter((x): x is string => typeof x === 'string')
+      : [];
+    const valence = typeof v.valence === 'number' ? Math.min(5, Math.max(1, Math.round(v.valence))) : undefined;
+    const labelPrimary = labels[0] ?? (valence !== undefined ? V1_BAND_ANCHOR[valence] : undefined);
+
+    const out: Record<string, unknown> = {
+      id: v.id,
+      timestamp: v.timestamp,
+      routedToSupport: typeof v.routedToSupport === 'boolean' ? v.routedToSupport : false,
+    };
+    if (labelPrimary !== undefined) out.labelPrimary = labelPrimary;
+    if (labels[1] !== undefined) out.labelSecondary = labels[1];
+    if (v.note !== undefined) out.note = v.note;
+    return out;
+  });
+}
+
+// Forward-only transform registry, indexed by `from`. `migrate` walks it from the
+// persisted version up to SCHEMA_VERSION, applying each step in turn.
 interface Transform {
   readonly from: number;
   readonly to: number;
   readonly transform: (raw: unknown) => unknown;
 }
-const TRANSFORMS: readonly Transform[] = [];
+const TRANSFORMS: readonly Transform[] = [{ from: 1, to: 2, transform: transformV1ToV2 }];
 
 function emptyStore(): PersistedMoments {
   return { version: SCHEMA_VERSION, moments: [] };
 }
 
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((x) => typeof x === 'string');
+function isIntensity(value: unknown): value is MomentIntensity {
+  return typeof value === 'string' && (INTENSITY_VALUES as readonly string[]).includes(value);
+}
+
+function isWordKey(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0 && value.length <= LABEL_MAX_LENGTH;
 }
 
 function isValidMoment(value: unknown): value is Moment {
@@ -67,16 +131,9 @@ function isValidMoment(value: unknown): value is Moment {
   const v = value as Record<string, unknown>;
   if (typeof v.id !== 'string' || v.id.length === 0) return false;
   if (typeof v.timestamp !== 'string' || Number.isNaN(Date.parse(v.timestamp))) return false;
-  if (
-    typeof v.valence !== 'number' ||
-    !Number.isInteger(v.valence) ||
-    v.valence < 1 ||
-    v.valence > 5
-  ) {
-    return false;
-  }
-  if (!isStringArray(v.labels) || v.labels.length > MAX_LABELS) return false;
-  if (!isStringArray(v.context)) return false;
+  if (!isWordKey(v.labelPrimary)) return false;
+  if (v.labelSecondary !== undefined && !isWordKey(v.labelSecondary)) return false;
+  if (v.intensity !== undefined && !isIntensity(v.intensity)) return false;
   if (v.note !== undefined && (typeof v.note !== 'string' || v.note.length > NOTE_MAX_LENGTH)) {
     return false;
   }
@@ -84,17 +141,20 @@ function isValidMoment(value: unknown): value is Moment {
   return true;
 }
 
-/** Canonicalize one validated moment — drop unknown keys, omit an absent note. */
+/** Canonicalize one validated moment — drop unknown keys, omit absent optionals. */
 export function canonicalMoment(moment: Moment): Moment {
   const base = {
     id: moment.id,
     timestamp: moment.timestamp,
-    valence: moment.valence as MomentValence,
-    labels: [...moment.labels],
-    context: [...moment.context],
+    labelPrimary: moment.labelPrimary,
     routedToSupport: moment.routedToSupport,
   };
-  return moment.note === undefined ? base : { ...base, note: moment.note };
+  return {
+    ...base,
+    ...(moment.labelSecondary !== undefined ? { labelSecondary: moment.labelSecondary } : {}),
+    ...(moment.intensity !== undefined ? { intensity: moment.intensity } : {}),
+    ...(moment.note !== undefined ? { note: moment.note } : {}),
+  };
 }
 
 /** Ascending chronological order by capture instant (stable tiebreak on id). */
@@ -108,8 +168,8 @@ export function compareByTimestamp(a: Moment, b: Moment): number {
 
 /**
  * Validate + dedupe a raw moments array. Keeps every well-formed moment; collapses
- * duplicate ids (last occurrence wins). `dropped` is true when anything was rejected
- * or collapsed — the signal the store uses to quarantine the original blob.
+ * duplicate ids (last occurrence wins). `dropped` is true when anything was rejected or
+ * collapsed — the signal the store uses to quarantine the original blob.
  */
 export function normalizeMoments(raw: unknown): { moments: Moment[]; dropped: boolean } {
   if (!Array.isArray(raw)) return { moments: [], dropped: true };
@@ -133,6 +193,7 @@ export function normalizeMoments(raw: unknown): { moments: Moment[]; dropped: bo
  * Parse + migrate a persisted moments blob.
  *
  * - `null` (no data) → clean empty store.
+ * - older version → walk TRANSFORMS up to SCHEMA_VERSION, then normalize.
  * - matching version, all moments valid → clean pass-through.
  * - matching version, some malformed/duplicated → anomaly carrying the salvageable subset.
  * - corrupt JSON / non-object / missing version / future version / no migration path
