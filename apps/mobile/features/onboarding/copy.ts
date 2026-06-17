@@ -30,4 +30,20 @@ export const ONBOARDING_COPY = {
   // S4 — Acknowledge the act (valence-blind — identical regardless of the named feeling)
   acknowledge: 'You named it. That’s the whole skill.',
   acknowledgeContinue: 'Continue',
+
+  // S6 — Orient reinforcement. Restates the EVENT-INITIATED model: a Moment is noticed
+  // when the person chooses, never on a schedule. Counters any read of the app as a daily
+  // prompt. Valence-blind (no named feeling). The #132 tour covers the tabs, not this.
+  orientTitle: 'Your space is ready.',
+  orientBody: 'Notice a moment whenever you want — no schedule, no pressure.',
+
+  // S7 — Founder / intention beat (terminal onboarding screen). The "made with intention"
+  // moment, in the existing brand voice. Attribution is a quiet, swappable placeholder —
+  // the exact name/title is pending the founder + Dr. Dobson; not fabricated here.
+  founderBody:
+    'We built Psychage so making sense of how you feel is as ordinary as noticing the weather.',
+  founderAttribution: '— The team at Psychage',
+
+  // Shared close-screen continue label (S6/S7).
+  continue: 'Continue',
 } as const;
