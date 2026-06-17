@@ -24,8 +24,10 @@ const ENTRIES = [entry('2026-06-13', 2), entry('2026-06-14', 4, 'felt, "ok", tod
 describe('toJSON', () => {
   it('serializes entries under the export format version, carrying the day range', () => {
     const parsed = JSON.parse(toJSON([entry('2026-06-15', 1, undefined, 4)]));
-    expect(EXPORT_FORMAT_VERSION).toBe(2);
-    expect(parsed.exportFormatVersion).toBe(2);
+    // v3: the export subsystem gained the session-prep document; the record's JSON
+    // shape is unchanged (state/low/high/count), only the reported version moves.
+    expect(EXPORT_FORMAT_VERSION).toBe(3);
+    expect(parsed.exportFormatVersion).toBe(3);
     expect(parsed.entries[0]).toMatchObject({ state: 1, low: 1, high: 4, count: 2 });
   });
 

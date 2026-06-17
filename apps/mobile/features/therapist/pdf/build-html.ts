@@ -1,6 +1,7 @@
 import {
   asLocalCalendarDate,
   type LocalCalendarDate,
+  type MomentValence,
   toLocalCalendarDate,
 } from '@psychage/shared/engagement';
 
@@ -10,6 +11,8 @@ import {
   type DailyEntry as CheckInEntry,
   type DailyState as CheckInState,
 } from '@/lib/daily-rollup';
+import { EXPORT_FORMAT_VERSION } from '@/lib/export/record-export';
+import { ALL_LABELS, CONTEXT_DOMAINS } from '@/features/moments/constants';
 import {
   connectingSegments,
   entryDotY,
@@ -21,6 +24,7 @@ import {
 } from '@/components/terrain/terrain-geometry';
 
 import { THERAPIST_COPY } from '../copy';
+import type { SessionPrepSummary } from '../session-prep/summary';
 
 // C-PDF — the therapist export. A PRINT artifact, NOT an app screen: white page,
 // ink-led, NO night mode. Pure string builder → Vitest-testable; the native
@@ -289,6 +293,83 @@ function buildToolSections(tools?: TherapistToolSummaries): string {
   );
 }
 
+// The shared print SHELL — both therapist documents emit identical design language
+// (white page, ink palette, 8.5pt floor, Fraunces name, per-page counter, fixed
+// footer). Each builder supplies its own `extraCss` + `body` between the header and the
+// footer. `name`/`footer` are escaped (the name is user input); `rangeLine` is our own
+// copy/data and matches the prior un-escaped behaviour.
+const BASE_CSS = `  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #ffffff;
+    color: ${INK_TEXT};
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .name { font-family: "Fraunces", Georgia, "Times New Roman", serif; font-size: 17pt; font-weight: 600; margin: 0 0 4px; }
+  .range-line { font-size: 11pt; color: ${INK_SECONDARY}; margin: 0 0 16px; }
+  .footer {
+    position: fixed;
+    bottom: 24px;
+    left: 40px;
+    right: 40px;
+    font-size: ${TYPE_FLOOR_PT}pt;
+    color: ${INK_HINT};
+  }`;
+
+function renderDocument(opts: {
+  pageSize: 'A4' | 'letter';
+  extraCss: string;
+  name: string;
+  rangeLine: string;
+  body: string;
+  footer: string;
+  versionComment?: string;
+}): string {
+  const versionLine = opts.versionComment ? `\n  <!-- ${opts.versionComment} -->` : '';
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<style>
+  @page {
+    size: ${opts.pageSize};
+    margin: 48px 40px 72px;
+    @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: ${TYPE_FLOOR_PT}pt; color: ${INK_HINT}; }
+  }
+${BASE_CSS}
+${opts.extraCss}
+</style>
+</head>
+<body>${versionLine}
+  <div class="name">${escapeHtml(opts.name)}</div>
+  <div class="range-line">${opts.rangeLine}</div>
+${opts.body}
+  <div class="footer">${escapeHtml(opts.footer)}</div>
+</body>
+</html>`;
+}
+
+// Therapist check-in PDF CSS (terrain + daily table + cross-tool sections).
+const THERAPIST_EXTRA_CSS = `  .terrain { display: flex; align-items: stretch; gap: 10px; height: 120px; margin: 0 0 20px; }
+  .edge-labels { display: flex; flex-direction: column; justify-content: space-between; font-size: ${TYPE_FLOOR_PT}pt; color: ${INK_SECONDARY}; padding: 2px 0; }
+  .terrain-canvas { flex: 1; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 5px 8px; vertical-align: top; border-bottom: 1px solid ${INK_BASELINE}; }
+  td.date { font-size: 10pt; color: ${INK_SECONDARY}; white-space: nowrap; width: 40%; }
+  td.state { font-size: 10pt; font-weight: 600; width: 22%; }
+  td.note { font-size: 10pt; font-style: italic; color: ${INK_TEXT}; }
+  tr.no-entry td { color: ${INK_HINT}; font-weight: 400; font-style: normal; }
+  .tools-block { margin-top: 28px; page-break-inside: avoid; }
+  .note { font-size: ${TYPE_FLOOR_PT}pt; color: ${INK_SECONDARY}; border: 1px solid ${INK_BASELINE}; border-radius: 6px; padding: 6px 8px; margin-bottom: 12px; }
+  section.tool { margin-bottom: 14px; page-break-inside: avoid; }
+  section.tool h2 { font-size: 11pt; font-weight: 600; margin: 0 0 2px; color: ${INK_TEXT}; }
+  section.tool p { font-size: 10pt; margin: 0 0 4px; color: ${INK_SECONDARY}; }
+  ul.metrics { margin: 0; padding-left: 16px; }
+  ul.metrics li { font-size: 10pt; color: ${INK_TEXT}; }`;
+
 export function buildTherapistPdfHtml(input: TherapistPdfInput): string {
   const from = asLocalCalendarDate(input.from);
   const to = asLocalCalendarDate(input.to);
@@ -304,67 +385,193 @@ export function buildTherapistPdfHtml(input: TherapistPdfInput): string {
 
   const dayCount = days.length;
   const entryCount = inRange.length;
-  const pageSize = pageSizeForLocale(input.locale);
-  const name = input.fullName.trim();
 
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<style>
-  @page {
-    size: ${pageSize};
-    margin: 48px 40px 72px;
-    @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: ${TYPE_FLOOR_PT}pt; color: ${INK_HINT}; }
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    background: #ffffff;
-    color: ${INK_TEXT};
-    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .name { font-family: "Fraunces", Georgia, "Times New Roman", serif; font-size: 17pt; font-weight: 600; margin: 0 0 4px; }
-  .range-line { font-size: 11pt; color: ${INK_SECONDARY}; margin: 0 0 16px; }
-  .terrain { display: flex; align-items: stretch; gap: 10px; height: 120px; margin: 0 0 20px; }
-  .edge-labels { display: flex; flex-direction: column; justify-content: space-between; font-size: ${TYPE_FLOOR_PT}pt; color: ${INK_SECONDARY}; padding: 2px 0; }
-  .terrain-canvas { flex: 1; }
-  table { width: 100%; border-collapse: collapse; }
-  td { padding: 5px 8px; vertical-align: top; border-bottom: 1px solid ${INK_BASELINE}; }
-  td.date { font-size: 10pt; color: ${INK_SECONDARY}; white-space: nowrap; width: 40%; }
-  td.state { font-size: 10pt; font-weight: 600; width: 22%; }
-  td.note { font-size: 10pt; font-style: italic; color: ${INK_TEXT}; }
-  tr.no-entry td { color: ${INK_HINT}; font-weight: 400; font-style: normal; }
-  .tools-block { margin-top: 28px; page-break-inside: avoid; }
-  .note { font-size: ${TYPE_FLOOR_PT}pt; color: ${INK_SECONDARY}; border: 1px solid ${INK_BASELINE}; border-radius: 6px; padding: 6px 8px; margin-bottom: 12px; }
-  section.tool { margin-bottom: 14px; page-break-inside: avoid; }
-  section.tool h2 { font-size: 11pt; font-weight: 600; margin: 0 0 2px; color: ${INK_TEXT}; }
-  section.tool p { font-size: 10pt; margin: 0 0 4px; color: ${INK_SECONDARY}; }
-  ul.metrics { margin: 0; padding-left: 16px; }
-  ul.metrics li { font-size: 10pt; color: ${INK_TEXT}; }
-  .footer {
-    position: fixed;
-    bottom: 24px;
-    left: 40px;
-    right: 40px;
-    font-size: ${TYPE_FLOOR_PT}pt;
-    color: ${INK_HINT};
-  }
-</style>
-</head>
-<body>
-  <div class="name">${escapeHtml(name)}</div>
-  <div class="range-line">${formatRangeLabel(from, to)} · ${THERAPIST_COPY.rangeCountLine(dayCount, entryCount)}</div>
-  <div class="terrain">
+  const body = `  <div class="terrain">
     <div class="edge-labels"><span>Very good</span><span>Very low</span></div>
     <div class="terrain-canvas">${buildTerrainSvg(terrainDays)}</div>
   </div>
   <table><tbody>${buildRows(days, byDate)}</tbody></table>
-  ${buildToolSections(input.tools)}
-  <div class="footer">${escapeHtml(THERAPIST_COPY.pdfFooter)}</div>
-</body>
-</html>`;
+  ${buildToolSections(input.tools)}`;
+
+  return renderDocument({
+    pageSize: pageSizeForLocale(input.locale),
+    extraCss: THERAPIST_EXTRA_CSS,
+    name: input.fullName.trim(),
+    rangeLine: `${formatRangeLabel(from, to)} · ${THERAPIST_COPY.rangeCountLine(dayCount, entryCount)}`,
+    body,
+    footer: THERAPIST_COPY.pdfFooter,
+  });
+}
+
+// ─── Session-prep document ───────────────────────────────────────────────────
+// A SEPARATE therapist-oriented artifact rendered through the SAME shell (identical
+// design language, grayscale-safe). Unlike the check-in PDF above — which deliberately
+// carries NO aggregates — this is the person's own record of WHAT THEY NOTICED, so it
+// DOES present frequencies/ranges: that is the point of a session-prep summary. The
+// framing stays neutral and non-diagnostic (Sacred Rule #2/#3): counts and the app's
+// own affect scale, never assessment/severity. The full window is shown — hard moments
+// and all; nothing is positive-filtered.
+
+export interface SessionPrepPdfInput {
+  /** Editable full name — the provider files the summary by it. */
+  readonly fullName: string;
+  /** The pre-aggregated summary (see session-prep/summary.ts). */
+  readonly summary: SessionPrepSummary;
+  /** BCP-47 locale — drives A4 (default) vs Letter. */
+  readonly locale?: string;
+}
+
+const LABEL_BY_KEY = new Map(ALL_LABELS.map((l) => [l.key, l.label]));
+const CONTEXT_BY_KEY = new Map(CONTEXT_DOMAINS.map((l) => [l.key, l.label]));
+
+// Key → display word, falling back to the raw key (so an unknown/retired key still
+// prints rather than vanishing — completeness over prettiness).
+function resolveLabel(key: string): string {
+  return LABEL_BY_KEY.get(key) ?? key;
+}
+function resolveContext(key: string): string {
+  return CONTEXT_BY_KEY.get(key) ?? key;
+}
+
+function formatDateShort(date: LocalCalendarDate): string {
+  const d = parseDate(date);
+  return `${MONTHS[d.getMonth()]} ${d.getDate()}`;
+}
+
+// Local 12-hour clock for a capture instant. Local accessors match the rollup's
+// device-day convention; with timestamps minted locally this round-trips deterministically.
+function formatClock(timestamp: string): string {
+  const d = new Date(timestamp);
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const hour24 = d.getHours();
+  const ampm = hour24 < 12 ? 'AM' : 'PM';
+  const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+  return `${hour12}:${minutes} ${ampm}`;
+}
+
+const SESSION_PREP_BAR_WIDTH = 240;
+
+// One horizontal distribution bar: width encodes the count, and EVERY bar keeps an ink
+// stroke (the grayscale-safe rescue) — the printed count beside it is the real fallback.
+function distBarSvg(count: number, max: number, valence: MomentValence): string {
+  const height = 16;
+  const fill = moodTint((valence - 1) as CheckInState);
+  const rect =
+    count === 0
+      ? ''
+      : `<rect x="0.6" y="0.6" width="${round(Math.max(3, (count / max) * SESSION_PREP_BAR_WIDTH))}" height="${height - 1.2}" rx="2" fill="${fill}" stroke="${INK_RING}" stroke-width="1.2"/>`;
+  return `<svg width="${SESSION_PREP_BAR_WIDTH}" height="${height}" viewBox="0 0 ${SESSION_PREP_BAR_WIDTH} ${height}" xmlns="http://www.w3.org/2000/svg" role="img">${rect}</svg>`;
+}
+
+function distributionBlock(distribution: Readonly<Record<MomentValence, number>>): string {
+  const max = Math.max(
+    1,
+    distribution[1],
+    distribution[2],
+    distribution[3],
+    distribution[4],
+    distribution[5],
+  );
+  // High valence at the top — matches the terrain edge order (Very good … Very low).
+  return ([5, 4, 3, 2, 1] as const)
+    .map(
+      (v) =>
+        `<div class="dist-row"><div class="dist-label">${escapeHtml(THERAPIST_COPY.sessionPrep.scale[v])}</div><div class="dist-bar">${distBarSvg(distribution[v], max, v)}</div><div class="dist-count">${distribution[v]}</div></div>`,
+    )
+    .join('');
+}
+
+function freqList(
+  items: readonly { readonly key: string; readonly count: number }[],
+  resolve: (key: string) => string,
+): string {
+  const lis = items
+    .map(
+      (it) =>
+        `<li><span class="freq-label">${escapeHtml(resolve(it.key))}</span><span class="freq-count">${it.count}×</span></li>`,
+    )
+    .join('');
+  return `<ul class="freq">${lis}</ul>`;
+}
+
+function timeOfDayBlock(timeOfDay: SessionPrepSummary['timeOfDay']): string {
+  const c = THERAPIST_COPY.sessionPrep;
+  const cells: [string, number][] = [
+    [c.morning, timeOfDay.morning],
+    [c.afternoon, timeOfDay.afternoon],
+    [c.evening, timeOfDay.evening],
+    [c.night, timeOfDay.night],
+  ];
+  return `<div class="tod">${cells
+    .map(([label, n]) => `<div class="tod-cell"><div class="tod-n">${n}</div><div class="tod-l">${escapeHtml(label)}</div></div>`)
+    .join('')}</div>`;
+}
+
+function notesBlock(notes: SessionPrepSummary['notes']): string {
+  if (notes.length === 0) {
+    return `<p class="empty">${escapeHtml(THERAPIST_COPY.sessionPrep.notesEmpty)}</p>`;
+  }
+  // Every note, oldest first, verbatim (escaped) — never positive-filtered.
+  return notes
+    .map(
+      (n) =>
+        `<div class="note-row"><div class="note-when">${formatDateShort(n.date)}, ${formatClock(n.timestamp)}</div><div class="note-text">${escapeHtml(n.note)}</div></div>`,
+    )
+    .join('');
+}
+
+function section(heading: string, inner: string): string {
+  return `  <section class="block"><h2>${escapeHtml(heading)}</h2>${inner}</section>`;
+}
+
+const SESSION_PREP_EXTRA_CSS = `  .block { margin: 0 0 18px; page-break-inside: avoid; }
+  .block h2 { font-size: 12pt; font-weight: 600; margin: 0 0 6px; color: ${INK_TEXT}; }
+  .empty { font-size: 10.5pt; color: ${INK_SECONDARY}; margin: 0; }
+  ul.freq { list-style: none; margin: 0; padding: 0; }
+  ul.freq li { display: flex; justify-content: space-between; font-size: 10.5pt; padding: 3px 0; border-bottom: 1px solid ${INK_BASELINE}; color: ${INK_TEXT}; }
+  .freq-count { color: ${INK_SECONDARY}; font-variant-numeric: tabular-nums; }
+  .dist-row { display: flex; align-items: center; gap: 10px; margin: 0 0 5px; }
+  .dist-label { width: 80px; font-size: 9.5pt; color: ${INK_SECONDARY}; }
+  .dist-count { font-size: 9.5pt; color: ${INK_TEXT}; font-variant-numeric: tabular-nums; }
+  .tod { display: flex; gap: 10px; }
+  .tod-cell { flex: 1; border: 1px solid ${INK_BASELINE}; border-radius: 6px; padding: 8px 4px; text-align: center; }
+  .tod-n { font-size: 14pt; font-weight: 600; color: ${INK_TEXT}; }
+  .tod-l { font-size: 9pt; color: ${INK_SECONDARY}; }
+  .note-row { padding: 5px 0; border-bottom: 1px solid ${INK_BASELINE}; page-break-inside: avoid; }
+  .note-when { font-size: 9pt; color: ${INK_SECONDARY}; }
+  .note-text { font-size: 10.5pt; color: ${INK_TEXT}; font-style: italic; }`;
+
+export function buildSessionPrepHtml(input: SessionPrepPdfInput): string {
+  const { summary } = input;
+  const from = asLocalCalendarDate(summary.window.from);
+  const to = asLocalCalendarDate(summary.window.to);
+  const dayCount = enumerateDays(from, to).length;
+  const c = THERAPIST_COPY.sessionPrep;
+
+  let body: string;
+  if (summary.totalCount === 0) {
+    body = `  <p class="empty">${escapeHtml(c.empty)}</p>`;
+  } else {
+    const sections: string[] = [];
+    if (summary.feelingFrequency.length > 0) {
+      sections.push(section(c.feelingsHeading, freqList(summary.feelingFrequency, resolveLabel)));
+    }
+    if (summary.contextFrequency.length > 0) {
+      sections.push(section(c.contextHeading, freqList(summary.contextFrequency, resolveContext)));
+    }
+    sections.push(section(c.spreadHeading, distributionBlock(summary.valence.distribution)));
+    sections.push(section(c.timeHeading, timeOfDayBlock(summary.timeOfDay)));
+    sections.push(section(c.notesHeading, notesBlock(summary.notes)));
+    body = sections.join('\n');
+  }
+
+  return renderDocument({
+    pageSize: pageSizeForLocale(input.locale),
+    extraCss: SESSION_PREP_EXTRA_CSS,
+    name: input.fullName.trim(),
+    rangeLine: `${formatRangeLabel(from, to)} · ${c.countLine(dayCount, summary.totalCount)}`,
+    body,
+    footer: c.footer,
+    versionComment: `psychage-session-prep v${EXPORT_FORMAT_VERSION}`,
+  });
 }

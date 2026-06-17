@@ -8,11 +8,15 @@ import { DAILY_STATE_LABELS as STATE_LABELS, type DailyEntry as CheckInEntry } f
 // sheet) is NOT the silent backend/telemetry exfiltration SR-4 forbids. This
 // module must never additionally log entries to Sentry/analytics.
 
-// The export's own format version — independent of the store's schema version, so
-// this module needs no runtime import from the shared package. v2 carries the day's
-// RANGE: `state` is worst-of-day (== `low`), and `high`/`highLabel`/`count` are added
-// (CSV columns + JSON fields) so a multi-modal day exports its span, not just one tap.
-export const EXPORT_FORMAT_VERSION = 2 as const;
+// The export subsystem's format version — independent of the store's schema version,
+// so this module needs no runtime import from the shared package. Monotonic across
+// every export artifact (JSON/CSV record + the therapist PDFs), bumped when any of them
+// gains structure. v2 added the day's RANGE to the record: `state` is worst-of-day
+// (== `low`), and `high`/`highLabel`/`count` are added (CSV columns + JSON fields) so a
+// multi-modal day exports its span, not just one tap. v3 adds the session-prep document
+// (a new PDF artifact stamped with this version); the JSON/CSV record shape is unchanged
+// at v3.
+export const EXPORT_FORMAT_VERSION = 3 as const;
 
 // Wide lexical bounds: the day key is fixed-width YYYY-MM-DD, so lexical order ==
 // chronological. getRange is inclusive, so this captures every day entry.

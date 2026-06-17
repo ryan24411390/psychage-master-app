@@ -8,11 +8,17 @@
 export { THERAPIST_COPY } from './copy';
 export { ProviderProvider, useProvider, type Provider } from './use-provider';
 export {
+  buildSessionPrepHtml,
   buildTherapistPdfHtml,
   enumerateDays,
   summarizeRange,
   windowForDays,
   type RangeSummary,
+  type SessionPrepPdfInput,
   type TherapistPdfInput,
 } from './pdf/build-html';
+export {
+  buildSessionPrepSummary,
+  type SessionPrepSummary,
+} from './session-prep/summary';
 export { generateAndShare, type PdfPrinter } from './pdf/printer';

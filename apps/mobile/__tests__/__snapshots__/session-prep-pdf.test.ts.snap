@@ -1,0 +1,64 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`buildSessionPrepHtml > renders a deterministic document 1`] = `
+"<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<style>
+  @page {
+    size: A4;
+    margin: 48px 40px 72px;
+    @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8.5pt; color: #6d6762; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #ffffff;
+    color: #0a0a0a;
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .name { font-family: "Fraunces", Georgia, "Times New Roman", serif; font-size: 17pt; font-weight: 600; margin: 0 0 4px; }
+  .range-line { font-size: 11pt; color: #57534e; margin: 0 0 16px; }
+  .footer {
+    position: fixed;
+    bottom: 24px;
+    left: 40px;
+    right: 40px;
+    font-size: 8.5pt;
+    color: #6d6762;
+  }
+  .block { margin: 0 0 18px; page-break-inside: avoid; }
+  .block h2 { font-size: 12pt; font-weight: 600; margin: 0 0 6px; color: #0a0a0a; }
+  .empty { font-size: 10.5pt; color: #57534e; margin: 0; }
+  ul.freq { list-style: none; margin: 0; padding: 0; }
+  ul.freq li { display: flex; justify-content: space-between; font-size: 10.5pt; padding: 3px 0; border-bottom: 1px solid #D6D3D1; color: #0a0a0a; }
+  .freq-count { color: #57534e; font-variant-numeric: tabular-nums; }
+  .dist-row { display: flex; align-items: center; gap: 10px; margin: 0 0 5px; }
+  .dist-label { width: 80px; font-size: 9.5pt; color: #57534e; }
+  .dist-count { font-size: 9.5pt; color: #0a0a0a; font-variant-numeric: tabular-nums; }
+  .tod { display: flex; gap: 10px; }
+  .tod-cell { flex: 1; border: 1px solid #D6D3D1; border-radius: 6px; padding: 8px 4px; text-align: center; }
+  .tod-n { font-size: 14pt; font-weight: 600; color: #0a0a0a; }
+  .tod-l { font-size: 9pt; color: #57534e; }
+  .note-row { padding: 5px 0; border-bottom: 1px solid #D6D3D1; page-break-inside: avoid; }
+  .note-when { font-size: 9pt; color: #57534e; }
+  .note-text { font-size: 10.5pt; color: #0a0a0a; font-style: italic; }
+</style>
+</head>
+<body>
+  <!-- psychage-session-prep v3 -->
+  <div class="name">Alex Rivers</div>
+  <div class="range-line">Jun 1 – Jun 14, 2026 · 14 days, 6 moments noted</div>
+  <section class="block"><h2>Feelings you noted most</h2><ul class="freq"><li><span class="freq-label">Anxious</span><span class="freq-count">2×</span></li><li><span class="freq-label">Calm</span><span class="freq-count">1×</span></li><li><span class="freq-label">Exhausted</span><span class="freq-count">1×</span></li><li><span class="freq-label">Grateful</span><span class="freq-count">1×</span></li><li><span class="freq-label">Hopeless</span><span class="freq-count">1×</span></li><li><span class="freq-label">Steady</span><span class="freq-count">1×</span></li><li><span class="freq-label">Tense</span><span class="freq-count">1×</span></li></ul></section>
+  <section class="block"><h2>What was on your mind</h2><ul class="freq"><li><span class="freq-label">Family</span><span class="freq-count">2×</span></li><li><span class="freq-label">Work</span><span class="freq-count">2×</span></li><li><span class="freq-label">Friends</span><span class="freq-count">1×</span></li><li><span class="freq-label">Health</span><span class="freq-count">1×</span></li><li><span class="freq-label">Sleep</span><span class="freq-count">1×</span></li></ul></section>
+  <section class="block"><h2>How your moments spread</h2><div class="dist-row"><div class="dist-label">Very good</div><div class="dist-bar"><svg width="240" height="16" viewBox="0 0 240 16" xmlns="http://www.w3.org/2000/svg" role="img"><rect x="0.6" y="0.6" width="120" height="14.8" rx="2" fill="#15B8A6" stroke="#44403C" stroke-width="1.2"/></svg></div><div class="dist-count">1</div></div><div class="dist-row"><div class="dist-label">Good</div><div class="dist-bar"><svg width="240" height="16" viewBox="0 0 240 16" xmlns="http://www.w3.org/2000/svg" role="img"><rect x="0.6" y="0.6" width="120" height="14.8" rx="2" fill="#1A9B8C" stroke="#44403C" stroke-width="1.2"/></svg></div><div class="dist-count">1</div></div><div class="dist-row"><div class="dist-label">Mixed</div><div class="dist-bar"><svg width="240" height="16" viewBox="0 0 240 16" xmlns="http://www.w3.org/2000/svg" role="img"><rect x="0.6" y="0.6" width="120" height="14.8" rx="2" fill="#8FAE8B" stroke="#44403C" stroke-width="1.2"/></svg></div><div class="dist-count">1</div></div><div class="dist-row"><div class="dist-label">Low</div><div class="dist-bar"><svg width="240" height="16" viewBox="0 0 240 16" xmlns="http://www.w3.org/2000/svg" role="img"><rect x="0.6" y="0.6" width="240" height="14.8" rx="2" fill="#D4A060" stroke="#44403C" stroke-width="1.2"/></svg></div><div class="dist-count">2</div></div><div class="dist-row"><div class="dist-label">Very low</div><div class="dist-bar"><svg width="240" height="16" viewBox="0 0 240 16" xmlns="http://www.w3.org/2000/svg" role="img"><rect x="0.6" y="0.6" width="120" height="14.8" rx="2" fill="#8B7FA8" stroke="#44403C" stroke-width="1.2"/></svg></div><div class="dist-count">1</div></div></section>
+  <section class="block"><h2>When moments happened</h2><div class="tod"><div class="tod-cell"><div class="tod-n">2</div><div class="tod-l">Morning</div></div><div class="tod-cell"><div class="tod-n">2</div><div class="tod-l">Afternoon</div></div><div class="tod-cell"><div class="tod-n">1</div><div class="tod-l">Evening</div></div><div class="tod-cell"><div class="tod-n">1</div><div class="tod-l">Night</div></div></div></section>
+  <section class="block"><h2>In your words</h2><div class="note-row"><div class="note-when">Jun 3, 10:00 PM</div><div class="note-text">could not sleep again</div></div><div class="note-row"><div class="note-when">Jun 4, 9:00 AM</div><div class="note-text">big deadline tomorrow</div></div><div class="note-row"><div class="note-when">Jun 6, 8:00 AM</div><div class="note-text">morning walk helped</div></div></section>
+  <div class="footer">Your own record of the moments you noticed, shared from Psychage.</div>
+</body>
+</html>"
+`;
