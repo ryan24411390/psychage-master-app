@@ -104,7 +104,7 @@ export function MetricBars({
       return;
     }
     progress.value = withTiming(1, { duration: DURATION.calm, easing: easingFn('out') });
-  }, [reduced, progress, bars]);
+  }, [reduced, progress]);
 
   const a11y =
     accessibilityLabel ??
@@ -151,8 +151,8 @@ export function MetricBars({
               const isActive = activeIndex === null || activeIndex === i;
 
               return (
-                <G 
-                  key={`bar-${b.label}-${i}`}
+                <G
+                  key={`bar-${b.label}`}
                   onPressIn={() => {
                     setActiveIndex(i);
                     tooltipOpacity.value = withSpring(1);

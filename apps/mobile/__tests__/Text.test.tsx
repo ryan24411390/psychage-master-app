@@ -21,17 +21,18 @@ describe('Text variant → font-family class', () => {
     expect(classesFor('body')).toContain('font-sans');
   });
 
-  it('bodyMedium uses font-sans-medium (500)', () => {
-    expect(classesFor('bodyLarge')).toContain('font-sans-medium');
+  it('bodyLarge uses font-sans (400)', () => {
+    expect(classesFor('bodyLarge')).toContain('font-sans');
   });
 
-  it('bodyBold uses font-sans-bold (700)', () => {
-    expect(classesFor('label')).toContain('font-sans-bold');
+  it('label uses font-sans-medium (500)', () => {
+    expect(classesFor('label')).toContain('font-sans-medium');
   });
 
-  it('heading + headingLg use font-display (Fraunces 600)', () => {
-    expect(classesFor('h2')).toContain('font-display');
+  it('display + h1 use font-display (Fraunces 600); h2 steps down to sans', () => {
+    expect(classesFor('display')).toContain('font-display');
     expect(classesFor('h1')).toContain('font-display');
+    expect(classesFor('h2')).toContain('font-sans-medium');
   });
 
   it('headingLg no longer carries the no-op font-bold weight utility', () => {

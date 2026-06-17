@@ -17,7 +17,7 @@ export function BentoGrid({ children }: BentoGridProps) {
     <View className="flex-col gap-4">
       {childrenArray.map((child, index) => (
         <Animated.View
-          key={index}
+          key={React.isValidElement(child) ? child.key : undefined}
           entering={
             reduced
               ? undefined

@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/react-native';
+import { View } from 'react-native';
 
 import { MessageBubble } from '@/features/mindmate/components/MessageBubble';
 import type { ChatMessage } from '@/features/mindmate/types';
@@ -28,7 +29,7 @@ describe('MessageBubble', () => {
   it('shows the thinking indicator while an assistant turn is streaming with no text yet', () => {
     const msg: ChatMessage = { id: 'a2', role: 'assistant', content: '', isStreaming: true };
     renderWithProviders(<MessageBubble message={msg} />);
-    expect(screen.UNSAFE_getByType('View').children.length).toBeGreaterThan(0); // the indicator renders views
+    expect(screen.UNSAFE_getByType(View).children.length).toBeGreaterThan(0); // the indicator renders views
   });
 
   it('renders citations under a completed assistant turn', () => {

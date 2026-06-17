@@ -73,11 +73,11 @@ describe('onboarding moment routing — mark-seen anchored to the first Moment s
     seenMock.mockClear();
   });
 
-  it('non-acute save → marks seen (not deferred to founder) and advances to acknowledge', () => {
+  it('non-acute save → marks seen (not deferred) and exits home (collapsed flow)', () => {
     renderWithProviders(<MomentScreen />, { haptics: true });
     fireEvent.press(screen.getByLabelText('mock-save-calm'));
     expect(seenMock).toHaveBeenCalledTimes(1);
-    expect(replaceMock).toHaveBeenCalledWith('/onboarding/acknowledge');
+    expect(replaceMock).toHaveBeenCalledWith('/');
   });
 
   it('acute save → marks seen, then routes INTO crisis (SR-2)', () => {

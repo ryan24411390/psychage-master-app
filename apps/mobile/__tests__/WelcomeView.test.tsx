@@ -15,12 +15,10 @@ describe('WelcomeView (S1)', () => {
       screen.getByTestId('onboarding-host-mascot', { includeHiddenElements: true }),
     ).toBeTruthy();
     expect(screen.getByText('This is Psychage.')).toBeTruthy();
-    expect(
-      screen.getByText('A private place to notice how you feel — free, for everyone.'),
-    ).toBeTruthy();
+    expect(screen.getByText('Name your first feeling.')).toBeTruthy();
     expect(screen.getByLabelText('Help now')).toBeTruthy(); // crisis reachable before anything
 
-    fireEvent.press(screen.getByRole('button', { name: 'Begin' }));
+    fireEvent.press(screen.getByRole('button', { name: 'I am feeling...' }));
     expect(onBegin).toHaveBeenCalled();
 
     fireEvent.press(screen.getByRole('button', { name: 'Already have a record? Sign in' }));
