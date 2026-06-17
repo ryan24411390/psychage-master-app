@@ -17,15 +17,16 @@ import { DURATION, easingFn } from '@/lib/motion';
 
 import { ONBOARDING_COPY } from './copy';
 
-// S4 — acknowledge the act (Flow 1). The mascot RETURNS: route-auto 'neutral' (an idle
-// state, so it breathes = "settle"), plus a single tilt fired on mount (the same tiltSignal
-// machinery HomeContainer uses on save). One teal element — the brand accent dot — pulses
-// once, then rests; under reduced motion it is simply shown in its rested state (a single
-// static state change, no animation).
+// S4 — acknowledge the act (Flow 1). The mascot registers the act: route-auto 'tilt' (a
+// non-idle pose — a held head-tilt, so it does NOT breathe), plus a single tilt fired on
+// mount (the same tiltSignal machinery HomeContainer uses on save). One teal element — the
+// brand accent dot — pulses once, then rests; under reduced motion it is simply shown in its
+// rested state (a single static state change, no animation).
 //
 // VALENCE-BLIND (the whole point of this slice): this view takes NO moment / valence /
 // label input. The acknowledgment is byte-identical regardless of which feeling was named —
-// naming itself is the skill being affirmed, not the valence of what was named.
+// the 'tilt' registers the ACT of naming, not the valence of what was named. Never
+// 'accomplished'/'encouraging' here (those would read as evaluating the feeling).
 
 const ACK_MASCOT_WIDTH = 110;
 

@@ -8,8 +8,9 @@ import { Mascot } from '@/components/home/Mascot';
 import { MomentCaptureSheet } from '@/components/moments/MomentCaptureSheet';
 import { useHaptics } from '@/lib/haptic-context';
 
-// S3 — the first Moment capture, inside onboarding. The mascot RECEDES: small, at the edge
-// of the frame, route-auto 'seated' via /onboarding/moment — the user has the floor. The
+// S3 — the first Moment capture, inside onboarding. The mascot RECEDES and LISTENS: small,
+// at the edge of the frame, route-auto 'listening' via /onboarding/moment — the user has
+// the floor and the mascot never interferes with the act of naming. The
 // shipped MomentCaptureSheet (valence → optional label → optional context → optional one
 // line → save) is reused verbatim; the sheet owns its copy (MOMENTS_COPY) and runs the
 // acute predicate, stamping routedToSupport on the draft.
