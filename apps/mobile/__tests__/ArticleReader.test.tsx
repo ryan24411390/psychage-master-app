@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -8,10 +8,16 @@ jest.mock('expo-router', () => ({
   router: { back: jest.fn(), push: jest.fn() },
   useFocusEffect: jest.fn(),
 }));
-jest.mock('@/lib/articles', () => ({ getArticleBySlug: jest.fn() }));
+jest.mock('@/lib/articles', () => ({
+  getArticleBySlug: jest.fn(),
+  // H1: the reader now offers related reading after the references.
+  getRelatedArticles: jest.fn().mockResolvedValue([]),
+}));
+
+import { router } from 'expo-router';
 
 import { ArticleReader } from '@/features/content/ArticleReader';
-import { getArticleBySlug } from '@/lib/articles';
+import { getArticleBySlug, getRelatedArticles } from '@/lib/articles';
 
 const ARTICLE = {
   slug: 'why-your-chest-gets-tight',
@@ -66,6 +72,9 @@ function renderReader(ui: ReactElement) {
 describe('S22 ArticleReader', () => {
   beforeEach(() => {
     (getArticleBySlug as jest.Mock).mockReset();
+    (getRelatedArticles as jest.Mock).mockReset();
+    (getRelatedArticles as jest.Mock).mockResolvedValue([]);
+    (router.push as jest.Mock).mockClear();
   });
 
   it('shows the FULL verbatim Dr. Dobson credit + author byline, never truncated', async () => {
@@ -120,6 +129,34 @@ describe('S22 ArticleReader', () => {
     renderReader(<ArticleReader slug={ARTICLE.slug} />);
     await screen.findByText('Why your chest gets tight');
     expect(screen.queryByTestId('article-references')).toBeNull();
+  });
+
+  it('closes the content loop: a contextual tool CTA that routes forward (H1)', async () => {
+    (getArticleBySlug as jest.Mock).mockResolvedValue(ARTICLE); // anxiety-stress
+    renderReader(<ArticleReader slug={ARTICLE.slug} />);
+    const cta = await screen.findByTestId('article-tool-cta');
+    expect(cta).toBeTruthy();
+    expect(screen.getByText('Steady yourself with a short exercise')).toBeTruthy();
+    fireEvent.press(cta);
+    expect(router.push).toHaveBeenCalledWith('/toolkit');
+  });
+
+  it('shows a Related reading rail when related articles exist (H1)', async () => {
+    (getArticleBySlug as jest.Mock).mockResolvedValue(ARTICLE);
+    (getRelatedArticles as jest.Mock).mockResolvedValue([
+      { ...ARTICLE, slug: 'another-read', title: 'Another read' },
+    ]);
+    renderReader(<ArticleReader slug={ARTICLE.slug} />);
+    expect(await screen.findByTestId('article-related')).toBeTruthy();
+    expect(screen.getByTestId('article-card-another-read')).toBeTruthy();
+  });
+
+  it('omits the Related rail (but keeps the tool CTA) when none are found (H1)', async () => {
+    (getArticleBySlug as jest.Mock).mockResolvedValue(ARTICLE);
+    (getRelatedArticles as jest.Mock).mockResolvedValue([]);
+    renderReader(<ArticleReader slug={ARTICLE.slug} />);
+    await screen.findByTestId('article-tool-cta');
+    expect(screen.queryByTestId('article-related')).toBeNull();
   });
 
   it('renders the reading progress bar when an article is loaded', async () => {

@@ -12,4 +12,7 @@ export const CT4_CONTENT = {
     'Psychage is educational and does not diagnose or treat. If you need help now, tap Help now at the top.',
   referencesTitle: 'References',
   viewSource: 'View source',
+  // H1 content-loop forward actions (audit) — non-diagnostic, calm. CT4.
+  relatedTitle: 'Related reading',
+  nextStepTitle: 'Where to go next',
 };

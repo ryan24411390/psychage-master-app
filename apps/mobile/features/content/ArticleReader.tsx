@@ -14,6 +14,7 @@ import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
 import { ArticleBody } from '@/features/content/blocks/ArticleBody';
+import { ArticleNextSteps } from '@/features/content/ArticleNextSteps';
 import { ArtPanel } from '@/features/learn/ArtPanel';
 import { Citations } from '@/features/content/Citations';
 import { CT4_CONTENT } from '@/features/content/copy';
@@ -187,6 +188,12 @@ export function ArticleReader({ slug }: { slug: string }) {
               <ArticleBody html={article.contentHtml} />
 
               <Citations items={article.citations} />
+
+              <ArticleNextSteps
+                slug={article.slug}
+                categorySlug={article.categorySlug}
+                tags={article.tags}
+              />
             </ScreenEntrance>
           </Animated.ScrollView>
         </ReadingTextSizeProvider>
