@@ -1,5 +1,5 @@
 import { ArrowLeft } from 'lucide-react-native';
-import { useMemo, useReducer, useRef } from 'react';
+import { useEffect, useMemo, useReducer, useRef } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -68,6 +68,13 @@ export interface NavigatorFlowProps {
   readonly onTrack: () => void;
   readonly onFindCare: () => void;
   readonly onLearn: () => void;
+  /**
+   * Fired once when a NON-crisis results screen is reached, with the inputs and
+   * computed results. The route uses this to persist the run to the local-only
+   * history store (SR-4: never leaves the device). Optional so render tests and
+   * dev harnesses can omit it.
+   */
+  readonly onResults?: (inputs: UserSymptomInput[], results: NavigatorResults) => void;
 }
 
 function BackButton({ onPress }: { onPress: () => void }) {
@@ -95,6 +102,7 @@ export function NavigatorFlow({
   onTrack,
   onFindCare,
   onLearn,
+  onResults,
 }: NavigatorFlowProps) {
   const [state, dispatch] = useReducer(navigatorReducer, initialNavigatorState);
   const reduced = useReducedMotion();
@@ -127,6 +135,22 @@ export function NavigatorFlow({
     () => (needsEngine ? runNavigator(buildUserInputs(state)) : null),
     [needsEngine, runNavigator, state],
   );
+
+  // Persist exactly once per completed run: when a non-crisis results screen is
+  // reached. Crisis-halt runs (should_halt) are never stored. Local-only (SR-4).
+  const savedRef = useRef(false);
+  useEffect(() => {
+    if (
+      state.step === 'results' &&
+      engineResult &&
+      !engineResult.safety.should_halt &&
+      onResults &&
+      !savedRef.current
+    ) {
+      savedRef.current = true;
+      onResults(buildUserInputs(state), engineResult);
+    }
+  }, [state, engineResult, onResults]);
 
   const handleBack = () => {
     if (isExitOnBack(state)) onExit();
