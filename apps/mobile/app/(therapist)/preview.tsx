@@ -11,8 +11,88 @@ import {
   THERAPIST_COPY,
   windowForDays,
 } from '@/features/therapist';
+import type { TherapistToolSummaries } from '@/features/therapist/pdf/build-html';
 import { expoPdfPrinter } from '@/features/therapist/pdf/expo-printer';
+import type { LocalCalendarDate } from '@psychage/shared/check-in';
 import { getCheckInStore } from '@/lib/check-in-store';
+import { getClarityStore } from '@/lib/clarity-store';
+import { getMoodJournalStore } from '@/lib/mood-journal-store';
+import { getNavigatorStore } from '@/lib/navigator-store';
+import { getRelationshipStore } from '@/lib/relationship-store';
+import { getSleepStore } from '@/lib/sleep-store';
+
+// Assemble the OPT-IN cross-tool summaries from the local stores (SR-4: on-device
+// only). Sparse assessments (Clarity/Navigator/Relationship) use the most recent
+// result; frequent logs (Mood/Sleep) are scoped to the shared range. No raw Navigator
+// confidence (SR-1 — relevance label only); no DV/isolation specifics.
+function buildToolSummaries(from: LocalCalendarDate, to: LocalCalendarDate): TherapistToolSummaries {
+  const tools: {
+    clarity?: TherapistToolSummaries['clarity'];
+    navigator?: TherapistToolSummaries['navigator'];
+    relationship?: TherapistToolSummaries['relationship'];
+    mood?: TherapistToolSummaries['mood'];
+    sleep?: TherapistToolSummaries['sleep'];
+  } = {};
+
+  const clarity = getClarityStore().getRecent(1)[0];
+  if (clarity) {
+    const d = clarity.domains;
+    tools.clarity = {
+      date: clarity.date,
+      composite: clarity.composite,
+      tier: clarity.tier,
+      domains: [
+        { label: 'Emotional', value: d.emotional, max: 20 },
+        { label: 'Vitality', value: d.vitality, max: 20 },
+        { label: 'Social', value: d.social, max: 20 },
+        { label: 'Cognitive', value: d.cognitive, max: 20 },
+        { label: 'Functioning', value: d.functioning, max: 20 },
+      ],
+    };
+  }
+
+  const nav = getNavigatorStore().getRecent(1)[0];
+  if (nav) {
+    tools.navigator = {
+      date: nav.date,
+      areas: nav.results.results
+        .slice(0, 5)
+        .map((r) => ({ name: r.name, relevance: r.relevance_label })),
+    };
+  }
+
+  const rel = getRelationshipStore().loadHistory()[0];
+  if (rel) {
+    const d = rel.domainScores;
+    tools.relationship = {
+      date: rel.createdAt.slice(0, 10),
+      composite: rel.compositeScore,
+      tier: rel.tierLabel,
+      domains: [
+        { label: 'Partner', value: d.partner, max: 100 },
+        { label: 'Family', value: d.family, max: 100 },
+        { label: 'Friends', value: d.friends, max: 100 },
+        { label: 'Community', value: d.community, max: 100 },
+      ],
+    };
+  }
+
+  const moments = getMoodJournalStore().getRange(from, to);
+  if (moments.length > 0) {
+    const counts = new Map<string, number>();
+    for (const m of moments) for (const e of m.emotions) counts.set(e, (counts.get(e) ?? 0) + 1);
+    const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([t]) => t);
+    tools.mood = { momentCount: moments.length, topEmotions: top };
+  }
+
+  const sleep = getSleepStore().getRange(from, to);
+  if (sleep.length > 0) {
+    const avg = sleep.reduce((s, e) => s + e.sleep_quality, 0) / sleep.length;
+    tools.sleep = { nights: sleep.length, avgQuality: Math.round(avg * 10) / 10 };
+  }
+
+  return tools;
+}
 
 // S41 — PDF preview + share. Thin route: reads the selected range from the local
 // RecordStore, builds the on-screen terrain preview, and on Share generates the PDF
@@ -34,12 +114,14 @@ export default function PreviewScreen() {
     return { from, to, entries, terrainDays, dayCount, entryCount };
   }, [days]);
 
-  const handleShare = (fullName: string) => {
+  const handleShare = (fullName: string, includeTools: boolean) => {
     const html = buildTherapistPdfHtml({
       fullName,
       from: data.from,
       to: data.to,
       entries: data.entries,
+      // Opt-in only — default share stays check-ins-only to match the consent copy.
+      tools: includeTools ? buildToolSummaries(data.from, data.to) : undefined,
     });
     void generateAndShare(html, expoPdfPrinter);
   };
