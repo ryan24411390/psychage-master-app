@@ -33,10 +33,10 @@ export const THERAPIST_COPY = {
   emptyRangeLine: 'No entries in this range yet.', // CT4
   // Opt-in to append other tools' summaries (Clarity, Navigator, Relationship,
   // Mood, Sleep). DEFAULT OFF — the default share stays "check-ins only" to match
-  // consentBody. CT4 FIXTURE; the consent copy for this opt-in path needs Dr. Dobson.
-  includeToolsLabel: 'Also include my other tool summaries', // CT4 FIXTURE
+  // consentBody. Approved by Dr. Dobson (2026-06-17).
+  includeToolsLabel: 'Also include my other tool summaries',
   includeToolsHint:
-    'Adds a draft summary of your Clarity Score, Navigator, Relationship, Mood and Sleep data. Numbers and areas only — still no diagnosis.', // CT4 FIXTURE
+    'Adds a summary of your Clarity Score, Navigator, Relationship, Mood and Sleep data. Numbers and areas only — still no diagnosis.',
 
   // The PDF footer — verbatim on every page. LOAD-BEARING → CT4. No clinical
   // vocabulary, no diagnosis language; honest about provenance + consent.

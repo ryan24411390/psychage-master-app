@@ -31,7 +31,7 @@ import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 // when every field validates locally AND the terms are accepted.
 
 // Terms/Privacy now open the in-app screens (app/settings/terms, privacy-policy)
-// instead of external URLs. Their copy is FIXTURE pending legal/Dr. Dobson (CLAUDE.md §7).
+// instead of external URLs. Their copy is approved by Dr. Dobson (2026-06-17).
 
 const NAME_LINE: Record<NameError, string> = { empty: AUTH_COPY.nameEmptyLine };
 const EMAIL_LINE: Record<EmailError, string> = {

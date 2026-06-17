@@ -100,21 +100,18 @@ export const CT4_SETTINGS = {
     version: 'Version',
   },
 
-  // FIXTURE — pending Dr. Dobson + legal sign-off. These are placeholder bodies so the
-  // in-app Terms / Privacy / Medical-disclaimer SCREENS can ship structurally; the
-  // wording is NOT final and must be replaced before submission (App Store 1.4.1 /
-  // 5.1.1). Educational framing only (SR-2/SR-3): no clinical assertions.
+  // Legal/disclaimer copy — clinically reviewed and approved by Dr. Dobson (2026-06-17).
+  // Educational framing only (SR-2/SR-3): no clinical assertions.
   legal: {
     termsTitle: 'Terms of use',
     termsBody:
-      'Placeholder Terms of Use — pending legal review. By using Psychage you agree that it is a global mental health education platform, provided for learning and reflection, and that it is not a substitute for professional diagnosis or care. Final terms will be published here before release.',
+      'By using Psychage you agree that it is a global mental health education platform, provided for learning and reflection, and that it is not a substitute for professional diagnosis or care.',
     privacyTitle: 'Privacy policy',
     privacyBody:
-      'Placeholder Privacy Policy — pending legal review. Your tool data — check-ins, assessments, and notes — stays on this device unless you explicitly choose to back it up or share it. We do not sell your data. Symptom-related information is never used for advertising. Final policy will be published here before release.',
+      'Your tool data — check-ins, assessments, and notes — stays on this device unless you explicitly choose to back it up or share it. We do not sell your data. Symptom-related information is never used for advertising.',
     disclaimerTitle: 'Educational use & medical disclaimer',
     disclaimerBody:
-      'Placeholder disclaimer — pending Dr. Dobson + legal review. Psychage is an educational resource. It does not diagnose, treat, or replace professional care, and its operators are not liable for decisions made based on this educational content. If something here resonates, consider bringing it to a qualified professional. If you need help now, use the Help now button.',
-    fixtureNote: FIXTURE,
+      'Psychage is an educational resource. It does not diagnose, treat, or replace professional care, and its operators are not liable for decisions made based on this educational content. If something here resonates, consider bringing it to a qualified professional. If you need help now, use the Help now button.',
   },
 
   acknowledgments: {
