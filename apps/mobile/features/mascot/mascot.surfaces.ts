@@ -24,6 +24,9 @@ export const MASCOT_BY_ROUTE: Record<string, MascotState> = {
   '/onboarding/moment': 'seated', // receded while the user captures (calm, edge of frame)
   '/onboarding/acknowledge': 'neutral', // returns + settles (idle → breathes); S4 fires the tilt
   '/settings': 'friendly',
+  // Insights is a calm, reflective read surface — a fixed, non-reactive 'thoughtful' pose.
+  // No time/theme override (not a Today route); resolveMascotState never reads logged mood.
+  '/insights': 'thoughtful',
   '/': 'neutral',
   '/today': 'neutral',
 };

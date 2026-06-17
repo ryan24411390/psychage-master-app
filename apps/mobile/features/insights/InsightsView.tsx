@@ -1,11 +1,13 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { Pressable, ScrollView, View } from 'react-native';
 
+import { Mascot } from '@/components/home/Mascot';
 import { DomainRadar, MetricBars, ScoreGauge, TrendLine } from '@/components/ui/charts';
 import { Text } from '@/components/ui/Text';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
 import { buildToolSummaries, type InsightsInput, type ToolKey, type ToolSummary } from './aggregate';
+import { DailyRecapSection } from './DailyRecapSection';
 
 // Insights screen — the drill-down behind the home "Your tools" card. Renders one
 // section per tool the user has data in, newest-used first, each with a real chart
@@ -149,6 +151,16 @@ export function InsightsView({ input, onBack, onOpenTool }: InsightsViewProps) {
             A look across the tools you've used. All of this stays on your device.
           </Text>
         </View>
+
+        {/* Ambient companion — route-driven only (resolveMascotState reads pathname/time/
+            theme, never the logged mood). Decorative; hidden from VoiceOver. */}
+        <View className="items-center" pointerEvents="none">
+          <Mascot />
+        </View>
+
+        {/* The gentle daily recap: presence calendar + weekly recap + energy trend. Always
+            shown (it carries its own empty state), above the per-tool cross-tool sections. */}
+        <DailyRecapSection input={input} testID="insights-daily-recap" />
 
         {summaries.length === 0 ? (
           <View className="rounded-xl bg-surface p-6 shadow-base dark:bg-surface-dark">
