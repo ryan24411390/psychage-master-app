@@ -106,9 +106,13 @@ describe('HomeContainer (S3 live flow)', () => {
 
   it('steadying bridge: Breathing chip navigates and "Not now" dismisses it', () => {
     const breathSpy = jest.fn();
-    renderWithProviders(<HomeContainer store={makeStore()} navigateToBreathing={breathSpy} />, {
-      haptics: true,
-    });
+    // Pin a daytime hour so the bridge renders the day chip ("Breathing · 1 min"); after
+    // 21:00 / before 05:00 local the register flips to night ("Night breathing · 2 min").
+    const noon = new Date('2026-06-17T12:00:00');
+    renderWithProviders(
+      <HomeContainer store={makeStore()} navigateToBreathing={breathSpy} now={noon} />,
+      { haptics: true },
+    );
 
     fireEvent.press(screen.getByRole('button', { name: 'Check in — 30 seconds' }));
     fireEvent.press(screen.getByLabelText('Level 2 of 5'));

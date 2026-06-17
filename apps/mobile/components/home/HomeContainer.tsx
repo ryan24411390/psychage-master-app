@@ -91,6 +91,7 @@ export function HomeContainer({
   navigateToCrisis = () => router.push('/crisis'),
   readSummaries = readToolSummaries,
   autoOpenCheckIn = false,
+  now = new Date(),
 }: {
   store: EngagementStore;
   reflectionGate?: ReflectionGate;
@@ -102,6 +103,8 @@ export function HomeContainer({
   navigateToCrisis?: () => void;
   // Onboarding's "Capture your first moment" opens the sheet over the first-run home.
   autoOpenCheckIn?: boolean;
+  /** Wall-clock for the day/night view-model. Injected for deterministic tests. */
+  now?: Date;
 }) {
   const { fireHaptic } = useHaptics();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -118,7 +121,6 @@ export function HomeContainer({
     if (autoOpenCheckIn) setSheetOpen(true);
   }, [autoOpenCheckIn]);
 
-  const now = new Date();
   const baseModel = buildLiveModel(reader, now, readSummaries());
   const model = bridgeDismissed ? { ...baseModel, card: null } : baseModel;
 
