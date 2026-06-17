@@ -1,5 +1,6 @@
 import type { CheckInEntry, CheckInState } from '@psychage/shared/check-in';
 
+import type { ToolSummary } from '@/features/insights/aggregate';
 import type { HomeCard } from '@/components/home/home-card';
 import type { TerrainDay, TerrainValue } from '@/components/terrain/terrain-geometry';
 import { type Tool, TOOLS, toolUsageStore } from '@/lib/tool-usage-store';
@@ -26,6 +27,8 @@ export type HomeViewModel = {
   readonly dormantTool: { tool: Tool; sinceDays: number } | null;
   readonly insight: { headline: string; consistency: string } | null;
   readonly inProgressReads: { id: string; progress: number; lastAt: number }[];
+  /** Cross-tool summary rows (newest-used first; empty tools omitted). */
+  readonly tools: readonly ToolSummary[];
 };
 
 export function partOfDay(hour: number): 'morning' | 'afternoon' | 'evening' {
