@@ -28,7 +28,10 @@
     "preview": {
       "distribution": "internal",
       "channel": "preview",
-      "node": "22.22.3"
+      "node": "22.22.3",
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
       "distribution": "store",
