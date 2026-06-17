@@ -18,14 +18,14 @@ function html(tools?: TherapistToolSummaries): string {
 describe('therapist PDF — opt-in tool summaries', () => {
   it('omits the block entirely by default (consent: check-ins only)', () => {
     const out = html();
-    // The draft banner / sections only appear when tools are supplied. (The
+    // The provenance note / sections only appear when tools are supplied. (The
     // `.tools-block` CSS class always lives in the stylesheet, so assert on the
-    // rendered banner text + a section heading, not the class name.)
-    expect(out).not.toContain('Draft — additional tool summaries');
+    // rendered note text + a section heading, not the class name.)
+    expect(out).not.toContain('Additional tool summaries — self-tracked');
     expect(out).not.toContain('<section class="tool">');
   });
 
-  it('renders a DRAFT banner and tool sections when tools are supplied', () => {
+  it('renders a provenance note and tool sections when tools are supplied', () => {
     const out = html({
       clarity: {
         date: '2026-06-05',
@@ -36,7 +36,7 @@ describe('therapist PDF — opt-in tool summaries', () => {
       navigator: { date: '2026-06-04', areas: [{ name: 'Low mood', relevance: 'Strong match' }] },
       sleep: { nights: 3, avgQuality: 3.5 },
     });
-    expect(out).toContain('Draft — additional tool summaries, pending clinical review.');
+    expect(out).toContain('Additional tool summaries — self-tracked, shared for discussion.');
     expect(out).toContain('Clarity Score');
     expect(out).toContain('Composite 64/100 · balanced');
     expect(out).toContain('Emotional: 14/20');

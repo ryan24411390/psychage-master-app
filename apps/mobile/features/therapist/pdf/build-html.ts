@@ -64,10 +64,8 @@ export interface TherapistMetric {
  * Optional cross-tool summaries appended after the check-in section. Each is a small,
  * pre-summarised, LOCAL-ONLY shape (the caller reads the on-device stores). Numbers are
  * fine; NO raw Navigator confidence is ever passed (SR-1 — relevance LABEL only), and
- * NO Relationship DV/isolation alert specifics (intentionally omitted from the
- * auto-generated draft pending a clinical decision). Educational framing only.
- *
- * FIXTURE framing — the section copy is placeholder pending Dr. Dobson + legal (SR-12).
+ * NO Relationship DV/isolation alert specifics (intentionally omitted). Educational
+ * framing only; section copy approved by Dr. Dobson (2026-06-17).
  */
 export interface TherapistToolSummaries {
   readonly clarity?: { readonly date: string; readonly composite: number; readonly tier: string; readonly domains: readonly TherapistMetric[] };
@@ -230,8 +228,8 @@ function metricList(metrics: readonly TherapistMetric[]): string {
 /**
  * The optional cross-tool summary block, appended after the check-in section. Returns
  * '' when no tools are supplied. Numbers + educational labels only — no diagnosis, no
- * raw Navigator confidence (SR-1), no DV/isolation specifics. The whole block is
- * clearly marked DRAFT pending clinical review (SR-12); final copy is Dr. Dobson's.
+ * raw Navigator confidence (SR-1), no DV/isolation specifics. The block opens with a
+ * provenance note (self-tracked, for discussion). Copy approved by Dr. Dobson.
  */
 function buildToolSections(tools?: TherapistToolSummaries): string {
   if (!tools) return '';
@@ -276,9 +274,10 @@ function buildToolSections(tools?: TherapistToolSummaries): string {
   }
 
   if (sections.length === 0) return '';
-  // DRAFT banner — the cross-tool block is fixture/pending clinical review (SR-12).
+  // Provenance note — these are the person's own self-tracked tool summaries, shared
+  // for discussion (educational, not a diagnosis).
   return (
-    `<div class="tools-block"><div class="draft">Draft — additional tool summaries, pending clinical review.</div>` +
+    `<div class="tools-block"><div class="note">Additional tool summaries — self-tracked, shared for discussion.</div>` +
     `${sections.join('')}</div>`
   );
 }
@@ -332,7 +331,7 @@ export function buildTherapistPdfHtml(input: TherapistPdfInput): string {
   td.note { font-size: 10pt; font-style: italic; color: ${INK_TEXT}; }
   tr.no-entry td { color: ${INK_HINT}; font-weight: 400; font-style: normal; }
   .tools-block { margin-top: 28px; page-break-inside: avoid; }
-  .draft { font-size: ${TYPE_FLOOR_PT}pt; color: ${INK_SECONDARY}; border: 1px solid ${INK_BASELINE}; border-radius: 6px; padding: 6px 8px; margin-bottom: 12px; }
+  .note { font-size: ${TYPE_FLOOR_PT}pt; color: ${INK_SECONDARY}; border: 1px solid ${INK_BASELINE}; border-radius: 6px; padding: 6px 8px; margin-bottom: 12px; }
   section.tool { margin-bottom: 14px; page-break-inside: avoid; }
   section.tool h2 { font-size: 11pt; font-weight: 600; margin: 0 0 2px; color: ${INK_TEXT}; }
   section.tool p { font-size: 10pt; margin: 0 0 4px; color: ${INK_SECONDARY}; }
