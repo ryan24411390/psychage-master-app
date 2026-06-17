@@ -59,7 +59,9 @@ describe('Storm Check sub-state guard', () => {
 describe('route-driven presence', () => {
   it('auto-selects the bound state for mapped routes', () => {
     expect(resolveMascotState({ pathname: '/onboarding/welcome' })).toBe('hi');
-    expect(resolveMascotState({ pathname: '/onboarding/record' })).toBe('thoughtful');
+    expect(resolveMascotState({ pathname: '/onboarding/naming' })).toBe('thoughtful');
+    expect(resolveMascotState({ pathname: '/onboarding/moment' })).toBe('seated');
+    expect(resolveMascotState({ pathname: '/onboarding/acknowledge' })).toBe('neutral');
     expect(resolveMascotState({ pathname: '/settings' })).toBe('friendly');
   });
 
