@@ -8,6 +8,7 @@
 import { dailyRollupReader } from '@/lib/daily-rollup';
 import { getMomentStore } from '@/lib/moment-store';
 import { getClarityStore } from '@/lib/clarity-store';
+import { getClarityJournalStore } from '@/lib/clarity-journal-store';
 import { getMoodJournalStore } from '@/lib/mood-journal-store';
 import { getNavigatorStore } from '@/lib/navigator-store';
 import { getRelationshipStore } from '@/lib/relationship-store';
@@ -24,6 +25,11 @@ export function readInsightsInput(): InsightsInput {
     relationship: getRelationshipStore().loadHistory(),
     mood: getMoodJournalStore().getRecent(400),
     sleep: getSleepStore().getRecent(400),
+    // Energy lives in the Clarity Journal (1–10, one per day) — the only store that has it.
+    // No mobile capture writes it yet, so this is usually empty until that screen lands.
+    energy: getClarityJournalStore()
+      .getRecentDailyCheckIns(400)
+      .map((c) => ({ date: c.date as string, energy: c.energy })),
   };
 }
 

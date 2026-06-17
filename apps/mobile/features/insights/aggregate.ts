@@ -14,6 +14,8 @@ import type { ClaritySnapshot } from '@/features/clarity/result-store';
 import type { NavigatorSnapshot } from '@/features/navigator/result-store';
 import type { RelationshipHealthResult } from '@/features/relationship-health/types';
 
+import type { EnergyPoint } from './daily-recap';
+
 export type ToolKey = 'checkin' | 'clarity' | 'navigator' | 'relationship' | 'mood' | 'sleep';
 
 /** A compact, presentational summary of one tool's local history. */
@@ -38,6 +40,8 @@ export interface InsightsInput {
   readonly relationship: readonly RelationshipHealthResult[];
   readonly mood: readonly MomentEntry[];
   readonly sleep: readonly SleepEntry[];
+  /** Self-reported energy readings (1–10) from the Clarity Journal — feeds the recap trend. */
+  readonly energy: readonly EnergyPoint[];
 }
 
 const TOOL_NAMES: Record<ToolKey, string> = {
