@@ -65,10 +65,10 @@ export function CrisisView({
 
       <ScrollView contentContainerClassName="gap-6 px-4 pb-10 mt-2">
         <View className="gap-1">
-          <Text variant="headingLg" accessibilityRole="header">
+          <Text variant="h1" accessibilityRole="header">
             {regionName}
           </Text>
-          <Text variant="bodyMedium" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodyLarge" className="text-text-secondary dark:text-text-secondary-dark">
             {CRISIS_COPY.heading}
           </Text>
         </View>
@@ -82,7 +82,7 @@ export function CrisisView({
 
         {hasHelp ? (
           <View className="gap-2">
-            <Text variant="bodyMedium" className="mb-2 text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="bodyLarge" className="mb-2 text-text-secondary dark:text-text-secondary-dark">
               {HELPLINES_INTRO}
             </Text>
             {helplines.map((row) => (
@@ -104,7 +104,7 @@ export function CrisisView({
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <Text
-            variant="bodySm"
+            variant="caption"
             className="text-text-secondary underline dark:text-text-secondary-dark"
           >
             {CRISIS_COPY.notInRegion(regionName)}

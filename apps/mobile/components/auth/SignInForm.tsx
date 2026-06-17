@@ -61,13 +61,13 @@ export function SignInForm({
   };
 
   return (
-    <ScreenShell>
+    <View className="flex-1">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1"
       >
         <ScrollView
-          contentContainerClassName="flex-grow justify-center py-8"
+          contentContainerClassName="flex-grow justify-center py-8 px-5"
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -75,7 +75,7 @@ export function SignInForm({
             entering={reduced ? undefined : FadeIn.duration(DURATION.base).easing(easingFn('out'))}
             className="gap-6"
           >
-            <Text variant="headingLg">{AUTH_COPY.signInPrimary}</Text>
+            <Text variant="h1">{AUTH_COPY.signInPrimary}</Text>
 
             <View className="gap-4">
               <AuthTextField
@@ -108,7 +108,7 @@ export function SignInForm({
                 onPress={onForgotPassword}
                 className="self-end px-1 py-1"
               >
-                <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+                <Text variant="caption" className="text-primary dark:text-primary-dark">
                   {AUTH_COPY.forgotLink}
                 </Text>
               </Pressable>
@@ -116,7 +116,7 @@ export function SignInForm({
 
             <View className="gap-2">
               {formError ? (
-                <Text variant="bodySm" className="text-error dark:text-error-dark">
+                <Text variant="caption" className="text-error dark:text-error-dark">
                   {formError}
                 </Text>
               ) : null}
@@ -129,6 +129,6 @@ export function SignInForm({
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ScreenShell>
+    </View>
   );
 }

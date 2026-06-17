@@ -39,11 +39,11 @@ export function MomentRow({ moment }: { moment: Moment }) {
         <View className={`h-3.5 w-3.5 rounded-full ${DOT_FILL[moment.valence]}`} />
       </View>
       <View className="flex-1">
-        <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+        <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
           {timeLabel(moment.timestamp)}
         </Text>
         {words.length > 0 && (
-          <Text variant="bodyMedium" className="mt-0.5">
+          <Text variant="bodyLarge" className="mt-0.5">
             {words.join(' · ')}
           </Text>
         )}

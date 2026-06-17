@@ -54,7 +54,7 @@ export function ValenceSlider({ value, onChange }: ValenceSliderProps) {
 
   return (
     <View className="items-center gap-5">
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
         {MOMENTS_COPY.valencePrompt}
       </Text>
 

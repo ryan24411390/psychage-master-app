@@ -134,7 +134,7 @@ export function ClarityFlow({
       <ClarityChrome onHelp={onHelp} onBack={handleBack}>
         <View className="flex-1 items-center justify-center px-8" accessibilityRole="progressbar">
           <ActivityIndicator size="large" color="#1A9B8C" />
-          <Text variant="headingLg" className="mt-8 text-center">
+          <Text variant="h1" className="mt-8 text-center">
             {CALCULATING_TITLE}
           </Text>
           <Text variant="body" className="mt-2 text-center text-text-secondary dark:text-text-secondary-dark">
@@ -150,7 +150,7 @@ export function ClarityFlow({
     return (
       <ClarityChrome onHelp={onHelp} onBack={handleBack}>
         <ScrollView contentContainerClassName="gap-5 px-4 pb-12 pt-4" showsVerticalScrollIndicator={false}>
-          <Text variant="headingLg" accessibilityRole="header">
+          <Text variant="h1" accessibilityRole="header">
             {CRISIS_TITLE}
           </Text>
           <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
@@ -172,13 +172,13 @@ export function ClarityFlow({
     return (
       <ClarityChrome onHelp={onHelp} onBack={handleBack}>
         <ScrollView contentContainerClassName="gap-5 px-4 pb-12 pt-4" showsVerticalScrollIndicator={false}>
-          <Text variant="headingLg" accessibilityRole="header">
+          <Text variant="h1" accessibilityRole="header">
             {INTRO_TITLE}
           </Text>
           <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
             {INTRO_BODY}
           </Text>
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {INTRO_META}
           </Text>
           <Button variant="primary" onPress={() => dispatch({ type: 'START' })}>
@@ -216,10 +216,10 @@ function QuestionStep({
       <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
         Question {state.index + 1} of {CLARITY_QUESTION_COUNT}
       </Text>
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
         {question.lead}
       </Text>
-      <Text variant="headingLg" accessibilityRole="header">
+      <Text variant="h1" accessibilityRole="header">
         {question.prompt}
       </Text>
       <View className="gap-3 pt-1">

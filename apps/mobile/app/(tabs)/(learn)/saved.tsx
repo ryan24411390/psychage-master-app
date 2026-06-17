@@ -36,7 +36,7 @@ export default function SavedScreen() {
         >
           <ChevronLeft size={24} color={tc.ink} strokeWidth={1.75} />
         </Pressable>
-        <Text variant="headingLg" className="text-text-primary dark:text-text-primary-dark">
+        <Text variant="h1" className="text-text-primary dark:text-text-primary-dark">
           {BOOKMARKS_COPY.list.title}
         </Text>
       </View>

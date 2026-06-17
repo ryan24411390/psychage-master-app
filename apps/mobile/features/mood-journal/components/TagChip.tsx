@@ -31,7 +31,7 @@ export function TagChip({ label, selected, onPress, testID }: TagChipProps) {
       }`}
     >
       <Text
-        variant="bodySm"
+        variant="caption"
         className={
           selected
             ? 'text-primary dark:text-primary-dark'

@@ -46,7 +46,7 @@ function Row({
       className="min-h-[44px] flex-row items-center justify-between border-b border-border py-3.5 dark:border-border-dark"
       style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
     >
-      <Text variant={emphasis ? 'bodyMedium' : 'body'}>{label}</Text>
+      <Text variant={emphasis ? 'bodyLarge' : 'body'}>{label}</Text>
       <View className="flex-row items-center gap-2">
         {meta ? (
           <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
@@ -106,12 +106,12 @@ export function LocationSetup() {
           className="min-h-[44px] flex-row items-center gap-1 self-start"
         >
           <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {t.outsideBack}
           </Text>
         </Pressable>
 
-        <Text variant="headingLg" className="mt-2">
+        <Text variant="h1" className="mt-2">
           {t.outsideTitle}
         </Text>
         <Text variant="body" className="mt-2 text-text-secondary dark:text-text-secondary-dark">
@@ -121,9 +121,9 @@ export function LocationSetup() {
         <View className="mt-5 rounded-xl bg-surface-accent p-4 dark:bg-surface-accent-dark">
           <View className="flex-row items-center gap-2">
             <LifeBuoy size={18} color={tc.crisis} strokeWidth={1.75} />
-            <Text variant="bodyMedium">{t.outsideCrisisTitle}</Text>
+            <Text variant="bodyLarge">{t.outsideCrisisTitle}</Text>
           </View>
-          <Text variant="bodySm" className="mt-1.5 text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="mt-1.5 text-text-secondary dark:text-text-secondary-dark">
             {t.outsideCrisisBody}
           </Text>
           <View className="mt-3">
@@ -149,12 +149,12 @@ export function LocationSetup() {
           className="min-h-[44px] flex-row items-center gap-1 self-start"
         >
           <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {stateName}
           </Text>
         </Pressable>
 
-        <Text variant="headingLg" className="mt-2">
+        <Text variant="h1" className="mt-2">
           {t.setupCityTitle}
         </Text>
         <Text variant="body" className="mt-2 text-text-secondary dark:text-text-secondary-dark">
@@ -195,7 +195,7 @@ export function LocationSetup() {
   // ── State (entry) ──────────────────────────────────────────────────────────
   return (
     <View className="flex-1 bg-background dark:bg-background-dark px-4 pt-2">
-      <Text variant="headingLg">{t.setupStateTitle}</Text>
+      <Text variant="h1">{t.setupStateTitle}</Text>
       <Text variant="body" className="mt-2 text-text-secondary dark:text-text-secondary-dark">
         {t.setupStateBody}
       </Text>

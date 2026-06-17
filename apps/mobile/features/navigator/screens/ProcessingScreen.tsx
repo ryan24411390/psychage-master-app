@@ -105,7 +105,7 @@ export function ProcessingScreen({ onDone }: ProcessingScreenProps) {
           />
         </Svg>
         <View className="absolute inset-0 items-center justify-center">
-          <Text variant="headingLg">{progressPct}%</Text>
+          <Text variant="h1">{progressPct}%</Text>
         </View>
       </View>
 
@@ -122,11 +122,11 @@ export function ProcessingScreen({ onDone }: ProcessingScreenProps) {
       </View>
 
       {/* Step text */}
-      <Text variant="bodyMedium" accessibilityLiveRegion="polite" className="text-center">
+      <Text variant="bodyLarge" accessibilityLiveRegion="polite" className="text-center">
         {PROCESSING_STEPS[currentStep]}
       </Text>
 
-      <Text variant="bodySm" className="text-center text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="caption" className="text-center text-text-secondary dark:text-text-secondary-dark">
         {NAVIGATOR_COPY.processingFootnote}
       </Text>
     </View>

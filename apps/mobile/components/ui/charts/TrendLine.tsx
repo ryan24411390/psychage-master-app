@@ -28,6 +28,10 @@ export interface TrendLineProps {
   readonly testID?: string;
   /** Override the auto-generated data summary read to screen readers. */
   readonly accessibilityLabel?: string;
+  /** Optional minimum Y value for the chart area. */
+  readonly yMin?: number;
+  /** Optional maximum Y value for the chart area. */
+  readonly yMax?: number;
 }
 
 const PAD = 8;
@@ -107,6 +111,8 @@ export function TrendLine({
   lineColor,
   testID,
   accessibilityLabel,
+  yMin,
+  yMax,
 }: TrendLineProps) {
   const reduced = useReducedMotion();
   const tc = useThemeColors();
@@ -121,8 +127,11 @@ export function TrendLine({
   const innerW = width - PAD * 2;
   const innerH = height - PAD * 2;
   const ys = present.map((d) => d.y);
-  const minY = isEmpty ? 0 : Math.min(...ys);
-  const maxY = isEmpty ? 1 : Math.max(...ys);
+  
+  const computedMinY = isEmpty ? 0 : Math.min(...ys);
+  const computedMaxY = isEmpty ? 1 : Math.max(...ys);
+  const minY = yMin ?? computedMinY;
+  const maxY = yMax ?? computedMaxY;
   const span = maxY - minY || 1;
 
   const px = (i: number) => PAD + (n <= 1 ? innerW / 2 : (i / (n - 1)) * innerW);

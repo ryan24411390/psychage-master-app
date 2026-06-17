@@ -87,13 +87,13 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
   };
 
   return (
-    <ScreenShell>
+    <View className="flex-1">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1"
       >
         <ScrollView
-          contentContainerClassName="flex-grow justify-center py-8"
+          contentContainerClassName="flex-grow justify-center py-8 px-5"
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -101,7 +101,7 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
             entering={reduced ? undefined : FadeIn.duration(DURATION.base).easing(easingFn('out'))}
             className="gap-6"
           >
-            <Text variant="headingLg">{AUTH_COPY.signUpTitle}</Text>
+            <Text variant="h1">{AUTH_COPY.signUpTitle}</Text>
 
             <View className="gap-4">
               <AuthTextField
@@ -179,10 +179,10 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
                 >
                   {accepted ? <Check size={16} color="#FFFFFF" strokeWidth={3} /> : null}
                 </View>
-                <Text variant="bodySm" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
+                <Text variant="caption" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
                   {AUTH_COPY.termsPrefix}
                   <Text
-                    variant="bodySm"
+                    variant="caption"
                     className="text-primary underline dark:text-primary-dark"
                     onPress={() => router.push('/settings/terms')}
                   >
@@ -190,7 +190,7 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
                   </Text>
                   {AUTH_COPY.termsAnd}
                   <Text
-                    variant="bodySm"
+                    variant="caption"
                     className="text-primary underline dark:text-primary-dark"
                     onPress={() => router.push('/settings/privacy-policy')}
                   >
@@ -199,7 +199,7 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
                 </Text>
               </Pressable>
               {termsError ? (
-                <Text variant="bodySm" className="text-error dark:text-error-dark">
+                <Text variant="caption" className="text-error dark:text-error-dark">
                   {AUTH_COPY.termsRequiredLine}
                 </Text>
               ) : null}
@@ -207,7 +207,7 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
 
             <View className="gap-2">
               {formError ? (
-                <Text variant="bodySm" className="text-error dark:text-error-dark">
+                <Text variant="caption" className="text-error dark:text-error-dark">
                   {formError}
                 </Text>
               ) : null}
@@ -220,6 +220,6 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ScreenShell>
+    </View>
   );
 }

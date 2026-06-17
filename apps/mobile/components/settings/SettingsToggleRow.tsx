@@ -26,9 +26,9 @@ export function SettingsToggleRow({
   // "On" track follows the themed brand primary so it reads on the dark canvas.
   const tc = useThemeColors();
   return (
-    <View className="min-h-[44px] flex-row items-center gap-3 px-1 py-3">
+    <View className="min-h-[52px] flex-row items-center gap-3 px-4 py-3 border-b border-border-hairline last:border-b-0">
       <View className="flex-1 gap-0.5">
-        <Text variant="bodyMedium">{label}</Text>
+        <Text variant="bodyLarge">{label}</Text>
         {description ? (
           <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {description}

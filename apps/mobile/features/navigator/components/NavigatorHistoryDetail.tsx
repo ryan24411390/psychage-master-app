@@ -39,7 +39,7 @@ export function NavigatorHistoryDetail({ snapshot, onBack }: NavigatorHistoryDet
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
           <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             Back
           </Text>
         </Pressable>
@@ -47,7 +47,7 @@ export function NavigatorHistoryDetail({ snapshot, onBack }: NavigatorHistoryDet
 
       <ScrollView contentContainerClassName="px-5 pb-10 pt-2 gap-4" showsVerticalScrollIndicator={false}>
         <View className="gap-1">
-          <Text variant="headingLg" className="text-text-primary dark:text-text-primary-dark">
+          <Text variant="h1" className="text-text-primary dark:text-text-primary-dark">
             {formatDate(snapshot.date)}
           </Text>
           <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
@@ -66,18 +66,18 @@ export function NavigatorHistoryDetail({ snapshot, onBack }: NavigatorHistoryDet
           results.map((r) => (
             <View key={r.condition_id} className="gap-2 rounded-xl bg-surface p-5 shadow-base dark:bg-surface-dark">
               <View className="flex-row items-center justify-between gap-2">
-                <Text variant="bodyMedium" className="flex-1 text-text-primary dark:text-text-primary-dark">
+                <Text variant="bodyLarge" className="flex-1 text-text-primary dark:text-text-primary-dark">
                   {r.name}
                 </Text>
                 <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                   {r.relevance_label}
                 </Text>
               </View>
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 {r.description_for_user}
               </Text>
               {r.matched_symptoms.length > 0 ? (
-                <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+                <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
                   Related to what was described: {r.matched_symptoms.map((m) => m.name).join(', ')}
                 </Text>
               ) : null}
@@ -86,7 +86,7 @@ export function NavigatorHistoryDetail({ snapshot, onBack }: NavigatorHistoryDet
         )}
 
         {snapshot.results.disclaimer ? (
-          <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+          <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
             {snapshot.results.disclaimer}
           </Text>
         ) : null}

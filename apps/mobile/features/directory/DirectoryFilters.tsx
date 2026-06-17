@@ -38,7 +38,7 @@ function Chip({
       }`}
     >
       <Text
-        variant="bodySm"
+        variant="caption"
         className={selected ? 'text-primary dark:text-primary-dark' : 'text-text-secondary dark:text-text-secondary-dark'}
       >
         {label}
@@ -83,9 +83,9 @@ export function DirectoryFilters({
       <View className="flex-1 justify-end bg-black/40">
         <View className="max-h-[80%] rounded-t-2xl bg-background px-4 pb-6 pt-4 dark:bg-background-dark">
           <View className="mb-3 flex-row items-center justify-between">
-            <Text variant="heading">Filters</Text>
+            <Text variant="h2">Filters</Text>
             <Pressable accessibilityRole="button" accessibilityLabel="Clear filters" onPress={clearAll} hitSlop={8}>
-              <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+              <Text variant="caption" className="text-primary dark:text-primary-dark">
                 Clear all
               </Text>
             </Pressable>
@@ -93,7 +93,7 @@ export function DirectoryFilters({
 
           <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-5 pb-2">
             <View className="gap-2">
-              <Text variant="bodyMedium">Modality</Text>
+              <Text variant="bodyLarge">Modality</Text>
               <View className="flex-row flex-wrap gap-2">
                 <Chip label="Telehealth" selected={draft.telehealth} onPress={() => setDraft((d) => ({ ...d, telehealth: !d.telehealth }))} />
                 <Chip label="In person" selected={draft.inPerson} onPress={() => setDraft((d) => ({ ...d, inPerson: !d.inPerson }))} />
@@ -102,7 +102,7 @@ export function DirectoryFilters({
             </View>
 
             <View className="gap-2">
-              <Text variant="bodyMedium">State</Text>
+              <Text variant="bodyLarge">State</Text>
               <TextInput
                 accessibilityLabel="Filter by state"
                 value={draft.state}
@@ -118,7 +118,7 @@ export function DirectoryFilters({
 
             {specialties.data && specialties.data.length > 0 ? (
               <View className="gap-2">
-                <Text variant="bodyMedium">Specialties</Text>
+                <Text variant="bodyLarge">Specialties</Text>
                 <View className="flex-row flex-wrap gap-2">
                   {specialties.data.map((s) => (
                     <Chip

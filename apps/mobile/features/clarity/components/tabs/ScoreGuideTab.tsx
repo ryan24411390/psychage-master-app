@@ -74,7 +74,7 @@ export function ScoreGuideTab({ currentTier }: ScoreGuideTabProps) {
       <View className={CARD}>
         <View className="mb-5 flex-row items-center gap-2">
           <BookOpen size={20} color="#1A9B8C" />
-          <Text variant="heading">Understanding Your Clarity Score</Text>
+          <Text variant="h2">Understanding Your Clarity Score</Text>
         </View>
         <View className="flex-row flex-wrap gap-3">
           {OVERVIEW.map((item) => {
@@ -86,7 +86,7 @@ export function ScoreGuideTab({ currentTier }: ScoreGuideTabProps) {
                 style={{ width: '47%' }}
               >
                 <ItemIcon size={18} color="#1A9B8C" />
-                <Text variant="bodyMedium" className="mt-2 text-[14px]">
+                <Text variant="bodyLarge" className="mt-2 text-[14px]">
                   {item.title}
                 </Text>
                 <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
@@ -100,10 +100,10 @@ export function ScoreGuideTab({ currentTier }: ScoreGuideTabProps) {
 
       {/* How scoring works */}
       <View className={CARD}>
-        <Text variant="heading" className="mb-4">
+        <Text variant="h2" className="mb-4">
           How Scoring Works
         </Text>
-        <Text variant="bodySm" className="mb-5 text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="caption" className="mb-5 text-text-secondary dark:text-text-secondary-dark">
           Each of the 20 questions uses a validated scale appropriate to its instrument. Your responses
           map to five wellness dimensions, each producing a sub-score from 0 to 20. The composite Clarity
           Score is the sum of all five dimension scores, giving a range of 0 to 100. Higher scores
@@ -137,7 +137,7 @@ export function ScoreGuideTab({ currentTier }: ScoreGuideTabProps) {
 
       {/* Score tiers explained */}
       <View className={CARD}>
-        <Text variant="heading" className="mb-4">
+        <Text variant="h2" className="mb-4">
           Score Tiers Explained
         </Text>
         <View className="gap-3">
@@ -159,7 +159,7 @@ export function ScoreGuideTab({ currentTier }: ScoreGuideTabProps) {
                 >
                   <View className="flex-row items-center gap-3">
                     <TierBadge tier={tierKey} size="md" />
-                    <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                    <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                       {td.range}
                     </Text>
                     {isCurrent ? (
@@ -176,22 +176,22 @@ export function ScoreGuideTab({ currentTier }: ScoreGuideTabProps) {
                 </Pressable>
                 {isExpanded ? (
                   <View className="gap-3 border-t border-border p-4 dark:border-border-dark">
-                    <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                    <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                       {td.description}
                     </Text>
                     <View className="gap-2">
                       <Text variant="caption" style={{ color: '#10b981' }}>
                         What's Working
                       </Text>
-                      <Text variant="bodySm">{td.whatsWorking}</Text>
+                      <Text variant="caption">{td.whatsWorking}</Text>
                       <Text variant="caption" style={{ color: '#f59e0b' }} className="mt-1">
                         Watch For
                       </Text>
-                      <Text variant="bodySm">{td.watchFor}</Text>
+                      <Text variant="caption">{td.watchFor}</Text>
                       <Text variant="caption" style={{ color: '#1A9B8C' }} className="mt-1">
                         Professional Guidance
                       </Text>
-                      <Text variant="bodySm">{td.professionalGuidance}</Text>
+                      <Text variant="caption">{td.professionalGuidance}</Text>
                     </View>
                   </View>
                 ) : null}
@@ -203,7 +203,7 @@ export function ScoreGuideTab({ currentTier }: ScoreGuideTabProps) {
 
       {/* Validated instruments */}
       <View className={CARD}>
-        <Text variant="heading" className="mb-4">
+        <Text variant="h2" className="mb-4">
           Validated Instruments
         </Text>
         <View className="gap-4">
@@ -225,7 +225,7 @@ export function ScoreGuideTab({ currentTier }: ScoreGuideTabProps) {
                   <DimIcon size={18} color={m.hexColor} />
                 </View>
                 <View className="flex-1">
-                  <Text variant="bodyMedium" className="text-[14px]">
+                  <Text variant="bodyLarge" className="text-[14px]">
                     {inst.badge} — {inst.name}
                   </Text>
                   <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
@@ -249,7 +249,7 @@ export function ScoreGuideTab({ currentTier }: ScoreGuideTabProps) {
               <DIMENSION_META.functioning.icon size={18} color={DIMENSION_META.functioning.hexColor} />
             </View>
             <View className="flex-1">
-              <Text variant="bodyMedium" className="text-[14px]">
+              <Text variant="bodyLarge" className="text-[14px]">
                 Custom — WHODAS-adapted Daily Functioning Items
               </Text>
               <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">

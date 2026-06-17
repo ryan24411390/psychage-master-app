@@ -35,7 +35,7 @@ export function AuthStatePanel({ icon, title, body, primary, secondary, testID }
       >
         <View className="items-center gap-3">
           {icon ? <View className="mb-1">{icon}</View> : null}
-          <Text variant="headingLg" className="text-center">
+          <Text variant="h1" className="text-center">
             {title}
           </Text>
           {body ? (

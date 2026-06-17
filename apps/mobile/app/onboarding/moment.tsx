@@ -1,5 +1,5 @@
 import { router, Stack } from 'expo-router';
-
+import { View } from 'react-native';
 import { OnboardingMomentCapture } from '@/features/onboarding/OnboardingMomentCapture';
 import { storage } from '@/lib/adapters/storage';
 import { getMomentStore } from '@/lib/moment-store';
@@ -22,14 +22,14 @@ export default function MomentScreen() {
     router.replace('/');
   };
   return (
-    <>
+    <View className="flex-1">
       <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
       <OnboardingMomentCapture
         store={store}
         onNamed={() => {
           // First successful (non-acute) save: a Moment now exists → onboarding is done.
           markOnboardingSeen(storage);
-          router.replace('/onboarding/acknowledge');
+          router.replace('/');
         }}
         onExit={exit}
         navigateToCrisis={() => {
@@ -39,6 +39,6 @@ export default function MomentScreen() {
           router.replace('/crisis');
         }}
       />
-    </>
+    </View>
   );
 }

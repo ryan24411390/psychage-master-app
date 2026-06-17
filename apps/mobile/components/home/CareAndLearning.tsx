@@ -31,7 +31,7 @@ function Doorway({ icon: Icon, title, subtitle, onPress, testID }: DoorwayProps)
         <Icon size={20} color={c.primary} strokeWidth={1.75} />
       </View>
       <View className="flex-1">
-        <Text variant="bodyBold" className="text-text-primary dark:text-text-primary-dark">
+        <Text variant="label" className="text-text-primary dark:text-text-primary-dark">
           {title}
         </Text>
         <Text variant="caption" className="mt-0.5 text-text-secondary dark:text-text-secondary-dark">
@@ -52,7 +52,7 @@ function Doorway({ icon: Icon, title, subtitle, onPress, testID }: DoorwayProps)
 export function CareAndLearning() {
   return (
     <View className="mt-6 gap-3">
-      <Text variant="heading" className="ml-1 mb-1">
+      <Text variant="h2" className="ml-1 mb-1">
         Care &amp; learning
       </Text>
       <Doorway

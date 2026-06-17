@@ -24,7 +24,7 @@ export function SleepDebt({ entries, settings }: SleepDebtProps) {
 
   if (entries.length === 0) {
     return (
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
         {t.debtEmpty}
       </Text>
     );
@@ -40,10 +40,10 @@ export function SleepDebt({ entries, settings }: SleepDebtProps) {
         <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {t.debtTotal}
         </Text>
-        <Text variant="headingLg">{formatDuration(debt.total_debt_minutes)}</Text>
+        <Text variant="h1">{formatDuration(debt.total_debt_minutes)}</Text>
       </Card>
       {debt.total_debt_minutes > 0 ? (
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {t.debtRecovery}
         </Text>
       ) : null}

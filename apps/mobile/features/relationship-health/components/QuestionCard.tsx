@@ -19,7 +19,7 @@ export function QuestionCard({ question, value, onSelect }: QuestionCardProps) {
 
   return (
     <View className="gap-5">
-      <Text variant="headingLg" className="text-[22px] leading-8" accessibilityRole="header">
+      <Text variant="h1" className="text-[22px] leading-8" accessibilityRole="header">
         {question.text}
       </Text>
 
@@ -52,7 +52,7 @@ export function QuestionCard({ question, value, onSelect }: QuestionCardProps) {
                 {selected ? <View className="h-2.5 w-2.5 rounded-full bg-primary dark:bg-primary-dark" /> : null}
               </View>
               <Text
-                variant={selected ? 'bodyMedium' : 'body'}
+                variant={selected ? 'bodyLarge' : 'body'}
                 className={selected ? 'text-primary dark:text-primary-dark' : undefined}
               >
                 {option.label}

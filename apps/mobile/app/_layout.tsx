@@ -39,7 +39,7 @@ SplashScreen.preventAutoHideAsync();
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   return (
     <View className="flex-1 items-center justify-center gap-3 bg-background px-6 dark:bg-background-dark">
-      <Text variant="heading" className="text-center text-text-primary dark:text-text-primary-dark">
+      <Text variant="h2" className="text-center text-text-primary dark:text-text-primary-dark">
         Something went wrong
       </Text>
       <Text
@@ -59,7 +59,7 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
         onPress={retry}
         className="mt-2 rounded-xl bg-primary px-5 py-3 active:opacity-80 dark:bg-primary-dark"
       >
-        <Text variant="bodyBold" className="text-white">
+        <Text variant="label" className="text-white">
           Try again
         </Text>
       </Pressable>

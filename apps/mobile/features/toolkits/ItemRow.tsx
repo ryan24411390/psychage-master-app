@@ -65,7 +65,7 @@ export function ItemRow({ item, progress, onOpen, onToggleDone, onRate }: ItemRo
         </Pressable>
 
         <View className="flex-1 gap-1">
-          <Text variant="bodyMedium" numberOfLines={2}>
+          <Text variant="bodyLarge" numberOfLines={2}>
             {item.label}
           </Text>
           <Badge variant="neutral">{t.kindLabel[item.kind]}</Badge>

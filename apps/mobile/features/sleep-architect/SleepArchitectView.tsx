@@ -98,7 +98,7 @@ export function SleepArchitectView({
               <ArrowLeft size={24} color={ink} strokeWidth={2} />
             </Pressable>
           ) : null}
-          <Text variant="heading" accessibilityRole="header">
+          <Text variant="h2" accessibilityRole="header">
             {CT4_SLEEP.title}
           </Text>
         </View>
@@ -154,7 +154,7 @@ export function SleepArchitectView({
 function Overview({ entryCount, onLog }: { entryCount: number; onLog: () => void }) {
   return (
     <View className="gap-4">
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
         {CT4_SLEEP.tagline}
       </Text>
       <SleepDisclaimer />
@@ -205,7 +205,7 @@ function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
             style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
           >
             <Text
-              variant={active ? 'bodyBold' : 'body'}
+              variant={active ? 'label' : 'body'}
               className={active ? 'text-primary dark:text-primary-dark' : 'text-text-secondary dark:text-text-secondary-dark'}
             >
               {item.label}

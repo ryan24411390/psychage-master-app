@@ -43,7 +43,7 @@ export function DurationPicker({ value, onChange }: DurationPickerProps) {
             style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
           >
             <Text
-              variant="bodyMedium"
+              variant="bodyLarge"
               className={
                 isSelected
                   ? 'text-white'

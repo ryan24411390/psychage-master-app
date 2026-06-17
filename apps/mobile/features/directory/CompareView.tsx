@@ -46,12 +46,12 @@ function Chrome({ children }: { children: React.ReactNode }) {
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
           <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             Back
           </Text>
         </Pressable>
       </View>
-      <Text variant="headingLg" className="px-4 pb-2">
+      <Text variant="h1" className="px-4 pb-2">
         {t.compareTitle}
       </Text>
       {children}
@@ -65,7 +65,7 @@ function Field({ label, value }: { label: string; value: string }) {
       <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
         {label}
       </Text>
-      <Text variant="bodySm">{value}</Text>
+      <Text variant="caption">{value}</Text>
     </View>
   );
 }
@@ -85,7 +85,7 @@ function Column({ p, onRemove }: { p: ProviderWithDetails; onRemove: () => void 
     <View className="w-52 rounded-xl border border-border p-3 dark:border-border-dark">
       <View className="items-center gap-1.5">
         <Avatar name={name} photoUrl={p.photo_url} size="lg" />
-        <Text variant="bodyMedium" numberOfLines={2} className="text-center">
+        <Text variant="bodyLarge" numberOfLines={2} className="text-center">
           {name}
         </Text>
         {p.credentials_suffix ? (
@@ -123,7 +123,7 @@ function Column({ p, onRemove }: { p: ProviderWithDetails; onRemove: () => void 
           testID={`compare-link-${p.id}`}
           className="min-h-[44px] items-center justify-center rounded-lg border border-border py-2 dark:border-border-dark"
         >
-          <Text variant="bodySm">{t.useAsTherapist}</Text>
+          <Text variant="caption">{t.useAsTherapist}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -132,7 +132,7 @@ function Column({ p, onRemove }: { p: ProviderWithDetails; onRemove: () => void 
           testID={`compare-remove-${p.id}`}
           className="min-h-[44px] items-center justify-center py-2"
         >
-          <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+          <Text variant="caption" className="text-primary dark:text-primary-dark">
             {t.compareRemove}
           </Text>
         </Pressable>
@@ -163,7 +163,7 @@ export function CompareView() {
     return (
       <Chrome>
         <View className="flex-1 items-center justify-center gap-2 px-6">
-          <Text variant="heading" className="text-center">
+          <Text variant="h2" className="text-center">
             {t.compareEmptyTitle}
           </Text>
           <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">

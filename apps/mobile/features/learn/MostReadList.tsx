@@ -30,11 +30,11 @@ export function MostReadList({ articles }: { articles: readonly ArticleListItem[
           className="flex-row items-center gap-4 border-b border-border py-3.5 dark:border-border-dark"
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
-          <Text variant="heading" className="w-9 text-text-tertiary dark:text-text-tertiary-dark">
+          <Text variant="h2" className="w-9 text-text-tertiary dark:text-text-tertiary-dark">
             {String(i + 1).padStart(2, '0')}
           </Text>
           <View className="flex-1 gap-1">
-            <Text variant="bodyMedium" numberOfLines={1} ellipsizeMode="tail">
+            <Text variant="bodyLarge" numberOfLines={1} ellipsizeMode="tail">
               {article.title}
             </Text>
             <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">

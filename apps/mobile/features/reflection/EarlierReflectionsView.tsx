@@ -1,7 +1,10 @@
 import { ArrowLeft } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
+import { ScreenEntrance } from '@/components/ui/ScreenEntrance';
 
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
@@ -26,46 +29,49 @@ export function EarlierReflectionsView({ weeks, onBack }: EarlierReflectionsView
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <View className="px-4 pt-1">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={onBack}
           hitSlop={8}
           className="min-h-[44px] w-11 justify-center"
+          haptic="tab"
         >
           <ArrowLeft size={24} color={ink} strokeWidth={2} />
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       <ScrollView contentContainerClassName="gap-4 px-4 pb-10 pt-2">
-        <Text
-          variant="caption"
-          className="uppercase tracking-widest text-text-secondary dark:text-text-secondary-dark"
-        >
-          Earlier weeks
-        </Text>
-
-        {weeks.length === 0 ? (
-          <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
-            {EMPTY}
+        <ScreenEntrance>
+          <Text
+            variant="caption"
+            className="uppercase tracking-widest text-text-secondary dark:text-text-secondary-dark"
+          >
+            Earlier weeks
           </Text>
-        ) : (
-          weeks.map((w) => (
-            <Card key={w.weekStartIso} variant="elevated" className="gap-3">
-              <Text
-                variant="caption"
-                className="text-text-tertiary dark:text-text-tertiary-dark font-sans-medium"
-              >
-                {w.rangeLabel}
-              </Text>
-              <View className="border-l-4 border-primary px-3 py-1 bg-surface-accent/20 dark:bg-surface-accent-dark/10 rounded-r-lg">
-                <Text className="font-display text-[16px] italic text-text-primary dark:text-text-primary-dark">
-                  {w.line}
+
+          {weeks.length === 0 ? (
+            <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
+              {EMPTY}
+            </Text>
+          ) : (
+            weeks.map((w) => (
+              <Card key={w.weekStartIso} variant="elevated" className="gap-3">
+                <Text
+                  variant="caption"
+                  className="text-text-tertiary dark:text-text-tertiary-dark font-sans-medium"
+                >
+                  {w.rangeLabel}
                 </Text>
-              </View>
-            </Card>
-          ))
-        )}
+                <View className="border-l-4 border-primary px-3 py-1 bg-surface-accent/20 dark:bg-surface-accent-dark/10 rounded-r-lg">
+                  <Text className="font-display text-[16px] italic text-text-primary dark:text-text-primary-dark">
+                    {w.line}
+                  </Text>
+                </View>
+              </Card>
+            ))
+          )}
+        </ScreenEntrance>
       </ScrollView>
     </SafeAreaView>
   );

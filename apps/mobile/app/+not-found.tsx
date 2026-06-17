@@ -15,7 +15,7 @@ export default function NotFoundScreen() {
       <View className="flex-1 items-center justify-center gap-3 bg-background px-6 dark:bg-background-dark">
         {/* Contextual placement (see MASCOT_CONTEXTUAL): error / 404 → 'oops'. */}
         <Mascot state={MASCOT_CONTEXTUAL.error404} size={156} />
-        <Text variant="heading" className="text-center text-text-primary dark:text-text-primary-dark">
+        <Text variant="h2" className="text-center text-text-primary dark:text-text-primary-dark">
           This page isn’t here
         </Text>
         <Text
@@ -25,7 +25,7 @@ export default function NotFoundScreen() {
           The link may be broken or the page may have moved.
         </Text>
         <Link href="/" replace className="mt-2">
-          <Text variant="bodyBold" className="text-primary dark:text-primary-dark">
+          <Text variant="label" className="text-primary dark:text-primary-dark">
             Go to home
           </Text>
         </Link>

@@ -102,7 +102,7 @@ export function ArticleReader({ slug }: { slug: string }) {
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>
         </Pressable>
@@ -165,10 +165,10 @@ export function ArticleReader({ slug }: { slug: string }) {
                 ) : null}
               </View>
 
-              <Text variant="headingLg">{article.title}</Text>
+              <Text variant="h1">{article.title}</Text>
               {article.subtitle ? (
                 <Text
-                  variant="bodyMedium"
+                  variant="bodyLarge"
                   className="text-text-secondary dark:text-text-secondary-dark"
                 >
                   {article.subtitle}

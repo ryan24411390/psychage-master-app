@@ -45,7 +45,7 @@ export function ChipGroup({ items, selected, onToggle, max }: ChipGroupProps) {
             } ${disabled ? 'opacity-40' : ''}`}
           >
             <Text
-              variant="bodySm"
+              variant="caption"
               className={
                 isSelected
                   ? 'text-white dark:text-charcoal-950'

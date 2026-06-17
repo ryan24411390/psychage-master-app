@@ -49,10 +49,10 @@ export function SeveritySlider({ value = 5, onChange }: SeveritySliderProps) {
     <View className="gap-5">
       {/* Live value + tier label */}
       <View className="items-center">
-        <Text variant="headingLg" className={`text-5xl ${valueColorClass(selected)}`}>
+        <Text variant="h1" className={`text-5xl ${valueColorClass(selected)}`}>
           {String(selected)}
         </Text>
-        <Text variant="bodyMedium" className={`mt-1 ${valueColorClass(selected)}`}>
+        <Text variant="bodyLarge" className={`mt-1 ${valueColorClass(selected)}`}>
           {SEVERITY_LABELS[selected]}
         </Text>
       </View>
@@ -97,10 +97,10 @@ export function SeveritySlider({ value = 5, onChange }: SeveritySliderProps) {
 
       {/* Min / Max labels */}
       <View className="flex-row justify-between px-1">
-        <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+        <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
           Mild
         </Text>
-        <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+        <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
           Severe
         </Text>
       </View>

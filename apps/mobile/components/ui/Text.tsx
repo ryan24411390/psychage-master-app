@@ -10,13 +10,14 @@ import { useReadingScale } from '@/lib/reading-text-size-context';
 // token-wired via tailwind.config.js fontFamily.
 
 export type TextVariant =
+  | 'display'
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'bodyLarge'
   | 'body'
-  | 'bodyMedium'
-  | 'bodyBold'
-  | 'bodySm'
-  | 'heading'
-  | 'headingLg'
-  | 'caption';
+  | 'caption'
+  | 'label';
 
 type TextProps = RNTextProps & {
   variant?: TextVariant;
@@ -34,16 +35,17 @@ type TextProps = RNTextProps & {
 // and any Text outside a provider, keeps its fixed size (the map below produces the
 // exact prior classes at the 'default' size).
 const variantBase: Record<TextVariant, string> = {
-  body: 'font-sans text-text-primary dark:text-text-primary-dark',
-  bodyMedium: 'font-sans-medium text-text-primary dark:text-text-primary-dark',
-  bodyBold: 'font-sans-bold text-text-primary dark:text-text-primary-dark',
-  bodySm: 'font-sans text-text-primary dark:text-text-primary-dark',
-  caption: 'font-sans text-xs tracking-wider text-text-secondary dark:text-text-secondary-dark',
-  heading: 'font-display text-xl tracking-tight text-text-primary dark:text-text-primary-dark',
-  headingLg: 'font-display text-2xl tracking-tighter text-text-primary dark:text-text-primary-dark',
+  display: 'font-display text-4xl tracking-tighter leading-none text-text-primary dark:text-text-primary-dark',
+  h1: 'font-display text-3xl tracking-tight leading-tight text-text-primary dark:text-text-primary-dark',
+  h2: 'font-sans-medium text-2xl tracking-tight leading-tight text-text-primary dark:text-text-primary-dark',
+  h3: 'font-sans-medium text-xl leading-snug text-text-primary dark:text-text-primary-dark',
+  bodyLarge: 'font-sans leading-relaxed text-text-primary dark:text-text-primary-dark',
+  body: 'font-sans leading-relaxed text-text-primary dark:text-text-primary-dark',
+  caption: 'font-sans text-sm leading-normal text-text-tertiary dark:text-text-tertiary-dark',
+  label: 'font-sans-medium text-sm leading-tight text-text-primary dark:text-text-primary-dark',
 };
 
-const BODY_VARIANTS: readonly TextVariant[] = ['body', 'bodyMedium', 'bodyBold', 'bodySm'];
+const BODY_VARIANTS: readonly TextVariant[] = ['bodyLarge', 'body'];
 
 function isBodyVariant(variant: TextVariant): variant is BodyVariant {
   return BODY_VARIANTS.includes(variant);

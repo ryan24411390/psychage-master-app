@@ -19,7 +19,7 @@ export default function ToolScreen() {
 
   return (
     <View className="flex-1 items-center justify-center bg-background dark:bg-background-dark p-6 gap-6">
-      <Text variant="headingLg">{tool ? tool.name : 'Tool Not Found'}</Text>
+      <Text variant="h1">{tool ? tool.name : 'Tool Not Found'}</Text>
       <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
         This is a placeholder for {tool?.name}. In the full app, the tool itself opens here. Opening
         it is noted on your device, so Today can gently bring it back if it has been a while.

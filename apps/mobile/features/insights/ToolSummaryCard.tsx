@@ -53,7 +53,7 @@ export function ToolSummaryCard({ summaries, onOpen, testID }: ToolSummaryCardPr
           Your tools
         </Text>
         <View className="flex-row items-center gap-1">
-          <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+          <Text variant="bodyLarge" className="text-primary dark:text-primary-dark">
             Insights
           </Text>
           <ChevronRight size={16} color={tc.primary} strokeWidth={2} />
@@ -69,10 +69,10 @@ export function ToolSummaryCard({ summaries, onOpen, testID }: ToolSummaryCardPr
                 <Icon size={18} color={tc.primary} strokeWidth={2} />
               </View>
               <View className="flex-1">
-                <Text variant="bodyMedium" className="text-text-primary dark:text-text-primary-dark">
+                <Text variant="bodyLarge" className="text-text-primary dark:text-text-primary-dark">
                   {s.name}
                 </Text>
-                <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                   {s.metric}
                 </Text>
               </View>

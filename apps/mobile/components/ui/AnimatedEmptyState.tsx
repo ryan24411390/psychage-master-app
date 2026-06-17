@@ -61,7 +61,7 @@ export function AnimatedEmptyState({
             Callers may override via the `icon` prop for surface-specific states. */}
         {icon || <Mascot state={MASCOT_CONTEXTUAL.emptyGeneric} size={156} />}
       </Animated.View>
-      <Text variant="heading" className="text-center mb-2 text-text-primary dark:text-text-primary-dark">
+      <Text variant="h2" className="text-center mb-2 text-text-primary dark:text-text-primary-dark">
         {title}
       </Text>
       {description && (

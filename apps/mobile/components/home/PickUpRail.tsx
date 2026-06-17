@@ -12,7 +12,7 @@ export function PickUpRail({ reads }: PickUpRailProps) {
 
   return (
     <View className="mb-6 mt-2">
-      <Text variant="heading" className="ml-1 mb-3">
+      <Text variant="h2" className="ml-1 mb-3">
         Pick up where you left off
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-5 px-5" contentContainerClassName="gap-3">
@@ -22,7 +22,7 @@ export function PickUpRail({ reads }: PickUpRailProps) {
               {/* Subtle tinted background for visual flair */}
               <View className="absolute inset-0 bg-surface-active dark:bg-surface-active-dark opacity-50" />
               <View className="flex-1 p-4 justify-between">
-                <Text variant="bodyBold" className="text-text-primary dark:text-text-primary-dark" numberOfLines={2}>
+                <Text variant="label" className="text-text-primary dark:text-text-primary-dark" numberOfLines={2}>
                   {r.title || 'Article'}
                 </Text>
                 <View className="h-1 bg-border dark:bg-border-dark rounded-full overflow-hidden w-full">

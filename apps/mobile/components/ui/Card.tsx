@@ -30,12 +30,12 @@ type CardProps = ViewProps & {
 // and most tap targets. Padding default is `p-4` (mobile 8pt-grid card density);
 // callers pass px-/py- overrides for the few denser/looser one-offs.
 const variantClasses: Record<CardVariant, string> = {
-  default: 'bg-surface dark:bg-surface-dark border border-border/40 dark:border-border-dark/40',
+  default: 'bg-surface dark:bg-surface-dark border border-border dark:border-border-dark',
   elevated:
-    'bg-surface dark:bg-surface-dark border border-border/40 dark:border-border-dark/40 shadow-sm',
+    'bg-surface dark:bg-surface-dark border border-border dark:border-border-dark shadow-sm',
   accent:
-    'bg-surface-accent dark:bg-surface-accent-dark border border-border/40 dark:border-border-dark/40',
-  outline: 'bg-transparent border border-border/40 dark:border-border-dark/40',
+    'bg-surface-accent dark:bg-surface-accent-dark border border-border dark:border-border-dark',
+  outline: 'bg-transparent border border-border dark:border-border-dark',
   ghost: 'bg-transparent',
 };
 
@@ -61,12 +61,10 @@ export function Card({
         onPress={onPress}
         entering={entering}
         scaleTo={0.97}
+        activeOpacity={0.95}
         springPreset="magnetic"
         tilt={true}
         className={composed}
-        style={({ pressed }: { pressed: boolean }) => ({
-          opacity: pressed ? 0.95 : 1,
-        })}
         accessibilityRole="button"
         {...(props as any)}
       >
@@ -132,5 +130,23 @@ export function CardIcon({ children, className, ...props }: ViewProps & { childr
     <View className={composed} {...props}>
       {children}
     </View>
+  );
+}
+
+import { Text } from './Text';
+
+export function CardTitle({ children, className, ...props }: { children: ReactNode; className?: string }) {
+  return (
+    <Text variant="h3" className={className} {...props}>
+      {children}
+    </Text>
+  );
+}
+
+export function CardSubtitle({ children, className, ...props }: { children: ReactNode; className?: string }) {
+  return (
+    <Text variant="body" className={`text-text-secondary dark:text-text-secondary-dark ${className || ''}`} {...props}>
+      {children}
+    </Text>
   );
 }

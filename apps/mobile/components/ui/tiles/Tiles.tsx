@@ -134,13 +134,12 @@ export function ClarityTile({ title, feature, icon: Icon, onPress, testID }: Til
       className="min-h-[44px] w-full flex-row items-center justify-between rounded-[20px] bg-charcoal-900 p-[15px]"
     >
       <View className="flex-1 pr-3">
-        {/* Named utilities (text-white / text-teal-400) reliably override the Text
-            variant's base color; arbitrary hex on a dark tile did not. text-teal-400
-            is the brand teal (#2DD4BF) — already in the stylesheet, so it renders. */}
+        {/* Inline styles are used to reliably override the Text variant's base color 
+            since tailwind text color classes may not properly override here. */}
         <Text className="font-sans-medium text-base text-white" numberOfLines={2}>
           {title}
         </Text>
-        <Text className="mt-0.5 font-sans text-xs text-teal-400">{feature}</Text>
+        <Text className="mt-0.5 font-sans text-xs" style={{ color: '#2DD4BF' }}>{feature}</Text>
       </View>
       <Icon size={30} color={TEAL} strokeWidth={1.75} />
     </AnimatedPressable>

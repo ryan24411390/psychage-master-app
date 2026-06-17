@@ -13,6 +13,7 @@ import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeInUp, SlideInDown, ZoomIn } from 'react-native-reanimated';
 
 import { Button } from '@/components/ui/Button';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { TagChip } from '@/features/mood-journal/components/TagChip';
 import { ValenceScale } from '@/features/mood-journal/components/ValenceScale';
@@ -98,7 +99,7 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
           >
             <Check size={36} color={colorScheme === 'dark' ? '#20B8A6' : '#1A9B8C'} strokeWidth={3} />
           </Animated.View>
-          <Text variant="headingLg" className="text-center mt-2">
+          <Text variant="h1" className="text-center mt-2">
             Saved.
           </Text>
         </Animated.View>
@@ -122,17 +123,18 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
         className="rounded-t-xl bg-surface px-5 pb-6 pt-5 dark:bg-surface-dark"
       >
         <View className="mb-3 flex-row items-start justify-between">
-          <Text variant="heading" className="flex-1 pr-3">
+          <Text variant="h2" className="flex-1 pr-3">
             {step === 0 ? t.valenceHeading : t.heading}
           </Text>
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel={t.close}
             hitSlop={8}
             onPress={onClose}
+            haptic="tab"
           >
             <X size={22} color={colors.charcoal[600]} />
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         {/* Step indicator — two dots, current step in teal. */}
@@ -156,7 +158,7 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
         <ScrollView showsVerticalScrollIndicator={false} className="max-h-[440px]">
           {step === 0 ? (
             <View testID="mood-journal-valence-step">
-              <Text variant="bodySm" className="mb-3 text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="caption" className="mb-3 text-text-secondary dark:text-text-secondary-dark">
                 {t.valenceHint}
               </Text>
               <ValenceScale
@@ -168,7 +170,7 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
             </View>
           ) : (
             <View testID="mood-journal-tags-step">
-              <Text variant="bodyMedium" className="mb-2">
+              <Text variant="bodyLarge" className="mb-2">
                 {t.emotionsLabel}
               </Text>
               <View className="mb-4 flex-row flex-wrap gap-2">
@@ -183,7 +185,7 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
                 ))}
               </View>
 
-              <Text variant="bodyMedium" className="mb-2">
+              <Text variant="bodyLarge" className="mb-2">
                 {t.triggersLabel}
               </Text>
               <View className="mb-4 flex-row flex-wrap gap-2">
@@ -217,7 +219,7 @@ export function AddMomentSheet({ onSave, onClose }: AddMomentSheetProps) {
 
         {saveFailed && step === 1 && (
           <Text
-            variant="bodySm"
+            variant="caption"
             className="mt-2 text-text-primary dark:text-text-primary-dark"
             accessibilityLiveRegion="polite"
           >

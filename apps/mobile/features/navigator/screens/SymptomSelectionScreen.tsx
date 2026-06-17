@@ -99,7 +99,7 @@ export function SymptomSelectionScreen({
   return (
     <ScrollView contentContainerClassName="gap-5 px-4 pb-10 pt-2" keyboardShouldPersistTaps="handled">
       <View className="gap-1.5">
-        <Text variant="headingLg" accessibilityRole="header">
+        <Text variant="h1" accessibilityRole="header">
           {NAVIGATOR_COPY.symptomsTitle}
         </Text>
         <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
@@ -140,7 +140,7 @@ export function SymptomSelectionScreen({
         hitSlop={6}
         className="min-h-[44px] justify-center"
       >
-        <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+        <Text variant="bodyLarge" className="text-primary dark:text-primary-dark">
           {NAVIGATOR_COPY.somethingElse}
         </Text>
       </Pressable>

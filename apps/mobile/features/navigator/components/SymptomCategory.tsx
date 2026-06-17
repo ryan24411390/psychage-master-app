@@ -49,9 +49,9 @@ export function SymptomCategory({
             strokeWidth={2}
             style={{ transform: [{ rotate: open ? '0deg' : '-90deg' }] }}
           />
-          <Text variant="bodyBold">{title}</Text>
+          <Text variant="label">{title}</Text>
           {selectedCount > 0 ? (
-            <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+            <Text variant="caption" className="text-primary dark:text-primary-dark">
               {selectedCount}
             </Text>
           ) : null}
@@ -63,7 +63,7 @@ export function SymptomCategory({
           hitSlop={6}
           className="min-h-[44px] justify-center"
         >
-          <Text variant="bodySm" className="text-text-secondary underline dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary underline dark:text-text-secondary-dark">
             {allSelected ? 'Clear' : 'Select all'}
           </Text>
         </Pressable>

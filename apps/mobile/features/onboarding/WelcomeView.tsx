@@ -1,8 +1,10 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
+import { ScreenEntrance } from '@/components/ui/ScreenEntrance';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { DURATION, easingFn } from '@/lib/motion';
@@ -35,33 +37,37 @@ export function WelcomeView({ reduced, onBegin, onSignIn }: WelcomeViewProps) {
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
-      <Settle {...settleProps} className="flex-1 items-center justify-center gap-6 px-5 my-4">
-        <View className="mb-4">
-          <OnboardingMascot testID="onboarding-host-mascot" />
-        </View>
-        <Text variant="headingLg" className="text-center" accessibilityRole="header">
-          {TITLE}
-        </Text>
-        <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark px-4">
-          {BODY}
-        </Text>
+      <Settle {...settleProps} className="flex-1 items-center justify-center px-5 my-4">
+        <ScreenEntrance>
+          <View style={{ alignItems: 'center', gap: 24 }}>
+            <View className="mb-4">
+              <OnboardingMascot testID="onboarding-host-mascot" />
+            </View>
+          <Text variant="h1" className="text-center" accessibilityRole="header">
+            {TITLE}
+          </Text>
+          <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark px-4">
+            {BODY}
+          </Text>
+          </View>
+        </ScreenEntrance>
       </Settle>
       <SafeAreaView edges={['bottom']} className="gap-3 px-5 pb-2">
         <Button variant="primary" size="lg" className="w-full" onPress={onBegin}>
           {ONBOARDING_COPY.begin}
         </Button>
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel={ONBOARDING_COPY.signIn}
           onPress={onSignIn}
           hitSlop={8}
-          className="min-h-[44px] items-center justify-center active:scale-[0.98]"
-          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          className="min-h-[44px] items-center justify-center"
+          haptic="tab"
         >
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {ONBOARDING_COPY.signIn}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </SafeAreaView>
     </View>
   );

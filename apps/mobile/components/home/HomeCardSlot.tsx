@@ -40,8 +40,8 @@ function BridgeCardBody({
           onPress={onBreathing}
           className="min-h-[44px] flex-row items-center gap-1 rounded-full border border-border/50 bg-surface px-3 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
         >
-          <Text variant="bodyMedium">{chipName}</Text>
-          <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+          <Text variant="bodyLarge">{chipName}</Text>
+          <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
             {chipMin}
           </Text>
         </Pressable>
@@ -51,13 +51,13 @@ function BridgeCardBody({
           onPress={onDismiss}
           className="min-h-[44px] justify-center px-2"
         >
-          <Text variant="bodyMedium" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodyLarge" className="text-text-secondary dark:text-text-secondary-dark">
             Not now
           </Text>
         </Pressable>
       </View>
       {card.veryLow && (
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {/* CT4 §3 [CT4] very-low extra line — the one Help-now sentence, verbatim. */}
           If things feel unsafe, help is one tap away.
         </Text>
@@ -83,7 +83,7 @@ function ReminderCardBody({ card }: { card: ReminderCard }) {
           onPress={() => {}}
           className="min-h-[44px] justify-center rounded-full border border-border/50 bg-surface px-3 shadow-sm dark:border-border-dark/50 dark:bg-surface-dark"
         >
-          <Text variant="bodyMedium">9:00 PM</Text>
+          <Text variant="bodyLarge">9:00 PM</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -91,7 +91,7 @@ function ReminderCardBody({ card }: { card: ReminderCard }) {
           onPress={() => {}}
           className="min-h-[44px] justify-center px-2"
         >
-          <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+          <Text variant="bodyLarge" className="text-primary dark:text-primary-dark">
             Yes, remind me
           </Text>
         </Pressable>
@@ -101,7 +101,7 @@ function ReminderCardBody({ card }: { card: ReminderCard }) {
           onPress={() => {}}
           className="min-h-[44px] justify-center px-2"
         >
-          <Text variant="bodyMedium" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="bodyLarge" className="text-text-secondary dark:text-text-secondary-dark">
             No thanks
           </Text>
         </Pressable>

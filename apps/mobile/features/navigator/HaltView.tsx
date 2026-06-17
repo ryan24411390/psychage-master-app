@@ -30,7 +30,7 @@ export function HaltView({ emergencyNumber, helplines, onGoBack }: HaltViewProps
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <ScrollView contentContainerClassName="gap-5 px-4 pb-10 pt-8">
-        <Text variant="headingLg" accessibilityRole="header">
+        <Text variant="h1" accessibilityRole="header">
           {HALT_LEAD}
         </Text>
 
@@ -48,7 +48,7 @@ export function HaltView({ emergencyNumber, helplines, onGoBack }: HaltViewProps
           className="min-h-[44px] justify-center"
         >
           <Text
-            variant="bodySm"
+            variant="caption"
             className="text-text-secondary underline dark:text-text-secondary-dark"
           >
             {NAVIGATOR_COPY.goBack}

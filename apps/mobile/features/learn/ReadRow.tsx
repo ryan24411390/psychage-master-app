@@ -37,7 +37,7 @@ export const ReadRow = memo(function ReadRow({ article }: { article: ArticleList
         className="h-16 w-16 rounded-2xl"
       />
       <View className="flex-1 gap-1">
-        <Text variant="heading" numberOfLines={2} className="text-[17px] leading-[22px]">
+        <Text variant="h2" numberOfLines={2} className="text-[17px] leading-[22px]">
           {article.title}
         </Text>
         {meta ? (

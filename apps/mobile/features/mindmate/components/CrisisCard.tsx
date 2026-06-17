@@ -41,13 +41,13 @@ export function CrisisCard({
       <View className="flex-row items-center gap-2">
         <LifeBuoy size={20} color={tc.crisis} strokeWidth={1.75} />
         <Text
-          variant="bodyBold"
+          variant="label"
           className="flex-1 text-text-primary dark:text-text-primary-dark"
         >
           {MINDMATE_COPY.crisisTitle}
         </Text>
       </View>
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
         {MINDMATE_COPY.crisisBody}
       </Text>
 
@@ -60,7 +60,7 @@ export function CrisisCard({
           testID="mindmate-crisis-call"
         >
           <Phone size={18} color={tc.crisis} strokeWidth={2} />
-          <Text variant="bodyMedium" className="text-text-primary dark:text-text-primary-dark">
+          <Text variant="bodyLarge" className="text-text-primary dark:text-text-primary-dark">
             {MINDMATE_COPY.crisisCallPrefix} {hotline.name}
           </Text>
         </Pressable>

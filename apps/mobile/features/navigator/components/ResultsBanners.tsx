@@ -28,8 +28,8 @@ export function CrisisBanner({ emergencyNumber, helplines }: CrisisBannerProps) 
       <View className="flex-row items-start gap-3">
         <ShieldAlert size={20} color={tc.crisis} strokeWidth={2} />
         <View className="flex-1 gap-1.5">
-          <Text variant="bodyBold">Prioritizing Your Safety</Text>
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="label">Prioritizing Your Safety</Text>
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             You mentioned experiences that suggest you may be going through a particularly difficult
             time. Your safety matters deeply. Please reach out for immediate support.
           </Text>
@@ -48,7 +48,7 @@ export function WatchBanner() {
   return (
     <View className="flex-row items-start gap-3 rounded-xl border border-warning/30 bg-warning/10 p-4">
       <AlertTriangle size={18} color={tc.inkSecondary} strokeWidth={2} />
-      <Text variant="bodySm" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="caption" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
         Some of your reported experiences are worth monitoring closely. Consider speaking with a
         professional if they persist.
       </Text>

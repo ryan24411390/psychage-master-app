@@ -72,7 +72,7 @@ export default function ForgotPasswordScreen() {
           className="flex-1 justify-center gap-6"
         >
           <View className="gap-3">
-            <Text variant="headingLg">{AUTH_COPY.forgotTitle}</Text>
+            <Text variant="h1">{AUTH_COPY.forgotTitle}</Text>
             <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
               {AUTH_COPY.forgotBody}
             </Text>
@@ -94,7 +94,7 @@ export default function ForgotPasswordScreen() {
 
           <View className="gap-2">
             {formError ? (
-              <Text variant="bodySm" className="text-error dark:text-error-dark">
+              <Text variant="caption" className="text-error dark:text-error-dark">
                 {formError}
               </Text>
             ) : null}
@@ -107,7 +107,7 @@ export default function ForgotPasswordScreen() {
               onPress={() => router.back()}
               className="items-center py-2"
             >
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 {AUTH_COPY.forgotBackToSignIn}
               </Text>
             </Pressable>

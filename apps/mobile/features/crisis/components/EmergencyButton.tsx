@@ -41,7 +41,7 @@ export function EmergencyButton({ emergencyNumber, label, dial = defaultDial }: 
     >
       <View className="flex-row items-center gap-2">
         <Phone size={22} color="#FFFFFF" strokeWidth={2} />
-        <Text variant="bodyBold" className="text-center text-white">
+        <Text variant="label" className="text-center text-white">
           {label}
         </Text>
       </View>

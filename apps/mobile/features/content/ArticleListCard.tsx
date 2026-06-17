@@ -25,7 +25,7 @@ export const ArticleListCard = memo(function ArticleListCard({ article }: { arti
       {article.seoDescription ? (
         <View className="border-t border-border px-4 py-3 dark:border-border-dark">
           <Text
-            variant="bodySm"
+            variant="caption"
             numberOfLines={2}
             className="text-text-secondary dark:text-text-secondary-dark"
           >

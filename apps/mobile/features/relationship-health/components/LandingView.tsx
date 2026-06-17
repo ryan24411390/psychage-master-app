@@ -33,7 +33,7 @@ export function LandingView({ onStart, onViewHistory, historyCount }: LandingVie
       showsVerticalScrollIndicator={false}
     >
       <Animated.View entering={enter} className="gap-2 pt-2">
-        <Text variant="headingLg" className="text-[28px] leading-9" accessibilityRole="header">
+        <Text variant="h1" className="text-[28px] leading-9" accessibilityRole="header">
           {t.heading}
         </Text>
         <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark leading-6">
@@ -45,10 +45,10 @@ export function LandingView({ onStart, onViewHistory, historyCount }: LandingVie
       <View className="gap-3">
         {t.info.map((card) => (
           <Card key={card.title}>
-            <Text variant="bodyMedium" className="mb-1">
+            <Text variant="bodyLarge" className="mb-1">
               {card.title}
             </Text>
-            <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark leading-5">
+            <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark leading-5">
               {card.body}
             </Text>
           </Card>
@@ -69,7 +69,7 @@ export function LandingView({ onStart, onViewHistory, historyCount }: LandingVie
               key={d}
               className="rounded-lg border border-border bg-surface px-3 py-2 dark:border-border-dark dark:bg-surface-dark"
             >
-              <Text variant="bodySm" className="font-sans-medium">
+              <Text variant="caption" className="font-sans-medium">
                 {DOMAIN_META[d].shortName}
               </Text>
             </View>
@@ -79,10 +79,10 @@ export function LandingView({ onStart, onViewHistory, historyCount }: LandingVie
 
       {/* Choose path */}
       <View className="gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 dark:border-primary-dark/30">
-        <Text variant="bodyBold" accessibilityRole="header">
+        <Text variant="label" accessibilityRole="header">
           {t.chooseHeading}
         </Text>
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {t.chooseSub}
         </Text>
         <View className="gap-2.5 pt-1">
@@ -103,16 +103,16 @@ export function LandingView({ onStart, onViewHistory, historyCount }: LandingVie
 
       {/* Disclaimer */}
       <Card>
-        <Text variant="bodySm" className="mb-2 font-sans-medium">
+        <Text variant="caption" className="mb-2 font-sans-medium">
           {t.disclaimerHeading}
         </Text>
         <View className="gap-1.5">
           {t.disclaimer.map((line) => (
             <View key={line} className="flex-row gap-2">
-              <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+              <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
                 •
               </Text>
-              <Text variant="bodySm" className="flex-1 text-text-tertiary dark:text-text-tertiary-dark leading-5">
+              <Text variant="caption" className="flex-1 text-text-tertiary dark:text-text-tertiary-dark leading-5">
                 {line}
               </Text>
             </View>

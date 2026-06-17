@@ -18,7 +18,7 @@ export function ProviderQuestions({ questions }: ProviderQuestionsProps) {
           key={q}
           className="flex-row gap-3 rounded-xl border border-border bg-surface-accent p-4 dark:border-border-dark dark:bg-surface-accent-dark"
         >
-          <Text variant="bodyBold" className="text-primary dark:text-primary-dark">
+          <Text variant="label" className="text-primary dark:text-primary-dark">
             {i + 1}.
           </Text>
           <Text variant="body" className="flex-1 text-text-secondary dark:text-text-secondary-dark">

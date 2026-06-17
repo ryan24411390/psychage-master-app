@@ -55,7 +55,7 @@ export default function CompassScreen() {
 
         {/* Right now */}
         <View className="gap-3">
-          <Text variant="heading" className={HEADING}>
+          <Text variant="h2" className={HEADING}>
             {t.headingRightNow}
           </Text>
           <View className="flex-row gap-3">
@@ -87,7 +87,7 @@ export default function CompassScreen() {
 
         {/* Over time */}
         <View className="gap-3">
-          <Text variant="heading" className={HEADING}>
+          <Text variant="h2" className={HEADING}>
             {t.headingOverTime}
           </Text>
           <ClarityTile
@@ -105,7 +105,7 @@ export default function CompassScreen() {
             className="min-h-[40px] flex-row items-center justify-end gap-1 px-1"
             testID="compass-clarity-history"
           >
-            <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+            <Text variant="bodyLarge" className="text-primary dark:text-primary-dark">
               View past snapshots
             </Text>
             <ChevronRight size={16} color={tcPrimary} strokeWidth={2} />
@@ -134,7 +134,7 @@ export default function CompassScreen() {
 
         {/* Deep Dives */}
         <View className="gap-3">
-          <Text variant="heading" className={HEADING}>
+          <Text variant="h2" className={HEADING}>
             {t.headingDeepDives}
           </Text>
           <DeepDiveCard

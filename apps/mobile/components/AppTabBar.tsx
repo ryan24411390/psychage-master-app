@@ -85,7 +85,11 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
               className="min-h-[44px] min-w-[44px] items-center justify-center"
             >
               <Animated.View
-                layout={reduced ? undefined : LinearTransition.duration(DURATION.quick)}
+                layout={
+                  reduced 
+                    ? undefined 
+                    : LinearTransition.springify().damping(20).stiffness(350).mass(0.3)
+                }
                 className={
                   isActive
                     ? 'flex-row items-center gap-2 rounded-full bg-primary/15 px-4 py-[9px] dark:bg-primary-dark/20'
@@ -95,8 +99,8 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
                 <Icon size={ICON_SIZE} color={isActive ? activeInk : inactiveInk} />
                 {isActive ? (
                   <Animated.View
-                    entering={reduced ? undefined : FadeIn.duration(DURATION.quick)}
-                    exiting={reduced ? undefined : FadeOut.duration(DURATION.quick)}
+                    entering={reduced ? undefined : FadeIn.duration(100)}
+                    exiting={reduced ? undefined : FadeOut.duration(100)}
                   >
                     <Text
                       variant="caption"

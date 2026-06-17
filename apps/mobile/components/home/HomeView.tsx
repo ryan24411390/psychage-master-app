@@ -91,14 +91,14 @@ export function HomeView({
       >
         <Animated.View
           entering={
-            reduced ? undefined : FadeInUp.duration(DURATION.base).easing(easingFn('standard'))
+            reduced ? undefined : FadeInUp.springify().damping(18).stiffness(150).mass(0.8)
           }
           className="gap-8"
         >
           {/* STATE ZONE */}
           <View className="flex-row items-start justify-between gap-3 bg-surface-accent/30 border border-border-accent/50 dark:bg-surface-accent-dark/15 dark:border-border-accent-dark/30 p-5 rounded-xl shadow-sm">
             <View className="flex-1 gap-1">
-              <Text variant="headingLg">{model.greeting}</Text>
+              <Text variant="h1">{model.greeting}</Text>
               <Text
                 variant="body"
                 className="font-display italic text-text-secondary dark:text-text-secondary-dark"
@@ -134,7 +134,7 @@ export function HomeView({
                 hitSlop={8}
                 className="min-h-[44px] justify-center"
               >
-                <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+                <Text variant="bodyLarge" className="text-primary dark:text-primary-dark">
                   History
                 </Text>
               </Pressable>

@@ -46,7 +46,7 @@ export function ValenceScale({ value, onChange, lowLabel, highLabel }: ValenceSc
               }`}
             >
               <Text
-                variant="bodySm"
+                variant="caption"
                 className={
                   selected
                     ? 'text-primary dark:text-primary-dark'

@@ -1,11 +1,17 @@
 import { Send } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { ActivityIndicator, TextInput, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useHaptics } from '@/lib/haptic-context';
-import { colors } from '@/lib/colors';
-
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { MINDMATE_COPY } from '../copy';
+import { colors } from '@/lib/colors';
+import { useHaptics } from '@/lib/haptic-context';
+import { useThemeColors } from '@/lib/use-theme-colors';
 
 // Message composer. Multiline grows to a cap; the send affordance is a 44pt round
 // target (iOS HIG floor) disabled until there's trimmed text. Disabled while a
@@ -18,42 +24,70 @@ export function ChatInput({
   disabled?: boolean;
 }) {
   const [value, setValue] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const { fireHaptic } = useHaptics();
+  const insets = useSafeAreaInsets();
+  const tc = useThemeColors();
   const canSend = value.trim().length > 0 && !disabled;
 
   const submit = () => {
     if (!canSend) return;
-    // DESIGN.mobile.md §3.3 — primary CTA fires haptic.affirm.
-    fireHaptic('affirm');
     onSend(value.trim());
     setValue('');
   };
 
+  const containerStyle = useAnimatedStyle(() => {
+    return {
+      borderColor: withTiming(
+        isFocused ? tc.primary : 'transparent',
+        { duration: 200 }
+      ),
+    };
+  });
+
   return (
-    <View className="flex-row items-end gap-3 border-t border-border-hairline px-4 py-3 dark:border-border-dark/30">
-      <TextInput
-        className="max-h-32 min-h-[44px] flex-1 rounded-2xl bg-surface border border-border/40 px-4 py-2.5 font-sans text-base text-text-primary dark:bg-surface-dark dark:border-border-dark/40 dark:text-text-primary-dark"
-        placeholder={MINDMATE_COPY.inputPlaceholder}
-        placeholderTextColor={colors.text.tertiary.light}
-        value={value}
-        onChangeText={setValue}
-        multiline
-        editable={!disabled}
-        accessibilityLabel={MINDMATE_COPY.inputPlaceholder}
-        testID="mindmate-input"
-      />
-      <Pressable
+    <View
+      className="flex-row items-end gap-3 border-t border-border-hairline px-4 pt-3 dark:border-border-dark/30"
+      style={{ paddingBottom: Math.max(insets.bottom, 12) }}
+    >
+      <Animated.View
+        className="max-h-32 min-h-[44px] flex-1 rounded-2xl bg-surface border border-border/40 dark:bg-surface-dark dark:border-border-dark/40"
+        style={containerStyle}
+      >
+        <TextInput
+          className="flex-1 px-4 py-2.5 font-sans text-base text-text-primary dark:text-text-primary-dark"
+          placeholder={MINDMATE_COPY.inputPlaceholder}
+          placeholderTextColor={colors.text.tertiary.light}
+          value={value}
+          onChangeText={setValue}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          multiline
+          editable={!disabled}
+          accessibilityLabel={MINDMATE_COPY.inputPlaceholder}
+          testID="mindmate-input"
+        />
+      </Animated.View>
+      <AnimatedPressable
         accessibilityRole="button"
         accessibilityLabel={MINDMATE_COPY.sendLabel}
         accessibilityState={{ disabled: !canSend }}
         onPress={submit}
         disabled={!canSend}
-        className="h-11 w-11 items-center justify-center rounded-full bg-primary dark:bg-primary-dark"
-        style={({ pressed }) => ({ opacity: !canSend ? 0.5 : pressed ? 0.9 : 1, transform: [{ scale: pressed && canSend ? 0.96 : 1 }] })}
+        className="h-[44px] w-[44px] items-center justify-center rounded-full bg-primary dark:bg-primary-dark"
+        style={{ opacity: !canSend ? 0.5 : 1 }}
+        activeOpacity={0.7}
+        haptic="affirm"
+        scaleTo={0.92}
+        springPreset="magnetic"
         testID="mindmate-send"
       >
-        <Send size={20} color={colors.charcoal[50]} strokeWidth={2} />
-      </Pressable>
+        {disabled ? (
+          <ActivityIndicator size="small" color={colors.charcoal[50]} />
+        ) : (
+          <Send size={20} color={colors.charcoal[50]} strokeWidth={2} />
+        )}
+      </AnimatedPressable>
     </View>
   );
 }

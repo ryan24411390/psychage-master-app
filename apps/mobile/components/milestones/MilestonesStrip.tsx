@@ -20,10 +20,10 @@ export function MilestonesStrip({ reached }: MilestonesStripProps) {
 
   return (
     <View className="pb-3 pt-1" accessibilityRole="summary">
-      <Text variant="bodyMedium" className="mb-0.5">
+      <Text variant="bodyLarge" className="mb-0.5">
         {MILESTONES_COPY.title}
       </Text>
-      <Text variant="bodySm" className="mb-3 text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="caption" className="mb-3 text-text-secondary dark:text-text-secondary-dark">
         {MILESTONES_COPY.subline}
       </Text>
 
@@ -49,7 +49,7 @@ export function MilestonesStrip({ reached }: MilestonesStripProps) {
                 }
               >
                 <Text
-                  variant="bodyMedium"
+                  variant="bodyLarge"
                   className={
                     isReached
                       ? 'text-white'

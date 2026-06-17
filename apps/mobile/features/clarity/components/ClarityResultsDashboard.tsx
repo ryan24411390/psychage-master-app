@@ -1,6 +1,6 @@
 import { RefreshCw } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { type LayoutChangeEvent, Pressable, ScrollView, View } from 'react-native';
+import { type LayoutChangeEvent, View, ScrollView } from 'react-native';
 import Animated, {
   FadeIn,
   useAnimatedStyle,
@@ -11,6 +11,7 @@ import Animated, {
 import { Text } from '@/components/ui/Text';
 import { useReducedMotion } from '@/lib/motion';
 import { useThemeColors } from '@/lib/use-theme-colors';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 
 import { getTierHexColor } from '../scoring';
 import type { ClarityHistoryItem, ClarityScoreResult, DomainKey, Recommendation } from '../types';
@@ -79,7 +80,11 @@ export function ClarityResultsDashboard({
   };
 
   return (
-    <ScrollView contentContainerClassName="px-4 pb-12 pt-2" showsVerticalScrollIndicator={false}>
+    <Animated.ScrollView
+      entering={reduced ? undefined : FadeIn.springify().damping(18).stiffness(150).mass(0.8)}
+      contentContainerClassName="px-4 pb-12 pt-2"
+      showsVerticalScrollIndicator={false}
+    >
       {/* Banner */}
       <View className="rounded-t-2xl border border-border bg-surface px-5 py-8 dark:border-border-dark dark:bg-surface-dark">
         <View className="flex-row items-end justify-between">
@@ -103,19 +108,20 @@ export function ClarityResultsDashboard({
             </View>
           </View>
 
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel="Retake assessment"
             onPress={onRetake}
             hitSlop={8}
             className="min-h-[44px] flex-row items-center gap-1.5"
-            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            haptic="tab"
+            activeOpacity={0.7}
           >
             <RefreshCw size={14} color={tc.inkSecondary} />
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               Retake
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         {results.tier === 'crisis' ? <CrisisUrgentBanner /> : null}
@@ -129,20 +135,22 @@ export function ClarityResultsDashboard({
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
-            <Pressable
+            <AnimatedPressable
               key={tab.id}
               accessibilityRole="tab"
               accessibilityState={{ selected: isActive }}
               onPress={() => setActiveTab(tab.id)}
               className="min-h-[44px] flex-1 items-center justify-center px-2 py-3"
+              haptic="tab"
+              activeOpacity={0.7}
             >
               <Text
-                variant={isActive ? 'bodyMedium' : 'bodySm'}
+                variant={isActive ? 'bodyLarge' : 'caption'}
                 style={{ color: isActive ? tc.ink : tc.inkSecondary, fontSize: 13 }}
               >
                 {tab.label}
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           );
         })}
         {/* Animated underline indicator */}
@@ -168,9 +176,6 @@ export function ClarityResultsDashboard({
         {activeTab === 'guide' ? <ScoreGuideTab currentTier={results.tier} /> : null}
         {activeTab === 'history' ? <HistoryTab history={history} currentResult={results} /> : null}
       </View>
-
-      {/* First-mount fade of the whole surface (matches the web's results entrance). */}
-      {reduced ? null : <Animated.View entering={FadeIn.duration(300)} pointerEvents="none" />}
-    </ScrollView>
+    </Animated.ScrollView>
   );
 }

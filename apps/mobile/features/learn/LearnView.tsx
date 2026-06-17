@@ -119,7 +119,7 @@ export function LearnView() {
               className="min-h-[52px] flex-row items-center justify-center rounded-xl border border-border px-4 dark:border-border-dark"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
-              <Text variant="bodyMedium" className="text-teal-700 dark:text-primary-dark">
+              <Text variant="bodyLarge" className="text-teal-700 dark:text-primary-dark">
                 {t.conditionsLabel}
               </Text>
             </Pressable>
@@ -131,7 +131,7 @@ export function LearnView() {
               className="min-h-[52px] flex-row items-center justify-center rounded-xl border border-border px-4 dark:border-border-dark"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
-              <Text variant="bodyMedium" className="text-teal-700 dark:text-primary-dark">
+              <Text variant="bodyLarge" className="text-teal-700 dark:text-primary-dark">
                 {t.libraryLabel}
               </Text>
             </Pressable>

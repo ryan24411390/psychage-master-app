@@ -78,7 +78,7 @@ function MilestoneRow({ milestones }: { milestones: Milestone[] }) {
     <View className={CARD}>
       <View className="mb-4 flex-row items-center gap-2">
         <Award size={16} color="#1A9B8C" />
-        <Text variant="bodyBold" className="text-[14px]">
+        <Text variant="label" className="text-[14px]">
           Milestones
         </Text>
       </View>
@@ -129,7 +129,7 @@ export function HistoryTab({ history, currentResult }: HistoryTabProps) {
       <Wrap>
         <View className={`items-center ${CARD}`}>
           <Clock size={28} color="#1A9B8C" />
-          <Text variant="headingLg" className="mt-4 text-center">
+          <Text variant="h1" className="mt-4 text-center">
             Track Your Clarity Over Time
           </Text>
           <Text variant="body" className="mt-2 text-center text-text-secondary dark:text-text-secondary-dark">
@@ -150,13 +150,13 @@ export function HistoryTab({ history, currentResult }: HistoryTabProps) {
       <Wrap>
         <View className={`items-center ${CARD}`}>
           <Clock size={28} color="#1A9B8C" />
-          <Text variant="heading" className="mt-4 text-center">
+          <Text variant="h2" className="mt-4 text-center">
             Your First Assessment is Recorded
           </Text>
           <Text variant="body" className="mt-2 text-center text-text-secondary dark:text-text-secondary-dark">
             Score: {only?.score} — {only?.label ?? (only ? getScoreLabel(only.score).label : '')}
           </Text>
-          <Text variant="bodySm" className="mt-2 text-center text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="mt-2 text-center text-text-secondary dark:text-text-secondary-dark">
             Retake in 2 weeks to see how your wellness changes over time. Trend charts appear after 2 or
             more assessments.
           </Text>
@@ -172,7 +172,7 @@ export function HistoryTab({ history, currentResult }: HistoryTabProps) {
       <View className={CARD}>
         <View className="mb-4 flex-row items-center gap-2">
           <TrendingUp size={18} color="#1A9B8C" />
-          <Text variant="bodyBold">Score Trend</Text>
+          <Text variant="label">Score Trend</Text>
         </View>
         <View className="items-center">
           <TrendLine data={chronological.map((h) => ({ x: h.date, y: h.score }))} width={300} height={180} />
@@ -185,7 +185,7 @@ export function HistoryTab({ history, currentResult }: HistoryTabProps) {
             <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               Overall Change
             </Text>
-            <Text variant="headingLg">
+            <Text variant="h1">
               {insights.totalChange > 0 ? '+' : ''}
               {insights.totalChange} pts
             </Text>
@@ -194,13 +194,13 @@ export function HistoryTab({ history, currentResult }: HistoryTabProps) {
             <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               Assessments
             </Text>
-            <Text variant="headingLg">{history.length}</Text>
+            <Text variant="h1">{history.length}</Text>
           </View>
           <View className={`flex-1 items-center ${CARD}`} style={{ minWidth: '28%' }}>
             <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               Since Last
             </Text>
-            <Text variant="headingLg">
+            <Text variant="h1">
               {insights.recentChange > 0 ? '+' : ''}
               {insights.recentChange} pts
             </Text>
@@ -212,32 +212,32 @@ export function HistoryTab({ history, currentResult }: HistoryTabProps) {
         <View className={CARD}>
           <View className="mb-3 flex-row items-center gap-2">
             <TrendingUp size={16} color="#1A9B8C" />
-            <Text variant="bodyBold" className="text-[14px]">
+            <Text variant="label" className="text-[14px]">
               Pattern Insights
             </Text>
           </View>
           <View className="gap-2">
             {insights.totalChange > 0 ? (
-              <Text variant="bodySm">
+              <Text variant="caption">
                 Your overall score has improved {insights.totalChange} points since your first assessment.
               </Text>
             ) : null}
             {insights.totalChange === 0 ? (
-              <Text variant="bodySm">Your overall score has remained stable across assessments.</Text>
+              <Text variant="caption">Your overall score has remained stable across assessments.</Text>
             ) : null}
             {insights.totalChange < 0 ? (
-              <Text variant="bodySm">
+              <Text variant="caption">
                 Your score has decreased {Math.abs(insights.totalChange)} points. Consider exploring what
                 may have changed.
               </Text>
             ) : null}
             {insights.bestDelta > 0 ? (
-              <Text variant="bodySm">
+              <Text variant="caption">
                 {insights.bestImproving} is your most improved dimension (+{Math.round(insights.bestDelta)}{' '}
                 points).
               </Text>
             ) : null}
-            <Text variant="bodySm">
+            <Text variant="caption">
               Recommended: Retake in 2 weeks for the most meaningful comparison.
             </Text>
           </View>
@@ -247,7 +247,7 @@ export function HistoryTab({ history, currentResult }: HistoryTabProps) {
       <View className={CARD}>
         <View className="mb-4 flex-row items-center gap-2">
           <Layers size={16} color="#1A9B8C" />
-          <Text variant="bodyBold" className="text-[14px]">
+          <Text variant="label" className="text-[14px]">
             Assessment History
           </Text>
         </View>
@@ -270,10 +270,10 @@ export function HistoryTab({ history, currentResult }: HistoryTabProps) {
                     justifyContent: 'center',
                   }}
                 >
-                  <Text variant="bodyBold">{entry.score}</Text>
+                  <Text variant="label">{entry.score}</Text>
                 </View>
                 <View className="flex-1">
-                  <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                  <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                     {entry.date}
                   </Text>
                   <TierBadge tier={tier} size="sm" />

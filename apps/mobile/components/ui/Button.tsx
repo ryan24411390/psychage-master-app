@@ -49,7 +49,7 @@ const textVariantClasses: Record<ButtonVariant, string> = {
   // ink (#0C0A09 on #20B8A6 = 8.0:1, AA-body). Light mode is unchanged.
   primary: 'text-white dark:text-charcoal-950',
   secondary: 'text-text-primary dark:text-text-primary-dark',
-  ghost: 'text-primary dark:text-primary-dark',
+  ghost: 'text-text-interactive dark:text-text-interactive-dark',
   // White on the semantic error fill clears AA-large for button labels in both registers.
   danger: 'text-white',
 };
@@ -80,8 +80,8 @@ export function Button({
       : variant === 'danger'
         ? '#ffffff'
         : isDark
-          ? '#20B8A6'
-          : '#1A9B8C';
+          ? '#2DD4BF' // Interactive dark
+          : '#1A9B8C'; // Interactive light
 
   const handlePress: PressableProps['onPress'] = (event) => {
     if (disabled || isLoading) return;
@@ -101,11 +101,12 @@ export function Button({
       disabled={disabled}
       onPress={handlePress}
       className={composed}
-      scaleTo={0.98}
-      springPreset="subtle"
-      style={({ pressed }: { pressed: boolean }) => ({
-        opacity: disabled || isLoading ? 0.5 : pressed ? 0.85 : 1,
-      })}
+      scaleTo={0.96}
+      activeOpacity={0.85}
+      springPreset="magnetic"
+      style={{
+        opacity: disabled || isLoading ? 0.5 : 1,
+      }}
       {...props}
     >
       <Animated.View
@@ -118,7 +119,7 @@ export function Button({
           </Animated.View>
         ) : typeof children === 'string' ? (
           <Animated.Text entering={FadeIn.duration(DURATION.swift).easing(easingFn('out'))} exiting={FadeOut.duration(DURATION.swift)} className={textVariantClasses[variant]}>
-            <Text className={textVariantClasses[variant]}>{children}</Text>
+            <Text variant="label" className={textVariantClasses[variant]}>{children}</Text>
           </Animated.Text>
         ) : (
           <Animated.View entering={FadeIn.duration(DURATION.swift).easing(easingFn('out'))} exiting={FadeOut.duration(DURATION.swift)}>

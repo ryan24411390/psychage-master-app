@@ -97,7 +97,7 @@ export function MomentCaptureSheet({ onSave, onClose }: MomentCaptureSheetProps)
       >
         <View className="mb-1 flex-row items-start justify-between">
           <View className="flex-1 pr-3">
-            <Text variant="heading">{MOMENTS_COPY.title}</Text>
+            <Text variant="h2">{MOMENTS_COPY.title}</Text>
             <Text variant="body" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
               {MOMENTS_COPY.subline}
             </Text>
@@ -119,14 +119,14 @@ export function MomentCaptureSheet({ onSave, onClose }: MomentCaptureSheetProps)
           {valence !== null && (
             <View className="mt-6 gap-2">
               <View className="flex-row items-center justify-between">
-                <Text variant="bodyMedium">{MOMENTS_COPY.labelPrompt}</Text>
+                <Text variant="bodyLarge">{MOMENTS_COPY.labelPrompt}</Text>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={showAllLabels ? MOMENTS_COPY.labelShowFewer : MOMENTS_COPY.labelShowMore}
                   hitSlop={8}
                   onPress={() => setShowAllLabels((s) => !s)}
                 >
-                  <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+                  <Text variant="caption" className="text-primary dark:text-primary-dark">
                     {showAllLabels ? MOMENTS_COPY.labelShowFewer : MOMENTS_COPY.labelShowMore}
                   </Text>
                 </Pressable>
@@ -142,7 +142,7 @@ export function MomentCaptureSheet({ onSave, onClose }: MomentCaptureSheetProps)
 
           {valence !== null && (
             <View className="mt-6 gap-2">
-              <Text variant="bodyMedium">{MOMENTS_COPY.contextPrompt}</Text>
+              <Text variant="bodyLarge">{MOMENTS_COPY.contextPrompt}</Text>
               <ChipGroup
                 items={CONTEXT_DOMAINS}
                 selected={context}
@@ -168,7 +168,7 @@ export function MomentCaptureSheet({ onSave, onClose }: MomentCaptureSheetProps)
 
           {saveFailed && (
             <Text
-              variant="bodySm"
+              variant="caption"
               className="mt-2 text-text-primary dark:text-text-primary-dark"
               accessibilityLiveRegion="polite"
             >

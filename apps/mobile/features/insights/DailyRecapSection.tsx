@@ -6,15 +6,7 @@ import { Text } from '@/components/ui/Text';
 import { buildDailyRecap, type DailyRecapInput } from './daily-recap';
 import { PresenceCalendar } from './PresenceCalendar';
 
-// DailyRecapSection — the gentle, descriptive header of the Insights screen, built only
-// from the on-device check-in (Moments) + energy (Clarity Journal) records. Three pieces:
-//   1. a presence calendar (which days have a check-in — NOT a mood-intensity heatmap),
-//   2. a factual weekly recap line ("You checked in N of 7 days this week"),
-//   3. ONE descriptive insight (a plain count) beside ONE trend (the energy line).
-// DESCRIPTIVE ONLY (SR-1/SR-3): no score, gauge, percentage, verdict, or direction
-// language. LOCAL-ONLY (SR-4): every value comes from a record the caller already read.
-// The ambient companion lives on the screen (InsightsView), not here — and never reads
-// the logged mood. Kept router-free so it renders in a plain RNTL harness.
+// DailyRecapSection — upgraded premium header.
 
 export interface DailyRecapSectionProps {
   readonly input: DailyRecapInput;
@@ -27,42 +19,51 @@ export function DailyRecapSection({ input, now = () => new Date(), testID }: Dai
   const recap = buildDailyRecap(input, now());
 
   return (
-    <View testID={testID} className="rounded-xl bg-surface p-5 shadow-base dark:bg-surface-dark">
-      <Text variant="heading" className="font-display text-[16px] text-text-primary dark:text-text-primary-dark">
-        This week
-      </Text>
-
-      {recap.hasAnyData ? null : (
-        <Text variant="bodySm" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
-          Your check-ins and energy notes will appear here as you record them. Everything stays on
-          your device.
+    <View testID={testID} className="overflow-hidden rounded-[24px] bg-surface p-1 shadow-lg shadow-black/5 dark:bg-surface-dark dark:shadow-black/20">
+      <View className="rounded-[20px] bg-surface-active p-6 dark:bg-surface-active-dark">
+        <Text variant="h2" className="font-display text-[22px] tracking-tight text-text-primary dark:text-text-primary-dark">
+          This week
         </Text>
-      )}
 
-      {/* Presence calendar — which of the last 14 days have a check-in. */}
-      <View className="mt-4" accessibilityLabel={recap.weeklyRecap} accessible>
-        <PresenceCalendar days={recap.presence} testID={testID ? `${testID}-presence` : undefined} />
-      </View>
+        {recap.hasAnyData ? null : (
+          <Text variant="body" className="mt-2 text-text-secondary dark:text-text-secondary-dark">
+            Your check-ins and energy notes will appear here as you record them. Everything stays on
+            your device.
+          </Text>
+        )}
 
-      <Text variant="bodyMedium" className="mt-4 text-text-primary dark:text-text-primary-dark">
-        {recap.weeklyRecap}
-      </Text>
-
-      {/* One trend (energy) beside one descriptive note. */}
-      <View className="mt-5 gap-2 border-t border-border pt-4 dark:border-border-dark">
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
-          Energy you've logged
-        </Text>
-        <View className="items-center">
-          <TrendLine
-            data={recap.energySeries}
-            accessibilityLabel="Energy readings you've logged over time"
-            testID={testID ? `${testID}-energy` : undefined}
-          />
+        {/* Presence calendar */}
+        <View className="mt-4" accessibilityLabel={recap.weeklyRecap} accessible>
+          <PresenceCalendar days={recap.presence} testID={testID ? `${testID}-presence` : undefined} />
         </View>
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
-          {recap.energyInsight}
-        </Text>
+
+        <View className="mt-6 rounded-2xl bg-surface/80 p-4 dark:bg-surface-dark/80">
+          <Text variant="bodyLarge" className="text-center font-medium text-text-primary dark:text-text-primary-dark">
+            {recap.weeklyRecap}
+          </Text>
+        </View>
+
+        {/* Energy Trend */}
+        <View className="mt-6 pt-4 border-t border-border/50 dark:border-border-dark/50">
+          <View className="flex-row justify-between items-end mb-2 px-1">
+            <Text variant="bodyLarge" className="font-semibold text-text-primary dark:text-text-primary-dark">
+              Energy logged
+            </Text>
+            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark text-right flex-1 ml-4" numberOfLines={2}>
+              {recap.energyInsight}
+            </Text>
+          </View>
+          
+          <View className="items-center bg-surface/50 dark:bg-surface-dark/50 rounded-[16px] py-2 mt-2">
+            <TrendLine
+              data={recap.energySeries}
+              yMin={0}
+              yMax={10}
+              accessibilityLabel="Energy readings you've logged over time"
+              testID={testID ? `${testID}-energy` : undefined}
+            />
+          </View>
+        </View>
       </View>
     </View>
   );

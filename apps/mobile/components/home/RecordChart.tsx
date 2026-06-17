@@ -19,25 +19,31 @@ type RecordChartProps = {
 // would drift from that grammar (hardcoded hex, single-color dots, no markers, no
 // a11y), which is exactly what this replaced.
 export function RecordChart({ days, insight, width }: RecordChartProps) {
-  return (
-    <View className="gap-4">
-      {insight ? (
-        <View className="gap-1">
-          <Text variant="bodyBold" className="text-text-primary dark:text-text-primary-dark">
-            {insight.headline}
-          </Text>
-          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
-            {insight.consistency}
-          </Text>
-        </View>
-      ) : (
+  if (!insight) {
+    return (
+      <View className="gap-4">
         <Text
-          variant="bodyBold"
+          variant="label"
           className="mt-2 mb-2 text-text-secondary dark:text-text-secondary-dark"
         >
           No history to show yet.
         </Text>
-      )}
+      </View>
+    );
+  }
+
+  return (
+    <View className="gap-4">
+      <View className="gap-1">
+        {insight.headline !== 'Your record' && (
+          <Text variant="label" className="text-text-primary dark:text-text-primary-dark">
+            {insight.headline}
+          </Text>
+        )}
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+          {insight.consistency}
+        </Text>
+      </View>
       <Terrain days={days} width={width} />
     </View>
   );

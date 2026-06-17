@@ -58,6 +58,10 @@ module.exports = {
           'secondary-dark': c.text.secondary.dark,
           tertiary: c.text.tertiary.light,
           'tertiary-dark': c.text.tertiary.dark,
+          disabled: c.text.disabled.light,
+          'disabled-dark': c.text.disabled.dark,
+          interactive: c.text.interactive.light,
+          'interactive-dark': c.text.interactive.dark,
         },
         border: {
           DEFAULT: c.border.default.light,

@@ -29,7 +29,7 @@ export function RangePicker({ options, value, onChange, countLine, onPreview }: 
         entering={reduced ? undefined : FadeIn.duration(DURATION.base).easing(easingFn('out'))}
         className="flex-1 gap-6 pt-6"
       >
-        <Text variant="headingLg">{THERAPIST_COPY.rangeTitle}</Text>
+        <Text variant="h1">{THERAPIST_COPY.rangeTitle}</Text>
 
         <RangeRadio options={options} value={value} onChange={onChange} />
 

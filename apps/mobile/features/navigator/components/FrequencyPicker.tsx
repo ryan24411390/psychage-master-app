@@ -54,7 +54,7 @@ export function FrequencyPicker({ value, onChange }: FrequencyPickerProps) {
             </View>
             <View className="flex-1">
               <Text
-                variant="bodyMedium"
+                variant="bodyLarge"
                 className={
                   isSelected
                     ? 'text-background dark:text-background-dark'
@@ -64,7 +64,7 @@ export function FrequencyPicker({ value, onChange }: FrequencyPickerProps) {
                 {option.label}
               </Text>
               <Text
-                variant="bodySm"
+                variant="caption"
                 className={
                   isSelected
                     ? 'text-background/80 dark:text-background-dark/80'

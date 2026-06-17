@@ -126,11 +126,11 @@ function Block({ node }: { node: NElement }): ReactNode {
     case 'paragraph':
       return <Paragraph node={node} />;
     case 'heading2':
-      return <Heading node={node} variant="headingLg" />;
+      return <Heading node={node} variant="h1" />;
     case 'heading3':
-      return <Heading node={node} variant="heading" />;
+      return <Heading node={node} variant="h2" />;
     case 'heading4':
-      return <Heading node={node} variant="bodyBold" />;
+      return <Heading node={node} variant="label" />;
     case 'list-unordered':
       return <ListBlock node={node} ordered={false} />;
     case 'list-ordered':
@@ -175,7 +175,7 @@ function Paragraph({ node }: { node: NElement }) {
   const { align } = resolveTextStyle(node.classes);
   return (
     <Text
-      variant={lead ? 'bodyMedium' : 'body'}
+      variant={lead ? 'bodyLarge' : 'body'}
       className="leading-7"
       style={align ? { textAlign: align } : undefined}
     >
@@ -189,7 +189,7 @@ function Heading({
   variant,
 }: {
   node: NElement;
-  variant: 'headingLg' | 'heading' | 'bodyBold';
+  variant: 'h1' | 'h2' | 'label';
 }) {
   const { align } = resolveTextStyle(node.classes);
   return (
@@ -259,7 +259,7 @@ function TableBlock({ node }: { node: NElement }) {
       style={{ width: cellWidth }}
       className="border-b border-border px-3 py-2 dark:border-border-dark"
     >
-      <Text variant={head ? 'bodyMedium' : 'bodySm'} className="leading-6">
+      <Text variant={head ? 'bodyLarge' : 'caption'} className="leading-6">
         {text}
       </Text>
     </View>
@@ -415,7 +415,7 @@ function AccordionBlock({ node }: { node: NElement }) {
               className="min-h-[44px] flex-row items-center justify-between gap-2 bg-surface px-4 py-3 dark:bg-surface-dark"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
-              <Text variant="bodyMedium" className="flex-1">
+              <Text variant="bodyLarge" className="flex-1">
                 {item.heading}
               </Text>
               <ChevronDown
@@ -458,7 +458,7 @@ function TabsBlock({ node }: { node: NElement }) {
                 onPress={() => setActive(i)}
                 className={`min-h-[36px] justify-center rounded-full px-3 ${selected ? 'bg-surface-active dark:bg-surface-active-dark' : ''}`}
               >
-                <Text variant={selected ? 'bodyMedium' : 'bodySm'}>{tab.label}</Text>
+                <Text variant={selected ? 'bodyLarge' : 'caption'}>{tab.label}</Text>
               </Pressable>
             );
           })}
@@ -489,7 +489,7 @@ function StatCardBlock({ node }: { node: NElement }) {
           key={i}
           className="min-w-[44%] flex-1 items-center rounded-xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark"
         >
-          <Text variant="headingLg" className="text-primary dark:text-primary-dark">
+          <Text variant="h1" className="text-primary dark:text-primary-dark">
             {s.value}
           </Text>
           {s.label ? (
@@ -523,12 +523,12 @@ function StepsBlock({ node }: { node: NElement }) {
         // biome-ignore lint/suspicious/noArrayIndexKey: steps are positional, parsed once, never reordered
         <View key={i} className="flex-row gap-3">
           <View className="h-7 w-7 items-center justify-center rounded-full bg-surface-active dark:bg-surface-active-dark">
-            <Text variant="bodySm" className="font-sans-bold text-primary dark:text-primary-dark">
+            <Text variant="caption" className="font-sans-bold text-primary dark:text-primary-dark">
               {i + 1}
             </Text>
           </View>
           <View className="flex-1 gap-1">
-            <Text variant="bodyBold">{s.title}</Text>
+            <Text variant="label">{s.title}</Text>
             <RenderBlocks nodes={s.content} />
           </View>
         </View>

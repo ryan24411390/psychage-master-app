@@ -45,7 +45,7 @@ export function NavigatorHistoryView({ snapshots, onSelect, onStartNew, onBack }
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
           <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             Back
           </Text>
         </Pressable>
@@ -53,7 +53,7 @@ export function NavigatorHistoryView({ snapshots, onSelect, onStartNew, onBack }
 
       <ScrollView contentContainerClassName="px-5 pb-10 pt-2 gap-4" showsVerticalScrollIndicator={false}>
         <View className="gap-1">
-          <Text variant="headingLg" className="text-text-primary dark:text-text-primary-dark">
+          <Text variant="h1" className="text-text-primary dark:text-text-primary-dark">
             Past explorations
           </Text>
           <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
@@ -78,10 +78,10 @@ export function NavigatorHistoryView({ snapshots, onSelect, onStartNew, onBack }
               className="flex-row items-center gap-3 rounded-xl bg-surface p-4 shadow-base dark:bg-surface-dark active:scale-[0.99]"
             >
               <View className="flex-1">
-                <Text variant="bodyMedium" className="text-text-primary dark:text-text-primary-dark">
+                <Text variant="bodyLarge" className="text-text-primary dark:text-text-primary-dark">
                   {formatDate(s.date)}
                 </Text>
-                <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                   {topAreas(s)}
                 </Text>
               </View>
@@ -96,7 +96,7 @@ export function NavigatorHistoryView({ snapshots, onSelect, onStartNew, onBack }
           onPress={onStartNew}
           className="mt-1 min-h-[48px] items-center justify-center rounded-xl bg-primary px-5 dark:bg-primary-dark active:scale-[0.99]"
         >
-          <Text variant="bodyMedium" className="text-white">
+          <Text variant="bodyLarge" className="text-white">
             Start a new exploration
           </Text>
         </Pressable>

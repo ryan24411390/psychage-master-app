@@ -1,8 +1,10 @@
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
+import { ScreenEntrance } from '@/components/ui/ScreenEntrance';
 import { Text } from '@/components/ui/Text';
 import { CONDITIONS_COPY } from '@/features/conditions/copy';
 import { selectConditionDetail } from '@/features/conditions/select';
@@ -23,19 +25,20 @@ export function ConditionDetailView({ slug }: { slug: string }) {
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
       <View className="flex-row items-center px-2">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel={t.back}
           onPress={() => router.back()}
           hitSlop={8}
           testID="condition-detail-back"
           className="min-h-[44px] flex-row items-center gap-1 px-2"
+          haptic="tab"
         >
           <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       {detail == null ? (
@@ -49,66 +52,68 @@ export function ConditionDetailView({ slug }: { slug: string }) {
           contentContainerClassName="gap-3 px-5 pb-12"
           showsVerticalScrollIndicator={false}
         >
-          <Text variant="headingLg">{detail.name}</Text>
-          {/* Verbatim reviewed summary when ported (B1); else the generic intro. */}
-          <Text
-            variant="body"
-            className="text-text-secondary dark:text-text-secondary-dark"
-            testID={detail.summary ? 'condition-summary' : 'condition-intro'}
-          >
-            {detail.summary ?? t.detailIntro}
-          </Text>
-
-          {detail.subTopics.length > 0 ? (
-            <View className="gap-1.5 pt-1" testID="condition-subtopics">
-              <Text variant="bodyMedium">{t.coversLabel}</Text>
-              {detail.subTopics.map((topic) => (
-                <Text
-                  key={topic}
-                  variant="body"
-                  className="text-text-secondary dark:text-text-secondary-dark"
-                >
-                  {`•  ${topic}`}
-                </Text>
-              ))}
-            </View>
-          ) : null}
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t.browseLabel}
-            onPress={() => router.push('/library')}
-            testID="condition-browse-library"
-            className="min-h-[44px] justify-center rounded-xl border border-border px-4 dark:border-border-dark"
-            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-          >
-            <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
-              {t.browseLabel}
+          <ScreenEntrance>
+            <Text variant="h1">{detail.name}</Text>
+            {/* Verbatim reviewed summary when ported (B1); else the generic intro. */}
+            <Text
+              variant="body"
+              className="text-text-secondary dark:text-text-secondary-dark"
+              testID={detail.summary ? 'condition-summary' : 'condition-intro'}
+            >
+              {detail.summary ?? t.detailIntro}
             </Text>
-          </Pressable>
 
-          {detail.related.length > 0 ? (
-            <View className="gap-2 pt-2" testID="condition-related">
-              <Text variant="bodyMedium">{t.relatedLabel}</Text>
-              {detail.related.map((rel) => (
-                <Pressable
-                  key={rel.slug}
-                  accessibilityRole="button"
-                  accessibilityLabel={rel.name}
-                  onPress={() => router.push(`/conditions/${rel.slug}`)}
-                  testID={`condition-related-${rel.slug}`}
-                  className="min-h-[44px] justify-center rounded-xl border border-border bg-surface px-4 dark:border-border-dark dark:bg-surface-dark"
-                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-                >
-                  <Text variant="body">{rel.name}</Text>
-                </Pressable>
-              ))}
-            </View>
-          ) : null}
+            {detail.subTopics.length > 0 ? (
+              <View className="gap-1.5 pt-1" testID="condition-subtopics">
+                <Text variant="bodyLarge">{t.coversLabel}</Text>
+                {detail.subTopics.map((topic) => (
+                  <Text
+                    key={topic}
+                    variant="body"
+                    className="text-text-secondary dark:text-text-secondary-dark"
+                  >
+                    {`•  ${topic}`}
+                  </Text>
+                ))}
+              </View>
+            ) : null}
 
-          <Text variant="caption" className="px-1 pt-2">
-            {t.disclaimer}
-          </Text>
+            <AnimatedPressable
+              accessibilityRole="button"
+              accessibilityLabel={t.browseLabel}
+              onPress={() => router.push('/library')}
+              testID="condition-browse-library"
+              className="min-h-[44px] justify-center rounded-xl border border-border px-4 dark:border-border-dark"
+              haptic="tab"
+            >
+              <Text variant="bodyLarge" className="text-primary dark:text-primary-dark">
+                {t.browseLabel}
+              </Text>
+            </AnimatedPressable>
+
+            {detail.related.length > 0 ? (
+              <View className="gap-2 pt-2" testID="condition-related">
+                <Text variant="bodyLarge">{t.relatedLabel}</Text>
+                {detail.related.map((rel) => (
+                  <AnimatedPressable
+                    key={rel.slug}
+                    accessibilityRole="button"
+                    accessibilityLabel={rel.name}
+                    onPress={() => router.push(`/conditions/${rel.slug}`)}
+                    testID={`condition-related-${rel.slug}`}
+                    className="min-h-[44px] justify-center rounded-xl border border-border bg-surface px-4 dark:border-border-dark dark:bg-surface-dark"
+                    haptic="tab"
+                  >
+                    <Text variant="body">{rel.name}</Text>
+                  </AnimatedPressable>
+                ))}
+              </View>
+            ) : null}
+
+            <Text variant="caption" className="px-1 pt-2">
+              {t.disclaimer}
+            </Text>
+          </ScreenEntrance>
         </ScrollView>
       )}
     </View>

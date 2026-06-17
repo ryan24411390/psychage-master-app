@@ -48,10 +48,10 @@ export function PathPickerSheet({ visible, onClose, onPick }: PathPickerSheetPro
           style={{ paddingBottom: insets.bottom + 20 }}
         >
           <View className="mb-1 h-1 w-10 self-center rounded-full bg-border dark:bg-border-dark" />
-          <Text variant="heading" accessibilityRole="header">
+          <Text variant="h2" accessibilityRole="header">
             {t.pickerTitle}
           </Text>
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {t.pickerHint}
           </Text>
 
@@ -70,7 +70,7 @@ export function PathPickerSheet({ visible, onClose, onPick }: PathPickerSheetPro
                 style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
               >
                 <View className="flex-1">
-                  <Text variant="bodyMedium">{p.label}</Text>
+                  <Text variant="bodyLarge">{p.label}</Text>
                 </View>
                 <ChevronRight size={18} color={tc.inkTertiary} strokeWidth={2} />
               </Pressable>
@@ -84,7 +84,7 @@ export function PathPickerSheet({ visible, onClose, onPick }: PathPickerSheetPro
             className="min-h-[44px] items-center justify-center"
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
           >
-            <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark underline">
+            <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark underline">
               {t.pickerSkip}
             </Text>
           </Pressable>

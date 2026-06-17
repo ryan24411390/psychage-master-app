@@ -36,7 +36,7 @@ function StatCell({ label, value }: { label: string; value: string }) {
       <Text variant="caption" className="mb-0.5 text-center text-text-secondary dark:text-text-secondary-dark">
         {label}
       </Text>
-      <Text variant="bodyBold" className="text-center text-[13px]">
+      <Text variant="label" className="text-center text-[13px]">
         {value}
       </Text>
     </View>
@@ -82,7 +82,7 @@ export function OverviewTab({
 
       {/* Dimension radar */}
       <View className={CARD}>
-        <Text variant="bodyBold" className="mb-2 text-[14px]">
+        <Text variant="label" className="mb-2 text-[14px]">
           Dimension Profile
         </Text>
         <View className="items-center">
@@ -92,7 +92,7 @@ export function OverviewTab({
 
       {/* Dimension breakdown */}
       <View className={CARD}>
-        <Text variant="bodyBold" className="mb-4">
+        <Text variant="label" className="mb-4">
           Dimension Breakdown
         </Text>
         <View className="gap-4">
@@ -116,7 +116,7 @@ export function OverviewTab({
             <>
               <View className="mb-5 flex-row items-center gap-2.5">
                 <CheckCircle2 size={16} color="#10b981" />
-                <Text variant="bodyBold">Core Strengths</Text>
+                <Text variant="label">Core Strengths</Text>
               </View>
               <View className="gap-3">
                 {detailed.strengths.map((s) => {
@@ -125,14 +125,14 @@ export function OverviewTab({
                     <View key={s.key} className="rounded-xl border border-border p-4 dark:border-border-dark">
                       <View className="mb-1.5 flex-row items-center gap-2">
                         <Icon size={14} color={DIMENSION_META[s.key].hexColor} />
-                        <Text variant="bodyMedium" className="text-[14px]">
+                        <Text variant="bodyLarge" className="text-[14px]">
                           {s.name}
                         </Text>
                         <Text variant="caption" className="ml-auto text-text-secondary dark:text-text-secondary-dark">
                           {Math.round(s.score)}/20
                         </Text>
                       </View>
-                      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                      <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                         {s.insight}
                       </Text>
                     </View>
@@ -144,9 +144,9 @@ export function OverviewTab({
             <>
               <View className="mb-5 flex-row items-center gap-2.5">
                 <Compass size={16} color={tc.primary} />
-                <Text variant="bodyBold">Areas to Support</Text>
+                <Text variant="label">Areas to Support</Text>
               </View>
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 Every dimension has room to grow right now — that's common, and it's a workable place to
                 start. The growth areas here show where small, focused steps can help most.
               </Text>
@@ -157,7 +157,7 @@ export function OverviewTab({
         <View className={CARD}>
           <View className="mb-5 flex-row items-center gap-2.5">
             <TrendingUp size={16} color="#f59e0b" />
-            <Text variant="bodyBold">Growth Opportunities</Text>
+            <Text variant="label">Growth Opportunities</Text>
           </View>
           <View className="gap-3">
             {detailed.growthAreas.map((g) => {
@@ -166,14 +166,14 @@ export function OverviewTab({
                 <View key={g.key} className="rounded-xl border border-border p-4 dark:border-border-dark">
                   <View className="mb-1.5 flex-row items-center gap-2">
                     <Icon size={14} color={DIMENSION_META[g.key].hexColor} />
-                    <Text variant="bodyMedium" className="text-[14px]">
+                    <Text variant="bodyLarge" className="text-[14px]">
                       {g.name}
                     </Text>
                     <Text variant="caption" className="ml-auto text-text-secondary dark:text-text-secondary-dark">
                       {Math.round(g.score)}/20
                     </Text>
                   </View>
-                  <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                  <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                     {g.insight}
                   </Text>
                 </View>
@@ -189,10 +189,10 @@ export function OverviewTab({
       {/* Personalized recommendations */}
       {recommendations.length > 0 ? (
         <View className={CARD}>
-          <Text variant="bodyBold" className="mb-1">
+          <Text variant="label" className="mb-1">
             Personalized for Your Growth Areas
           </Text>
-          <Text variant="bodySm" className="mb-5 text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="mb-5 text-text-secondary dark:text-text-secondary-dark">
             Actions tailored to the dimensions that need the most attention.
           </Text>
           <View className="gap-3">
@@ -215,7 +215,7 @@ export function OverviewTab({
                   >
                     <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700' }}>{i + 1}</Text>
                   </View>
-                  <Text variant="bodySm" className="flex-1">
+                  <Text variant="caption" className="flex-1">
                     {rec.text}
                   </Text>
                 </View>
@@ -247,7 +247,7 @@ export function OverviewTab({
         <View className="overflow-hidden rounded-2xl border border-border dark:border-border-dark">
           <View className="flex-row items-center gap-2 border-b border-border px-5 py-4 dark:border-border-dark">
             <AlertTriangle size={16} color="#f59e0b" />
-            <Text variant="bodyBold" className="text-[14px]">
+            <Text variant="label" className="text-[14px]">
               Clinical Indicators
             </Text>
           </View>
@@ -265,9 +265,9 @@ export function OverviewTab({
                     backgroundColor: flag.severity === 'significant' ? '#f97316' : '#f59e0b',
                   }}
                 />
-                <Text variant="bodySm">{flag.label}</Text>
+                <Text variant="caption">{flag.label}</Text>
               </View>
-              <Text variant="bodyMedium" className="text-[14px]">
+              <Text variant="bodyLarge" className="text-[14px]">
                 {flag.result}
               </Text>
             </View>

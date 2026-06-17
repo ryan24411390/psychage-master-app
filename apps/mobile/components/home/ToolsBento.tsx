@@ -19,7 +19,7 @@ function open(id: ToolId, route: string) {
 export function ToolsBento() {
   return (
     <View className="gap-3">
-      <Text variant="heading" className="ml-1 mt-2">
+      <Text variant="h2" className="ml-1 mt-2">
         When you need something now
       </Text>
 

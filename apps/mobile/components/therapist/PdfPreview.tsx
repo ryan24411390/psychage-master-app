@@ -65,7 +65,7 @@ export function PdfPreview({
         </Card>
 
         {isEmpty ? (
-          <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+          <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
             {THERAPIST_COPY.emptyRangeLine}
           </Text>
         ) : null}
@@ -91,10 +91,10 @@ export function PdfPreview({
             {includeTools ? <Check size={16} color="#FFFFFF" strokeWidth={3} /> : null}
           </View>
           <View className="flex-1">
-            <Text variant="bodyMedium" className="text-text-primary dark:text-text-primary-dark">
+            <Text variant="bodyLarge" className="text-text-primary dark:text-text-primary-dark">
               {THERAPIST_COPY.includeToolsLabel}
             </Text>
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               {THERAPIST_COPY.includeToolsHint}
             </Text>
           </View>

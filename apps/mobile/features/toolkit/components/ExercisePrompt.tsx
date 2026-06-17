@@ -27,7 +27,7 @@ export function ExercisePrompt({ label, text, glyph, onAdvance }: ExercisePrompt
       <Text variant="caption" className="uppercase tracking-wider text-text-secondary dark:text-text-secondary-dark">
         {label}
       </Text>
-      <Text variant="headingLg" className="text-center text-text-primary dark:text-text-primary-dark">
+      <Text variant="h1" className="text-center text-text-primary dark:text-text-primary-dark">
         {text}
       </Text>
     </Pressable>

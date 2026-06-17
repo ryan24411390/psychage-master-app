@@ -91,7 +91,7 @@ export function ToolkitDetailView({ id, store }: ToolkitDetailViewProps) {
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
           <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {t.back}
           </Text>
         </Pressable>
@@ -115,7 +115,7 @@ export function ToolkitDetailView({ id, store }: ToolkitDetailViewProps) {
           <ToolkitsDisclaimer />
 
           <View className="gap-1.5">
-            <Text variant="headingLg">{toolkit.theme_title}</Text>
+            <Text variant="h1">{toolkit.theme_title}</Text>
             {toolkit.clinical_subtitle ? (
               <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
                 {toolkit.clinical_subtitle}
@@ -133,7 +133,7 @@ export function ToolkitDetailView({ id, store }: ToolkitDetailViewProps) {
 
           {toolkit.intro_md ? (
             <View className="gap-1.5">
-              <Text variant="bodyMedium">{t.introHeading}</Text>
+              <Text variant="bodyLarge">{t.introHeading}</Text>
               {toParagraphs(toolkit.intro_md).map((para) => (
                 <Text
                   key={para}
@@ -148,7 +148,7 @@ export function ToolkitDetailView({ id, store }: ToolkitDetailViewProps) {
 
           {groups.map(({ kind, items }) => (
             <View key={kind} className="gap-2">
-              <Text variant="bodyMedium">{t.groupLabel[kind]}</Text>
+              <Text variant="bodyLarge">{t.groupLabel[kind]}</Text>
               {items.map((item) => (
                 <ItemRow
                   key={item.id}

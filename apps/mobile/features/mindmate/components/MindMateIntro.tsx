@@ -15,7 +15,7 @@ export function MindMateIntro() {
           explicit because /tools/mindmate is not a route-auto presence. */}
       <Mascot testID="mindmate-mascot" state={MASCOT_CONTEXTUAL.mindmateIdle} />
       <Text
-        variant="headingLg"
+        variant="h1"
         accessibilityRole="header"
         className="text-center text-text-primary dark:text-text-primary-dark"
       >

@@ -15,10 +15,10 @@
 // features/moments/copy.ts flags itself. The capture step (S3) reuses MOMENTS_COPY from
 // features/moments — its copy is NOT duplicated here.
 export const ONBOARDING_COPY = {
-  // S1 — Welcome / host
+  // S1 — Welcome / host (Merged with S2)
   welcomeTitle: 'This is Psychage.',
-  welcomeBody: 'A private place to notice how you feel — free, for everyone.',
-  begin: 'Begin',
+  welcomeBody: 'Name your first feeling.',
+  begin: 'I am feeling...',
   signIn: 'Already have a record? Sign in',
 
   // S2 — What naming does

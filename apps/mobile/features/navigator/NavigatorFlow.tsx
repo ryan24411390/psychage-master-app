@@ -262,7 +262,7 @@ export function NavigatorFlow({
 
         {state.step === 'safety' ? (
           <ScrollView contentContainerClassName="gap-4 px-4 pb-10 pt-2">
-            <Text variant="headingLg" accessibilityRole="header">
+            <Text variant="h1" accessibilityRole="header">
               {NAVIGATOR_COPY.severityQuestion}
             </Text>
             <ChipXL

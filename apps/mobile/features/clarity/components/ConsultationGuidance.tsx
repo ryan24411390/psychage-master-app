@@ -129,9 +129,9 @@ export function ConsultationGuidance({ tier, score, flags = [] }: ConsultationGu
           <Icon size={24} color={hex} />
         </View>
         <View className="flex-1">
-          <Text variant="heading">{config.title}</Text>
+          <Text variant="h2">{config.title}</Text>
           {flags.length > 0 ? (
-            <Text variant="bodySm" className="mt-0.5 text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="caption" className="mt-0.5 text-text-secondary dark:text-text-secondary-dark">
               {flags.length} clinical indicator{flags.length !== 1 ? 's' : ''} flagged
             </Text>
           ) : null}
@@ -140,19 +140,19 @@ export function ConsultationGuidance({ tier, score, flags = [] }: ConsultationGu
 
       {/* Body */}
       <View className="gap-5 p-5">
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {config.description}
         </Text>
 
         <View>
-          <Text variant="bodyBold" className="mb-3 text-[14px]">
+          <Text variant="label" className="mb-3 text-[14px]">
             What You Can Do
           </Text>
           <View className="gap-2.5">
             {config.whatYouCanDo.map((item) => (
               <View key={item} className="flex-row items-start gap-2.5">
                 <CheckCircle2 size={16} color="#1A9B8C" style={{ marginTop: 2 }} />
-                <Text variant="bodySm" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
+                <Text variant="caption" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
                   {item}
                 </Text>
               </View>

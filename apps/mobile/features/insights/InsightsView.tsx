@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { useState, useMemo } from 'react';
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus } from 'lucide-react-native';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { Mascot } from '@/components/home/Mascot';
@@ -9,10 +10,7 @@ import { useThemeColors } from '@/lib/use-theme-colors';
 import { buildToolSummaries, type InsightsInput, type ToolKey, type ToolSummary } from './aggregate';
 import { DailyRecapSection } from './DailyRecapSection';
 
-// Insights screen — the drill-down behind the home "Your tools" card. Renders one
-// section per tool the user has data in, newest-used first, each with a real chart
-// from its on-device store and a link into that tool's full history. Educational
-// framing only (SR-2/SR-3); all data is local (SR-4/SR-11).
+// Insights screen — upgraded premium experience.
 
 export interface InsightsViewProps {
   readonly input: InsightsInput;
@@ -20,82 +18,157 @@ export interface InsightsViewProps {
   readonly onOpenTool: (route: string) => void;
 }
 
-// Check-in state 0–4 → 0–100 for a single gentle trend.
-function checkinTrend(input: InsightsInput) {
-  return [...input.checkins]
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .map((e, i) => ({ x: i, y: e.state * 25 }));
+type TimeRange = '7D' | '30D' | '3M' | 'ALL';
+
+function getCutoffMs(range: TimeRange): number {
+  if (range === 'ALL') return 0;
+  const now = Date.now();
+  if (range === '7D') return now - 7 * 24 * 60 * 60 * 1000;
+  if (range === '30D') return now - 30 * 24 * 60 * 60 * 1000;
+  if (range === '3M') return now - 90 * 24 * 60 * 60 * 1000;
+  return 0;
 }
 
-function clarityTrend(input: InsightsInput) {
+function parseDateMs(dateStr: string): number {
+  if (!dateStr) return 0;
+  if (dateStr.includes('T')) {
+    const t = Date.parse(dateStr);
+    return Number.isFinite(t) ? t : 0;
+  }
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1).getTime();
+}
+
+// Check-in state 0–4 → 0–100 for a single gentle trend.
+function checkinTrend(input: InsightsInput, cutoffMs: number) {
+  return [...input.checkins]
+    .filter(e => parseDateMs(e.date) >= cutoffMs)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((e, i) => ({ x: i, y: e.state * 25, label: e.date }));
+}
+
+function clarityTrend(input: InsightsInput, cutoffMs: number) {
   return [...input.clarity]
+    .filter(e => parseDateMs(e.date) >= cutoffMs)
     .slice()
     .reverse() // store is newest-first; chart wants oldest→newest
-    .map((s, i) => ({ x: i, y: s.composite }));
+    .map((s, i) => ({ x: i, y: s.composite, label: s.date }));
 }
 
-function sleepQualityTrend(input: InsightsInput) {
+function sleepQualityTrend(input: InsightsInput, cutoffMs: number) {
   return [...input.sleep]
+    .filter(e => parseDateMs(e.created_at) >= cutoffMs)
     .sort((a, b) => a.date.localeCompare(b.date))
-    .map((e, i) => ({ x: i, y: e.sleep_quality * 20 }));
+    .map((e, i) => ({ x: i, y: e.sleep_quality * 20, label: e.date }));
 }
 
-function moodBars(input: InsightsInput) {
+function moodBars(input: InsightsInput, cutoffMs: number) {
   const counts = new Map<string, number>();
-  for (const m of input.mood) for (const e of m.emotions) counts.set(e, (counts.get(e) ?? 0) + 1);
+  const filtered = input.mood.filter(m => parseDateMs(m.createdAt) >= cutoffMs);
+  for (const m of filtered) for (const e of m.emotions) counts.set(e, (counts.get(e) ?? 0) + 1);
   return [...counts.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([label, value]) => ({ label, value }));
 }
 
+function TrendDelta({ data }: { data: { y: number }[] }) {
+  const tc = useThemeColors();
+  if (data.length < 2) return null;
+  const last = data[data.length - 1];
+  const prev = data[data.length - 2];
+  if (!last || !prev || last.y == null || prev.y == null) return null;
+  
+  const diff = last.y - prev.y;
+  if (Math.abs(diff) < 1) {
+    return (
+      <View className="flex-row items-center gap-1 rounded-full bg-surface-raised px-2 py-1 dark:bg-surface-raised-dark">
+        <Minus size={12} color={tc.inkSecondary} />
+        <Text variant="caption" className="text-xs text-text-secondary dark:text-text-secondary-dark">Stable</Text>
+      </View>
+    );
+  }
+  
+  const isUp = diff > 0;
+  const color = isUp ? '#14B8A6' : '#F43F5E'; // teal-500 : rose-500
+  const Icon = isUp ? TrendingUp : TrendingDown;
+  const textClass = isUp ? 'text-teal-600 dark:text-teal-400' : 'text-rose-600 dark:text-rose-400';
+  
+  return (
+    <View className={`flex-row items-center gap-1 rounded-full px-2 py-1 ${isUp ? 'bg-success/10 dark:bg-success-dark/10' : 'bg-warning/10 dark:bg-warning-dark/10'}`}>
+      <Icon size={12} color={color} />
+      <Text variant="caption" className={`text-xs font-medium ${textClass}`}>
+        {Math.abs(diff).toFixed(0)} {isUp ? 'up' : 'down'}
+      </Text>
+    </View>
+  );
+}
+
 export function InsightsView({ input, onBack, onOpenTool }: InsightsViewProps) {
   const tc = useThemeColors();
   const summaries = buildToolSummaries(input);
+  
+  const [range, setRange] = useState<TimeRange>('ALL');
+  const cutoffMs = useMemo(() => getCutoffMs(range), [range]);
 
-  const Section = ({ summary, children }: { summary: ToolSummary; children?: React.ReactNode }) => (
-    <View className="rounded-xl bg-surface p-5 shadow-base dark:bg-surface-dark">
-      <Text variant="heading" className="font-display text-[16px] text-text-primary dark:text-text-primary-dark">
-        {summary.name}
-      </Text>
-      <Text variant="bodySm" className="mt-0.5 text-text-secondary dark:text-text-secondary-dark">
-        {summary.metric}
-      </Text>
-      {children ? <View className="mt-3 items-center">{children}</View> : null}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`See full ${summary.name} history`}
-        onPress={() => onOpenTool(summary.route)}
-        hitSlop={6}
-        className="mt-3 min-h-[40px] flex-row items-center gap-1"
-      >
-        <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
-          See full history
+  const ranges: TimeRange[] = ['7D', '30D', '3M', 'ALL'];
+
+  const InsightCard = ({ summary, children, deltaData }: { summary: ToolSummary; children?: React.ReactNode; deltaData?: { y: number }[] }) => (
+    <View className="overflow-hidden rounded-[24px] bg-surface p-1 shadow-lg shadow-black/5 dark:bg-surface-dark dark:shadow-black/20">
+      <View className="rounded-[20px] bg-surface-active p-5 dark:bg-surface-active-dark">
+        <View className="flex-row items-center justify-between mb-1">
+          <Text variant="h2" className="font-display text-[18px] text-text-primary dark:text-text-primary-dark">
+            {summary.name}
+          </Text>
+          {deltaData ? <TrendDelta data={deltaData} /> : null}
+        </View>
+        <Text variant="caption" className="mb-4 text-text-secondary dark:text-text-secondary-dark">
+          {summary.metric}
         </Text>
-        <ChevronRight size={16} color={tc.primary} strokeWidth={2} />
-      </Pressable>
+        
+        {children ? <View className="my-4 items-center">{children}</View> : null}
+        
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`See full ${summary.name} history`}
+          onPress={() => onOpenTool(summary.route)}
+          hitSlop={8}
+          className="mt-2 flex-row items-center justify-center gap-1.5 rounded-full bg-background px-4 py-3 active:opacity-70 dark:bg-background-dark"
+        >
+          <Text variant="bodyLarge" className="font-medium text-text-primary dark:text-text-primary-dark">
+            Explore history
+          </Text>
+          <ChevronRight size={16} color={tc.inkSecondary} strokeWidth={2.5} />
+        </Pressable>
+      </View>
     </View>
   );
 
   const renderChart = (key: ToolKey) => {
     switch (key) {
       case 'checkin': {
-        const data = checkinTrend(input);
-        return data.length >= 2 ? <TrendLine data={data} accessibilityLabel="Check-in trend" /> : null;
+        const data = checkinTrend(input, cutoffMs);
+        return {
+          chart: data.length >= 2 ? <TrendLine data={data} yMin={0} yMax={100} accessibilityLabel="Check-in trend" /> : null,
+          deltaData: data
+        };
       }
       case 'clarity': {
-        const latest = input.clarity[0];
-        const trend = clarityTrend(input);
-        return (
-          <View className="items-center gap-3">
-            <ScoreGauge value={latest?.composite ?? null} label="Latest clarity" />
-            {trend.length >= 2 ? <TrendLine data={trend} accessibilityLabel="Clarity over time" /> : null}
-          </View>
-        );
+        const data = clarityTrend(input, cutoffMs);
+        const latest = input.clarity[0]; // overall latest, ignoring filter for the top score gauge
+        return {
+          chart: (
+            <View className="items-center gap-6 w-full">
+              <ScoreGauge value={latest?.composite ?? null} label="LATEST" size={180} />
+              {data.length >= 2 ? <TrendLine data={data} yMin={0} yMax={100} accessibilityLabel="Clarity over time" /> : null}
+            </View>
+          ),
+          deltaData: data
+        };
       }
       case 'relationship': {
         const latest = input.relationship[0];
-        if (!latest) return null;
+        if (!latest) return { chart: null };
         const d = latest.domainScores;
         const points = [
           { label: 'Partner', value: d.partner },
@@ -103,30 +176,36 @@ export function InsightsView({ input, onBack, onOpenTool }: InsightsViewProps) {
           { label: 'Friends', value: d.friends },
           { label: 'Community', value: d.community },
         ];
-        return (
-          <View className="items-center gap-3">
-            <ScoreGauge value={latest.compositeScore} label={latest.tierLabel} />
-            <DomainRadar points={points} accessibilityLabel="Relationship domains" />
-          </View>
-        );
+        return {
+          chart: (
+            <View className="items-center gap-6 w-full">
+              <ScoreGauge value={latest.compositeScore} label={latest.tierLabel} size={180} />
+              <DomainRadar points={points} accessibilityLabel="Relationship domains" />
+            </View>
+          )
+        };
       }
       case 'mood': {
-        const bars = moodBars(input);
-        return bars.length > 0 ? <MetricBars bars={bars} accessibilityLabel="Most-noted emotions" /> : null;
+        const bars = moodBars(input, cutoffMs);
+        return {
+          chart: bars.length > 0 ? <MetricBars bars={bars} accessibilityLabel="Most-noted emotions" /> : null
+        };
       }
       case 'sleep': {
-        const data = sleepQualityTrend(input);
-        return data.length >= 2 ? <TrendLine data={data} accessibilityLabel="Sleep quality trend" /> : null;
+        const data = sleepQualityTrend(input, cutoffMs);
+        return {
+          chart: data.length >= 2 ? <TrendLine data={data} yMin={0} yMax={100} accessibilityLabel="Sleep quality trend" /> : null,
+          deltaData: data
+        };
       }
       case 'navigator':
-        // No chart — Navigator history is a list of explorations (educational, no scores).
-        return null;
+        return { chart: null };
     }
   };
 
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
-      <View className="flex-row items-center px-2 pt-1">
+      <View className="flex-row items-center px-2 pt-1 pb-2">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Back"
@@ -135,46 +214,61 @@ export function InsightsView({ input, onBack, onOpenTool }: InsightsViewProps) {
           testID="insights-back"
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
-          <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <ChevronLeft size={22} color={tc.inkSecondary} strokeWidth={2.5} />
+          <Text variant="bodyLarge" className="font-medium text-text-secondary dark:text-text-secondary-dark">
             Back
           </Text>
         </Pressable>
       </View>
 
-      <ScrollView contentContainerClassName="px-5 pb-10 pt-2 gap-5" showsVerticalScrollIndicator={false}>
-        <View className="gap-1">
-          <Text variant="headingLg" className="text-text-primary dark:text-text-primary-dark">
-            Your insights
+      <ScrollView contentContainerClassName="px-5 pb-12 pt-2 gap-6" showsVerticalScrollIndicator={false}>
+        <View className="gap-2">
+          <Text variant="h1" className="font-display text-[32px] tracking-tight text-text-primary dark:text-text-primary-dark">
+            Insights
           </Text>
-          <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
-            A look across the tools you've used. All of this stays on your device.
+          <Text variant="body" className="text-[15px] leading-relaxed text-text-secondary dark:text-text-secondary-dark">
+            A comprehensive look at your well-being across all tools. Processed securely on your device.
           </Text>
         </View>
+        
+        {/* Time Range Selector */}
+        {summaries.length > 0 && (
+          <View className="flex-row items-center justify-between rounded-xl bg-surface-active p-1 dark:bg-surface-active-dark">
+            {ranges.map(r => (
+              <Pressable
+                key={r}
+                onPress={() => setRange(r)}
+                className={`flex-1 rounded-lg py-2 items-center ${range === r ? 'bg-surface shadow-sm dark:bg-surface-dark' : ''}`}
+              >
+                <Text variant="caption" className={`font-medium ${range === r ? 'text-text-primary dark:text-text-primary-dark' : 'text-text-tertiary dark:text-text-tertiary-dark'}`}>
+                  {r}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
 
-        {/* Ambient companion — route-driven only (resolveMascotState reads pathname/time/
-            theme, never the logged mood). Decorative; hidden from VoiceOver. */}
         <View className="items-center" pointerEvents="none">
           <Mascot />
         </View>
 
-        {/* The gentle daily recap: presence calendar + weekly recap + energy trend. Always
-            shown (it carries its own empty state), above the per-tool cross-tool sections. */}
         <DailyRecapSection input={input} testID="insights-daily-recap" />
 
         {summaries.length === 0 ? (
-          <View className="rounded-xl bg-surface p-6 shadow-base dark:bg-surface-dark">
-            <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
-              Your tools' insights will appear here as you use them — check-ins, Clarity Score,
-              the Symptom Navigator, and more.
+          <View className="rounded-[24px] bg-surface p-6 shadow-base dark:bg-surface-dark">
+            <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
+              Your insights will appear here as you use your tools — log check-ins, take the Clarity Score, and more.
             </Text>
           </View>
         ) : (
-          summaries.map((s) => (
-            <Section key={s.key} summary={s}>
-              {renderChart(s.key)}
-            </Section>
-          ))
+          summaries.map((s) => {
+            const { chart, deltaData } = renderChart(s.key) ?? { chart: null };
+            return (
+              <InsightCard key={s.key} summary={s} deltaData={deltaData}>
+                {chart}
+              </InsightCard>
+            );
+          })
         )}
       </ScrollView>
     </View>

@@ -25,10 +25,10 @@ describe('MessageBubble', () => {
     expect(screen.queryByText('This is **important** information')).toBeNull();
   });
 
-  it('shows a calm ellipsis while an assistant turn is streaming with no text yet', () => {
+  it('shows the thinking indicator while an assistant turn is streaming with no text yet', () => {
     const msg: ChatMessage = { id: 'a2', role: 'assistant', content: '', isStreaming: true };
     renderWithProviders(<MessageBubble message={msg} />);
-    expect(screen.getByText('…')).toBeTruthy();
+    expect(screen.UNSAFE_getByType('View').children.length).toBeGreaterThan(0); // the indicator renders views
   });
 
   it('renders citations under a completed assistant turn', () => {

@@ -84,7 +84,7 @@ function ClinicianRule({ tone, children }: { tone: 'crisis' | 'warning' | 'muted
   return (
     <View className="flex-row items-start gap-2.5">
       <View className={`mt-2 h-1.5 w-1.5 rounded-full ${dot}`} />
-      <Text variant="bodySm" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="caption" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
         {children}
       </Text>
     </View>
@@ -150,7 +150,7 @@ export function ResultsScreen({
     <ScrollView contentContainerClassName="gap-10 px-4 pb-16 pt-2" keyboardShouldPersistTaps="handled">
       {/* Header */}
       <View className="gap-3">
-        <Text variant="headingLg" accessibilityRole="header">
+        <Text variant="h1" accessibilityRole="header">
           Your Results
         </Text>
         <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
@@ -166,8 +166,8 @@ export function ResultsScreen({
       <View className="gap-4 border-b border-border pb-10 dark:border-border-dark">
         <View>
           <SectionLabel number="1" label="Your Symptoms" />
-          <Text variant="heading">What You Reported</Text>
-          <Text variant="bodySm" className="mt-1.5 text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="h2">What You Reported</Text>
+          <Text variant="caption" className="mt-1.5 text-text-secondary dark:text-text-secondary-dark">
             {symptomCount} symptom{symptomCount !== 1 ? 's' : ''} across your selected areas of concern.
           </Text>
         </View>
@@ -179,7 +179,7 @@ export function ResultsScreen({
             >
               <View className="min-w-0 flex-1 flex-row items-center gap-3">
                 <Activity size={14} color={tc.inkTertiary} strokeWidth={2} />
-                <Text variant="bodyMedium" numberOfLines={1} className="flex-1">
+                <Text variant="bodyLarge" numberOfLines={1} className="flex-1">
                   {s.name.replace(/_/g, ' ')}
                 </Text>
               </View>
@@ -207,8 +207,8 @@ export function ResultsScreen({
         {strong.length > 0 ? (
           <View className="gap-3">
             <View>
-              <Text variant="heading">Likely Patterns</Text>
-              <Text variant="bodySm" className="mt-1.5 text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="h2">Likely Patterns</Text>
+              <Text variant="caption" className="mt-1.5 text-text-secondary dark:text-text-secondary-dark">
                 These profiles reflect patterns commonly associated with the symptoms you described.
                 Ranked by relevance — not certainty.
               </Text>
@@ -224,8 +224,8 @@ export function ResultsScreen({
         {exploratory.length > 0 ? (
           <View className="mt-2 gap-3">
             <View>
-              <Text variant="heading">{strong.length > 0 ? 'Worth Exploring' : 'Possible Patterns'}</Text>
-              <Text variant="bodySm" className="mt-1.5 text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="h2">{strong.length > 0 ? 'Worth Exploring' : 'Possible Patterns'}</Text>
+              <Text variant="caption" className="mt-1.5 text-text-secondary dark:text-text-secondary-dark">
                 {strong.length > 0
                   ? 'These showed a weaker connection but may be worth discussing with a professional.'
                   : 'Your symptoms showed a partial match with these patterns. They may be a helpful starting point for a conversation with a provider.'}
@@ -233,8 +233,8 @@ export function ResultsScreen({
             </View>
             {allWeak ? (
               <View className="rounded-lg border border-warning/30 bg-warning/10 p-4">
-                <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
-                  <Text variant="bodyMedium" className="text-warning dark:text-warning-dark">
+                <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+                  <Text variant="bodyLarge" className="text-warning dark:text-warning-dark">
                     Tip:{' '}
                   </Text>
                   Providing more detail about severity, duration, and frequency can help produce
@@ -252,24 +252,24 @@ export function ResultsScreen({
 
         {matches.length === 0 ? (
           <View className="gap-3">
-            <Text variant="heading">No Strong Matches Found</Text>
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="h2">No Strong Matches Found</Text>
+            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               We couldn't find a clear match for your specific combination. This doesn't mean your
               experience isn't valid.
             </Text>
             <View className="gap-3 rounded-xl border border-border bg-surface-accent p-5 dark:border-border-dark dark:bg-surface-accent-dark">
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 This can happen when symptoms span multiple areas or don't fit neatly into common
                 patterns. A professional can help you understand what you're going through.
               </Text>
-              <Text variant="bodyMedium">What you can try:</Text>
+              <Text variant="bodyLarge">What you can try:</Text>
               <View className="gap-1.5">
                 {[
                   'Go back and select additional symptoms you may be experiencing',
                   'Provide more detail about duration, severity, and frequency',
                   'Rate symptoms you feel strongly about at a higher severity',
                 ].map((tip) => (
-                  <Text key={tip} variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                  <Text key={tip} variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                     •  {tip}
                   </Text>
                 ))}
@@ -283,8 +283,8 @@ export function ResultsScreen({
       <View className="gap-6 border-b border-border pb-10 dark:border-border-dark">
         <View>
           <SectionLabel number="3" label="Recommended Next Steps" />
-          <Text variant="heading">Where to Go from Here</Text>
-          <Text variant="bodySm" className="mt-1.5 text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="h2">Where to Go from Here</Text>
+          <Text variant="caption" className="mt-1.5 text-text-secondary dark:text-text-secondary-dark">
             These results are a starting point. Here's how to make the most of them.
           </Text>
         </View>
@@ -338,12 +338,12 @@ export function ResultsScreen({
       <View className="flex-row items-start gap-3 rounded-xl border border-warning/30 bg-warning/10 p-5">
         <AlertTriangle size={16} color={tc.inkSecondary} strokeWidth={2} />
         <View className="flex-1 gap-2">
-          <Text variant="bodyBold">Important Disclaimer</Text>
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="label">Important Disclaimer</Text>
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             This tool provides educational information only and is not a substitute for professional
             medical advice, diagnosis, or treatment.
           </Text>
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             Always consult a qualified healthcare provider for personal medical concerns. If you are
             in crisis, contact emergency services or a crisis helpline immediately.
           </Text>

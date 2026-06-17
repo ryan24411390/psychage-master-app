@@ -25,7 +25,7 @@ export function BedtimeCalculator() {
   return (
     <View className="gap-4">
       <View className="gap-1.5">
-        <Text variant="bodySm">{t.bedtimeWake}</Text>
+        <Text variant="caption">{t.bedtimeWake}</Text>
         <TextInput
           value={wake}
           onChangeText={setWake}
@@ -40,7 +40,7 @@ export function BedtimeCalculator() {
 
       {valid ? (
         <View className="gap-2">
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {t.bedtimeResult}
           </Text>
           {suggestions.map((s) => (
@@ -52,7 +52,7 @@ export function BedtimeCalculator() {
                   : 'border-border dark:border-border-dark'
               }`}
             >
-              <Text variant="bodyBold">{s.bedtime}</Text>
+              <Text variant="label">{s.bedtime}</Text>
               <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 {t.bedtimeCycles(s.cycles, formatDuration(s.sleep_duration_minutes))}
               </Text>
@@ -60,7 +60,7 @@ export function BedtimeCalculator() {
           ))}
         </View>
       ) : (
-        <Text variant="bodySm" className="text-error dark:text-error-dark">
+        <Text variant="caption" className="text-error dark:text-error-dark">
           {CT4_SLEEP.form.invalid}
         </Text>
       )}

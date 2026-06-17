@@ -39,7 +39,7 @@ export function CrisisUrgentBanner() {
           <AlertTriangle size={20} color={CRISIS_RED} />
         </View>
         <View className="min-w-0 flex-1">
-          <Text variant="headingLg" style={{ color: CRISIS_RED }}>
+          <Text variant="h1" style={{ color: CRISIS_RED }}>
             Support is available right now
           </Text>
           <Text variant="body" className="mt-2" style={{ color: CRISIS_RED }}>

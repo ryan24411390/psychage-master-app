@@ -46,7 +46,7 @@ export function MigrationProgress({
     >
       <Text variant="body">{line}</Text>
       {showConflictNote ? (
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {AUTH_COPY.migrateConflictNote}
         </Text>
       ) : null}

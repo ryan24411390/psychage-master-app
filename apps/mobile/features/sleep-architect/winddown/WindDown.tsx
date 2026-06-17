@@ -27,13 +27,13 @@ export function WindDown() {
 
   return (
     <View className="gap-4">
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
         {t.intro}
       </Text>
 
       <Card className="gap-2 px-4 py-4">
-        <Text variant="bodyBold">{t.breathingTitle}</Text>
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="label">{t.breathingTitle}</Text>
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {t.breathingBody}
         </Text>
         <Button
@@ -46,8 +46,8 @@ export function WindDown() {
       </Card>
 
       <Card className="gap-2 px-4 py-4">
-        <Text variant="bodyBold">{t.brainDumpTitle}</Text>
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="label">{t.brainDumpTitle}</Text>
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {t.brainDumpBody}
         </Text>
         <TextInput
@@ -62,7 +62,7 @@ export function WindDown() {
         />
         {crisisFlagged ? (
           <View className="gap-2 rounded-lg border border-crisis px-3 py-2">
-            <Text variant="bodySm">{t.crisisLine}</Text>
+            <Text variant="caption">{t.crisisLine}</Text>
             <CrisisPill />
           </View>
         ) : null}
@@ -81,8 +81,8 @@ export function WindDown() {
       </Text>
       {CT4_SLEEP.cbtiCards.map((card) => (
         <Card key={card.id} className="gap-1 px-4 py-4">
-          <Text variant="bodyBold">{card.title}</Text>
-          <Text variant="bodySm" className="leading-5 text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="label">{card.title}</Text>
+          <Text variant="caption" className="leading-5 text-text-secondary dark:text-text-secondary-dark">
             {card.body}
           </Text>
         </Card>

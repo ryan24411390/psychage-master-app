@@ -14,7 +14,7 @@ export function LegalScreen({ body, testID }: { body: string; testID?: string })
         showsVerticalScrollIndicator={false}
         testID={testID}
       >
-        <Text variant="bodySm" className="px-1 text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="caption" className="px-1 text-text-secondary dark:text-text-secondary-dark">
           {body}
         </Text>
       </ScrollView>

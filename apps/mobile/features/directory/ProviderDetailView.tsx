@@ -64,7 +64,7 @@ function Chrome({ children }: { children: React.ReactNode }) {
           className="min-h-[44px] flex-row items-center gap-1 px-2"
         >
           <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             Back
           </Text>
         </Pressable>
@@ -112,7 +112,7 @@ function ContactActionTile({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View className="gap-1.5">
-      <Text variant="bodyMedium">{title}</Text>
+      <Text variant="bodyLarge">{title}</Text>
       {children}
     </View>
   );
@@ -123,7 +123,7 @@ function TagRow({ items }: { items: string[] }) {
     <View className="flex-row flex-wrap gap-1.5">
       {items.map((label) => (
         <View key={label} className="rounded-full bg-surface px-2.5 py-1 dark:bg-surface-dark">
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {label}
           </Text>
         </View>
@@ -164,7 +164,7 @@ export function ProviderDetailView({ id }: { id: string }) {
     return (
       <Chrome>
         <View className="flex-1 items-center justify-center gap-2 px-6">
-          <Text variant="heading" className="text-center">
+          <Text variant="h2" className="text-center">
             {t.notFoundTitle}
           </Text>
           <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
@@ -197,7 +197,7 @@ export function ProviderDetailView({ id }: { id: string }) {
           <Avatar name={name} photoUrl={p.photo_url} size="lg" />
           <View className="flex-1 gap-1">
             <View className="flex-row items-start justify-between gap-2">
-              <Text variant="headingLg" className="flex-1">
+              <Text variant="h1" className="flex-1">
                 {name}
               </Text>
               <View className="flex-row items-center gap-1">
@@ -218,12 +218,12 @@ export function ProviderDetailView({ id }: { id: string }) {
               </Text>
             ) : null}
             {typeLine ? (
-              <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+              <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
                 {typeLine}
               </Text>
             ) : null}
             {p.practice_name ? (
-              <Text variant="bodySm" className="text-text-tertiary dark:text-text-tertiary-dark">
+              <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
                 {p.practice_name}
               </Text>
             ) : null}
@@ -330,12 +330,12 @@ export function ProviderDetailView({ id }: { id: string }) {
         {(p.npi_number || p.license_number || p.verified_at) && (
           <Section title={t.credentialsTitle}>
             {p.npi_number ? (
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 {`${t.npiLabel} ${p.npi_number}`}
               </Text>
             ) : null}
             {p.license_number ? (
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 {`${t.licenseLabel} ${[p.license_number, p.license_state].filter(Boolean).join(' · ')}`}
               </Text>
             ) : null}

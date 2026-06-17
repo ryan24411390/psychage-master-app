@@ -23,16 +23,16 @@ export default function AboutScreen() {
     <ScreenShell edges={['bottom']}>
       <ScrollView contentContainerClassName="gap-4 py-4" showsVerticalScrollIndicator={false}>
         <View className="gap-1">
-          <Text variant="bodyMedium" className="px-1">
+          <Text variant="bodyLarge" className="px-1">
             {t.aboutLabel}
           </Text>
-          <Text variant="bodySm" className="px-1 text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="px-1 text-text-secondary dark:text-text-secondary-dark">
             {t.aboutBody}
           </Text>
         </View>
 
         <View className="rounded-xl border border-border px-4 py-3 dark:border-border-dark">
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
             {t.disclaimerBody}
           </Text>
         </View>

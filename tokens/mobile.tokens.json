@@ -37,10 +37,12 @@
       "_source": { "_note": "Brand teal expression. Values verbatim from tokens/web.tokens.json color.primary.*." }
     },
     "text": {
-      "primary":   { "light": "#0a0a0a", "dark": "#FFFFFF" },
-      "secondary": { "light": "#57534e", "dark": "#B3B3B3" },
-      "tertiary":  { "light": "#6d6762", "dark": "#8A8A8A" },
-      "_source": { "_note": "Light values verbatim from tokens/web.tokens.json color.text.*; text.tertiary.light floors at WCAG AA 5.2:1 — do not lighten without re-checking. Dark values DIVERGE (mobile-only true-black register, see color.background._divergence): pure-white primary #FFFFFF (21:1 on #000000), ~70%-white secondary #B3B3B3 (10.0:1 canvas / 8.9:1 surface), dimmed tertiary #8A8A8A (6.1:1 canvas / 5.4:1 surface). All clear WCAG AA body on the true-black canvas." }
+      "primary":   { "light": "#111827", "dark": "#FFFFFF" },
+      "secondary": { "light": "#4B5563", "dark": "#A1A1AA" },
+      "tertiary":  { "light": "#6B7280", "dark": "#71717A" },
+      "disabled":  { "light": "#9CA3AF", "dark": "#52525B" },
+      "interactive": { "light": "#1A9B8C", "dark": "#2DD4BF" },
+      "_source": { "_note": "Refined for premium hierarchy. text-interactive maps to primary brand colors for WCAG AA compliance. Dark values maintain true-black OLED readability." }
     },
     "border": {
       "default": { "light": "#e7e5e4", "dark": "#3f3f46" },

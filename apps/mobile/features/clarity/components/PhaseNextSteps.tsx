@@ -105,8 +105,8 @@ export function PhaseNextSteps({ tier }: PhaseNextStepsProps) {
               Next Steps
             </Text>
           </View>
-          <Text variant="heading">{protocol.title}</Text>
-          <Text variant="bodySm" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
+          <Text variant="h2">{protocol.title}</Text>
+          <Text variant="caption" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
             {protocol.subtitle}
           </Text>
         </View>
@@ -156,7 +156,7 @@ export function PhaseNextSteps({ tier }: PhaseNextStepsProps) {
               onPress={() => setShowDonts((v) => !v)}
               className="min-h-[44px] flex-row items-center justify-between px-4"
             >
-              <Text variant="bodyBold" className="text-[14px]">
+              <Text variant="label" className="text-[14px]">
                 What to avoid right now
               </Text>
               <ChevronDown
@@ -168,7 +168,7 @@ export function PhaseNextSteps({ tier }: PhaseNextStepsProps) {
             {showDonts ? (
               <View className="gap-2 px-4 pb-4">
                 {protocol.whatNotToDo.map((d) => (
-                  <Text key={d} variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                  <Text key={d} variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                     • {d}
                   </Text>
                 ))}
@@ -183,13 +183,13 @@ export function PhaseNextSteps({ tier }: PhaseNextStepsProps) {
             <Text variant="caption" style={{ color: '#10b981' }} className="mb-1.5">
               What's working
             </Text>
-            <Text variant="bodySm">{tierDesc.whatsWorking}</Text>
+            <Text variant="caption">{tierDesc.whatsWorking}</Text>
           </View>
           <View className="rounded-xl border border-border p-4 dark:border-border-dark">
             <Text variant="caption" style={{ color: '#f59e0b' }} className="mb-1.5">
               Watch for
             </Text>
-            <Text variant="bodySm">{tierDesc.watchFor}</Text>
+            <Text variant="caption">{tierDesc.watchFor}</Text>
           </View>
         </View>
 
@@ -203,7 +203,7 @@ export function PhaseNextSteps({ tier }: PhaseNextStepsProps) {
             className="min-h-[44px] flex-row items-center gap-1.5"
           >
             <Info size={13} color={tc.inkSecondary} />
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               Why these recommendations
             </Text>
             <ChevronDown
@@ -217,10 +217,10 @@ export function PhaseNextSteps({ tier }: PhaseNextStepsProps) {
               <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 Source
               </Text>
-              <Text variant="bodyBold" className="text-[14px]">
+              <Text variant="label" className="text-[14px]">
                 {protocol.protocolSource}
               </Text>
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 {protocol.protocolSummary}
               </Text>
               <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">

@@ -10,6 +10,7 @@ const AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);
 export type AnimatedPressableProps = PressableProps & {
   children: React.ReactNode | ((state: { pressed: boolean }) => React.ReactNode);
   scaleTo?: number;
+  activeOpacity?: number;
   springPreset?: keyof typeof SPRING_PRESETS;
   style?: StyleProp<ViewStyle> | ((state: { pressed: boolean }) => StyleProp<ViewStyle>);
   tilt?: boolean;
@@ -19,6 +20,7 @@ export type AnimatedPressableProps = PressableProps & {
 export function AnimatedPressable({
   children,
   scaleTo = 0.98,
+  activeOpacity = 1,
   springPreset = 'subtle',
   onPressIn,
   onPressOut,
@@ -31,6 +33,7 @@ export function AnimatedPressable({
   const reduced = useReducedMotion();
   const { fireHaptic } = useHaptics();
   const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
 
   const width = useSharedValue(0);
   const height = useSharedValue(0);
@@ -52,6 +55,7 @@ export function AnimatedPressable({
     }
     return {
       transform: transforms,
+      opacity: opacity.value,
     };
   });
 
@@ -62,6 +66,9 @@ export function AnimatedPressable({
     }
     if (!reduced && !props.disabled) {
       scale.value = withSpring(scaleTo, SPRING_PRESETS[springPreset]);
+      if (activeOpacity !== 1) {
+        opacity.value = withSpring(activeOpacity, SPRING_PRESETS[springPreset]);
+      }
       if (tilt && width.value > 0 && height.value > 0) {
         const { locationX, locationY } = e.nativeEvent;
         const normX = locationX / width.value - 0.5;
@@ -77,6 +84,9 @@ export function AnimatedPressable({
     onPressOut?.(e);
     if (!reduced) {
       scale.value = withSpring(1, SPRING_PRESETS[springPreset]);
+      if (activeOpacity !== 1) {
+        opacity.value = withSpring(1, SPRING_PRESETS[springPreset]);
+      }
       if (tilt) {
         rotateX.value = withSpring(0, SPRING_PRESETS[springPreset]);
         rotateY.value = withSpring(0, SPRING_PRESETS[springPreset]);

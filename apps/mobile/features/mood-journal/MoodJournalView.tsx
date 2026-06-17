@@ -2,6 +2,8 @@ import type { MomentEntry, MomentInput, MoodJournalStore } from '@psychage/share
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
+import { ScreenEntrance } from '@/components/ui/ScreenEntrance';
+
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
@@ -45,23 +47,25 @@ export function MoodJournalView({ momentStore }: MoodJournalViewProps) {
   return (
     <View className="flex-1">
       <ScrollView contentContainerClassName="gap-4 px-4 py-4" showsVerticalScrollIndicator={false}>
-        <View>
-          <Text variant="headingLg">{t.title}</Text>
-          <Text variant="body" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
-            {t.intro}
-          </Text>
-        </View>
-
-        {moments.length === 0 ? (
-          <Card testID="mood-journal-empty" className="p-5">
-            <Text variant="heading">{t.empty.heading}</Text>
+        <ScreenEntrance>
+          <View>
+            <Text variant="h1">{t.title}</Text>
             <Text variant="body" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
-              {t.empty.body}
+              {t.intro}
             </Text>
-          </Card>
-        ) : (
-          <PatternView moments={moments} onDelete={handleDelete} />
-        )}
+          </View>
+
+          {moments.length === 0 ? (
+            <Card testID="mood-journal-empty" className="p-5">
+              <Text variant="h2">{t.empty.heading}</Text>
+              <Text variant="body" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
+                {t.empty.body}
+              </Text>
+            </Card>
+          ) : (
+            <PatternView moments={moments} onDelete={handleDelete} />
+          )}
+        </ScreenEntrance>
       </ScrollView>
 
       <View className="px-4 pb-4 pt-2">

@@ -20,7 +20,7 @@ function ButtonRow({ icon, label }: { icon: ReactNode; label: string }) {
   return (
     <View className="flex-row items-center justify-center gap-2.5">
       {icon}
-      <Text variant="bodyMedium" className="text-text-primary dark:text-text-primary-dark">
+      <Text variant="bodyLarge" className="text-text-primary dark:text-text-primary-dark">
         {label}
       </Text>
     </View>

@@ -58,7 +58,7 @@ export function SettingsRadioRow<T extends string>({
                 : 'border-border dark:border-border-dark'
             }`}
           >
-            <Text variant="bodyMedium" className="flex-1">
+            <Text variant="bodyLarge" className="flex-1">
               {option.label}
             </Text>
             {isSelected ? (

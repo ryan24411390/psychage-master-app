@@ -17,7 +17,7 @@ import type { Storage } from '@/lib/adapters/storage';
 export type ReadingTextSize = 'small' | 'default' | 'large';
 
 /** The body variants that scale with the reading size (others stay fixed). */
-export type BodyVariant = 'body' | 'bodyMedium' | 'bodyBold' | 'bodySm';
+export type BodyVariant = 'bodyLarge' | 'body';
 
 export const SCHEMA_VERSION = 1 as const;
 export const STORAGE_KEY = 'mobile:reading-text-size';
@@ -33,10 +33,8 @@ export interface ReadingTextSizeState {
 // Text sizes exactly (body→text-base, bodySm→text-sm), so wrapping a surface with
 // the provider at the default size is a visual no-op.
 const BODY_SIZE_CLASS: Record<BodyVariant, Record<ReadingTextSize, string>> = {
+  bodyLarge: { small: 'text-base', default: 'text-lg', large: 'text-xl' },
   body: { small: 'text-sm', default: 'text-base', large: 'text-lg' },
-  bodyMedium: { small: 'text-sm', default: 'text-base', large: 'text-lg' },
-  bodyBold: { small: 'text-sm', default: 'text-base', large: 'text-lg' },
-  bodySm: { small: 'text-xs', default: 'text-sm', large: 'text-base' },
 };
 
 /** Pure (variant, size) → size class. The unit-test target for the scaling map. */

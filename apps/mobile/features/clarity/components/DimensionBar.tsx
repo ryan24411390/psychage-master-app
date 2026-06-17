@@ -58,12 +58,12 @@ export function DimensionBar({
       <View className="mb-1.5 flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <Icon size={16} color={meta.hexColor} />
-          <Text variant="bodyMedium" className="text-[13px]">
+          <Text variant="bodyLarge" className="text-[13px]">
             {meta.name}
           </Text>
           {showTier ? <TierBadge tier={tier} size="sm" /> : null}
         </View>
-        <Text variant="bodyBold" className="text-[13px]">
+        <Text variant="label" className="text-[13px]">
           {Math.round(score)}/20
         </Text>
       </View>

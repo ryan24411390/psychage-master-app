@@ -45,7 +45,7 @@ export interface DailyRecap {
 }
 
 const WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as const;
-const PRESENCE_WINDOW_DAYS = 14;
+const PRESENCE_WINDOW_DAYS = 7;
 const WEEK_DAYS = 7;
 
 /** Local `YYYY-MM-DD` for a Date, using its local (not UTC) calendar fields. */

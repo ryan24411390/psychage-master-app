@@ -27,7 +27,7 @@ export function WhyAccount({ onPrimary, onSecondary }: WhyAccountProps) {
         className="flex-1 justify-center gap-7"
       >
         <View className="gap-3">
-          <Text variant="headingLg">{AUTH_COPY.whyTitle}</Text>
+          <Text variant="h1">{AUTH_COPY.whyTitle}</Text>
           <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
             {AUTH_COPY.whyBody}
           </Text>

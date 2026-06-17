@@ -121,13 +121,13 @@ export function DimensionsTab({ results, initialDimension }: DimensionsTabProps)
             <Icon size={28} color={meta.hexColor} />
           </View>
           <View className="flex-1">
-            <Text variant="heading">{meta.name}</Text>
+            <Text variant="h2">{meta.name}</Text>
             <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               {meta.instrument} — {meta.instrumentFull}
             </Text>
           </View>
           <View className="items-end">
-            <Text variant="headingLg">
+            <Text variant="h1">
               {Math.round(score)}
               <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 /20
@@ -143,7 +143,7 @@ export function DimensionsTab({ results, initialDimension }: DimensionsTabProps)
             <Text variant="caption" className="mb-2 text-text-secondary dark:text-text-secondary-dark">
               WHAT THIS MEASURES
             </Text>
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               {meta.description}
             </Text>
           </View>
@@ -157,7 +157,7 @@ export function DimensionsTab({ results, initialDimension }: DimensionsTabProps)
                   WHY THIS MATTERS
                 </Text>
               </View>
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 {content.context}
               </Text>
             </View>
@@ -171,14 +171,14 @@ export function DimensionsTab({ results, initialDimension }: DimensionsTabProps)
             <View>
               <View className="mb-3 flex-row items-center gap-2">
                 <CheckCircle2 size={16} color="#10b981" />
-                <Text variant="bodyBold" className="text-[14px]">
+                <Text variant="label" className="text-[14px]">
                   What's Going Well
                 </Text>
               </View>
               <View className="gap-2">
                 {content.strengths.map((s) => (
                   <View key={s} className="rounded-lg border border-border p-3 dark:border-border-dark">
-                    <Text variant="bodySm">{s}</Text>
+                    <Text variant="caption">{s}</Text>
                   </View>
                 ))}
               </View>
@@ -190,14 +190,14 @@ export function DimensionsTab({ results, initialDimension }: DimensionsTabProps)
             <View>
               <View className="mb-3 flex-row items-center gap-2">
                 <AlertCircle size={16} color="#f59e0b" />
-                <Text variant="bodyBold" className="text-[14px]">
+                <Text variant="label" className="text-[14px]">
                   Areas to Watch
                 </Text>
               </View>
               <View className="gap-2">
                 {content.concerns.map((c) => (
                   <View key={c} className="rounded-lg border border-border p-3 dark:border-border-dark">
-                    <Text variant="bodySm">{c}</Text>
+                    <Text variant="caption">{c}</Text>
                   </View>
                 ))}
               </View>
@@ -208,7 +208,7 @@ export function DimensionsTab({ results, initialDimension }: DimensionsTabProps)
           <View>
             <View className="mb-3 flex-row items-center gap-2">
               <Lightbulb size={16} color="#1A9B8C" />
-              <Text variant="bodyBold" className="text-[14px]">
+              <Text variant="label" className="text-[14px]">
                 Recommended Next Steps
               </Text>
             </View>
@@ -227,7 +227,7 @@ export function DimensionsTab({ results, initialDimension }: DimensionsTabProps)
                   >
                     <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700' }}>{i + 1}</Text>
                   </View>
-                  <Text variant="bodySm" className="flex-1">
+                  <Text variant="caption" className="flex-1">
                     {a}
                   </Text>
                 </View>
@@ -256,7 +256,7 @@ export function DimensionsTab({ results, initialDimension }: DimensionsTabProps)
               >
                 <Icon size={16} color={meta.hexColor} />
               </View>
-              <Text variant="bodyMedium" className="flex-1 text-[14px]">
+              <Text variant="bodyLarge" className="flex-1 text-[14px]">
                 {content.toolLink.label}
               </Text>
               <ChevronRight size={16} color={tc.inkSecondary} />
@@ -268,10 +268,10 @@ export function DimensionsTab({ results, initialDimension }: DimensionsTabProps)
             className="rounded-xl border p-5"
             style={{ borderColor: `${consultCfg.color}55`, backgroundColor: `${consultCfg.color}12` }}
           >
-            <Text variant="bodyBold" className="mb-1 text-[14px]" style={{ color: consultCfg.color }}>
+            <Text variant="label" className="mb-1 text-[14px]" style={{ color: consultCfg.color }}>
               {consultCfg.title}
             </Text>
-            <Text variant="bodySm" style={{ color: consultCfg.color }}>
+            <Text variant="caption" style={{ color: consultCfg.color }}>
               {consultCfg.body}
             </Text>
             {consult === 'professional' ? (

@@ -1,5 +1,7 @@
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
+import { ScreenEntrance } from '@/components/ui/ScreenEntrance';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 
@@ -32,52 +34,54 @@ export interface ClarityHistoryViewProps {
 export function ClarityHistoryView({ snapshots, onStartNew }: ClarityHistoryViewProps) {
   return (
     <ScrollView contentContainerClassName="gap-5 px-4 pb-12 pt-2" showsVerticalScrollIndicator={false}>
-      <Text variant="headingLg" accessibilityRole="header">
-        {TITLE}
-      </Text>
-
-      {snapshots.length === 0 ? (
-        <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
-          {EMPTY}
+      <ScreenEntrance>
+        <Text variant="h1" accessibilityRole="header">
+          {TITLE}
         </Text>
-      ) : (
-        snapshots.map((s) => (
-          <Card key={s.id} className="flex-row items-center gap-4">
-            <View
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 999,
-                borderWidth: 1,
-                borderColor: '#9ca3af55',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Text variant="bodyBold">{s.composite}</Text>
-            </View>
-            <View className="flex-1">
-              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
-                {formatDate(s.date)}
-              </Text>
-              <TierBadge tier={s.tier} size="sm" />
-            </View>
-          </Card>
-        ))
-      )}
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Take a new assessment"
-        onPress={onStartNew}
-        hitSlop={6}
-        className="min-h-[44px] justify-center"
-        style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-      >
-        <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
-          Take a new assessment
-        </Text>
-      </Pressable>
+        {snapshots.length === 0 ? (
+          <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
+            {EMPTY}
+          </Text>
+        ) : (
+          snapshots.map((s) => (
+            <Card key={s.id} className="flex-row items-center gap-4">
+              <View
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 999,
+                  borderWidth: 1,
+                  borderColor: '#9ca3af55',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text variant="label">{s.composite}</Text>
+              </View>
+              <View className="flex-1">
+                <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
+                  {formatDate(s.date)}
+                </Text>
+                <TierBadge tier={s.tier} size="sm" />
+              </View>
+            </Card>
+          ))
+        )}
+
+        <AnimatedPressable
+          accessibilityRole="button"
+          accessibilityLabel="Take a new assessment"
+          onPress={onStartNew}
+          hitSlop={6}
+          className="min-h-[44px] justify-center"
+          haptic="tab"
+        >
+          <Text variant="bodyLarge" className="text-primary dark:text-primary-dark">
+            Take a new assessment
+          </Text>
+        </AnimatedPressable>
+      </ScreenEntrance>
     </ScrollView>
   );
 }

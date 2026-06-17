@@ -5,6 +5,8 @@ import { CrisisPill } from '@/components/CrisisPill';
 import { HeaderAvatar } from '@/components/HeaderAvatar';
 import { Text } from '@/components/ui/Text';
 
+import { PsychageLogo } from '@/components/PsychageLogo';
+
 // C0.1 global header — persistent top chrome on every screen: wordmark (Fraunces)
 // left; Help-now pill (crisis outline) + avatar right. Static chrome — no
 // offline/error state. Rendered as the navigation `header` so it sits above the
@@ -17,9 +19,7 @@ export function GlobalHeader() {
   return (
     <SafeAreaView edges={['top']} className="bg-background dark:bg-background-dark">
       <View className="flex-row items-center justify-between border-b border-border/20 px-5 py-3 dark:border-border-dark/20">
-        <Text variant="heading" accessibilityRole="header">
-          Psychage
-        </Text>
+        <PsychageLogo />
         <View className="flex-row items-center gap-2">
           <CrisisPill />
           <HeaderAvatar />

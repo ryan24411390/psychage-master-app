@@ -37,7 +37,7 @@ export function SignInSheet({ visible, onClose, onSignIn }: SignInSheetProps) {
         <View className="rounded-t-2xl bg-background px-5 pb-8 pt-5 dark:bg-background-dark">
           <View className="items-center gap-3">
             <BookmarkPlus size={32} color={tc.primary} strokeWidth={1.75} />
-            <Text variant="headingLg" className="text-center text-text-primary dark:text-text-primary-dark">
+            <Text variant="h1" className="text-center text-text-primary dark:text-text-primary-dark">
               {c.title}
             </Text>
             <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">

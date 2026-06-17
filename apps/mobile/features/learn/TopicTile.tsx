@@ -38,7 +38,7 @@ export function TopicTile({ label, count, artKey, onPress, className }: TopicTil
       <ArtPanel artKey={artKey} className="aspect-[4/3] w-full" />
       <View className="border-t border-border bg-surface px-3 py-2.5 dark:border-border-dark dark:bg-surface-dark">
         <Text
-          variant="heading"
+          variant="h2"
           numberOfLines={1}
           ellipsizeMode="tail"
           className="text-[15px] leading-[19px]"

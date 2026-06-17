@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { Button } from '@/components/ui/Button';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { CRISIS_DATASET } from '@/features/crisis/helplines.fixtures';
 import {
@@ -81,20 +82,30 @@ export function MindMateView({
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
-      <View className="flex-row items-center px-2">
-        <Pressable
+      <View className="flex-row items-center justify-between border-b border-border-hairline px-2 py-2 pb-3 dark:border-border-dark/30">
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={onBack}
           hitSlop={8}
           testID="mindmate-back"
-          className="min-h-[44px] flex-row items-center gap-1 px-2"
+          className="min-h-[44px] w-16 flex-row items-center gap-1 px-2"
+          haptic="tab"
         >
-          <ChevronLeft size={20} color={colors.charcoal[600]} strokeWidth={2} />
-          <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
-            Back
+          <ChevronLeft size={24} color={colors.charcoal[600]} strokeWidth={2} />
+        </AnimatedPressable>
+        <View className="flex-1 items-center justify-center gap-0.5">
+          <Text variant="label" className="text-base text-text-primary dark:text-text-primary-dark">
+            MindMate
           </Text>
-        </Pressable>
+          <View className="flex-row items-center gap-1.5">
+            <View className="h-1.5 w-1.5 rounded-full bg-primary dark:bg-primary-dark" />
+            <Text variant="caption" className="text-xs text-text-secondary dark:text-text-secondary-dark">
+              Online
+            </Text>
+          </View>
+        </View>
+        <View className="w-16" />
       </View>
 
       <KeyboardAvoidingView
@@ -114,10 +125,10 @@ export function MindMateView({
             className="mx-4 my-2 gap-3 rounded-2xl border border-border/50 bg-surface p-4 dark:border-border-dark/50 dark:bg-surface-dark"
             testID="mindmate-signin"
           >
-            <Text variant="bodyBold" className="text-text-primary dark:text-text-primary-dark">
+            <Text variant="label" className="text-text-primary dark:text-text-primary-dark">
               {MINDMATE_COPY.signInTitle}
             </Text>
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               {MINDMATE_COPY.signInBody}
             </Text>
             <Button onPress={onSignIn} testID="mindmate-signin-cta">
@@ -126,7 +137,7 @@ export function MindMateView({
           </View>
         ) : error && !needsSignIn ? (
           <Text
-            variant="bodySm"
+            variant="caption"
             className="px-4 py-2 text-center text-text-secondary dark:text-text-secondary-dark"
             testID="mindmate-error"
           >

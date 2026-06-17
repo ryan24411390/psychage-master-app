@@ -110,7 +110,7 @@ export default function ResetPasswordScreen() {
           className="flex-1 justify-center gap-6"
         >
           <View className="gap-3">
-            <Text variant="headingLg">{AUTH_COPY.resetTitle}</Text>
+            <Text variant="h1">{AUTH_COPY.resetTitle}</Text>
             <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
               {AUTH_COPY.resetBody}
             </Text>
@@ -152,7 +152,7 @@ export default function ResetPasswordScreen() {
 
           <View className="gap-2">
             {formError ? (
-              <Text variant="bodySm" className="text-error dark:text-error-dark">
+              <Text variant="caption" className="text-error dark:text-error-dark">
                 {formError}
               </Text>
             ) : null}

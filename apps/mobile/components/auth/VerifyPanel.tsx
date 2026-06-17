@@ -50,11 +50,11 @@ export function VerifyPanel({
         className="flex-1 justify-center gap-6"
       >
         <View className="gap-3">
-          <Text variant="headingLg">{AUTH_COPY.verifyTitle}</Text>
+          <Text variant="h1">{AUTH_COPY.verifyTitle}</Text>
           <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
             {AUTH_COPY.verifyBody}
           </Text>
-          <Text variant="bodyMedium">{email}</Text>
+          <Text variant="bodyLarge">{email}</Text>
         </View>
 
         <Button variant="secondary" disabled={onCooldown} onPress={handleResend}>

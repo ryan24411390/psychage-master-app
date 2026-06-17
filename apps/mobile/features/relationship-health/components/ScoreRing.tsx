@@ -41,7 +41,7 @@ export function ScoreRing({ score, size = 168, caption }: ScoreRingProps) {
         />
       </Svg>
       <View className="absolute items-center">
-        <Text variant="headingLg" className="text-[40px] leading-[44px] text-primary dark:text-primary-dark">
+        <Text variant="h1" className="text-[40px] leading-[44px] text-primary dark:text-primary-dark">
           {clamped}
         </Text>
         {caption ? (

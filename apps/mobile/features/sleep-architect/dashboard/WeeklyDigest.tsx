@@ -52,23 +52,23 @@ export function WeeklyDigest({ entries }: WeeklyDigestProps) {
       </Text>
 
       {thisWeek.length === 0 ? (
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {t.emptyWeek}
         </Text>
       ) : (
         <>
           <View className="flex-row items-baseline justify-between">
-            <Text variant="bodyBold">{t.nightsLabel(thisWeek.length)}</Text>
+            <Text variant="label">{t.nightsLabel(thisWeek.length)}</Text>
             <View className="flex-row items-baseline gap-2">
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 {t.typicalLabel}
               </Text>
-              <Text variant="bodyBold">{formatDuration(Math.round(restedMinutes(thisWeek)))}</Text>
+              <Text variant="label">{formatDuration(Math.round(restedMinutes(thisWeek)))}</Text>
             </View>
           </View>
 
           {priorWeek.length > 0 ? (
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               {comparisonCopy(restedMinutes(thisWeek) - restedMinutes(priorWeek))}
             </Text>
           ) : null}

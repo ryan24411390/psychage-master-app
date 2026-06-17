@@ -25,8 +25,8 @@ export function Skeleton({ className, style, ...props }: SkeletonProps) {
     }
     opacity.value = withRepeat(
       withTiming(0.6, { 
-        duration: 1000,
-        easing: Easing.inOut(Easing.ease)
+        duration: 1200,
+        easing: Easing.bezier(0.45, 0, 0.55, 1) // Breath curve
       }),
       -1,
       true

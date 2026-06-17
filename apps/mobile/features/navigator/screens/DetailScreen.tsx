@@ -39,7 +39,7 @@ export function DetailScreen({ symptom, index, total, detail, onSet, onNext }: D
         <View className="h-1 overflow-hidden rounded-full bg-border/60 dark:bg-border-dark/60">
           <View className="h-full rounded-full bg-primary dark:bg-primary-dark" style={{ width: `${progress}%` }} />
         </View>
-        <Text variant="headingLg" accessibilityRole="header">
+        <Text variant="h1" accessibilityRole="header">
           {symptom.name}
         </Text>
         {symptom.description ? (
@@ -51,7 +51,7 @@ export function DetailScreen({ symptom, index, total, detail, onSet, onNext }: D
 
       {symptom.ask_severity ? (
         <View className="gap-3">
-          <Text variant="bodyBold">{NAVIGATOR_COPY.detailSeverityLabel}</Text>
+          <Text variant="label">{NAVIGATOR_COPY.detailSeverityLabel}</Text>
           <SeveritySlider
             value={detail?.severity ?? 5}
             onChange={(severity) => onSet({ severity })}
@@ -61,14 +61,14 @@ export function DetailScreen({ symptom, index, total, detail, onSet, onNext }: D
 
       {symptom.ask_duration ? (
         <View className="gap-3">
-          <Text variant="bodyBold">{NAVIGATOR_COPY.detailDurationLabel}</Text>
+          <Text variant="label">{NAVIGATOR_COPY.detailDurationLabel}</Text>
           <DurationPicker value={detail?.duration} onChange={(duration) => onSet({ duration })} />
         </View>
       ) : null}
 
       {symptom.ask_frequency ? (
         <View className="gap-3">
-          <Text variant="bodyBold">{NAVIGATOR_COPY.detailFrequencyLabel}</Text>
+          <Text variant="label">{NAVIGATOR_COPY.detailFrequencyLabel}</Text>
           <FrequencyPicker value={detail?.frequency} onChange={(frequency) => onSet({ frequency })} />
         </View>
       ) : null}

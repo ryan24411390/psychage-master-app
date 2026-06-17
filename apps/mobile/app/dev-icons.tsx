@@ -26,7 +26,7 @@ function MoodRow() {
           <View key={state} className="items-center gap-1.5">
             <MoodGlyphFace state={state} size={44} />
             <MoodGlyphFace state={state} size={24} />
-            <Text variant="bodySm" className="text-center">
+            <Text variant="caption" className="text-center">
               {STATE_LABELS[state]}
             </Text>
           </View>
@@ -53,7 +53,7 @@ export default function DevIconsScreen() {
       <Stack.Screen options={{ headerShown: true, title: 'Dev — Icons' }} />
       <ScrollView contentContainerClassName="gap-8 py-4">
         <View className="gap-2">
-          <Text variant="heading">Mood scale</Text>
+          <Text variant="h2">Mood scale</Text>
           <Text variant="body">
             The five-point mood glyph (Very low → Very good) — Dr. Lena Dobson's chosen face,
             now wired into check-in. Each column shows the glyph at 44dp and 24dp; toggle

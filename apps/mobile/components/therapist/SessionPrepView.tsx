@@ -100,7 +100,7 @@ export function SessionPrepView({ countForWindow, onGenerate }: SessionPrepViewP
         />
 
         <View className="gap-3">
-          <Text variant="bodyMedium">{c.windowLabel}</Text>
+          <Text variant="bodyLarge">{c.windowLabel}</Text>
           <RangeRadio options={WINDOW_OPTIONS} value={selectedKey} onChange={setSelectedKey} />
 
           {selectedKey === 'since' ? (
@@ -111,10 +111,10 @@ export function SessionPrepView({ countForWindow, onGenerate }: SessionPrepViewP
               testID="session-prep-since-date"
               className="min-h-[44px] flex-row items-center justify-between rounded-lg border border-border px-3 py-2 dark:border-border-dark"
             >
-              <Text variant="bodyMedium" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="bodyLarge" className="text-text-secondary dark:text-text-secondary-dark">
                 {c.sincePickLabel}
               </Text>
-              <Text variant="bodyMedium">{sinceDate ? formatPickedDate(sinceDate) : '—'}</Text>
+              <Text variant="bodyLarge">{sinceDate ? formatPickedDate(sinceDate) : '—'}</Text>
             </Pressable>
           ) : null}
 

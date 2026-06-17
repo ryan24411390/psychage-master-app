@@ -37,7 +37,7 @@ function Chip({ label, selected, onPress }: { label: string; selected: boolean; 
       }`}
     >
       <Text
-        variant="bodyMedium"
+        variant="bodyLarge"
         className={
           selected
             ? 'text-primary dark:text-primary-dark'
@@ -55,7 +55,7 @@ function EmptyState() {
     <View className="items-center gap-3 px-6 py-16">
       {/* Contextual placement (see MASCOT_CONTEXTUAL): empty library / bookmarks → 'looking-up'. */}
       <Mascot state={MASCOT_CONTEXTUAL.emptyLibrary} size={156} />
-      <Text variant="bodyBold" className="text-center text-text-primary dark:text-text-primary-dark">
+      <Text variant="label" className="text-center text-text-primary dark:text-text-primary-dark">
         {BOOKMARKS_COPY.empty.title}
       </Text>
       <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">

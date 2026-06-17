@@ -49,7 +49,7 @@ export function ClarityChrome({ children, onHelp, onBack }: ClarityChromeProps) 
           className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-3"
         >
           <LifeBuoy size={18} color={crisis} strokeWidth={1.75} />
-          <Text variant="bodyMedium" className="text-[13px] text-crisis">
+          <Text variant="bodyLarge" className="text-[13px] text-crisis">
             Help now
           </Text>
         </Pressable>

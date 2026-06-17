@@ -151,7 +151,7 @@ export function SearchableList<T>({
                 style={({ pressed }: { pressed: boolean }) => ({ opacity: pressed ? 0.7 : 1 })}
               >
                 <View className="flex-1 flex-row items-center justify-between pr-2">
-                  <Text variant={selected ? 'bodyMedium' : 'body'} className="flex-shrink">
+                  <Text variant={selected ? 'bodyLarge' : 'body'} className="flex-shrink">
                     {getLabel(item)}
                   </Text>
                   {getSecondaryLabel ? (

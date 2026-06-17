@@ -1,11 +1,12 @@
 import { FlashList } from '@shopify/flash-list';
 import type { Moment } from '@psychage/shared/engagement';
 import { ArrowLeft } from 'lucide-react-native';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { MilestonesStrip } from '@/components/milestones/MilestonesStrip';
 import { MomentRow } from '@/components/moments/MomentRow';
 import { Card } from '@/components/ui/Card';
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { MOMENTS_COPY } from '@/features/moments/copy';
 import { useThemeColors } from '@/lib/use-theme-colors';
@@ -74,21 +75,22 @@ export function MomentsHistoryView({
   return (
     <View className="flex-1 px-4">
       <View className="flex-row items-center gap-2 py-2">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={onBack}
           hitSlop={8}
-          className="min-h-[44px] w-11 justify-center active:scale-[0.96]"
+          className="min-h-[44px] w-11 justify-center"
+          haptic="tab"
         >
           <ArrowLeft size={24} color={ink} strokeWidth={2} />
-        </Pressable>
-        <Text variant="heading">{MOMENTS_COPY.historyTitle}</Text>
+        </AnimatedPressable>
+        <Text variant="h2">{MOMENTS_COPY.historyTitle}</Text>
       </View>
 
       {moments.length === 0 ? (
         <Card variant="ghost" className="mt-4">
-          <Text variant="bodyMedium">{MOMENTS_COPY.historyBeginning}</Text>
+          <Text variant="bodyLarge">{MOMENTS_COPY.historyBeginning}</Text>
           <Text variant="body" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
             {MOMENTS_COPY.historyEmpty}
           </Text>
@@ -96,7 +98,7 @@ export function MomentsHistoryView({
       ) : (
         <>
         <Text
-          variant="bodySm"
+          variant="caption"
           className="pb-2 pt-1 text-text-secondary dark:text-text-secondary-dark"
         >
           {MOMENTS_COPY.historyCount(moments.length)}

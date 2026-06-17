@@ -40,7 +40,7 @@ function ResourceRow({
     >
       <View className="h-8 w-8 items-center justify-center rounded-full bg-primary/10">{icon}</View>
       <View className="flex-1">
-        <Text variant="bodyMedium" className="text-[14px]">
+        <Text variant="bodyLarge" className="text-[14px]">
           {title}
         </Text>
         <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
@@ -58,10 +58,10 @@ export function SafetyAlert({ visible, onDismiss, onCrisis }: SafetyAlertProps) 
       {/* @design-purpose: modal backdrop scrim to focus the safety dialog — solid dim, no blur/glassmorphism */}
       <View className="flex-1 items-center justify-center bg-black/60 px-6">
         <View className="w-full max-w-md rounded-2xl border border-border bg-surface p-5 dark:border-border-dark dark:bg-surface-dark">
-          <Text variant="heading" className="mb-2" accessibilityRole="header">
+          <Text variant="h2" className="mb-2" accessibilityRole="header">
             {t.title}
           </Text>
-          <Text variant="bodySm" className="mb-4 text-text-secondary dark:text-text-secondary-dark leading-5">
+          <Text variant="caption" className="mb-4 text-text-secondary dark:text-text-secondary-dark leading-5">
             {t.body}
           </Text>
 
@@ -105,11 +105,11 @@ export function SafetyBanner({ onCrisis }: { onCrisis: () => void }) {
       onPress={onCrisis}
       className="rounded-xl border border-crisis/40 bg-surface p-4 dark:bg-surface-dark"
     >
-      <Text variant="bodySm" className="leading-5">
-        <Text variant="bodyMedium" className="text-[14px]">
+      <Text variant="caption" className="leading-5">
+        <Text variant="bodyLarge" className="text-[14px]">
           {t.bannerLead}{' '}
         </Text>
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {t.bannerBody}
         </Text>
       </Text>

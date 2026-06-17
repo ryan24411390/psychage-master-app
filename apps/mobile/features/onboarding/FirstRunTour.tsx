@@ -49,7 +49,7 @@ export function FirstRunTour({ onDone }: FirstRunTourProps) {
             <Icon size={24} color={tc.primary} strokeWidth={2} />
           </View>
 
-          <Text variant="headingLg" className="text-text-primary dark:text-text-primary-dark">
+          <Text variant="h1" className="text-text-primary dark:text-text-primary-dark">
             {slide.tab}
           </Text>
           <Text variant="body" className="mt-1 text-text-secondary dark:text-text-secondary-dark">
@@ -78,7 +78,7 @@ export function FirstRunTour({ onDone }: FirstRunTourProps) {
               hitSlop={8}
               className="min-h-[44px] justify-center"
             >
-              <Text variant="bodyMedium" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="bodyLarge" className="text-text-secondary dark:text-text-secondary-dark">
                 Skip
               </Text>
             </Pressable>
@@ -88,7 +88,7 @@ export function FirstRunTour({ onDone }: FirstRunTourProps) {
               onPress={() => (isLast ? onDone() : setIndex((i) => i + 1))}
               className="min-h-[44px] items-center justify-center rounded-xl bg-primary px-6 dark:bg-primary-dark active:scale-[0.98]"
             >
-              <Text variant="bodyMedium" className="text-white">
+              <Text variant="bodyLarge" className="text-white">
                 {isLast ? 'Get started' : 'Next'}
               </Text>
             </Pressable>

@@ -135,7 +135,7 @@ export function ClarityTile({ title, feature, icon: Icon, onPress, testID }: Til
         <Text className="font-sans-bold text-base text-white" numberOfLines={2}>
           {title}
         </Text>
-        <Text className="mt-0.5 font-sans-medium text-xs text-teal-400">{feature}</Text>
+        <Text className="mt-0.5 font-sans-medium text-xs" style={{ color: '#2DD4BF' }}>{feature}</Text>
       </View>
       <Icon size={30} color={TEAL} strokeWidth={1.75} />
     </AnimatedPressable>

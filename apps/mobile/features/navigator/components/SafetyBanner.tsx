@@ -24,7 +24,7 @@ export function SafetyBanner({ emergencyNumber }: SafetyBannerProps) {
     >
       <View className="flex-row items-start gap-3">
         <ShieldAlert size={20} color={tc.crisis} strokeWidth={2} />
-        <Text variant="bodyMedium" className="flex-1 text-text-primary dark:text-text-primary-dark">
+        <Text variant="bodyLarge" className="flex-1 text-text-primary dark:text-text-primary-dark">
           If you're in crisis or thinking about harming yourself, support is available right now.
         </Text>
       </View>

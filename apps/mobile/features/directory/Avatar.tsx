@@ -20,8 +20,8 @@ export function initialsOf(name: string): string {
 }
 
 const SIZE = {
-  md: { box: 'h-11 w-11', text: 'bodyMedium' as const },
-  lg: { box: 'h-16 w-16', text: 'heading' as const },
+  md: { box: 'h-11 w-11', text: 'bodyLarge' as const },
+  lg: { box: 'h-16 w-16', text: 'h2' as const },
 };
 
 export function Avatar({

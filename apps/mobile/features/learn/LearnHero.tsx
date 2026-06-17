@@ -18,7 +18,7 @@ export function LearnHero({ onFindPath }: { onFindPath: () => void }) {
 
   return (
     <View className="gap-3 px-4 pt-3">
-      <Text variant="headingLg" className="text-[26px] leading-[30px]" accessibilityRole="header">
+      <Text variant="h1" className="text-[26px] leading-[30px]" accessibilityRole="header">
         {t.heroTitle}
       </Text>
 
@@ -52,7 +52,7 @@ export function LearnHero({ onFindPath }: { onFindPath: () => void }) {
         style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
       >
         <Sparkles size={16} color={tc.primary} strokeWidth={2} />
-        <Text variant="bodyMedium" className="text-teal-700 dark:text-primary-dark">
+        <Text variant="bodyLarge" className="text-teal-700 dark:text-primary-dark">
           {t.findPath}
         </Text>
       </Pressable>

@@ -40,9 +40,9 @@ export function SortSheet({
       <View className="flex-1 justify-end bg-black/40">
         <View className="rounded-t-2xl bg-background px-4 pb-6 pt-4 dark:bg-background-dark">
           <View className="mb-1 flex-row items-center justify-between">
-            <Text variant="heading">{t.sortTitle}</Text>
+            <Text variant="h2">{t.sortTitle}</Text>
             <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={onClose} hitSlop={8}>
-              <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+              <Text variant="caption" className="text-primary dark:text-primary-dark">
                 Done
               </Text>
             </Pressable>

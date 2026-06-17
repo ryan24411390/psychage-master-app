@@ -59,7 +59,7 @@ export function CelebrationOverlay({ threshold, onDismiss }: CelebrationOverlayP
           className="items-center gap-3 rounded-3xl bg-surface px-10 py-10 dark:bg-surface-dark"
         >
           <View className="h-20 w-20 items-center justify-center rounded-full bg-primary dark:bg-primary-dark">
-            <Text variant="heading" className="text-white">
+            <Text variant="h2" className="text-white">
               {threshold}
             </Text>
           </View>
@@ -69,11 +69,11 @@ export function CelebrationOverlay({ threshold, onDismiss }: CelebrationOverlayP
           >
             {MILESTONES_COPY.celebrateEyebrow}
           </Text>
-          <Text variant="heading">{MILESTONES_COPY.celebrateTitle(threshold)}</Text>
+          <Text variant="h2">{MILESTONES_COPY.celebrateTitle(threshold)}</Text>
           <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
             {MILESTONES_COPY.celebrateBody}
           </Text>
-          <Text variant="bodySm" className="mt-2 text-text-tertiary dark:text-text-tertiary-dark">
+          <Text variant="caption" className="mt-2 text-text-tertiary dark:text-text-tertiary-dark">
             {MILESTONES_COPY.celebrateDismiss}
           </Text>
         </Animated.View>

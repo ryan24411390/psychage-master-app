@@ -33,7 +33,7 @@ export function SleepInsights({ entries }: { entries: readonly SleepEntry[] }) {
         >
           {t.title}
         </Text>
-        <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
           {t.insufficient}
         </Text>
       </View>
@@ -71,7 +71,7 @@ export function SleepInsights({ entries }: { entries: readonly SleepEntry[] }) {
       >
         {t.title}
       </Text>
-      <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+      <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
         {t.intro}
       </Text>
 

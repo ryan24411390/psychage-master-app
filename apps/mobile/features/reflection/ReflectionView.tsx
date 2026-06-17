@@ -1,7 +1,10 @@
 import { ArrowLeft } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { ScrollView, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
+import { ScreenEntrance } from '@/components/ui/ScreenEntrance';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Terrain } from '@/components/terrain/Terrain';
@@ -46,67 +49,70 @@ export function ReflectionView({
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
       <View className="px-4 pt-1">
-        <Pressable
+        <AnimatedPressable
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={onBack}
           hitSlop={8}
           className="min-h-[44px] w-11 justify-center"
+          haptic="tab"
         >
           <ArrowLeft size={24} color={ink} strokeWidth={2} />
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       <Settle {...settleProps} className="flex-1">
         <ScrollView contentContainerClassName="gap-6 px-4 pb-10 pt-2">
-          <Terrain days={week.days} width={Math.max(0, width - 32)} />
+          <ScreenEntrance>
+            <Terrain days={week.days} width={Math.max(0, width - 32)} />
 
-          <View className="border-l-[3px] border-primary px-5 py-4 rounded-r-xl bg-surface-accent/20 dark:bg-surface-accent-dark/10">
-            <Text className="font-display text-xl tracking-tight leading-snug italic text-text-primary dark:text-text-primary-dark">
-              {week.line}
-            </Text>
-          </View>
+            <View className="border-l-[3px] border-primary px-5 py-4 rounded-r-xl bg-surface-accent/20 dark:bg-surface-accent-dark/10">
+              <Text className="font-display text-xl tracking-tight leading-snug italic text-text-primary dark:text-text-primary-dark">
+                {week.line}
+              </Text>
+            </View>
 
-          {week.notes.length > 0 ? (
-            <Card variant="elevated" className="gap-3 p-5">
-              {week.notes.map((n) => (
-                <Text
-                  key={`${n.day}:${n.note}`}
-                  variant="body"
-                  className="text-text-secondary dark:text-text-secondary-dark"
-                >
-                  {`${n.day} — ‘${n.note}’`}
+            {week.notes.length > 0 ? (
+              <Card variant="elevated" className="gap-3 p-5">
+                {week.notes.map((n) => (
+                  <Text
+                    key={`${n.day}:${n.note}`}
+                    variant="body"
+                    className="text-text-secondary dark:text-text-secondary-dark"
+                  >
+                    {`${n.day} — ‘${n.note}’`}
+                  </Text>
+                ))}
+              </Card>
+            ) : null}
+
+            <View className="gap-1 border-t border-border pt-4 dark:border-border-dark">
+              <AnimatedPressable
+                accessibilityRole="button"
+                accessibilityLabel="See the full record"
+                onPress={onFullRecord}
+                hitSlop={8}
+                className="min-h-[44px] justify-center"
+                haptic="tab"
+              >
+                <Text variant="bodyLarge" className="text-primary dark:text-primary-dark">
+                  See the full record
                 </Text>
-              ))}
-            </Card>
-          ) : null}
-
-          <View className="gap-1 border-t border-border pt-4 dark:border-border-dark">
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="See the full record"
-              onPress={onFullRecord}
-              hitSlop={8}
-              className="min-h-[44px] justify-center active:scale-[0.98]"
-              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-            >
-              <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
-                See the full record
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Earlier weeks"
-              onPress={onEarlier}
-              hitSlop={8}
-              className="min-h-[44px] justify-center active:scale-[0.98]"
-              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-            >
-              <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
-                Earlier weeks
-              </Text>
-            </Pressable>
-          </View>
+              </AnimatedPressable>
+              <AnimatedPressable
+                accessibilityRole="button"
+                accessibilityLabel="Earlier weeks"
+                onPress={onEarlier}
+                hitSlop={8}
+                className="min-h-[44px] justify-center"
+                haptic="tab"
+              >
+                <Text variant="bodyLarge" className="text-primary dark:text-primary-dark">
+                  Earlier weeks
+                </Text>
+              </AnimatedPressable>
+            </View>
+          </ScreenEntrance>
         </ScrollView>
       </Settle>
     </SafeAreaView>

@@ -35,7 +35,7 @@ export function DomainSelectionScreen({
   return (
     <ScrollView contentContainerClassName="gap-4 px-4 pb-10 pt-2" keyboardShouldPersistTaps="handled">
       <View className="gap-1.5">
-        <Text variant="headingLg" accessibilityRole="header">
+        <Text variant="h1" accessibilityRole="header">
           {NAVIGATOR_COPY.domainTitle}
         </Text>
         <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
@@ -60,10 +60,10 @@ export function DomainSelectionScreen({
             style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
           >
             <View className="flex-1 gap-0.5">
-              <Text variant="bodyBold" className={isSelected ? 'text-teal-900 dark:text-teal-50' : undefined}>
+              <Text variant="label" className={isSelected ? 'text-teal-900 dark:text-teal-50' : undefined}>
                 {domain.label}
               </Text>
-              <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+              <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                 {domain.description}
               </Text>
             </View>
@@ -79,7 +79,7 @@ export function DomainSelectionScreen({
         hitSlop={6}
         className="min-h-[44px] justify-center"
       >
-        <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+        <Text variant="bodyLarge" className="text-primary dark:text-primary-dark">
           {NAVIGATOR_COPY.selectAll}
         </Text>
       </Pressable>

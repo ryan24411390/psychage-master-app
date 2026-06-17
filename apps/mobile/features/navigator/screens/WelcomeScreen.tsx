@@ -21,7 +21,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   return (
     <ScrollView contentContainerClassName="gap-6 px-4 pb-10 pt-8" keyboardShouldPersistTaps="handled">
       <View className="gap-3">
-        <Text variant="headingLg" accessibilityRole="header">
+        <Text variant="h1" accessibilityRole="header">
           {NAVIGATOR_COPY.welcomeTitle}
         </Text>
         <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
@@ -31,7 +31,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
 
       <Card variant="accent" className="flex-row items-start gap-3">
         <ShieldCheck size={20} color={tc.primary} strokeWidth={2} />
-        <Text variant="bodySm" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
+        <Text variant="caption" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
           {NAVIGATOR_COPY.welcomeDisclaimer}
         </Text>
       </Card>

@@ -36,13 +36,13 @@ export function NextStepCards({ steps }: { steps: readonly NextStepItem[] }) {
           <Card key={step.id} variant="elevated" onPress={step.onPress} className="gap-2 p-5">
             <View className="flex-row items-center gap-2.5">
               <Icon size={18} color={tc.primary} strokeWidth={2} />
-              <Text variant="bodyBold">{step.title}</Text>
+              <Text variant="label">{step.title}</Text>
             </View>
-            <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+            <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
               {step.description}
             </Text>
             <View className="mt-1 flex-row items-center gap-1.5">
-              <Text variant="bodyMedium" className="text-primary dark:text-primary-dark">
+              <Text variant="bodyLarge" className="text-primary dark:text-primary-dark">
                 {step.actionText}
               </Text>
               <ArrowRight size={16} color={tc.primary} strokeWidth={2} />

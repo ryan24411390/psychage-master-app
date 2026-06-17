@@ -38,7 +38,7 @@ export function MostRead() {
 
   return (
     <View className="gap-3 mt-6">
-      <Text variant="heading" className="ml-1 mb-2">
+      <Text variant="h2" className="ml-1 mb-2">
         Most read this month
       </Text>
 
@@ -55,7 +55,7 @@ export function MostRead() {
                   {String(i + 1).padStart(2, '0')}
                 </Text>
                 <View className="flex-1">
-                  <Text variant="bodyBold" className="text-text-primary dark:text-text-primary-dark">{a.title}</Text>
+                  <Text variant="label" className="text-text-primary dark:text-text-primary-dark">{a.title}</Text>
                   <Text variant="caption" className="mt-0.5 text-text-secondary dark:text-text-secondary-dark">
                     {a.categoryName}
                     {a.readTime ? ` · ${a.readTime} min` : ''}

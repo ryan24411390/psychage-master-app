@@ -43,7 +43,7 @@ export function ResultCard({ result }: ResultCardProps) {
     <Card variant="elevated" className="gap-3 p-5">
       {/* Name + relevance dots */}
       <View className="gap-2">
-        <Text variant="heading">{result.name}</Text>
+        <Text variant="h2">{result.name}</Text>
         <View className="self-start rounded-full border border-border bg-surface-accent px-3 py-1.5 dark:border-border-dark dark:bg-surface-accent-dark">
           <RelevanceDots level={result.relevance_level} />
         </View>
@@ -78,7 +78,7 @@ export function ResultCard({ result }: ResultCardProps) {
                 hitSlop={6}
                 className="min-h-[36px] flex-row items-center gap-1.5"
               >
-                <Text variant="bodySm" className="text-primary dark:text-primary-dark">
+                <Text variant="caption" className="text-primary dark:text-primary-dark">
                   {expanded ? 'Show less' : `Show all ${matched.length}`}
                 </Text>
                 <ChevronDown
@@ -94,14 +94,14 @@ export function ResultCard({ result }: ResultCardProps) {
           <View className="flex-row flex-wrap gap-2">
             {shown.map((sym) => (
               <View key={sym.name} className={`rounded-md border px-3 py-1.5 ${chipClass}`}>
-                <Text variant="bodySm" className={chipTextClass}>
+                <Text variant="caption" className={chipTextClass}>
                   {sym.name.replace(/_/g, ' ')}
                 </Text>
               </View>
             ))}
             {!expanded && hiddenCount > 0 ? (
               <View className="rounded-md border border-border bg-surface-accent px-3 py-1.5 dark:border-border-dark dark:bg-surface-accent-dark">
-                <Text variant="bodySm" className="text-text-secondary dark:text-text-secondary-dark">
+                <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
                   +{hiddenCount} more
                 </Text>
               </View>
