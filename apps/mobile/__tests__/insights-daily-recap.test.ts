@@ -40,19 +40,20 @@ function memStorage(): Storage {
 }
 
 describe('presenceWindow', () => {
-  it('returns the last 14 days oldest→newest with today flagged', () => {
+  it('returns the last 7 days oldest→newest with today flagged', () => {
     const out = presenceWindow([], TODAY);
-    expect(out).toHaveLength(14);
-    expect(out[0]?.date).toBe('2026-06-04');
-    expect(out[13]?.date).toBe('2026-06-17');
-    expect(out[13]?.isToday).toBe(true);
+    expect(out).toHaveLength(7);
+    expect(out[0]?.date).toBe('2026-06-11');
+    expect(out[6]?.date).toBe('2026-06-17');
+    expect(out[6]?.isToday).toBe(true);
     expect(out.every((d) => d.present === false)).toBe(true);
   });
 
   it('flags only days that have a check-in (presence, not intensity)', () => {
+    // 2026-06-10 falls outside the 7-day window (06-11..06-17) and is excluded.
     const out = presenceWindow([entry('2026-06-17'), entry('2026-06-15'), entry('2026-06-10')], TODAY);
     const present = out.filter((d) => d.present).map((d) => d.date);
-    expect(present).toEqual(['2026-06-10', '2026-06-15', '2026-06-17']);
+    expect(present).toEqual(['2026-06-15', '2026-06-17']);
   });
 
   it('does not vary by the day state (no mood-intensity leak)', () => {

@@ -39,10 +39,10 @@
     "text": {
       "primary":   { "light": "#111827", "dark": "#FFFFFF" },
       "secondary": { "light": "#4B5563", "dark": "#A1A1AA" },
-      "tertiary":  { "light": "#6B7280", "dark": "#71717A" },
+      "tertiary":  { "light": "#6B7280", "dark": "#8A8A8A" },
       "disabled":  { "light": "#9CA3AF", "dark": "#52525B" },
       "interactive": { "light": "#1A9B8C", "dark": "#2DD4BF" },
-      "_source": { "_note": "Refined for premium hierarchy. text-interactive maps to primary brand colors for WCAG AA compliance. Dark values maintain true-black OLED readability." }
+      "_source": { "_note": "Refined for premium hierarchy. text-interactive maps to primary brand colors for WCAG AA compliance. Dark values maintain true-black OLED readability — tertiary.dark is the ratified #8A8A8A (6.1:1 on #000000 canvas / 5.4:1 on #121212 surface); do NOT lighten toward #71717A, which fails AA body (~4.3 / 3.8). Enforced by dark-contrast.test.ts." }
     },
     "border": {
       "default": { "light": "#e7e5e4", "dark": "#3f3f46" },
