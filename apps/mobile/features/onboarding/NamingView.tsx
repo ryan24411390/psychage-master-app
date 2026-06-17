@@ -10,9 +10,9 @@ import { DURATION, easingFn } from '@/lib/motion';
 
 import { ONBOARDING_COPY } from './copy';
 
-// S2 — "what naming does" (Flow 1). The mascot steps back from its host scale: smaller,
-// 'thoughtful' (route-auto via /onboarding/naming), in the upper third — the screen is
-// now about the idea, not the greeting. One line of body, a primary that names the time
+// S2 — "what naming does" (Flow 1). The mascot guides: smaller than the host scale,
+// 'guiding' (route-auto via /onboarding/naming), in the upper third — directing the user
+// toward the act of naming. One line of body, a primary that names the time
 // cost honestly ("— 20 seconds"), and a quiet "Look around first" text-link that exits to
 // the first-run home. GlobalHeader keeps the Help-now pill reachable. Copy from ./copy
 // (provisional pending Dr. Dobson). Reduced motion: settle fade skipped; mascot is static.
