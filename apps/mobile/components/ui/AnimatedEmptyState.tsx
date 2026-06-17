@@ -59,7 +59,7 @@ export function AnimatedEmptyState({
       <Animated.View style={animatedIconStyle} className="mb-6">
         {/* Contextual placement (see MASCOT_CONTEXTUAL): generic / first-run empty → 'open'.
             Callers may override via the `icon` prop for surface-specific states. */}
-        {icon || <Mascot state={MASCOT_CONTEXTUAL.emptyGeneric} size={120} />}
+        {icon || <Mascot state={MASCOT_CONTEXTUAL.emptyGeneric} size={156} />}
       </Animated.View>
       <Text variant="heading" className="text-center mb-2 text-text-primary dark:text-text-primary-dark">
         {title}

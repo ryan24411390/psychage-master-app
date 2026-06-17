@@ -6,7 +6,9 @@ import { View } from 'react-native';
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { Mascot } from '@/components/home/Mascot';
 import { MomentCaptureSheet } from '@/components/moments/MomentCaptureSheet';
+import { storage } from '@/lib/adapters/storage';
 import { useHaptics } from '@/lib/haptic-context';
+import { recordCount } from '@/lib/persistence/milestones';
 
 // S3 — the first Moment capture, inside onboarding. The mascot RECEDES and LISTENS: small,
 // at the edge of the frame, route-auto 'listening' via /onboarding/moment — the user has
@@ -31,7 +33,7 @@ export interface OnboardingMomentCaptureProps {
   readonly navigateToCrisis?: () => void;
 }
 
-const RECEDED_WIDTH = 56; // small, edge-of-frame — the capture sheet has the focus
+const RECEDED_WIDTH = 73; // small, edge-of-frame — the capture sheet has the focus
 
 export function OnboardingMomentCapture({
   store,
@@ -50,6 +52,11 @@ export function OnboardingMomentCapture({
         navigateToCrisis();
         return;
       }
+      // Mark the cumulative milestone(s) this first capture reaches (the 1st rung)
+      // SILENTLY — onboarding owns its own warm beat (S4 acknowledgment), so no
+      // celebration overlay fires here; this only records reached state so the 1st
+      // rung never re-fires a celebration later on home.
+      recordCount(storage, store.getAll().length);
       onNamed();
     },
     [store, onNamed, navigateToCrisis, fireHaptic],

@@ -14,7 +14,7 @@ export default function NotFoundScreen() {
       <Stack.Screen options={{ title: 'Not found' }} />
       <View className="flex-1 items-center justify-center gap-3 bg-background px-6 dark:bg-background-dark">
         {/* Contextual placement (see MASCOT_CONTEXTUAL): error / 404 → 'oops'. */}
-        <Mascot state={MASCOT_CONTEXTUAL.error404} size={120} />
+        <Mascot state={MASCOT_CONTEXTUAL.error404} size={156} />
         <Text variant="heading" className="text-center text-text-primary dark:text-text-primary-dark">
           This page isn’t here
         </Text>

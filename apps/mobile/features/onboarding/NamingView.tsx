@@ -17,7 +17,7 @@ import { ONBOARDING_COPY } from './copy';
 // the first-run home. GlobalHeader keeps the Help-now pill reachable. Copy from ./copy
 // (provisional pending Dr. Dobson). Reduced motion: settle fade skipped; mascot is static.
 
-const SECONDARY_WIDTH = 88; // below host (130), above the Today footprint feel
+const SECONDARY_WIDTH = 114; // below host (169), above the Today footprint feel
 
 export interface NamingViewProps {
   readonly reduced: boolean;

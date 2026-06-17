@@ -26,7 +26,7 @@ import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 // Breathing scale-loop runs only on idle states; tilt-on-save (tiltSignal) is preserved.
 // Decorative, hidden from VoiceOver.
 
-const DEFAULT_WIDTH = 96;
+const DEFAULT_WIDTH = 125;
 const ASPECT = 1.15; // height ≈ 1.15× width — roughly the figure's standing footprint
 const BREATHE_SCALE = 1.03;
 
