@@ -5,6 +5,7 @@ import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/Text';
+import { CONDITIONS_REF_COPY } from '@/features/conditions-reference/copy';
 import { FeaturedCard } from '@/features/learn/FeaturedCard';
 import { LearnHero } from '@/features/learn/LearnHero';
 import { LEARN_CATEGORIES } from '@/features/learn/categories';
@@ -121,6 +122,18 @@ export function LearnView() {
             >
               <Text variant="bodyLarge" className="text-teal-700 dark:text-primary-dark">
                 {t.conditionsLabel}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={CONDITIONS_REF_COPY.title}
+              onPress={() => router.push('/reference')}
+              testID="learn-conditions-az-entry"
+              className="min-h-[52px] flex-row items-center justify-center rounded-xl border border-border px-4 dark:border-border-dark"
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
+              <Text variant="bodyLarge" className="text-teal-700 dark:text-primary-dark">
+                {CONDITIONS_REF_COPY.title}
               </Text>
             </Pressable>
             <Pressable
