@@ -7,8 +7,9 @@ import { Text } from '@/components/ui/Text';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
 // "Care & learning" — the two outward doorways at the foot of Today. Each row is one
-// accessible pressable into an existing destination (Find Care tab · Library). No new
-// data: the provider count is the same copy the Find surface uses.
+// accessible pressable into an existing destination (Find Care tab · Library). The
+// provider count is framed as the NPI registry source — never "verified" by Psychage
+// (P33): Psychage does not vet or endorse providers, matching the Find Care surface.
 type DoorwayProps = {
   icon: ElementType;
   title: string;
@@ -58,7 +59,7 @@ export function CareAndLearning() {
       <Doorway
         icon={Stethoscope}
         title="Find professional care"
-        subtitle="400,000+ verified providers"
+        subtitle="400,000+ providers from the NPI registry"
         onPress={() => router.push('/find')}
         testID="care-find"
       />
