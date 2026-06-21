@@ -3,9 +3,9 @@ import { ActivityIndicator, ScrollView, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
+import { ToolScreen } from '@/components/ui/ToolScreen';
 import { ChipXL } from '@/features/navigator/components/ChipXL';
 
-import { ClarityChrome } from './components/ClarityChrome';
 import { ClarityResultsDashboard } from './components/ClarityResultsDashboard';
 import {
   type ClarityFlowState,
@@ -45,9 +45,8 @@ const CALCULATING_BODY = 'Computing your Clarity Score across five dimensions';
 
 export interface ClarityFlowProps {
   readonly onExit: () => void;
-  /** Help-now pill → the crisis surface. */
-  readonly onHelp: () => void;
-  /** Crisis interstitial primary action → the crisis surface. */
+  /** Crisis interstitial primary action → the crisis surface. (The chrome Help-now
+   *  pill is provided by ToolScreen / CrisisPill, so no onHelp prop is needed.) */
   readonly onCrisisResources: () => void;
   /** A recommendation's action → a mobile route. */
   readonly onRecommend: (route: string) => void;
@@ -62,7 +61,6 @@ export interface ClarityFlowProps {
 
 export function ClarityFlow({
   onExit,
-  onHelp,
   onCrisisResources,
   onRecommend,
   onViewHistory,
@@ -116,7 +114,7 @@ export function ClarityFlow({
   // ── Results ────────────────────────────────────────────────────────────────────
   if (state.step === 'results' && result) {
     return (
-      <ClarityChrome onHelp={onHelp} onBack={handleBack}>
+      <ToolScreen scroll="none" onBack={handleBack}>
         <ClarityResultsDashboard
           results={result}
           recommendations={recommendations}
@@ -124,14 +122,14 @@ export function ClarityFlow({
           onRecommend={onRecommend}
           onRetake={() => dispatch({ type: 'RESET' })}
         />
-      </ClarityChrome>
+      </ToolScreen>
     );
   }
 
   // ── Calculating interlude (web parity) ───────────────────────────────────────────
   if (state.step === 'calculating') {
     return (
-      <ClarityChrome onHelp={onHelp} onBack={handleBack}>
+      <ToolScreen scroll="none" onBack={handleBack}>
         <View className="flex-1 items-center justify-center px-8" accessibilityRole="progressbar">
           <ActivityIndicator size="large" color="#1A9B8C" />
           <Text variant="h1" className="mt-8 text-center">
@@ -141,14 +139,14 @@ export function ClarityFlow({
             {CALCULATING_BODY}
           </Text>
         </View>
-      </ClarityChrome>
+      </ToolScreen>
     );
   }
 
   // ── Crisis interstitial (SR-2) ───────────────────────────────────────────────────
   if (state.step === 'crisis') {
     return (
-      <ClarityChrome onHelp={onHelp} onBack={handleBack}>
+      <ToolScreen scroll="none" onBack={handleBack}>
         <ScrollView contentContainerClassName="gap-5 px-4 pb-12 pt-4" showsVerticalScrollIndicator={false}>
           <Text variant="h1" accessibilityRole="header">
             {CRISIS_TITLE}
@@ -163,14 +161,14 @@ export function ClarityFlow({
             {CRISIS_CONTINUE}
           </Button>
         </ScrollView>
-      </ClarityChrome>
+      </ToolScreen>
     );
   }
 
   // ── Intro ────────────────────────────────────────────────────────────────────────
   if (state.step === 'intro') {
     return (
-      <ClarityChrome onHelp={onHelp} onBack={handleBack}>
+      <ToolScreen scroll="none" onBack={handleBack}>
         <ScrollView contentContainerClassName="gap-5 px-4 pb-12 pt-4" showsVerticalScrollIndicator={false}>
           <Text variant="h1" accessibilityRole="header">
             {INTRO_TITLE}
@@ -190,15 +188,15 @@ export function ClarityFlow({
             </Button>
           ) : null}
         </ScrollView>
-      </ClarityChrome>
+      </ToolScreen>
     );
   }
 
   // ── Question (one per screen) ─────────────────────────────────────────────────────
   return (
-    <ClarityChrome onHelp={onHelp} onBack={handleBack}>
+    <ToolScreen scroll="none" onBack={handleBack}>
       <QuestionStep state={state} onAnswer={(value) => dispatch({ type: 'ANSWER', value })} />
-    </ClarityChrome>
+    </ToolScreen>
   );
 }
 

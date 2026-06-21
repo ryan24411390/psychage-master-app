@@ -1,6 +1,6 @@
 import { router, Stack } from 'expo-router';
 
-import { ClarityChrome } from '@/features/clarity/components/ClarityChrome';
+import { ToolScreen } from '@/components/ui/ToolScreen';
 import { ClarityHistoryView } from '@/features/clarity/ClarityHistoryView';
 import { getClarityStore } from '@/lib/clarity-store';
 import { goBackOr } from '@/lib/nav';
@@ -14,9 +14,9 @@ export default function ClarityHistoryRoute() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
-      <ClarityChrome onHelp={() => router.push('/crisis')} onBack={() => goBackOr('/compass')}>
+      <ToolScreen scroll="none" onBack={() => goBackOr('/compass')}>
         <ClarityHistoryView snapshots={snapshots} onStartNew={() => router.replace('/tools/clarity')} />
-      </ClarityChrome>
+      </ToolScreen>
     </>
   );
 }
