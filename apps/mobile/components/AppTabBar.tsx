@@ -2,10 +2,11 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { StackActions } from '@react-navigation/native';
 import { BookOpen, Compass, type LucideIcon, MapPin, Sun } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { colorForScheme, tabBarTokens } from '@/lib/a1-tokens';
 import { useHaptics } from '@/lib/haptic-context';
@@ -78,12 +79,19 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
           };
 
           return (
-            <Pressable
+            // P3: visual press feedback (scale/opacity, reduce-motion-gated inside
+            // AnimatedPressable). The 'tab' haptic stays in onPress (above) — do NOT
+            // pass the `haptic` prop here, or it would double-fire and bypass the
+            // tabPress/defaultPrevented guard.
+            <AnimatedPressable
               key={route.key}
               accessibilityRole="tab"
               accessibilityState={{ selected: isActive }}
               accessibilityLabel={label}
               onPress={onPress}
+              scaleTo={0.94}
+              activeOpacity={0.85}
+              springPreset="subtle"
               className="min-h-[44px] min-w-[44px] items-center justify-center"
             >
               <Animated.View
@@ -113,7 +121,7 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
                   </Animated.View>
                 ) : null}
               </Animated.View>
-            </Pressable>
+            </AnimatedPressable>
           );
         })}
       </View>

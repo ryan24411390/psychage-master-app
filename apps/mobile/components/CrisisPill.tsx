@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { LifeBuoy } from 'lucide-react-native';
-import { Pressable } from 'react-native';
 
+import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
@@ -15,17 +15,23 @@ export function CrisisPill() {
   // the pill clears WCAG body contrast and keeps its urgency.
   const tc = useThemeColors();
   return (
-    <Pressable
+    // Visual press feedback only. NO haptic prop — crisis stays silent by design
+    // (SR-2: never jar a distressed user). Scale is reduce-motion-gated inside
+    // AnimatedPressable.
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel="Help now"
       onPress={() => router.push('/crisis')}
       hitSlop={4}
+      scaleTo={0.96}
+      activeOpacity={0.85}
+      springPreset="subtle"
       className="min-h-[44px] flex-row items-center gap-1.5 rounded-full border border-crisis px-3 dark:border-crisis-dark"
     >
       <LifeBuoy size={18} color={tc.crisis} strokeWidth={1.75} />
       <Text variant="bodyLarge" className="text-[13px] text-crisis dark:text-crisis-dark">
         Help now
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
