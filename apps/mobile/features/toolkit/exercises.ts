@@ -5,6 +5,14 @@
 
 export type ExerciseKind = 'breathing' | 'grounding' | 'body_scan';
 
+/** In/hold/out durations in ms. Whole-second multiples so the per-phase countdown
+ *  reads cleanly (e.g. 4000 → "4 3 2 1"). HOLD is stillness, not animation. */
+export interface BreathingPacing {
+  readonly inhale: number;
+  readonly hold: number;
+  readonly exhale: number;
+}
+
 export interface BreathingExercise {
   readonly kind: 'breathing';
   readonly name: string;
@@ -13,7 +21,14 @@ export interface BreathingExercise {
    *  at promptLg when reduced motion removes the form. */
   readonly cues: { readonly inhale: string; readonly hold: string; readonly exhale: string };
   /** 4-4-6 pacing in ms. HOLD is stillness, not animation. */
-  readonly pacing: { readonly inhale: number; readonly hold: number; readonly exhale: number };
+  readonly pacing: BreathingPacing;
+}
+
+/** A selectable breathing pace. The user picks one on the intro before they begin. */
+export interface BreathingPace {
+  readonly id: string;
+  readonly label: string;
+  readonly pacing: BreathingPacing;
 }
 
 export interface PromptStep {
@@ -39,6 +54,32 @@ export const BREATHING: BreathingExercise = {
   cues: { inhale: 'Breathe in', hold: 'Hold', exhale: 'Breathe out' },
   pacing: { inhale: 4000, hold: 4000, exhale: 6000 },
 };
+
+/** The default pace — reuses BREATHING.pacing so the 4-4-6 default stays single-sourced. */
+export const DEFAULT_PACE: BreathingPace = {
+  id: 'steady',
+  label: 'Steady',
+  pacing: BREATHING.pacing,
+};
+
+/** Selectable paces for the breathing form. DEFAULT_PACE (Steady) leads. All durations
+ *  are whole-second multiples (the countdown shows whole seconds). */
+export const PACES: readonly BreathingPace[] = [
+  DEFAULT_PACE,
+  { id: 'even', label: 'Even', pacing: { inhale: 4000, hold: 4000, exhale: 4000 } },
+  { id: 'longer', label: 'Longer exhale', pacing: { inhale: 4000, hold: 7000, exhale: 8000 } },
+];
+
+/** Resolve a pace by id, defaulting to Steady for an unknown/absent value. */
+export function resolvePace(id: string | undefined): BreathingPace {
+  return PACES.find((p) => p.id === id) ?? DEFAULT_PACE;
+}
+
+/** Calm, non-gamified line shown on the breathing surface. CT4 fixture — content review. */
+export const ENCOURAGEMENT = 'Let the breath lead — there’s nothing to get right.';
+
+/** Warm acknowledgement on the wind-down screen. CT4 fixture — content review. */
+export const END_NOTE = 'Whenever you need it, it’s here.';
 
 export const GROUNDING: PromptExercise = {
   kind: 'grounding',
