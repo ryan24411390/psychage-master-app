@@ -19,6 +19,7 @@ import { NAVIGATOR_KB } from '@/features/navigator/knowledge-base';
 import { NavigatorFlow } from '@/features/navigator/NavigatorFlow';
 import { isTierEnabled } from '@/lib/adapters';
 import { storage } from '@/lib/adapters/storage';
+import { useReducedMotion } from '@/lib/motion';
 import { goBackOr } from '@/lib/nav';
 import { getNavigatorStore } from '@/lib/navigator-store';
 
@@ -30,6 +31,7 @@ import { getNavigatorStore } from '@/lib/navigator-store';
 // state is in-memory, so navigating away leaves zero residue (SR-4).
 
 export default function NavigatorScreen() {
+  const reduced = useReducedMotion();
   const region = resolveRegion({
     storedOverride: loadRegionOverride(storage),
     deviceHint: defaultDeviceRegionHint(),
@@ -37,7 +39,13 @@ export default function NavigatorScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false, animation: 'slide_from_bottom' }} />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+          animation: reduced ? 'fade' : 'slide_from_right',
+          gestureEnabled: true,
+        }}
+      />
       <NavigatorFlow
         kb={NAVIGATOR_KB}
         runNavigator={(inputs: UserSymptomInput[]) =>

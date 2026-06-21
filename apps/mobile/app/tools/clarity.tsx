@@ -4,6 +4,7 @@ import { ClarityFlow } from '@/features/clarity/ClarityFlow';
 import { getScoreLabel } from '@/features/clarity/scoring';
 import type { ClarityHistoryItem, ClarityResult } from '@/features/clarity/types';
 import { getClarityStore } from '@/lib/clarity-store';
+import { useReducedMotion } from '@/lib/motion';
 import { goBackOr } from '@/lib/nav';
 
 // S32 Clarity Score — NATIVE flow (supersedes the former WebView embed of
@@ -12,6 +13,7 @@ import { goBackOr } from '@/lib/nav';
 // the device's MMKV-backed store and never sent anywhere (SR-4). Crisis is reachable
 // on every screen via the flow's Help-now pill and the mid-flow interstitial (SR-2).
 export default function ClarityRoute() {
+  const reduced = useReducedMotion();
   const store = getClarityStore();
 
   const saveResult = (result: ClarityResult): number | null => {
@@ -33,7 +35,13 @@ export default function ClarityRoute() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+          animation: reduced ? 'fade' : 'slide_from_right',
+          gestureEnabled: true,
+        }}
+      />
       <ClarityFlow
         onExit={() => goBackOr('/compass')}
         onHelp={() => router.push('/crisis')}

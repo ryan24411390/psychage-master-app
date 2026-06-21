@@ -1,6 +1,7 @@
 import { router, Stack } from 'expo-router';
 
 import { RelationshipFlow } from '@/features/relationship-health/RelationshipFlow';
+import { useReducedMotion } from '@/lib/motion';
 import { getRelationshipStore } from '@/lib/relationship-store';
 
 // Relationship Health — native, self-contained assessment (replaces the prior
@@ -8,9 +9,16 @@ import { getRelationshipStore } from '@/lib/relationship-store';
 // tabs; its own chrome carries the Help-now pill (SR-2). The store is the
 // MMKV-backed on-device singleton (SR-4); results never leave the device.
 export default function RelationshipHealthScreen() {
+  const reduced = useReducedMotion();
   return (
     <>
-      <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+          animation: reduced ? 'fade' : 'slide_from_right',
+          gestureEnabled: true,
+        }}
+      />
       <RelationshipFlow
         store={getRelationshipStore()}
         onExit={() => router.back()}

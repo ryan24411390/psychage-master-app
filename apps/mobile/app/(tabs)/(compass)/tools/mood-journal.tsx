@@ -3,6 +3,7 @@ import { View } from 'react-native';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { MoodJournalView } from '@/features/mood-journal/MoodJournalView';
+import { useReducedMotion } from '@/lib/motion';
 import { getMoodJournalStore } from '@/lib/mood-journal-store';
 
 // Mood Journal tool route — the "patterns & triggers" surface. Pushed full-screen
@@ -13,9 +14,16 @@ import { getMoodJournalStore } from '@/lib/mood-journal-store';
 // store is constructed here (it imports the shared package at runtime, so it loads
 // only on device / in Vitest — render tests inject a double into MoodJournalView).
 export default function MoodJournalRoute() {
+  const reduced = useReducedMotion();
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
-      <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+          animation: reduced ? 'fade' : 'slide_from_right',
+          gestureEnabled: true,
+        }}
+      />
       <GlobalHeader />
       <MoodJournalView momentStore={getMoodJournalStore()} />
     </View>
