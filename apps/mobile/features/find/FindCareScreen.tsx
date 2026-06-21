@@ -341,7 +341,7 @@ export default function FindCareScreen() {
         <Header />
         <View className="px-5 pt-2">
           <Text className="font-display text-4xl text-text-primary dark:text-text-primary-dark mt-1.5 mb-2.5">Find care</Text>
-          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-2">Browse NPI-verified providers licensed in your state. A listing is information, not a recommendation.</Text>
+          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-2">Browse providers listed in the public NPI registry, licensed in your state. A listing is information, not a recommendation or endorsement by Psychage.</Text>
           <View className="h-[120px] items-center justify-center my-4 bg-surface-accent dark:bg-surface-accent-dark rounded-[18px]"><BadgeCheck size={30} color={teal} /></View>
           <Primary label="Use my location" onPress={onUseLocation} />
           <Tap onPress={() => setStep('manual')}><View className="py-4 items-center"><Text className="font-sans-bold text-base text-primary dark:text-primary-dark">Enter my state instead</Text></View></Tap>
@@ -599,7 +599,7 @@ export default function FindCareScreen() {
         {loading ? (
           <Text className="font-sans-bold text-sm text-text-primary dark:text-text-primary-dark">Searching…</Text>
         ) : (
-          <View className="flex-row items-center gap-1.5"><BadgeCheck size={15} color={teal} /><Text className="font-sans-bold text-sm text-text-primary dark:text-text-primary-dark">{countShown.toLocaleString()} verified</Text></View>
+          <View className="flex-row items-center gap-1.5"><Text className="font-sans-bold text-sm text-text-primary dark:text-text-primary-dark">{countShown.toLocaleString()} listed</Text></View>
         )}
         <Tap onPress={() => setSheet('sort')}><View className="flex-row items-center gap-1.5 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-full px-3 py-1.5"><ArrowUpDown size={14} color={ink} /><Text className="font-sans-medium text-sm text-text-primary dark:text-text-primary-dark">Sort</Text></View></Tap>
       </View>
@@ -629,7 +629,7 @@ export default function FindCareScreen() {
                 <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-[14px] mt-0.5">{p.provider_type_label}</Text>
                 <View className="flex-row items-center gap-2.5 mt-2.5 flex-wrap">
                   {place ? <View className="flex-row items-center gap-1.5"><MapPin size={13} color={soft} /><Text className="font-sans text-[13px] text-text-secondary dark:text-text-secondary-dark">{place}{dist}</Text></View> : null}
-                  <View className="flex-row items-center gap-1 bg-teal-50 dark:bg-teal-900/30 rounded-full px-2 py-0.5 border border-teal-100 dark:border-teal-900/50"><BadgeCheck size={12} color={teal} /><Text style={{ color: teal }} className="font-sans-bold text-[12px]">Verified</Text></View>
+                  <View className="flex-row items-center gap-1 bg-surface-active dark:bg-surface-active-dark rounded-full px-2 py-0.5 border border-border/60 dark:border-border-dark/60"><Text className="font-sans-medium text-[12px] text-text-secondary dark:text-text-secondary-dark">NPI registry</Text></View>
                 </View>
               </View>
             </View>
@@ -794,9 +794,9 @@ const ProfileStep = React.memo(function ProfileStep({ id, onBack, fireHaptic }: 
         </View>
 
         {verified && (badge === 'verified') ? (
-          <View className="flex-row items-center gap-2.5 bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-900/40 rounded-2xl px-4 py-3 mb-6">
-            <BadgeCheck size={20} color={teal} />
-            <Text className="font-sans text-[14px] text-text-primary dark:text-text-primary-dark flex-1">NPI-verified profile <Text className="text-text-secondary dark:text-text-secondary-dark">· confirmed {verified}</Text></Text>
+          <View className="flex-row items-center gap-2.5 bg-surface-active dark:bg-surface-active-dark border border-border/50 dark:border-border-dark/40 rounded-2xl px-4 py-3 mb-6">
+            <FileText size={20} color={faint} />
+            <Text className="font-sans text-[14px] text-text-primary dark:text-text-primary-dark flex-1">Listed in the NPI registry <Text className="text-text-secondary dark:text-text-secondary-dark">· data confirmed {verified}</Text></Text>
           </View>
         ) : null}
 
@@ -861,7 +861,7 @@ const CompareStep = React.memo(function CompareStep({ ids, onBack, onRemove }: {
               <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-xs text-center mb-3">{p.credentials_suffix ?? ' '}</Text>
               <C l="Type" v={p.provider_type?.label ?? '—'} />
               <C l="License" v={[p.license_number, p.license_state].filter(Boolean).join(' · ') || '—'} />
-              <C l="Verified" v={formatVerified(p.verified_at) ?? '—'} />
+              <C l="NPI listing" v={formatVerified(p.verified_at) ? `Confirmed ${formatVerified(p.verified_at)}` : '—'} />
               <Tap onPress={() => onRemove(p.id)}><View className="py-2 mt-1.5 items-center"><Text className="font-sans-bold text-primary dark:text-primary-dark text-sm">Remove</Text></View></Tap>
             </View>
           );

@@ -45,7 +45,7 @@ export const DIRECTORY_COPY = {
   fieldType: 'Type',
   fieldLocation: 'Location',
   fieldModality: 'Modality',
-  fieldVerified: 'Verified',
+  fieldVerified: 'NPI listing',
   none: '—',
   noResults: 'No providers match these filters.',
   emptyTitle: 'No providers match',
@@ -56,8 +56,10 @@ export const DIRECTORY_COPY = {
   loadingMore: 'Loading more…',
   disclaimer: 'A listing is information, not a recommendation. Psychage does not vet or endorse providers.',
 
-  // Badges (mirror the provider's own DB state — not an endorsement)
-  badgeVerified: 'Verified',
+  // Badges (mirror the provider's own registry/claim state — NEVER a Psychage
+  // endorsement or vetting; P33). "Verified" was removed because it read as Psychage
+  // vouching for the provider; the data is simply sourced from the public NPI registry.
+  badgeVerified: 'NPI registry',
   badgeClaimed: 'Claimed',
   badgeUnclaimed: 'Listed',
   telehealth: 'Telehealth',
@@ -66,7 +68,7 @@ export const DIRECTORY_COPY = {
 
   // Provenance / credentials (detail). Informational — provider's own registry
   // data, not a Psychage endorsement. CT-pending.
-  credentialsTitle: 'Credentials & verification',
+  credentialsTitle: 'Credentials & registry listing',
   npiLabel: 'NPI',
   licenseLabel: 'License',
   npiSource: 'Listed from the NPI registry',
