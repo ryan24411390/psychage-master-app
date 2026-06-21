@@ -1,9 +1,16 @@
+import { FlashList } from '@shopify/flash-list';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { DomainRadar } from '@/components/ui/charts';
+import { ScoreGauge } from '@/components/ui/charts';
 import { Text } from '@/components/ui/Text';
+import { RelatedArticleCard } from '@/features/content/RelatedArticleCard';
+import { getLearnCategory } from '@/features/learn/categories';
+import { type ArticleListItem, listArticlesByCategorySlugs } from '@/lib/articles';
 
 import { CT4_RELATIONSHIP } from '../copy';
 import { getTopInterventions } from '../interventions';
@@ -13,12 +20,8 @@ import {
   type DetectedPattern,
   type PatternSeverity,
   type RelationshipDomain,
-  SUB_DIMENSION_META,
 } from '../types';
-import { DomainBar } from './DomainBar';
-import { RadarChart } from './RadarChart';
 import { SafetyAlert, SafetyBanner } from './SafetyAlert';
-import { ScoreRing } from './ScoreRing';
 
 export interface ResultsViewProps {
   readonly result: ComputedRelationshipResult;
@@ -56,13 +59,43 @@ function PatternCard({ pattern }: { pattern: DetectedPattern }) {
   );
 }
 
+// Related published articles for the relationship topic — read-only from
+// Supabase via the shared repo. The relationship category slugs are the single
+// source of truth in the Learn taxonomy. Drops silently when empty/offline.
+function RelatedReading({ heading }: { heading: string }) {
+  const slugs = getLearnCategory('relationships')?.slugs ?? [];
+  const { data } = useQuery({
+    queryKey: ['relationship-related', slugs],
+    queryFn: () => listArticlesByCategorySlugs(slugs),
+    enabled: slugs.length > 0,
+  });
+  const items = (data ?? []).slice(0, 5);
+  if (items.length === 0) return null;
+
+  return (
+    <View className="gap-3" testID="relationship-related">
+      <Text variant="h2" className="text-lg" accessibilityRole="header">
+        {heading}
+      </Text>
+      <FlashList
+        horizontal
+        data={items}
+        keyExtractor={(a: ArticleListItem) => a.slug}
+        showsHorizontalScrollIndicator={false}
+        ItemSeparatorComponent={() => <View className="w-3" />}
+        renderItem={({ item }: { item: ArticleListItem }) => <RelatedArticleCard article={item} />}
+      />
+    </View>
+  );
+}
+
 export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, onCrisis }: ResultsViewProps) {
   const t = CT4_RELATIONSHIP.results;
   const safetyTriggered = result.dvAlert.triggered || result.isolationAlert.triggered;
   const [alertVisible, setAlertVisible] = useState(safetyTriggered);
 
   const domains = ALL_DOMAINS.filter((d) => !(result.skipPartner && d === 'partner'));
-  const radarPoints = domains.map((d) => ({ label: DOMAIN_META[d].shortName, score: result.domainScores[d] }));
+  const radarPoints = domains.map((d) => ({ label: DOMAIN_META[d].shortName, value: result.domainScores[d] }));
   const interventions = getTopInterventions(result.patterns, 4);
   const blueprintParas = result.blueprint.split('\n\n').filter(Boolean);
 
@@ -77,7 +110,7 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
       >
         {safetyTriggered ? <SafetyBanner onCrisis={onCrisis} /> : null}
 
-        {/* Overall */}
+        {/* Overall — shared score gauge + tier read */}
         <View className="items-center gap-3 pt-2">
           <Text
             variant="caption"
@@ -85,7 +118,7 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
           >
             {t.overallHeading}
           </Text>
-          <ScoreRing score={result.compositeScore} />
+          <ScoreGauge value={result.compositeScore} />
           <Text
             variant="bodyLarge"
             className="px-6 text-center text-text-secondary dark:text-text-secondary-dark"
@@ -94,43 +127,35 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
           </Text>
         </View>
 
-        {/* Radar */}
-        <View className="items-center">
-          <RadarChart points={radarPoints} />
-        </View>
-
-        {/* By area */}
+        {/* By area — shared radar + compact per-area scores */}
         <View className="gap-3">
           <Text variant="h2" className="text-lg" accessibilityRole="header">
             {t.areasHeading}
           </Text>
-          {domains.map((d) => {
-            const subScores = result.subDimensionScores[d] as Record<string, number>;
-            const subMetas = SUB_DIMENSION_META.filter((m) => m.domain === d);
-            return (
-              <Card key={d} className="gap-3">
-                <DomainBar label={DOMAIN_META[d].name} score={result.domainScores[d]} />
-                <View className="gap-1.5 pl-1">
-                  {subMetas.map((m) => (
-                    <View key={m.key} className="flex-row items-center justify-between">
-                      <Text variant="caption" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
-                        {m.name}
-                      </Text>
-                      <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
-                        {subScores[m.key]}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </Card>
-            );
-          })}
+          <View className="items-center">
+            <DomainRadar points={radarPoints} />
+          </View>
+          <View className="flex-row flex-wrap justify-center gap-2">
+            {domains.map((d) => (
+              <View
+                key={d}
+                className="rounded-lg border border-border bg-surface px-3 py-2 dark:border-border-dark dark:bg-surface-dark"
+              >
+                <Text variant="caption" className="font-sans-medium">
+                  {`${DOMAIN_META[d].shortName} · ${result.domainScores[d]}`}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
 
-        {/* Blueprint */}
+        {/* What this means — plain-language tier read + generated reflection */}
         <View className="gap-2">
           <Text variant="h2" className="text-lg" accessibilityRole="header">
-            {t.blueprintHeading}
+            {t.whatThisMeansHeading}
+          </Text>
+          <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark leading-6">
+            {t.meaning[result.tier]}
           </Text>
           {blueprintParas.map((para) => (
             <Text
@@ -143,23 +168,25 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
           ))}
         </View>
 
-        {/* Patterns */}
-        {result.patterns.length > 0 ? (
-          <View className="gap-3">
-            <Text variant="h2" className="text-lg" accessibilityRole="header">
-              {t.patternsHeading}
+        {/* How it affects you — detected patterns (or a gentle fallback) */}
+        <View className="gap-3">
+          <Text variant="h2" className="text-lg" accessibilityRole="header">
+            {t.howAffectsHeading}
+          </Text>
+          {result.patterns.length > 0 ? (
+            result.patterns.map((p) => <PatternCard key={p.key} pattern={p} />)
+          ) : (
+            <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark leading-6">
+              {t.noPatterns}
             </Text>
-            {result.patterns.map((p) => (
-              <PatternCard key={p.key} pattern={p} />
-            ))}
-          </View>
-        ) : null}
+          )}
+        </View>
 
-        {/* Next steps */}
+        {/* How to improve — evidence-based next steps */}
         {interventions.length > 0 ? (
           <View className="gap-3">
             <Text variant="h2" className="text-lg" accessibilityRole="header">
-              {t.stepsHeading}
+              {t.howToImproveHeading}
             </Text>
             {interventions.map((iv) => (
               <Card key={iv.id} className="gap-2">
@@ -176,6 +203,9 @@ export function ResultsView({ result, saved, onSave, onRetake, onViewHistory, on
             ))}
           </View>
         ) : null}
+
+        {/* Related reading — published articles on relationships */}
+        <RelatedReading heading={t.relatedHeading} />
 
         {/* Actions */}
         <View className="gap-2.5 pt-2">

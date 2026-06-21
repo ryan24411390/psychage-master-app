@@ -7,19 +7,17 @@ import { Text } from '@/components/ui/Text';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 
 import { CT4_RELATIONSHIP } from '../copy';
-import { DOMAIN_META, type RelationshipDomain } from '../types';
 
-// Landing screen (S-relationship-1). Sets context, lets the user choose the
-// with-partner vs without-partner path, surfaces past reflections, and carries
-// the on-device + non-diagnostic disclaimer.
+// Landing screen (S-relationship-1). Leads with the with-partner vs
+// without-partner choice (the first decision branches the flow), then surfaces
+// past reflections, what to expect, and the on-device + non-diagnostic
+// disclaimer.
 
 export interface LandingViewProps {
   readonly onStart: (skipPartner: boolean) => void;
   readonly onViewHistory: () => void;
   readonly historyCount: number;
 }
-
-const PREVIEW_ORDER: RelationshipDomain[] = ['partner', 'family', 'friends', 'community'];
 
 export function LandingView({ onStart, onViewHistory, historyCount }: LandingViewProps) {
   const t = CT4_RELATIONSHIP.landing;
@@ -41,43 +39,7 @@ export function LandingView({ onStart, onViewHistory, historyCount }: LandingVie
         </Text>
       </Animated.View>
 
-      {/* Info cards */}
-      <View className="gap-3">
-        {t.info.map((card) => (
-          <Card key={card.title}>
-            <Text variant="bodyLarge" className="mb-1">
-              {card.title}
-            </Text>
-            <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark leading-5">
-              {card.body}
-            </Text>
-          </Card>
-        ))}
-      </View>
-
-      {/* Domain preview */}
-      <View className="gap-3">
-        <Text
-          variant="caption"
-          className="uppercase tracking-wider text-text-tertiary dark:text-text-tertiary-dark font-sans-medium"
-        >
-          {t.domainsHeading}
-        </Text>
-        <View className="flex-row flex-wrap gap-2">
-          {PREVIEW_ORDER.map((d) => (
-            <View
-              key={d}
-              className="rounded-lg border border-border bg-surface px-3 py-2 dark:border-border-dark dark:bg-surface-dark"
-            >
-              <Text variant="caption" className="font-sans-medium">
-                {DOMAIN_META[d].shortName}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </View>
-
-      {/* Choose path */}
+      {/* Choose path — the first decision, leads the screen and branches the flow */}
       <View className="gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 dark:border-primary-dark/30">
         <Text variant="label" accessibilityRole="header">
           {t.chooseHeading}
@@ -93,6 +55,9 @@ export function LandingView({ onStart, onViewHistory, historyCount }: LandingVie
             {`${t.withoutPartner.title}  ·  ${t.withoutPartner.sub}`}
           </Button>
         </View>
+        <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark leading-5">
+          {t.timeNote}
+        </Text>
       </View>
 
       {historyCount > 0 ? (
@@ -100,6 +65,20 @@ export function LandingView({ onStart, onViewHistory, historyCount }: LandingVie
           {`${t.viewHistory} (${historyCount})`}
         </Button>
       ) : null}
+
+      {/* What to expect */}
+      <View className="gap-3">
+        {t.info.map((card) => (
+          <Card key={card.title}>
+            <Text variant="bodyLarge" className="mb-1">
+              {card.title}
+            </Text>
+            <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark leading-5">
+              {card.body}
+            </Text>
+          </Card>
+        ))}
+      </View>
 
       {/* Disclaimer */}
       <Card>

@@ -62,15 +62,25 @@ export function RelationshipFlow({ store, onExit, onCrisis, initialView = 'landi
     [skipPartner],
   );
 
-  const handleSelect = useCallback(
+  // Commit the chosen answer, then advance — or finish on the last question.
+  // The next-answers map is threaded explicitly into finish() so the final
+  // selection is never lost to setAnswers' async flush (stale-closure guard).
+  const handleAnswer = useCallback(
     (value: number) => {
       if (!currentQuestion) return;
-      setAnswers((prev) => ({ ...prev, [currentQuestion.id]: value }));
+      const nextAnswers = { ...answers, [currentQuestion.id]: value };
+      setAnswers(nextAnswers);
+      if (index >= questions.length - 1) {
+        finish(nextAnswers);
+      } else {
+        setIndex((i) => i + 1);
+      }
     },
-    [currentQuestion],
+    [currentQuestion, answers, index, questions.length, finish],
   );
 
-  const advance = useCallback(() => {
+  // Move on without recording an answer for the current question.
+  const handleSkip = useCallback(() => {
     if (index >= questions.length - 1) {
       finish(answers);
     } else {
@@ -140,13 +150,13 @@ export function RelationshipFlow({ store, onExit, onCrisis, initialView = 'landi
 
       {view === 'wizard' && currentQuestion ? (
         <WizardView
+          key={currentQuestion.id}
           question={currentQuestion}
           index={index}
           total={questions.length}
           value={answers[currentQuestion.id]}
-          onSelect={handleSelect}
-          onNext={advance}
-          onSkip={advance}
+          onAnswer={handleAnswer}
+          onSkip={handleSkip}
         />
       ) : null}
 
