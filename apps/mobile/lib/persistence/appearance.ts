@@ -4,13 +4,21 @@
 //   - `reducedMotion` → OR-ed into lib/motion.ts useReducedMotion() app-wide, so
 //                       EVERY screen (A1 home/terrain included) calms its motion.
 //                       FULLY FUNCTIONAL — no tailwind dependency.
-//   - `mode`          → light / night / system. FULLY FUNCTIONAL since the #81
-//                       wiring: tailwind.config.js uses `darkMode: 'class'`, and
+//   - `mode`          → light / night. FULLY FUNCTIONAL since the #81 wiring:
+//                       tailwind.config.js uses `darkMode: 'class'`, and
 //                       app/_layout.tsx's AppearanceSync applies the persisted mode
 //                       imperatively via NativeWind's `colorScheme.set()`
-//                       (lib/theme.ts maps mode → scheme). 'system' defers to the
-//                       OS, which requires app.json `userInterfaceStyle: automatic`
-//                       so the OS reports its real appearance to the app.
+//                       (lib/theme.ts maps mode → scheme). 'night' is a manual
+//                       override, decoupled from the OS, so it reaches dark even
+//                       though foundation 0b set app.json `userInterfaceStyle:
+//                       "light"`. A third 'system' (follow-OS) mode stays in the
+//                       AppearanceMode union for lib/theme.ts totality but is NOT
+//                       offered in the S45 UI and is never persisted: under the
+//                       forced-light app.json the OS always reports light, so
+//                       follow-OS would silently never reach dark. Restoring a
+//                       working 'system' is a one-line SHARED CORE foundation fixup
+//                       — app.json `userInterfaceStyle` "light" → "automatic", with
+//                       this seed keeping light as the no-preference default.
 //
 // RESEED-ON-ANOMALY (derived preference, never throws) — the tier-flags policy.
 // Not user-authored record data.
@@ -28,7 +36,11 @@ export type AppearanceMode = 'light' | 'night' | 'system';
 export const SCHEMA_VERSION = 1 as const;
 export const STORAGE_KEY = 'mobile:appearance';
 
-const MODES: readonly AppearanceMode[] = ['light', 'night', 'system'];
+// 'system' stays in the AppearanceMode union (lib/theme.ts totality) but is not a
+// selectable/persistable value — only light + night round-trip. A legacy stored
+// 'system' (or any unknown) normalizes to light, the register it renders as under
+// the forced-light app.json, so the S45 radio never shows a blank selection.
+const PERSISTED_MODES: readonly AppearanceMode[] = ['light', 'night'];
 
 export interface AppearanceState {
   readonly version: number;
@@ -44,7 +56,7 @@ function seed(): AppearanceState {
 }
 
 function normalizeMode(value: unknown): AppearanceMode {
-  return MODES.includes(value as AppearanceMode) ? (value as AppearanceMode) : 'system';
+  return PERSISTED_MODES.includes(value as AppearanceMode) ? (value as AppearanceMode) : 'light';
 }
 
 /**
