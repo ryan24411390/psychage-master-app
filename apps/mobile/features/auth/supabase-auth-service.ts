@@ -40,13 +40,30 @@ type ProviderCredential =
   | { readonly provider: SocialProvider; readonly idToken: string; readonly nonce?: string };
 type GetProviderCredential = (provider: SocialProvider) => Promise<ProviderCredential>;
 
+/** Minimal shape of the supabase user fields we read for the display name (P63). */
+type NamedUser = { user_metadata?: Record<string, unknown> | null } | null | undefined;
+
+/**
+ * The verified method's display name (P63): Google's profile name, or the full_name
+ * entered at email signup. Null while unverified, or when the method carries no name
+ * (we never invent one — e.g. no email-local-part fallback).
+ */
+function deriveName(user: NamedUser, verified: boolean): string | null {
+  if (!verified || !user) return null;
+  const meta = user.user_metadata ?? {};
+  const candidate = meta.full_name ?? meta.name;
+  return typeof candidate === 'string' && candidate.trim().length > 0 ? candidate.trim() : null;
+}
+
 // Map a supabase-js Session to the lightweight AuthSession the UI reads. The same
-// {email, verified} shape signUp/signIn already return — so boot-hydration and the
-// onAuthStateChange listener stay consistent with the post-auth result.
+// {email, verified, name} shape signUp/signIn already return — so boot-hydration and
+// the onAuthStateChange listener stay consistent with the post-auth result.
 function toAuthSession(session: Session | null): AuthSession | null {
-  const email = session?.user?.email;
+  const user = session?.user;
+  const email = user?.email;
   if (!email) return null;
-  return { email, verified: Boolean(session?.user?.email_confirmed_at) };
+  const verified = Boolean(user?.email_confirmed_at);
+  return { email, verified, name: deriveName(user, verified) };
 }
 
 export interface SupabaseAuthServiceDeps {
@@ -102,9 +119,10 @@ export function createSupabaseAuthService(deps: SupabaseAuthServiceDeps = {}): A
           return { ok: false, error: isNetworkError(error) ? 'offline' : 'invalid-credentials' };
         }
         if (data.session) await recordEvent('sign_up', true);
+        const verified = Boolean(data.user?.email_confirmed_at);
         return {
           ok: true,
-          session: { email, verified: Boolean(data.user?.email_confirmed_at) },
+          session: { email, verified, name: deriveName(data.user, verified) },
         };
       } catch (error) {
         return { ok: false, error: isNetworkError(error) ? 'offline' : 'unknown' };
@@ -160,13 +178,13 @@ export function createSupabaseAuthService(deps: SupabaseAuthServiceDeps = {}): A
           }
           return { ok: false, error: 'unknown' };
         }
-        return {
-          ok: true,
-          session: {
-            email: data.user?.email ?? '',
-            verified: Boolean(data.user?.email_confirmed_at),
-          },
-        };
+        {
+          const verified = Boolean(data.user?.email_confirmed_at);
+          return {
+            ok: true,
+            session: { email: data.user?.email ?? '', verified, name: deriveName(data.user, verified) },
+          };
+        }
       } catch (error) {
         return { ok: false, error: isNetworkError(error) ? 'offline' : 'unknown' };
       }
@@ -188,9 +206,10 @@ export function createSupabaseAuthService(deps: SupabaseAuthServiceDeps = {}): A
           return { ok: false, error: 'invalid-credentials' };
         }
         await recordEvent('sign_in', true);
+        const verified = Boolean(data.user?.email_confirmed_at);
         return {
           ok: true,
-          session: { email, verified: Boolean(data.user?.email_confirmed_at) },
+          session: { email, verified, name: deriveName(data.user, verified) },
         };
       } catch (error) {
         return { ok: false, error: isNetworkError(error) ? 'offline' : 'unknown' };

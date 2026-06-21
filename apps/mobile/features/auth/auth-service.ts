@@ -34,6 +34,12 @@ export interface AuthSession {
   readonly email: string;
   /** rules/auth.md §3: Tier-2 features unlock only after email verification. */
   readonly verified: boolean;
+  /**
+   * Display name from the VERIFIED method (Google profile name / the full_name entered
+   * at email signup), or null when the method carries no name (P63). Always null while
+   * unverified — there is no verified method to source it from.
+   */
+  readonly name: string | null;
 }
 
 export interface AuthResult {
@@ -108,7 +114,7 @@ export function createStubAuthService(options: StubAuthOptions = {}): AuthServic
   return {
     async signUp(email: string) {
       if (offline) return { ok: false, error: 'offline' };
-      session = { email, verified: false };
+      session = { email, verified: false, name: null };
       emit();
       return { ok: true, session };
     },
@@ -117,7 +123,7 @@ export function createStubAuthService(options: StubAuthOptions = {}): AuthServic
       // Stub has no credential store, so it admits the sign-in. The REAL impl verifies
       // against Supabase and returns { ok: false, error: 'invalid-credentials' } on
       // any failure — the same generic code for wrong-password and unknown-email.
-      session = { email, verified: true };
+      session = { email, verified: true, name: null };
       emit();
       return { ok: true, session };
     },
@@ -125,7 +131,7 @@ export function createStubAuthService(options: StubAuthOptions = {}): AuthServic
       if (offline) return { ok: false, error: 'offline' };
       // Stub admits the social sign-in with a synthetic verified session (Apple/Google
       // emails are pre-verified). The REAL impl exchanges the provider id-token.
-      session = { email: 'social@stub.local', verified: true };
+      session = { email: 'social@stub.local', verified: true, name: null };
       emit();
       return { ok: true, session };
     },
