@@ -1,23 +1,29 @@
 /**
- * Bookmarks React Query hooks (design.md §State management).
+ * Bookmarks hooks — local-first (P13).
  *
- * Server state only (frozen stack: TanStack Query for server data). Optimistic
- * toggle with revert on error; invalidate on settle. Fires count-only analytics.
- * This is the app's first useMutation — sets the optimistic pattern.
+ * Backed by the on-device store (`./store`) via useSyncExternalStore, NOT the
+ * server (frozen stack reserves TanStack Query for SERVER data — bookmarks are now
+ * local). The exported API is unchanged so every consumer (the article reader,
+ * Learn save buttons + "Saved to read" rail, the provider directory star, the
+ * /saved list) keeps working — and now works fully signed-out.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo, useSyncExternalStore } from 'react';
 import { trackBookmarkAdded, trackBookmarkRemoved } from './analytics';
 import {
-  addBookmark,
-  bookmarkedIdsForType,
-  currentUserId,
-  listUserBookmarks,
+  bookmarkKey,
+  getBookmarksSnapshot,
   removeBookmark,
-} from './service';
-import type { BookmarkRef, ResourceType } from './types';
+  saveBookmark,
+  type StoredBookmark,
+  subscribeBookmarks,
+} from './store';
+import type { Bookmark, BookmarkRef, ResourceType } from './types';
 
-/** Pure optimistic transform — exported for unit testing the add/remove/revert math. */
+/** Local-first: there is no auth wall, so a stable non-null id always "signs in". */
+const LOCAL_USER = 'local';
+
+/** Pure optimistic transform — kept as a tiny, unit-testable add/remove helper. */
 export function toggleIds(prev: ReadonlySet<string>, resourceId: string, wasSaved: boolean): Set<string> {
   const next = new Set(prev);
   if (wasSaved) next.delete(resourceId);
@@ -25,29 +31,47 @@ export function toggleIds(prev: ReadonlySet<string>, resourceId: string, wasSave
   return next;
 }
 
-/** Current Supabase user id (null when signed out). Drives the per-user query keys. */
-export function useCurrentUserId() {
-  return useQuery({ queryKey: ['auth', 'uid'], queryFn: () => currentUserId(), staleTime: 5 * 60_000 });
+/** Map a stored row → the public Bookmark shape consumers already read. */
+function toBookmark(s: StoredBookmark): Bookmark {
+  return {
+    id: bookmarkKey(s),
+    user_id: LOCAL_USER,
+    resource_type: s.resource_type,
+    resource_id: s.resource_id,
+    created_at: s.savedAt,
+  };
 }
 
-/** Q-1: the signed-in user's full bookmark list, newest-first. */
-export function useBookmarks() {
-  const { data: userId } = useCurrentUserId();
-  return useQuery({
-    queryKey: ['bookmarks', userId],
-    queryFn: () => listUserBookmarks(),
-    enabled: Boolean(userId),
-  });
+/** Reactive read of the raw stored items (stable snapshot ref between mutations). */
+function useStoredBookmarks(): readonly StoredBookmark[] {
+  return useSyncExternalStore(subscribeBookmarks, getBookmarksSnapshot).items;
 }
 
-/** Q-2: saved-id set for one type — hydrates a detail-screen SaveButton. */
-export function useBookmarkedIds(resourceType: ResourceType) {
-  const { data: userId } = useCurrentUserId();
-  return useQuery({
-    queryKey: ['bookmarks', userId, resourceType],
-    queryFn: () => bookmarkedIdsForType(resourceType),
-    enabled: Boolean(userId),
-  });
+/**
+ * Always non-null in local-first mode (`'local'`). Kept so existing consumers —
+ * which gate saved surfaces on a truthy id — render signed-out without changes.
+ */
+export function useCurrentUserId(): { data: string | null } {
+  return { data: LOCAL_USER };
+}
+
+/** Q-1: the full saved list, newest-first. */
+export function useBookmarks(): { data: Bookmark[]; isLoading: boolean; isError: boolean } {
+  const items = useStoredBookmarks();
+  const data = useMemo(() => items.map(toBookmark), [items]);
+  return { data, isLoading: false, isError: false };
+}
+
+/** Q-2: the saved-id set for one type — hydrates a detail-screen SaveButton. */
+export function useBookmarkedIds(
+  resourceType: ResourceType,
+): { data: Set<string>; isLoading: boolean; isError: boolean } {
+  const items = useStoredBookmarks();
+  const data = useMemo(
+    () => new Set(items.filter((b) => b.resource_type === resourceType).map((b) => b.resource_id)),
+    [items, resourceType],
+  );
+  return { data, isLoading: false, isError: false };
 }
 
 interface ToggleVars {
@@ -56,41 +80,21 @@ interface ToggleVars {
   readonly wasSaved: boolean;
 }
 
-interface ToggleContext {
-  readonly idsKey: readonly unknown[];
-  readonly prevIds: Set<string> | undefined;
-}
-
 /**
- * Toggle a bookmark with optimistic UI. onMutate flips the cached id-set,
- * onError reverts it, onSettled invalidates the per-user keys (prefix match
- * also refreshes the full list). Analytics are count-only (SR-4).
+ * Toggle a bookmark. The local write is synchronous + reactive (the store
+ * notifies subscribers), so there's no optimistic/revert dance. Analytics stay
+ * count-only (SR-4). Returns a `mutate` to keep the call sites unchanged.
  */
-export function useToggleBookmark() {
-  const qc = useQueryClient();
-  const { data: userId } = useCurrentUserId();
-
-  return useMutation<void, unknown, ToggleVars, ToggleContext>({
-    mutationFn: async ({ ref, wasSaved }) => {
-      if (wasSaved) await removeBookmark(ref);
-      else await addBookmark(ref);
+export function useToggleBookmark(): { mutate: (vars: ToggleVars) => void } {
+  return {
+    mutate: ({ ref, wasSaved }: ToggleVars) => {
+      if (wasSaved) {
+        removeBookmark(ref);
+        trackBookmarkRemoved();
+      } else {
+        saveBookmark(ref);
+        trackBookmarkAdded();
+      }
     },
-    onMutate: async ({ ref, wasSaved }) => {
-      const idsKey = ['bookmarks', userId, ref.resource_type] as const;
-      await qc.cancelQueries({ queryKey: idsKey });
-      const prevIds = qc.getQueryData<Set<string>>(idsKey);
-      if (prevIds) qc.setQueryData(idsKey, toggleIds(prevIds, ref.resource_id, wasSaved));
-      return { idsKey, prevIds };
-    },
-    onError: (_err, _vars, ctx) => {
-      if (ctx?.prevIds !== undefined) qc.setQueryData(ctx.idsKey, ctx.prevIds);
-    },
-    onSuccess: (_data, { wasSaved }) => {
-      if (wasSaved) trackBookmarkRemoved();
-      else trackBookmarkAdded();
-    },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['bookmarks', userId] });
-    },
-  });
+  };
 }
