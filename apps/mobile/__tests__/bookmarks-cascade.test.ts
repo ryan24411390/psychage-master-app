@@ -1,26 +1,35 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import * as bookmarkService from '@/features/bookmarks/service';
+import { STORAGE_KEY as BOOKMARKS_KEY } from '@/features/bookmarks/store';
 import { requestRemoteAccountDeletion } from '@/lib/persistence/account-deletion';
+import { KNOWN_LOCAL_KEYS } from '@/lib/persistence/known-keys';
+import { wipeLocalData } from '@/lib/persistence/wipe-local-data';
 
 /**
  * US-7 / AC-7.1 / AC-7.2 — account deletion clears bookmarks.
  *
- * The shared `public.bookmarks` table has `user_id UUID FK auth.users ON DELETE
- * CASCADE` (web migration; brief open-Q#2 resolved). So bookmark rows are erased
- * by the DB when the account-deletion path removes the auth.users row — NO mobile
- * cleanup code. AC-7.2 ("integration test against the account-deletion path") is
- * covered here at the achievable unit level; the live row-gone assertion belongs
- * to a DB harness (cf. scripts/verify-checkin-rls.ts), tracked as a follow-up.
+ * Bookmarks are now LOCAL-FIRST (P13): they live on the device (no Supabase
+ * `bookmarks` rows), so the old DB FK CASCADE no longer applies. "Delete my
+ * record" (S48 `wipeLocalData`) erases them because the key is registered in
+ * KNOWN_LOCAL_KEYS; the remote account-deletion RPC still tears down the account.
  */
-describe('bookmarks account-deletion cascade (US-7)', () => {
-  it('AC-7.1: removal relies on FK CASCADE — the service exposes no client-side bulk delete', () => {
-    const svc = bookmarkService as Record<string, unknown>;
-    expect(svc.deleteAllForUser).toBeUndefined();
-    expect(svc.clearBookmarks).toBeUndefined();
+describe('bookmarks deletion (US-7, local-first)', () => {
+  it('AC-7.1: the bookmarks key is registered for local wipe (S48)', () => {
+    expect(KNOWN_LOCAL_KEYS).toContain(BOOKMARKS_KEY);
   });
 
-  it('AC-7.2: the account-deletion path fires delete_account() — the RPC that cascades bookmarks', async () => {
+  it('AC-7.1: wipeLocalData removes the bookmarks blob', () => {
+    const map = new Map<string, string>([[BOOKMARKS_KEY, JSON.stringify({ version: 1, items: [] })]]);
+    wipeLocalData({
+      get: (k) => map.get(k) ?? null,
+      set: (k, v) => void map.set(k, v),
+      remove: (k) => void map.delete(k),
+      getAllKeys: () => Array.from(map.keys()),
+    });
+    expect(map.has(BOOKMARKS_KEY)).toBe(false);
+  });
+
+  it('AC-7.2: the account-deletion path still fires delete_account() (account teardown)', async () => {
     const rpc = vi.fn(async () => ({ data: null, error: null }));
     const getUser = vi.fn(async () => ({ data: { user: { id: 'u-1' } }, error: null }));
     const client = { auth: { getUser }, rpc } as unknown as SupabaseClient;

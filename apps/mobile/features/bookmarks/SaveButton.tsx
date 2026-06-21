@@ -3,8 +3,9 @@
  *
  * Saved = filled Bookmark (primary); unsaved = outline BookmarkPlus (secondary).
  * Save = spring-pop scale + medium haptic (the feature's one signature moment);
- * unsave = light haptic. Anonymous tap → onRequestSignIn (parent shows S-2).
- * Reduce-Motion → instant fill; Reduce-Haptics handled inside useHaptics.
+ * unsave = light haptic. Local-first (P13): the tap saves to the device
+ * immediately — no auth wall. Reduce-Motion → instant fill; Reduce-Haptics
+ * handled inside useHaptics.
  */
 
 import { Bookmark, BookmarkPlus } from 'lucide-react-native';
@@ -19,7 +20,7 @@ import { useHaptics } from '@/lib/haptic-context';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 import { useThemeColors } from '@/lib/use-theme-colors';
 import { BOOKMARKS_COPY } from './copy';
-import { useBookmarkedIds, useCurrentUserId, useToggleBookmark } from './hooks';
+import { useBookmarkedIds, useToggleBookmark } from './hooks';
 import type { ResourceType } from './types';
 
 const SAVE_LABEL: Record<ResourceType, string> = {
@@ -32,16 +33,13 @@ const SAVE_LABEL: Record<ResourceType, string> = {
 export interface SaveButtonProps {
   readonly resourceType: ResourceType;
   readonly resourceId: string;
-  /** Called when an anonymous user taps save — parent presents the sign-in sheet (S-2). */
-  readonly onRequestSignIn?: () => void;
   readonly testID?: string;
 }
 
-export function SaveButton({ resourceType, resourceId, onRequestSignIn, testID }: SaveButtonProps) {
+export function SaveButton({ resourceType, resourceId, testID }: SaveButtonProps) {
   const tc = useThemeColors();
   const reduced = useReducedMotion();
   const { fireHaptic } = useHaptics();
-  const { data: userId } = useCurrentUserId();
   const { data: savedIds } = useBookmarkedIds(resourceType);
   const toggle = useToggleBookmark();
 
@@ -50,10 +48,6 @@ export function SaveButton({ resourceType, resourceId, onRequestSignIn, testID }
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   const onPress = () => {
-    if (!userId) {
-      onRequestSignIn?.();
-      return;
-    }
     if (isSaved) {
       fireHaptic('affirm');
     } else {
