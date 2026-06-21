@@ -10,12 +10,14 @@ import {
 } from '@/features/crisis/region';
 import { RegionPickerView } from '@/features/crisis/RegionPickerView';
 import { storage } from '@/lib/adapters/storage';
+import { useReducedMotion } from '@/lib/motion';
 
 // S12 route. The C-SEARCH-LIST region picker. Selecting persists the override
-// (local-only) and returns to S11, which re-resolves on focus. Instant navigation
-// (animation: 'none') to match the crisis register.
+// (local-only) and returns to S11, which re-resolves on focus. Slides on top of S11
+// (slide_from_right, fade under reduced-motion) — consistent with the crisis register.
 
 export default function CrisisRegionScreen() {
+  const reduced = useReducedMotion();
   const current = resolveRegion({
     storedOverride: loadRegionOverride(storage),
     deviceHint: defaultDeviceRegionHint(),
@@ -28,7 +30,9 @@ export default function CrisisRegionScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false, animation: 'none' }} />
+      <Stack.Screen
+        options={{ headerShown: false, animation: reduced ? 'fade' : 'slide_from_right' }}
+      />
       <RegionPickerView
         regions={CRISIS_DATASET.regions}
         currentRegion={current}
