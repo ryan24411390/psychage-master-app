@@ -14,14 +14,27 @@ export interface Coords {
 }
 
 export type LocationResult =
-  | { readonly status: 'granted'; readonly coords: Coords }
+  | {
+      readonly status: 'granted';
+      readonly coords: Coords;
+      /** ISO 3166-1 alpha-2 from reverse-geocode (e.g. 'US'); null if it failed. */
+      readonly countryCode: string | null;
+      /** State/region name or code from reverse-geocode (e.g. 'California'); null if it failed. */
+      readonly region: string | null;
+    }
   | { readonly status: 'denied' }
   | { readonly status: 'unavailable' };
 
 /**
- * Request foreground location permission and read the current position once.
- * Returns 'denied' if the user declines (the directory then stays on text filters)
- * and 'unavailable' on any hardware/lookup failure. Never throws.
+ * Request foreground location permission, read the current position once, and
+ * reverse-geocode it to a country + region. Returns 'denied' if the user declines
+ * (the directory then stays on manual state selection) and 'unavailable' on any
+ * hardware/lookup failure. Never throws.
+ *
+ * Why country + region and not a lat/lng radius search: provider records carry no
+ * coordinates (provider_locations.latitude/longitude are null across the table), so
+ * a geo-radius query matches nothing. The directory searches by STATE instead, so
+ * the caller resolves the device location to a US state (or detects non-US) here.
  */
 export async function requestAndGetCoords(): Promise<LocationResult> {
   try {
@@ -31,10 +44,21 @@ export async function requestAndGetCoords(): Promise<LocationResult> {
     const pos = await Location.getCurrentPositionAsync({
       accuracy: Location.Accuracy.Balanced,
     });
-    return {
-      status: 'granted',
-      coords: { latitude: pos.coords.latitude, longitude: pos.coords.longitude },
-    };
+    const coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+
+    // One-shot reverse-geocode (same foreground permission; never persisted/logged).
+    let countryCode: string | null = null;
+    let region: string | null = null;
+    try {
+      const places = await Location.reverseGeocodeAsync(coords);
+      const place = places[0];
+      countryCode = place?.isoCountryCode ?? null;
+      region = place?.region ?? null;
+    } catch {
+      // Reverse-geocode is best-effort; without it the caller falls back to manual.
+    }
+
+    return { status: 'granted', coords, countryCode, region };
   } catch {
     return { status: 'unavailable' };
   }

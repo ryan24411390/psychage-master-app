@@ -45,7 +45,7 @@ export const DIRECTORY_COPY = {
   fieldType: 'Type',
   fieldLocation: 'Location',
   fieldModality: 'Modality',
-  fieldVerified: 'Verified',
+  fieldVerified: 'NPI listing',
   none: '—',
   noResults: 'No providers match these filters.',
   emptyTitle: 'No providers match',
@@ -56,8 +56,10 @@ export const DIRECTORY_COPY = {
   loadingMore: 'Loading more…',
   disclaimer: 'A listing is information, not a recommendation. Psychage does not vet or endorse providers.',
 
-  // Badges (mirror the provider's own DB state — not an endorsement)
-  badgeVerified: 'Verified',
+  // Badges (mirror the provider's own registry/claim state — NEVER a Psychage
+  // endorsement or vetting; P33). "Verified" was removed because it read as Psychage
+  // vouching for the provider; the data is simply sourced from the public NPI registry.
+  badgeVerified: 'NPI registry',
   badgeClaimed: 'Claimed',
   badgeUnclaimed: 'Listed',
   telehealth: 'Telehealth',
@@ -66,7 +68,7 @@ export const DIRECTORY_COPY = {
 
   // Provenance / credentials (detail). Informational — provider's own registry
   // data, not a Psychage endorsement. CT-pending.
-  credentialsTitle: 'Credentials & verification',
+  credentialsTitle: 'Credentials & registry listing',
   npiLabel: 'NPI',
   licenseLabel: 'License',
   npiSource: 'Listed from the NPI registry',
@@ -84,7 +86,12 @@ export const DIRECTORY_COPY = {
   directions: 'Directions',
   email: 'Email',
   booking: 'Booking page',
-  useAsTherapist: 'Use in my therapist record',
+  // Action that opens the share-with-a-provider flow. Worded to say plainly what it
+  // does (the old "Use in my therapist record" read as "am I the therapist / did I
+  // sign up?"). Final copy is Dr. Dobson-reviewed.
+  useAsTherapist: 'Share my check-ins with this provider',
+  shareClarifier:
+    'Puts together a summary of your recent check-ins that you can share with them. Psychage never contacts them for you.',
   notFoundTitle: 'Provider unavailable',
   notFoundBody: 'This listing could not be loaded. It may have been removed.',
 } as const;

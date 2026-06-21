@@ -20,8 +20,8 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import {
   ArrowUpDown, BadgeCheck, Bookmark, BookOpen, Building2, Check, ChevronDown, ChevronLeft,
-  ChevronRight, FileText, Hash, Info, LifeBuoy, MapPin, MessageSquare, Phone, Search,
-  Stethoscope, Users, X,
+  ChevronRight, FileText, Hash, Info, LifeBuoy, MapPin, MessageSquare, Phone, Plus, Search,
+  Stethoscope, Trash2, Users, X,
 } from 'lucide-react-native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Modal, Pressable, ScrollView, TextInput, View, type ViewStyle } from 'react-native';
@@ -31,9 +31,12 @@ import { useColorScheme } from 'nativewind';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HeaderAvatar } from '@/components/HeaderAvatar';
+import { Mascot } from '@/components/home/Mascot';
 import { PsychageLogo } from '@/components/PsychageLogo';
 import { Text } from '@/components/ui/Text';
-import { useBookmarkedIds, useCurrentUserId, useToggleBookmark } from '@/features/bookmarks/hooks';
+import { MASCOT_CONTEXTUAL } from '@/features/mascot/mascot.surfaces';
+import { useMyProviders } from '@/lib/use-my-providers';
+import type { SavedProviderInput } from '@/lib/persistence/my-providers';
 import { dial } from '@/features/crisis/dialer';
 import { useHaptics } from '@/lib/haptic-context';
 import { useDirectoryLocation } from '@/lib/use-directory-location';
@@ -42,7 +45,7 @@ import { colors } from '@/lib/colors';
 
 import { telUrl } from '@/features/directory/contact';
 import { useCityCounts, useProviderSearch, useProviderTypes, useStateCounts, useTypeCounts } from '@/features/directory/hooks';
-import { DEFAULT_RADIUS_MILES, requestAndGetCoords, type Coords } from '@/features/directory/location';
+import { requestAndGetCoords } from '@/features/directory/location';
 import { cleanDisplayName } from '@/features/directory/mapping';
 import { getProviderById } from '@/features/directory/queries';
 import { ABBR, STATES } from '@/features/directory/states';
@@ -72,6 +75,18 @@ const TYPE_ICON: Record<string, typeof Users> = {
   'marriage-family-therapist': Users,
 };
 const iconForType = (slug: string) => TYPE_ICON[slug] ?? Users;
+
+// Resolve a reverse-geocoded region (full name "California" OR 2-letter "CA") to the
+// canonical state name the directory filters on. Providers carry no coordinates, so
+// "Use my location" searches by STATE — this maps the device region onto one.
+function resolveStateName(region: string | null): string | null {
+  if (!region) return null;
+  const direct = STATES.find((s) => s.toLowerCase() === region.trim().toLowerCase());
+  if (direct) return direct;
+  const up = region.trim().toUpperCase();
+  if (up.length === 2) return STATES.find((s) => ABBR[s] === up) ?? null;
+  return null;
+}
 
 function formatVerified(iso: string | null): string | null {
   if (!iso) return null;
@@ -151,7 +166,7 @@ function Skeleton() {
   );
 }
 
-type Step = 'location' | 'manual' | 'city' | 'type' | 'outside' | 'results' | 'profile' | 'compare';
+type Step = 'location' | 'manual' | 'city' | 'type' | 'outside' | 'results' | 'profile' | 'compare' | 'saved';
 
 export default function FindCareScreen() {
   const reduce = useReduceMotion();
@@ -178,19 +193,17 @@ export default function FindCareScreen() {
   const [city, setCity] = useState<string | null>(dl.city);
   const [typeSel, setTypeSel] = useState<{ id: string; label: string } | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [coords, setCoords] = useState<Coords | null>(null);
   const [stateQ, setStateQ] = useState('');
   const [cityQ, setCityQ] = useState('');
   const [query, setQuery] = useState('');
   const [debounced, setDebounced] = useState('');
   const [sort, setSort] = useState<'relevance' | 'name' | 'distance'>('relevance');
-  const [sheet, setSheet] = useState<null | 'sort' | 'crisis'>(null);
+  const [sheet, setSheet] = useState<null | 'sort' | 'crisis' | 'addProvider'>(null);
 
-  // bookmarks (real save + compare)
-  const { data: userId } = useCurrentUserId();
-  const { data: savedSet } = useBookmarkedIds('provider');
-  const toggle = useToggleBookmark();
-  const savedIds = useMemo(() => Array.from(savedSet ?? []), [savedSet]);
+  // My providers — local-first (works signed-out), used for save + compare + call list.
+  const my = useMyProviders();
+  // Compare only fetches real NPI listings by id; manual entries have no directory row.
+  const compareIds = useMemo(() => my.items.filter((p) => !p.manual).map((p) => p.id), [my.items]);
 
   useEffect(() => {
     const id = setTimeout(() => setDebounced(query.trim()), 300);
@@ -198,21 +211,21 @@ export default function FindCareScreen() {
   }, [query]);
 
   const stateAbbr = loc ? ABBR[loc] : undefined;
+  // No lat/lng/radius: provider_locations carry no coordinates, so a geo-radius search
+  // returns nothing. The directory searches by state (resolved from device location
+  // for "Use my location"); distance sort is likewise unbacked and not offered.
   const params = useMemo<ProviderSearchParams>(
     () => ({
       query: debounced || undefined,
       state: stateAbbr,
       city: city && city !== 'all' ? city : undefined,
       provider_type_ids: typeSel ? [typeSel.id] : undefined,
-      latitude: coords?.latitude,
-      longitude: coords?.longitude,
-      radius_miles: coords ? DEFAULT_RADIUS_MILES : undefined,
       sort_by: sort,
       per_page: 20,
     }),
-    [debounced, stateAbbr, city, typeSel, coords, sort],
+    [debounced, stateAbbr, city, typeSel, sort],
   );
-  const searchEnabled = step === 'results' && (!!stateAbbr || !!coords);
+  const searchEnabled = step === 'results' && !!stateAbbr;
   const search = useProviderSearch(params, searchEnabled);
   const headerCount = search.total;
   const countShown = useCountUp(headerCount, reduce);
@@ -243,27 +256,47 @@ export default function FindCareScreen() {
 
   const onUseLocation = async () => {
     const res = await requestAndGetCoords();
-    if (res.status === 'granted') {
-      setCoords(res.coords);
-      setSort('distance');
-      setStep('results');
+    if (res.status !== 'granted') {
+      setStep('manual');
+      return;
+    }
+    // Non-US device → the out-of-US state (the directory is US-only).
+    if (res.countryCode && res.countryCode !== 'US') {
+      setStep('outside');
+      return;
+    }
+    // US: resolve the region to a state and search by it (no provider coordinates exist
+    // for a radius search). Unresolvable region → fall back to manual state selection.
+    const stateName = resolveStateName(res.region);
+    if (stateName) {
+      setLoc(stateName);
+      setCity('all');
+      persist(stateName, 'all');
+      setStep('type');
     } else {
       setStep('manual');
     }
   };
 
-  const isSaved = (id: string) => savedSet?.has(id) ?? false;
-  const toggleSave = (id: string) => {
-    if (!userId) {
-      router.push('/(auth)/sign-up');
-      return;
-    }
-    fireHaptic(isSaved(id) ? 'tab' : 'confirm');
-    toggle.mutate({ ref: { resource_type: 'provider', resource_id: id }, wasSaved: isSaved(id) });
+  const isSaved = (id: string) => my.isSaved(id);
+  // Save locally (no auth wall). Takes a denormalized snapshot so the My-providers
+  // list can render + dial without re-fetching.
+  const toggleSave = (input: SavedProviderInput) => {
+    fireHaptic(my.isSaved(input.id) ? 'tab' : 'confirm');
+    my.toggleSaved(input);
   };
+  const cardSnapshot = (p: ProviderCardData): SavedProviderInput => ({
+    id: p.id,
+    name: cleanDisplayName(p.display_name) || p.display_name,
+    credentials: p.credentials_suffix,
+    typeLabel: p.provider_type_label,
+    phone: p.phone,
+    city: p.primary_city,
+    state: p.primary_state,
+  });
 
   /* ----------------------------- shared chrome ----------------------------- */
-  const Header = ({ back, title }: { back?: () => void; title?: string }) => (
+  const Header = ({ back, title, hideMine }: { back?: () => void; title?: string; hideMine?: boolean }) => (
     <Animated.View layout={LinearTransition} className="flex-row items-center justify-between px-6 pt-3 pb-4">
       {back ? (
         <Tap activeScale={0.85} onPress={back}><View className="p-2.5 -ml-2.5 bg-surface-active/50 dark:bg-surface-active-dark/50 rounded-full"><ChevronLeft size={24} color={ink} /></View></Tap>
@@ -272,6 +305,11 @@ export default function FindCareScreen() {
       )}
       {title ? <Text className="font-sans-bold text-[17px] text-text-primary dark:text-text-primary-dark">{title}</Text> : null}
       <View className="flex-row items-center gap-3">
+        {hideMine ? null : (
+          <Tap activeScale={0.9} accessibilityLabel="My providers" onPress={() => setStep('saved')}>
+            <View className="p-1.5"><Bookmark size={20} color={my.items.length ? teal : ink} fill={my.items.length ? teal : 'transparent'} /></View>
+          </Tap>
+        )}
         <Tap activeScale={0.9} onPress={() => setSheet('crisis')}>
           <View className="flex-row items-center gap-1.5 bg-error/10 dark:bg-error-dark/20 border border-error/30 dark:border-error-dark/40 rounded-full px-4 py-1.5 shadow-sm dark:shadow-none">
             <LifeBuoy size={16} color={red} /><Text className="font-sans-bold text-[14px] text-error dark:text-error-dark">Help</Text>
@@ -303,7 +341,7 @@ export default function FindCareScreen() {
         <Header />
         <View className="px-5 pt-2">
           <Text className="font-display text-4xl text-text-primary dark:text-text-primary-dark mt-1.5 mb-2.5">Find care</Text>
-          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-2">Browse NPI-verified providers licensed in your state. A listing is information, not a recommendation.</Text>
+          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-2">Browse providers listed in the public NPI registry, licensed in your state. A listing is information, not a recommendation or endorsement by Psychage.</Text>
           <View className="h-[120px] items-center justify-center my-4 bg-surface-accent dark:bg-surface-accent-dark rounded-[18px]"><BadgeCheck size={30} color={teal} /></View>
           <Primary label="Use my location" onPress={onUseLocation} />
           <Tap onPress={() => setStep('manual')}><View className="py-4 items-center"><Text className="font-sans-bold text-base text-primary dark:text-primary-dark">Enter my state instead</Text></View></Tap>
@@ -454,30 +492,93 @@ export default function FindCareScreen() {
   }
 
   /* ============================ OUTSIDE US ============================ */
+  // Reached when "Use my location" reverse-geocodes to a non-US country, or via the
+  // manual "I'm outside the United States" option. A designed, warm state (mascot is
+  // allowed here — this is a directory-coverage surface, not a crisis surface) that
+  // still offers the full US directory and keeps crisis help one tap away.
   if (step === 'outside')
     return (
       <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
         <Header back={() => setStep('manual')} />
-        <View className="px-5 pt-2">
-          <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark mb-2.5">The directory is U.S.-only for now</Text>
-          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-2">We currently list NPI-registered providers in the United States. We're working on more regions.</Text>
-          <View className="bg-crisis/10 dark:bg-crisis-dark/20 rounded-2xl p-4 my-2">
-            <View className="flex-row items-center gap-2 mb-1.5"><LifeBuoy size={18} color={red} /><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">In crisis right now?</Text></View>
-            <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5">You can still reach help. If you're in immediate danger, contact your local emergency number.</Text>
-            <View className="mt-3"><Primary label="See crisis resources" color={red} onPress={() => setSheet('crisis')} /></View>
-          </View>
-          <Tap onPress={() => setStep('manual')}><View className="py-4 items-center"><Text className="font-sans-bold text-base text-primary dark:text-primary-dark">I'm actually in the U.S.</Text></View></Tap>
-        </View>
+        <ScrollView className="px-5" contentContainerStyle={{ paddingBottom: insets.bottom + 24 }} showsVerticalScrollIndicator={false}>
+          <View className="items-center pt-3 pb-1"><Mascot state={MASCOT_CONTEXTUAL.findCareCta} size={132} /></View>
+          <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark text-center mb-2.5">You're not in the U.S. right now</Text>
+          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 text-center mb-6">Our provider directory lists NPI-registered providers in the United States only, for now. You can still browse every U.S. provider — and we're working to reach your country soon.</Text>
+          <Primary label="Browse U.S. providers" onPress={() => setStep('manual')} />
+          <Tap onPress={() => setStep('manual')}><View className="py-3.5 items-center"><Text className="font-sans-bold text-base text-primary dark:text-primary-dark">I'm actually in the U.S.</Text></View></Tap>
+          <Tap onPress={() => setSheet('crisis')}>
+            <View className="flex-row items-center justify-center gap-1.5 mt-1 py-2">
+              <LifeBuoy size={15} color={red} />
+              <Text className="font-sans-medium text-sm text-error dark:text-error-dark">In crisis? See help options</Text>
+            </View>
+          </Tap>
+        </ScrollView>
       </SafeAreaView>
     );
 
   /* ============================ PROFILE ============================ */
   if (step === 'profile' && activeId)
-    return <ProfileStep id={activeId} onBack={() => setStep('results')} saved={isSaved(activeId)} onToggleSave={() => toggleSave(activeId)} fireHaptic={fireHaptic} />;
+    return <ProfileStep id={activeId} onBack={() => setStep('results')} fireHaptic={fireHaptic} />;
 
   /* ============================ COMPARE ============================ */
   if (step === 'compare')
-    return <CompareStep ids={savedIds.slice(0, 3)} onBack={() => setStep('results')} onRemove={(id) => toggleSave(id)} />;
+    return <CompareStep ids={compareIds.slice(0, 3)} onBack={() => setStep('results')} onRemove={(id) => my.remove(id)} />;
+
+  /* ============================ MY PROVIDERS ============================ */
+  // Saved providers in one place, each callable + markable as contacted (P30/P31/P32).
+  if (step === 'saved')
+    return (
+      <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
+        <Header back={() => setStep(loc ? 'type' : 'location')} title="My providers" hideMine />
+        <ScrollView className="px-5 flex-1" contentContainerStyle={{ paddingBottom: insets.bottom + 24 }} showsVerticalScrollIndicator={false}>
+          {my.items.length === 0 ? (
+            <View className="items-center pt-16 px-4">
+              <View className="w-16 h-16 rounded-full bg-surface-active dark:bg-surface-active-dark border border-border/50 dark:border-border-dark/50 items-center justify-center mb-5"><Bookmark size={26} color={soft} /></View>
+              <Text className="font-display text-2xl text-text-primary dark:text-text-primary-dark mb-2 text-center">No saved providers yet</Text>
+              <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-[15px] leading-6 text-center mb-6">Save providers from the directory to keep them here — ready to call in one place. You can also add one by hand.</Text>
+            </View>
+          ) : (
+            <View className="pt-2 gap-3">
+              {my.items.map((sp) => {
+                const contacted = sp.contactedAt != null;
+                const place = [sp.city, sp.state].filter(Boolean).join(', ');
+                return (
+                  <View key={sp.id} className="bg-surface dark:bg-surface-dark border border-border/40 dark:border-border-dark/30 rounded-[18px] p-4 gap-3">
+                    <View className="flex-row items-start gap-3">
+                      <View style={{ backgroundColor: colorFor(sp.id) }} className="w-[46px] h-[46px] rounded-full items-center justify-center"><Text className="font-sans-bold text-white">{initials(sp.name)}</Text></View>
+                      <View className="flex-1">
+                        <View className="flex-row items-center gap-1.5 flex-wrap"><Text className="font-display text-lg text-text-primary dark:text-text-primary-dark">{sp.name}</Text>{sp.credentials ? <Text className="font-sans-medium text-text-secondary dark:text-text-secondary-dark text-[13px]">{sp.credentials}</Text> : null}</View>
+                        {sp.typeLabel ? <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-[13px] mt-0.5">{sp.typeLabel}</Text> : null}
+                        {place ? <Text className="font-sans text-text-tertiary dark:text-text-tertiary-dark text-[13px] mt-0.5">{place}</Text> : null}
+                      </View>
+                      <Tap accessibilityLabel={`Remove ${sp.name}`} onPress={() => my.remove(sp.id)} activeScale={0.8}><View className="p-1.5"><Trash2 size={18} color={faint} /></View></Tap>
+                    </View>
+                    <View className="flex-row gap-2.5">
+                      {sp.phone ? (
+                        <Tap activeScale={0.97} onPress={() => { fireHaptic('confirm'); dial(telUrl(sp.phone as string)); }} style={{ flex: 1 }}>
+                          <View style={{ backgroundColor: teal }} className="rounded-[13px] py-3 flex-row items-center justify-center gap-2"><Phone size={16} color="#fff" /><Text className="font-sans-bold text-white text-[15px]">Call</Text></View>
+                        </Tap>
+                      ) : null}
+                      <Tap activeScale={0.97} onPress={() => { fireHaptic('tab'); my.setContacted(sp.id, !contacted); }} style={{ flex: 1 }}>
+                        <View className={`rounded-[13px] py-3 flex-row items-center justify-center gap-2 border ${contacted ? 'bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800/50' : 'bg-surface dark:bg-surface-dark border-border dark:border-border-dark'}`}>
+                          {contacted ? <Check size={16} color={teal} /> : null}
+                          <Text className={`font-sans-bold text-[15px] ${contacted ? 'text-teal-700 dark:text-teal-300' : 'text-text-primary dark:text-text-primary-dark'}`}>{contacted ? 'Contacted' : 'Mark contacted'}</Text>
+                        </View>
+                      </Tap>
+                    </View>
+                    {!sp.manual ? (
+                      <Tap onPress={() => { setActiveId(sp.id); setStep('profile'); }}><View className="items-center"><Text className="font-sans-medium text-sm text-primary dark:text-primary-dark">View listing</Text></View></Tap>
+                    ) : null}
+                  </View>
+                );
+              })}
+            </View>
+          )}
+          <View className="mt-4"><Primary label="Add a provider manually" icon={<Plus size={18} color="#fff" />} onPress={() => setSheet('addProvider')} /></View>
+        </ScrollView>
+        <AddProviderSheet visible={sheet === 'addProvider'} onClose={() => setSheet(null)} onAdd={(name, phone) => { my.addManual({ name, phone }); setSheet(null); }} />
+      </SafeAreaView>
+    );
 
   /* ============================ RESULTS ============================ */
   const providers = search.providers;
@@ -498,7 +599,7 @@ export default function FindCareScreen() {
         {loading ? (
           <Text className="font-sans-bold text-sm text-text-primary dark:text-text-primary-dark">Searching…</Text>
         ) : (
-          <View className="flex-row items-center gap-1.5"><BadgeCheck size={15} color={teal} /><Text className="font-sans-bold text-sm text-text-primary dark:text-text-primary-dark">{countShown.toLocaleString()} verified</Text></View>
+          <View className="flex-row items-center gap-1.5"><Text className="font-sans-bold text-sm text-text-primary dark:text-text-primary-dark">{countShown.toLocaleString()} listed</Text></View>
         )}
         <Tap onPress={() => setSheet('sort')}><View className="flex-row items-center gap-1.5 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-full px-3 py-1.5"><ArrowUpDown size={14} color={ink} /><Text className="font-sans-medium text-sm text-text-primary dark:text-text-primary-dark">Sort</Text></View></Tap>
       </View>
@@ -528,11 +629,11 @@ export default function FindCareScreen() {
                 <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-[14px] mt-0.5">{p.provider_type_label}</Text>
                 <View className="flex-row items-center gap-2.5 mt-2.5 flex-wrap">
                   {place ? <View className="flex-row items-center gap-1.5"><MapPin size={13} color={soft} /><Text className="font-sans text-[13px] text-text-secondary dark:text-text-secondary-dark">{place}{dist}</Text></View> : null}
-                  <View className="flex-row items-center gap-1 bg-teal-50 dark:bg-teal-900/30 rounded-full px-2 py-0.5 border border-teal-100 dark:border-teal-900/50"><BadgeCheck size={12} color={teal} /><Text style={{ color: teal }} className="font-sans-bold text-[12px]">Verified</Text></View>
+                  <View className="flex-row items-center gap-1 bg-surface-active dark:bg-surface-active-dark rounded-full px-2 py-0.5 border border-border/60 dark:border-border-dark/60"><Text className="font-sans-medium text-[12px] text-text-secondary dark:text-text-secondary-dark">NPI registry</Text></View>
                 </View>
               </View>
             </View>
-            <Tap onPress={() => toggleSave(p.id)} activeScale={0.8}><View className="px-4 h-full justify-start pt-4"><Bookmark size={22} color={sv ? teal : faint} fill={sv ? teal : 'transparent'} /></View></Tap>
+            <Tap onPress={() => toggleSave(cardSnapshot(p))} activeScale={0.8}><View className="px-4 h-full justify-start pt-4"><Bookmark size={22} color={sv ? teal : faint} fill={sv ? teal : 'transparent'} /></View></Tap>
           </View>
         </Tap>
       </Animated.View>
@@ -551,6 +652,19 @@ export default function FindCareScreen() {
     </Animated.View>
   );
 
+  // Distinct from Empty: the search couldn't REACH the directory (RPC/connection
+  // failure, now surfaced instead of silently showing "0 results"). Offers a retry.
+  const ErrorState = (
+    <Animated.View entering={FadeIn.duration(400)} className="items-center px-6 pt-12">
+      <View className="w-16 h-16 rounded-full bg-surface-active dark:bg-surface-active-dark border border-border/50 dark:border-border-dark/50 items-center justify-center mb-5"><Info size={28} color={soft} /></View>
+      <Text className="font-display text-2xl text-text-primary dark:text-text-primary-dark mb-2.5 text-center">Couldn't load providers</Text>
+      <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-[15px] leading-6 text-center mb-6">The directory didn't respond. This is usually a connection hiccup — please try again.</Text>
+      <View className="w-full gap-3">
+        <Primary label="Try again" onPress={() => void search.refetch()} />
+      </View>
+    </Animated.View>
+  );
+
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
       <Header back={() => setStep('type')} />
@@ -558,7 +672,9 @@ export default function FindCareScreen() {
           box does not lose focus on every keystroke as the list re-renders. */}
       <View className="px-5">{ListHeader}</View>
       <View className="px-5 flex-1">
-        {loading ? (
+        {search.isError ? (
+          ErrorState
+        ) : loading ? (
           <View className="pt-3">{[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} />)}</View>
         ) : (
           <FlashList
@@ -581,13 +697,13 @@ export default function FindCareScreen() {
         )}
       </View>
 
-      {savedIds.length >= 2 && !loading ? (
+      {compareIds.length >= 2 && !loading ? (
         <Animated.View entering={enter()} style={{ bottom: Math.max(24, insets.bottom + 12) }} className="absolute left-[18px] right-[18px]">
-          <Tap onPress={() => setStep('compare')}><View className="bg-primary rounded-[13px] py-4 flex-row items-center justify-center gap-1.5"><Text className="font-sans-bold text-white text-base">Compare {Math.min(savedIds.length, 3)} selected</Text><ChevronRight size={18} color="#fff" /></View></Tap>
+          <Tap onPress={() => setStep('compare')}><View className="bg-primary rounded-[13px] py-4 flex-row items-center justify-center gap-1.5"><Text className="font-sans-bold text-white text-base">Compare {Math.min(compareIds.length, 3)} selected</Text><ChevronRight size={18} color="#fff" /></View></Tap>
         </Animated.View>
       ) : null}
 
-      <SortSheet visible={sheet === 'sort'} value={sort} geo={!!coords} onSelect={(v) => { setSort(v); setSheet(null); }} onClose={() => setSheet(null)} />
+      <SortSheet visible={sheet === 'sort'} value={sort} geo={false} onSelect={(v) => { setSort(v); setSheet(null); }} onClose={() => setSheet(null)} />
       <CrisisSheet visible={sheet === 'crisis'} onClose={() => setSheet(null)} />
     </SafeAreaView>
   );
@@ -601,26 +717,62 @@ const Row = React.memo(function Row({ icon: Icon, label, value }: { icon: typeof
     <View className="flex-row items-start gap-3"><View className="mt-1"><Icon size={17} color={soft} /></View><Text className="font-sans text-sm text-text-secondary dark:text-text-secondary-dark w-1/3 min-w-[90px] pr-2">{label}</Text><Text className="font-sans-medium text-sm text-text-primary dark:text-text-primary-dark flex-1 leading-5">{value}</Text></View>
   );
 });
-const ProfileStep = React.memo(function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: string; onBack: () => void; saved: boolean; onToggleSave: () => void; fireHaptic: (e: 'affirm') => void }) {
+const ProfileStep = React.memo(function ProfileStep({ id, onBack, fireHaptic }: { id: string; onBack: () => void; fireHaptic: (e: 'affirm') => void }) {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
   const ink = isDark ? colors.text.primary.dark : colors.text.primary.light;
   const faint = isDark ? colors.text.tertiary.dark : colors.text.tertiary.light;
   const teal = isDark ? colors.teal[400] : colors.teal[600];
-  const { data, isLoading } = useQuery({ queryKey: ['providers', 'detail', id], queryFn: () => getProviderById(id), enabled: !!id });
+  const my = useMyProviders();
+  const saved = my.isSaved(id);
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ['providers', 'detail', id],
+    queryFn: () => getProviderById(id),
+    enabled: !!id,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 4000),
+  });
   const Shell = ({ children }: { children: React.ReactNode }) => (
     <Animated.View entering={FadeIn.duration(300)} layout={LinearTransition} className="flex-1 bg-background dark:bg-background-dark pt-14">
       <View className="flex-row items-center px-5 pt-1 pb-2"><Tap activeScale={0.8} onPress={onBack}><View className="p-2 bg-surface-active dark:bg-surface-active-dark rounded-full"><ChevronLeft size={24} color={ink} /></View></Tap></View>
       {children}
     </Animated.View>
   );
-  if (isLoading || !data) return <Shell><View className="flex-1 items-center justify-center"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark">{isLoading ? 'Loading…' : 'This listing could not be loaded.'}</Text></View></Shell>;
+  if (isLoading)
+    return <Shell><View className="flex-1 items-center justify-center"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark">Loading…</Text></View></Shell>;
+  // Load failure (connection/RPC) is recoverable — offer a retry, distinct from a
+  // genuine not-found (listing removed) which is not.
+  if (isError)
+    return (
+      <Shell>
+        <View className="flex-1 items-center justify-center gap-4 px-8">
+          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-center">This listing didn't load. Check your connection and try again.</Text>
+          <Tap activeScale={0.97} onPress={() => void refetch()}>
+            <View style={{ backgroundColor: teal }} className="rounded-[16px] px-6 py-3.5"><Text className="font-sans-bold text-white text-base">Try again</Text></View>
+          </Tap>
+        </View>
+      </Shell>
+    );
+  if (!data)
+    return <Shell><View className="flex-1 items-center justify-center px-8"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-center">This listing is unavailable. It may have been removed.</Text></View></Shell>;
 
   const p: ProviderWithDetails = data;
   const name = cleanDisplayName(p.display_name) || p.display_name;
   const locrow = p.locations.find((l) => l.is_primary) ?? p.locations[0] ?? null;
   const verified = formatVerified(p.verified_at);
   const badge = getTrustBadge({ status: p.status, verified_at: p.verified_at });
+  const onToggleSave = () => {
+    fireHaptic('affirm');
+    my.toggleSaved({
+      id: p.id,
+      name,
+      credentials: p.credentials_suffix,
+      typeLabel: p.provider_type?.label ?? null,
+      phone: p.phone,
+      city: locrow?.city ?? null,
+      state: locrow?.state_province ?? null,
+    });
+  };
 
   return (
     <Shell>
@@ -642,9 +794,9 @@ const ProfileStep = React.memo(function ProfileStep({ id, onBack, saved, onToggl
         </View>
 
         {verified && (badge === 'verified') ? (
-          <View className="flex-row items-center gap-2.5 bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-900/40 rounded-2xl px-4 py-3 mb-6">
-            <BadgeCheck size={20} color={teal} />
-            <Text className="font-sans text-[14px] text-text-primary dark:text-text-primary-dark flex-1">NPI-verified profile <Text className="text-text-secondary dark:text-text-secondary-dark">· confirmed {verified}</Text></Text>
+          <View className="flex-row items-center gap-2.5 bg-surface-active dark:bg-surface-active-dark border border-border/50 dark:border-border-dark/40 rounded-2xl px-4 py-3 mb-6">
+            <FileText size={20} color={faint} />
+            <Text className="font-sans text-[14px] text-text-primary dark:text-text-primary-dark flex-1">Listed in the NPI registry <Text className="text-text-secondary dark:text-text-secondary-dark">· data confirmed {verified}</Text></Text>
           </View>
         ) : null}
 
@@ -675,8 +827,9 @@ const ProfileStep = React.memo(function ProfileStep({ id, onBack, saved, onToggl
           </Tap>
         ) : null}
         <Tap activeScale={0.97} onPress={() => router.push({ pathname: '/add-provider', params: { name, ...(p.phone ? { contact: p.phone } : {}) } })}>
-          <View className="rounded-[16px] py-4 items-center bg-surface-active dark:bg-surface-active-dark"><Text className="font-sans-bold text-[17px] text-text-primary dark:text-text-primary-dark">Use in my therapist record</Text></View>
+          <View className="rounded-[16px] py-4 items-center bg-surface-active dark:bg-surface-active-dark"><Text className="font-sans-bold text-[17px] text-text-primary dark:text-text-primary-dark">Share my check-ins with this provider</Text></View>
         </Tap>
+        <Text className="font-sans text-text-tertiary dark:text-text-tertiary-dark text-xs text-center leading-4">Puts together a summary of your recent check-ins to share. Psychage never contacts them for you.</Text>
       </View>
     </Shell>
   );
@@ -708,7 +861,7 @@ const CompareStep = React.memo(function CompareStep({ ids, onBack, onRemove }: {
               <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-xs text-center mb-3">{p.credentials_suffix ?? ' '}</Text>
               <C l="Type" v={p.provider_type?.label ?? '—'} />
               <C l="License" v={[p.license_number, p.license_state].filter(Boolean).join(' · ') || '—'} />
-              <C l="Verified" v={formatVerified(p.verified_at) ?? '—'} />
+              <C l="NPI listing" v={formatVerified(p.verified_at) ? `Confirmed ${formatVerified(p.verified_at)}` : '—'} />
               <Tap onPress={() => onRemove(p.id)}><View className="py-2 mt-1.5 items-center"><Text className="font-sans-bold text-primary dark:text-primary-dark text-sm">Remove</Text></View></Tap>
             </View>
           );
@@ -775,6 +928,51 @@ function CrisisSheet({ visible, onClose }: { visible: boolean; onClose: () => vo
                 <View className="w-12 h-12 rounded-full bg-error/10 dark:bg-error-dark/20 items-center justify-center"><Phone size={20} color={red} /></View>
                 <View className="flex-1"><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-[17px]">Call 911</Text><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-[14px] mt-0.5">Emergency Services</Text></View>
               </View>
+            </Tap>
+          </View>
+        </Animated.View>
+      </Pressable>
+    </Modal>
+  );
+}
+
+// Manual provider entry (P30 "enter provider info") — name + optional phone saved to
+// the local My-providers list. For a provider not in the NPI directory (e.g. an
+// existing therapist) so they're callable alongside the rest.
+function AddProviderSheet({ visible, onClose, onAdd }: { visible: boolean; onClose: () => void; onAdd: (name: string, phone: string) => void }) {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const ink = isDark ? colors.text.primary.dark : colors.text.primary.light;
+  const faint = isDark ? colors.text.tertiary.dark : colors.text.tertiary.light;
+  const teal = isDark ? colors.teal[400] : colors.teal[600];
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  useEffect(() => {
+    if (!visible) {
+      setName('');
+      setPhone('');
+    }
+  }, [visible]);
+  const canAdd = name.trim().length > 0;
+  return (
+    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
+      <Pressable className="flex-1 bg-black/40 justify-end" onPress={onClose}>
+        <Animated.View entering={SlideInDown.springify().damping(20).stiffness(300)} className="bg-background dark:bg-background-dark rounded-t-[32px] pt-3 pb-8 shadow-[0_-8px_30px_rgba(0,0,0,0.12)]">
+          <View className="w-12 h-1.5 bg-border dark:bg-border-dark rounded-full self-center mb-4" />
+          <View className="flex-row items-center justify-between px-6 pb-4 border-b border-border/40 dark:border-border-dark/40">
+            <View className="w-10" />
+            <Text className="font-display text-xl text-text-primary dark:text-text-primary-dark">Add a provider</Text>
+            <Tap activeScale={0.8} onPress={onClose}><View className="p-2 bg-surface-active dark:bg-surface-active-dark rounded-full"><X size={20} color={ink} /></View></Tap>
+          </View>
+          <View className="px-6 pt-4 gap-3">
+            <View className="bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-xl px-4 py-3.5">
+              <TextInput placeholder="Name" placeholderTextColor={faint} value={name} onChangeText={setName} className="font-sans text-base text-text-primary dark:text-text-primary-dark" />
+            </View>
+            <View className="bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-xl px-4 py-3.5">
+              <TextInput placeholder="Phone (optional)" placeholderTextColor={faint} value={phone} onChangeText={setPhone} keyboardType="phone-pad" className="font-sans text-base text-text-primary dark:text-text-primary-dark" />
+            </View>
+            <Tap activeScale={0.96} onPress={canAdd ? () => onAdd(name.trim(), phone.trim()) : undefined}>
+              <View style={{ backgroundColor: teal, opacity: canAdd ? 1 : 0.45 }} className="rounded-[16px] py-4 items-center mt-1"><Text className="font-sans-bold text-white text-[17px]">Add to my providers</Text></View>
             </Tap>
           </View>
         </Animated.View>
