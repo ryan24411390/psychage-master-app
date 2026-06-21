@@ -19,16 +19,21 @@ const ROUTES = [
 ];
 const TITLES = ['Today', 'Learn', 'Compass', 'Find'];
 
-function makeProps(activeIndex: number, navigate: (name: string) => void): BottomTabBarProps {
+function makeProps(
+  activeIndex: number,
+  navigate: (name: string) => void,
+  dispatch: (action: unknown) => void = () => {},
+): BottomTabBarProps {
   const descriptors = Object.fromEntries(
     ROUTES.map((route, i) => [route.key, { options: { title: TITLES[i] } }]),
   );
   return {
-    state: { index: activeIndex, routes: ROUTES },
+    state: { key: 'tabs-1', index: activeIndex, routes: ROUTES },
     descriptors,
     navigation: {
       emit: () => ({ defaultPrevented: false }),
       navigate,
+      dispatch,
     },
   } as unknown as BottomTabBarProps;
 }
@@ -61,5 +66,16 @@ describe('AppTabBar', () => {
     renderWithProviders(<AppTabBar {...makeProps(0, navigate)} />, { haptics: true });
     fireEvent.press(screen.getByLabelText('Learn'));
     expect(navigate).toHaveBeenCalledWith('(learn)');
+  });
+
+  it('pops the focused tab stack to root (not navigate) when the active tab is re-pressed', () => {
+    const navigate = jest.fn();
+    const dispatch = jest.fn();
+    // Learn (index 1) is the active tab; pressing it again should reset its stack.
+    renderWithProviders(<AppTabBar {...makeProps(1, navigate, dispatch)} />, { haptics: true });
+    fireEvent.press(screen.getByLabelText('Learn'));
+    expect(navigate).not.toHaveBeenCalled();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ type: 'POP_TO_TOP' }));
   });
 });

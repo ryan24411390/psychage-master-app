@@ -20,3 +20,13 @@ export function goBackOr(fallback: Href): void {
     router.replace(fallback);
   }
 }
+
+/**
+ * Open the article reader for a slug. Centralized so every entry point pushes the
+ * SAME root-level `/article/[slug]` route over the tabs — back then returns to the
+ * exact origin tab (Today or Learn), not the Learn landing (nav bug P5). The route
+ * lives at `app/article/[slug].tsx` (root), so this push covers the tabs.
+ */
+export function openArticle(slug: string): void {
+  router.push({ pathname: '/article/[slug]', params: { slug } });
+}
