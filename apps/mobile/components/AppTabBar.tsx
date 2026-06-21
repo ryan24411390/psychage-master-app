@@ -1,5 +1,5 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { router } from 'expo-router';
+import { StackActions } from '@react-navigation/native';
 import { BookOpen, Compass, type LucideIcon, MapPin, Sun } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { Pressable, View } from 'react-native';
@@ -66,10 +66,12 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
             });
             if (event.defaultPrevented) return;
             if (isActive) {
-              // Re-tapping the focused tab pops its nested stack back to the
-              // landing (standard tab behavior). canDismiss() guards the no-op
-              // case where the tab is already at its root.
-              if (router.canDismiss()) router.dismissAll();
+              // Re-tapping the focused tab pops ITS nested stack back to the tab
+              // root (standard tab behavior). StackActions.popToTop() is scoped to
+              // the focused child Stack and is a clean no-op at root — unlike the
+              // former router.dismissAll(), which acts on dismissable frames only
+              // and silently no-ops on ordinary pushes (nav bug P6).
+              navigation.dispatch(StackActions.popToTop());
             } else {
               navigation.navigate(route.name);
             }
