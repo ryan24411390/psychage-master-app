@@ -20,8 +20,8 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import {
   ArrowUpDown, BadgeCheck, Bookmark, BookOpen, Building2, Check, ChevronDown, ChevronLeft,
-  ChevronRight, FileText, Hash, Info, LifeBuoy, MapPin, MessageSquare, Phone, Search,
-  Stethoscope, Users, X,
+  ChevronRight, FileText, Hash, Info, LifeBuoy, MapPin, MessageSquare, Phone, Plus, Search,
+  Stethoscope, Trash2, Users, X,
 } from 'lucide-react-native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Modal, Pressable, ScrollView, TextInput, View, type ViewStyle } from 'react-native';
@@ -35,7 +35,8 @@ import { Mascot } from '@/components/home/Mascot';
 import { PsychageLogo } from '@/components/PsychageLogo';
 import { Text } from '@/components/ui/Text';
 import { MASCOT_CONTEXTUAL } from '@/features/mascot/mascot.surfaces';
-import { useBookmarkedIds, useCurrentUserId, useToggleBookmark } from '@/features/bookmarks/hooks';
+import { useMyProviders } from '@/lib/use-my-providers';
+import type { SavedProviderInput } from '@/lib/persistence/my-providers';
 import { dial } from '@/features/crisis/dialer';
 import { useHaptics } from '@/lib/haptic-context';
 import { useDirectoryLocation } from '@/lib/use-directory-location';
@@ -165,7 +166,7 @@ function Skeleton() {
   );
 }
 
-type Step = 'location' | 'manual' | 'city' | 'type' | 'outside' | 'results' | 'profile' | 'compare';
+type Step = 'location' | 'manual' | 'city' | 'type' | 'outside' | 'results' | 'profile' | 'compare' | 'saved';
 
 export default function FindCareScreen() {
   const reduce = useReduceMotion();
@@ -197,13 +198,12 @@ export default function FindCareScreen() {
   const [query, setQuery] = useState('');
   const [debounced, setDebounced] = useState('');
   const [sort, setSort] = useState<'relevance' | 'name' | 'distance'>('relevance');
-  const [sheet, setSheet] = useState<null | 'sort' | 'crisis'>(null);
+  const [sheet, setSheet] = useState<null | 'sort' | 'crisis' | 'addProvider'>(null);
 
-  // bookmarks (real save + compare)
-  const { data: userId } = useCurrentUserId();
-  const { data: savedSet } = useBookmarkedIds('provider');
-  const toggle = useToggleBookmark();
-  const savedIds = useMemo(() => Array.from(savedSet ?? []), [savedSet]);
+  // My providers — local-first (works signed-out), used for save + compare + call list.
+  const my = useMyProviders();
+  // Compare only fetches real NPI listings by id; manual entries have no directory row.
+  const compareIds = useMemo(() => my.items.filter((p) => !p.manual).map((p) => p.id), [my.items]);
 
   useEffect(() => {
     const id = setTimeout(() => setDebounced(query.trim()), 300);
@@ -278,18 +278,25 @@ export default function FindCareScreen() {
     }
   };
 
-  const isSaved = (id: string) => savedSet?.has(id) ?? false;
-  const toggleSave = (id: string) => {
-    if (!userId) {
-      router.push('/(auth)/sign-up');
-      return;
-    }
-    fireHaptic(isSaved(id) ? 'tab' : 'confirm');
-    toggle.mutate({ ref: { resource_type: 'provider', resource_id: id }, wasSaved: isSaved(id) });
+  const isSaved = (id: string) => my.isSaved(id);
+  // Save locally (no auth wall). Takes a denormalized snapshot so the My-providers
+  // list can render + dial without re-fetching.
+  const toggleSave = (input: SavedProviderInput) => {
+    fireHaptic(my.isSaved(input.id) ? 'tab' : 'confirm');
+    my.toggleSaved(input);
   };
+  const cardSnapshot = (p: ProviderCardData): SavedProviderInput => ({
+    id: p.id,
+    name: cleanDisplayName(p.display_name) || p.display_name,
+    credentials: p.credentials_suffix,
+    typeLabel: p.provider_type_label,
+    phone: p.phone,
+    city: p.primary_city,
+    state: p.primary_state,
+  });
 
   /* ----------------------------- shared chrome ----------------------------- */
-  const Header = ({ back, title }: { back?: () => void; title?: string }) => (
+  const Header = ({ back, title, hideMine }: { back?: () => void; title?: string; hideMine?: boolean }) => (
     <Animated.View layout={LinearTransition} className="flex-row items-center justify-between px-6 pt-3 pb-4">
       {back ? (
         <Tap activeScale={0.85} onPress={back}><View className="p-2.5 -ml-2.5 bg-surface-active/50 dark:bg-surface-active-dark/50 rounded-full"><ChevronLeft size={24} color={ink} /></View></Tap>
@@ -298,6 +305,11 @@ export default function FindCareScreen() {
       )}
       {title ? <Text className="font-sans-bold text-[17px] text-text-primary dark:text-text-primary-dark">{title}</Text> : null}
       <View className="flex-row items-center gap-3">
+        {hideMine ? null : (
+          <Tap activeScale={0.9} accessibilityLabel="My providers" onPress={() => setStep('saved')}>
+            <View className="p-1.5"><Bookmark size={20} color={my.items.length ? teal : ink} fill={my.items.length ? teal : 'transparent'} /></View>
+          </Tap>
+        )}
         <Tap activeScale={0.9} onPress={() => setSheet('crisis')}>
           <View className="flex-row items-center gap-1.5 bg-error/10 dark:bg-error-dark/20 border border-error/30 dark:border-error-dark/40 rounded-full px-4 py-1.5 shadow-sm dark:shadow-none">
             <LifeBuoy size={16} color={red} /><Text className="font-sans-bold text-[14px] text-error dark:text-error-dark">Help</Text>
@@ -506,11 +518,67 @@ export default function FindCareScreen() {
 
   /* ============================ PROFILE ============================ */
   if (step === 'profile' && activeId)
-    return <ProfileStep id={activeId} onBack={() => setStep('results')} saved={isSaved(activeId)} onToggleSave={() => toggleSave(activeId)} fireHaptic={fireHaptic} />;
+    return <ProfileStep id={activeId} onBack={() => setStep('results')} fireHaptic={fireHaptic} />;
 
   /* ============================ COMPARE ============================ */
   if (step === 'compare')
-    return <CompareStep ids={savedIds.slice(0, 3)} onBack={() => setStep('results')} onRemove={(id) => toggleSave(id)} />;
+    return <CompareStep ids={compareIds.slice(0, 3)} onBack={() => setStep('results')} onRemove={(id) => my.remove(id)} />;
+
+  /* ============================ MY PROVIDERS ============================ */
+  // Saved providers in one place, each callable + markable as contacted (P30/P31/P32).
+  if (step === 'saved')
+    return (
+      <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
+        <Header back={() => setStep(loc ? 'type' : 'location')} title="My providers" hideMine />
+        <ScrollView className="px-5 flex-1" contentContainerStyle={{ paddingBottom: insets.bottom + 24 }} showsVerticalScrollIndicator={false}>
+          {my.items.length === 0 ? (
+            <View className="items-center pt-16 px-4">
+              <View className="w-16 h-16 rounded-full bg-surface-active dark:bg-surface-active-dark border border-border/50 dark:border-border-dark/50 items-center justify-center mb-5"><Bookmark size={26} color={soft} /></View>
+              <Text className="font-display text-2xl text-text-primary dark:text-text-primary-dark mb-2 text-center">No saved providers yet</Text>
+              <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-[15px] leading-6 text-center mb-6">Save providers from the directory to keep them here — ready to call in one place. You can also add one by hand.</Text>
+            </View>
+          ) : (
+            <View className="pt-2 gap-3">
+              {my.items.map((sp) => {
+                const contacted = sp.contactedAt != null;
+                const place = [sp.city, sp.state].filter(Boolean).join(', ');
+                return (
+                  <View key={sp.id} className="bg-surface dark:bg-surface-dark border border-border/40 dark:border-border-dark/30 rounded-[18px] p-4 gap-3">
+                    <View className="flex-row items-start gap-3">
+                      <View style={{ backgroundColor: colorFor(sp.id) }} className="w-[46px] h-[46px] rounded-full items-center justify-center"><Text className="font-sans-bold text-white">{initials(sp.name)}</Text></View>
+                      <View className="flex-1">
+                        <View className="flex-row items-center gap-1.5 flex-wrap"><Text className="font-display text-lg text-text-primary dark:text-text-primary-dark">{sp.name}</Text>{sp.credentials ? <Text className="font-sans-medium text-text-secondary dark:text-text-secondary-dark text-[13px]">{sp.credentials}</Text> : null}</View>
+                        {sp.typeLabel ? <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-[13px] mt-0.5">{sp.typeLabel}</Text> : null}
+                        {place ? <Text className="font-sans text-text-tertiary dark:text-text-tertiary-dark text-[13px] mt-0.5">{place}</Text> : null}
+                      </View>
+                      <Tap accessibilityLabel={`Remove ${sp.name}`} onPress={() => my.remove(sp.id)} activeScale={0.8}><View className="p-1.5"><Trash2 size={18} color={faint} /></View></Tap>
+                    </View>
+                    <View className="flex-row gap-2.5">
+                      {sp.phone ? (
+                        <Tap activeScale={0.97} onPress={() => { fireHaptic('confirm'); dial(telUrl(sp.phone as string)); }} style={{ flex: 1 }}>
+                          <View style={{ backgroundColor: teal }} className="rounded-[13px] py-3 flex-row items-center justify-center gap-2"><Phone size={16} color="#fff" /><Text className="font-sans-bold text-white text-[15px]">Call</Text></View>
+                        </Tap>
+                      ) : null}
+                      <Tap activeScale={0.97} onPress={() => { fireHaptic('tab'); my.setContacted(sp.id, !contacted); }} style={{ flex: 1 }}>
+                        <View className={`rounded-[13px] py-3 flex-row items-center justify-center gap-2 border ${contacted ? 'bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800/50' : 'bg-surface dark:bg-surface-dark border-border dark:border-border-dark'}`}>
+                          {contacted ? <Check size={16} color={teal} /> : null}
+                          <Text className={`font-sans-bold text-[15px] ${contacted ? 'text-teal-700 dark:text-teal-300' : 'text-text-primary dark:text-text-primary-dark'}`}>{contacted ? 'Contacted' : 'Mark contacted'}</Text>
+                        </View>
+                      </Tap>
+                    </View>
+                    {!sp.manual ? (
+                      <Tap onPress={() => { setActiveId(sp.id); setStep('profile'); }}><View className="items-center"><Text className="font-sans-medium text-sm text-primary dark:text-primary-dark">View listing</Text></View></Tap>
+                    ) : null}
+                  </View>
+                );
+              })}
+            </View>
+          )}
+          <View className="mt-4"><Primary label="Add a provider manually" icon={<Plus size={18} color="#fff" />} onPress={() => setSheet('addProvider')} /></View>
+        </ScrollView>
+        <AddProviderSheet visible={sheet === 'addProvider'} onClose={() => setSheet(null)} onAdd={(name, phone) => { my.addManual({ name, phone }); setSheet(null); }} />
+      </SafeAreaView>
+    );
 
   /* ============================ RESULTS ============================ */
   const providers = search.providers;
@@ -565,7 +633,7 @@ export default function FindCareScreen() {
                 </View>
               </View>
             </View>
-            <Tap onPress={() => toggleSave(p.id)} activeScale={0.8}><View className="px-4 h-full justify-start pt-4"><Bookmark size={22} color={sv ? teal : faint} fill={sv ? teal : 'transparent'} /></View></Tap>
+            <Tap onPress={() => toggleSave(cardSnapshot(p))} activeScale={0.8}><View className="px-4 h-full justify-start pt-4"><Bookmark size={22} color={sv ? teal : faint} fill={sv ? teal : 'transparent'} /></View></Tap>
           </View>
         </Tap>
       </Animated.View>
@@ -629,9 +697,9 @@ export default function FindCareScreen() {
         )}
       </View>
 
-      {savedIds.length >= 2 && !loading ? (
+      {compareIds.length >= 2 && !loading ? (
         <Animated.View entering={enter()} style={{ bottom: Math.max(24, insets.bottom + 12) }} className="absolute left-[18px] right-[18px]">
-          <Tap onPress={() => setStep('compare')}><View className="bg-primary rounded-[13px] py-4 flex-row items-center justify-center gap-1.5"><Text className="font-sans-bold text-white text-base">Compare {Math.min(savedIds.length, 3)} selected</Text><ChevronRight size={18} color="#fff" /></View></Tap>
+          <Tap onPress={() => setStep('compare')}><View className="bg-primary rounded-[13px] py-4 flex-row items-center justify-center gap-1.5"><Text className="font-sans-bold text-white text-base">Compare {Math.min(compareIds.length, 3)} selected</Text><ChevronRight size={18} color="#fff" /></View></Tap>
         </Animated.View>
       ) : null}
 
@@ -649,12 +717,14 @@ const Row = React.memo(function Row({ icon: Icon, label, value }: { icon: typeof
     <View className="flex-row items-start gap-3"><View className="mt-1"><Icon size={17} color={soft} /></View><Text className="font-sans text-sm text-text-secondary dark:text-text-secondary-dark w-1/3 min-w-[90px] pr-2">{label}</Text><Text className="font-sans-medium text-sm text-text-primary dark:text-text-primary-dark flex-1 leading-5">{value}</Text></View>
   );
 });
-const ProfileStep = React.memo(function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: string; onBack: () => void; saved: boolean; onToggleSave: () => void; fireHaptic: (e: 'affirm') => void }) {
+const ProfileStep = React.memo(function ProfileStep({ id, onBack, fireHaptic }: { id: string; onBack: () => void; fireHaptic: (e: 'affirm') => void }) {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
   const ink = isDark ? colors.text.primary.dark : colors.text.primary.light;
   const faint = isDark ? colors.text.tertiary.dark : colors.text.tertiary.light;
   const teal = isDark ? colors.teal[400] : colors.teal[600];
+  const my = useMyProviders();
+  const saved = my.isSaved(id);
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['providers', 'detail', id],
     queryFn: () => getProviderById(id),
@@ -691,6 +761,18 @@ const ProfileStep = React.memo(function ProfileStep({ id, onBack, saved, onToggl
   const locrow = p.locations.find((l) => l.is_primary) ?? p.locations[0] ?? null;
   const verified = formatVerified(p.verified_at);
   const badge = getTrustBadge({ status: p.status, verified_at: p.verified_at });
+  const onToggleSave = () => {
+    fireHaptic('affirm');
+    my.toggleSaved({
+      id: p.id,
+      name,
+      credentials: p.credentials_suffix,
+      typeLabel: p.provider_type?.label ?? null,
+      phone: p.phone,
+      city: locrow?.city ?? null,
+      state: locrow?.state_province ?? null,
+    });
+  };
 
   return (
     <Shell>
@@ -846,6 +928,51 @@ function CrisisSheet({ visible, onClose }: { visible: boolean; onClose: () => vo
                 <View className="w-12 h-12 rounded-full bg-error/10 dark:bg-error-dark/20 items-center justify-center"><Phone size={20} color={red} /></View>
                 <View className="flex-1"><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-[17px]">Call 911</Text><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-[14px] mt-0.5">Emergency Services</Text></View>
               </View>
+            </Tap>
+          </View>
+        </Animated.View>
+      </Pressable>
+    </Modal>
+  );
+}
+
+// Manual provider entry (P30 "enter provider info") — name + optional phone saved to
+// the local My-providers list. For a provider not in the NPI directory (e.g. an
+// existing therapist) so they're callable alongside the rest.
+function AddProviderSheet({ visible, onClose, onAdd }: { visible: boolean; onClose: () => void; onAdd: (name: string, phone: string) => void }) {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const ink = isDark ? colors.text.primary.dark : colors.text.primary.light;
+  const faint = isDark ? colors.text.tertiary.dark : colors.text.tertiary.light;
+  const teal = isDark ? colors.teal[400] : colors.teal[600];
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  useEffect(() => {
+    if (!visible) {
+      setName('');
+      setPhone('');
+    }
+  }, [visible]);
+  const canAdd = name.trim().length > 0;
+  return (
+    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
+      <Pressable className="flex-1 bg-black/40 justify-end" onPress={onClose}>
+        <Animated.View entering={SlideInDown.springify().damping(20).stiffness(300)} className="bg-background dark:bg-background-dark rounded-t-[32px] pt-3 pb-8 shadow-[0_-8px_30px_rgba(0,0,0,0.12)]">
+          <View className="w-12 h-1.5 bg-border dark:bg-border-dark rounded-full self-center mb-4" />
+          <View className="flex-row items-center justify-between px-6 pb-4 border-b border-border/40 dark:border-border-dark/40">
+            <View className="w-10" />
+            <Text className="font-display text-xl text-text-primary dark:text-text-primary-dark">Add a provider</Text>
+            <Tap activeScale={0.8} onPress={onClose}><View className="p-2 bg-surface-active dark:bg-surface-active-dark rounded-full"><X size={20} color={ink} /></View></Tap>
+          </View>
+          <View className="px-6 pt-4 gap-3">
+            <View className="bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-xl px-4 py-3.5">
+              <TextInput placeholder="Name" placeholderTextColor={faint} value={name} onChangeText={setName} className="font-sans text-base text-text-primary dark:text-text-primary-dark" />
+            </View>
+            <View className="bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-xl px-4 py-3.5">
+              <TextInput placeholder="Phone (optional)" placeholderTextColor={faint} value={phone} onChangeText={setPhone} keyboardType="phone-pad" className="font-sans text-base text-text-primary dark:text-text-primary-dark" />
+            </View>
+            <Tap activeScale={0.96} onPress={canAdd ? () => onAdd(name.trim(), phone.trim()) : undefined}>
+              <View style={{ backgroundColor: teal, opacity: canAdd ? 1 : 0.45 }} className="rounded-[16px] py-4 items-center mt-1"><Text className="font-sans-bold text-white text-[17px]">Add to my providers</Text></View>
             </Tap>
           </View>
         </Animated.View>
