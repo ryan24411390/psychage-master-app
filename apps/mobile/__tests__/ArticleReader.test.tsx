@@ -13,6 +13,8 @@ jest.mock('@/lib/articles', () => ({
   // H1: the reader now offers related reading after the references.
   getRelatedArticles: jest.fn().mockResolvedValue([]),
 }));
+// P21: the reader mounts a read-aloud control; stub the native TTS module.
+jest.mock('expo-speech', () => ({ speak: jest.fn(), stop: jest.fn() }));
 
 import { router } from 'expo-router';
 
@@ -141,14 +143,16 @@ describe('S22 ArticleReader', () => {
     expect(router.push).toHaveBeenCalledWith('/toolkit');
   });
 
-  it('shows a Related reading rail when related articles exist (H1)', async () => {
+  it('shows a horizontal Related reading rail of several articles (P22)', async () => {
     (getArticleBySlug as jest.Mock).mockResolvedValue(ARTICLE);
-    (getRelatedArticles as jest.Mock).mockResolvedValue([
-      { ...ARTICLE, slug: 'another-read', title: 'Another read' },
-    ]);
+    (getRelatedArticles as jest.Mock).mockResolvedValue(
+      Array.from({ length: 5 }, (_, i) => ({ ...ARTICLE, slug: `read-${i}`, title: `Read ${i}` })),
+    );
     renderReader(<ArticleReader slug={ARTICLE.slug} />);
     expect(await screen.findByTestId('article-related')).toBeTruthy();
-    expect(screen.getByTestId('article-card-another-read')).toBeTruthy();
+    // The rail requests 5; every returned related article renders as a card.
+    expect(screen.getByTestId('related-card-read-0')).toBeTruthy();
+    expect(screen.getByTestId('related-card-read-4')).toBeTruthy();
   });
 
   it('omits the Related rail (but keeps the tool CTA) when none are found (H1)', async () => {

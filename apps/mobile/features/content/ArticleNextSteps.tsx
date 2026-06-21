@@ -1,3 +1,4 @@
+import { FlashList } from '@shopify/flash-list';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Anchor, ArrowUpRight, Compass, HeartHandshake, Moon, Notebook } from 'lucide-react-native';
@@ -5,10 +6,11 @@ import type { ElementType } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
-import { ArticleListCard } from '@/features/content/ArticleListCard';
+import { RelatedArticleCard } from '@/features/content/RelatedArticleCard';
 import { CT4_CONTENT } from '@/features/content/copy';
 import { type ToolIconKey, toolForCategory } from '@/features/content/related-tools';
 import { getRelatedArticles } from '@/lib/articles';
+import type { ArticleListItem } from '@/lib/articles';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
 const ICONS: Record<ToolIconKey, ElementType> = {
@@ -40,9 +42,11 @@ export function ArticleNextSteps({
   const tool = toolForCategory(categorySlug);
   const Icon = ICONS[tool.iconKey];
 
+  // P22 — a horizontal rail of 4–5 related articles (same category, tag-ranked,
+  // cross-category backfill). Request 5; FlashList renders whatever fills.
   const { data: related } = useQuery({
     queryKey: ['related-articles', slug],
-    queryFn: () => getRelatedArticles(slug, categorySlug, tags, 3),
+    queryFn: () => getRelatedArticles(slug, categorySlug, tags, 5),
     enabled: slug.length > 0 && categorySlug.length > 0,
   });
 
@@ -53,9 +57,14 @@ export function ArticleNextSteps({
           <Text variant="h2" className={HEADING}>
             {CT4_CONTENT.relatedTitle}
           </Text>
-          {related.map((a) => (
-            <ArticleListCard key={a.slug} article={a} />
-          ))}
+          <FlashList
+            horizontal
+            data={related}
+            keyExtractor={(a: ArticleListItem) => a.slug}
+            showsHorizontalScrollIndicator={false}
+            ItemSeparatorComponent={() => <View className="w-3" />}
+            renderItem={({ item }: { item: ArticleListItem }) => <RelatedArticleCard article={item} />}
+          />
         </View>
       ) : null}
 
