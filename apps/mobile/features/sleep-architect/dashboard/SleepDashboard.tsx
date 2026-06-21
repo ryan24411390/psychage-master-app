@@ -1,4 +1,3 @@
-import { useColorScheme } from 'nativewind';
 import { useState } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 
@@ -16,13 +15,12 @@ import {
 } from '@psychage/shared/sleep';
 
 import { Card } from '@/components/ui/Card';
+import { TrendLine } from '@/components/ui/charts/TrendLine';
 import { Text } from '@/components/ui/Text';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
-import { colors } from '@/lib/colors';
 
 import { QualityMoodTrend } from './QualityMoodTrend';
 import { ScoreBand } from './ScoreBand';
-import { Sparkline } from './Sparkline';
 import { WeeklyDigest } from './WeeklyDigest';
 
 // Patterns/Dashboard tab. The composite score reaches the UI only as a band
@@ -51,7 +49,6 @@ const RANGE_OPTIONS = [
 
 export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
   const { width } = useWindowDimensions();
-  const { colorScheme } = useColorScheme();
   const [rangeDays, setRangeDays] = useState<number>(7);
   const t = CT4_SLEEP.metrics;
 
@@ -100,8 +97,13 @@ export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
   const score = calculateSleepScore(windowed, settings.age_range);
   const band = bandForScore(score.overall);
 
-  const trend = chronological.map((e) => calculateMetrics(e).total_sleep_minutes);
-  const strokeTint = colorScheme === 'dark' ? colors.teal[400] : colors.teal[600];
+  // Factual sleep-length trend (minutes per night, oldest → newest). Plotted on the
+  // shared TrendLine — the axis is unlabelled, so minutes vs hours give the same shape.
+  // Auto-scaled (no fixed min) to keep night-to-night variation visible.
+  const trend = chronological.map((e, i) => ({
+    x: i,
+    y: calculateMetrics(e).total_sleep_minutes,
+  }));
 
   const components: { key: keyof typeof CT4_SLEEP.componentLabels; value: number }[] = [
     { key: 'duration', value: score.duration },
@@ -130,7 +132,11 @@ export function SleepDashboard({ entries, settings }: SleepDashboardProps) {
           <Text variant="caption" className="uppercase tracking-wider text-text-secondary dark:text-text-secondary-dark">
             {t.trendTitle}
           </Text>
-          <Sparkline values={trend} width={Math.max(0, width - 64)} color={strokeTint} />
+          <TrendLine
+            data={trend}
+            width={Math.max(0, width - 64)}
+            accessibilityLabel={t.trendTitle}
+          />
         </Card>
       ) : null}
 

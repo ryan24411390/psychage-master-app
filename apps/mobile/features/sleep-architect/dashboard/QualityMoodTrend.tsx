@@ -1,19 +1,17 @@
-import { useColorScheme } from 'nativewind';
 import { useWindowDimensions, View } from 'react-native';
 
 import type { SleepEntry } from '@psychage/shared/sleep';
 
 import { Card } from '@/components/ui/Card';
+import { TrendLine, type TrendPoint } from '@/components/ui/charts/TrendLine';
 import { Text } from '@/components/ui/Text';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
 import { colors } from '@/lib/colors';
 
-import { Sparkline } from './Sparkline';
-
-// Self-rated quality + morning-mood trends (1–5), each a reused Sparkline. Two
-// gentle lines to notice alongside the nights — never scored or judged (SR-1 /
-// SR-3). All from the on-device store (SR-4). Reuses the in-feature Sparkline; no
-// new chart code.
+// Self-rated quality + morning-mood trends (1–5), each on the shared TrendLine with a
+// fixed 1–5 axis (so the lines read on a stable scale). Two gentle lines to notice
+// alongside the nights — never scored or judged (SR-1 / SR-3). All from the on-device
+// store (SR-4). Consumes the shared chart kit; no in-feature chart code.
 
 type QualityMoodTrendProps = {
   entries: readonly SleepEntry[]; // chronological (oldest → newest)
@@ -21,17 +19,13 @@ type QualityMoodTrendProps = {
 
 export function QualityMoodTrend({ entries }: QualityMoodTrendProps) {
   const { width } = useWindowDimensions();
-  const { colorScheme } = useColorScheme();
   const t = CT4_SLEEP.trends;
 
-  // Sparkline needs ≥2 points; with fewer nights there is no trend to show.
+  // TrendLine needs ≥2 points; with fewer nights there is no trend to show.
   if (entries.length < 2) return null;
 
-  const qualityValues = entries.map((e) => e.sleep_quality);
-  const moodValues = entries.map((e) => e.morning_mood);
-
-  const qualityTint = colorScheme === 'dark' ? colors.teal[400] : colors.teal[600];
-  const moodTint = colors.charcoal[400];
+  const qualityData: TrendPoint[] = entries.map((e, i) => ({ x: i, y: e.sleep_quality }));
+  const moodData: TrendPoint[] = entries.map((e, i) => ({ x: i, y: e.morning_mood }));
   const chartWidth = Math.max(0, width - 64);
 
   return (
@@ -39,16 +33,15 @@ export function QualityMoodTrend({ entries }: QualityMoodTrendProps) {
       <TrendRow
         label={t.qualityTitle}
         dotClass="bg-teal-500"
-        values={qualityValues}
+        data={qualityData}
         width={chartWidth}
-        color={qualityTint}
       />
       <TrendRow
         label={t.moodTitle}
         dotClass="bg-charcoal-400"
-        values={moodValues}
+        data={moodData}
         width={chartWidth}
-        color={moodTint}
+        lineColor={colors.charcoal[400]}
       />
     </Card>
   );
@@ -57,15 +50,15 @@ export function QualityMoodTrend({ entries }: QualityMoodTrendProps) {
 function TrendRow({
   label,
   dotClass,
-  values,
+  data,
   width,
-  color,
+  lineColor,
 }: {
   label: string;
   dotClass: string;
-  values: readonly number[];
+  data: readonly TrendPoint[];
   width: number;
-  color: string;
+  lineColor?: string;
 }) {
   return (
     <View className="gap-2">
@@ -78,7 +71,15 @@ function TrendRow({
           {label}
         </Text>
       </View>
-      <Sparkline values={values} width={width} color={color} />
+      <TrendLine
+        data={data}
+        width={width}
+        height={72}
+        yMin={1}
+        yMax={5}
+        lineColor={lineColor}
+        accessibilityLabel={label}
+      />
     </View>
   );
 }

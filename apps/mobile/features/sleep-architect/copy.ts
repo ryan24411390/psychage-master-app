@@ -14,13 +14,65 @@ export const CT4_SLEEP = {
   title: 'Sleep Architect',
   tagline: 'Understand your nights — gently, on your terms',
 
+  // 4-tab IA (P58 redesign): the former Overview, Patterns and Insights tabs are
+  // folded into one scrollable Home; Diary, Tools and Wind-down stay. Four items fit
+  // without the old horizontal-scroll overflow.
   tabs: {
-    overview: 'Overview',
+    home: 'Home',
     diary: 'Diary',
-    dashboard: 'Patterns',
     tools: 'Tools',
     windDown: 'Wind-down',
-    insights: 'Insights',
+  },
+
+  // Home tab CTAs. The primary "Log last night" reuses diary.logToday; export is the
+  // user-initiated PDF / therapist share (P59), shown only once there is data to share.
+  home: {
+    exportCta: 'Export / share',
+  },
+
+  // Export & share (P59). A PDF the person generates on demand and shares THEMSELVES
+  // via the system share sheet — Psychage never transmits it (SR-4). All CT4 — flagged
+  // for Dr. Dobson before ship. No diagnostic language; no score number (SR-1).
+  export: {
+    title: 'Export & share',
+    intro:
+      'Make a PDF of your logged nights to keep or take to a provider. You pick the range and share it yourself — Psychage never sends it anywhere.',
+    nameLabel: 'Your full name',
+    nameHint: 'Your provider files the summary by this name',
+    rangeLabel: 'What to include',
+    range7: 'Last 7 days',
+    range30: 'Last 30 days',
+    range90: 'Last 90 days',
+    rangeAll: 'All nights',
+    generate: 'Generate & share',
+    cancel: 'Cancel',
+    countLine: (nights: number) =>
+      `${nights} ${nights === 1 ? 'night' : 'nights'} logged in this range`,
+    empty: 'No nights logged in this range yet.',
+
+    // ── PDF document strings (print artifact; plain, factual, non-verdict) ──
+    pdfTitle: 'Sleep summary',
+    pdfGenerated: (stamp: string) => `Generated ${stamp}`,
+    pdfNightsLine: (nights: number) =>
+      `${nights} ${nights === 1 ? 'night' : 'nights'} logged`,
+    pdfAveragesHeading: 'Typical across these nights',
+    pdfNightsHeading: 'Night by night',
+    pdfAvgLength: 'Typical length',
+    pdfAvgEfficiency: 'Time asleep in bed',
+    pdfAvgLatency: 'Time to fall asleep',
+    pdfAvgQuality: 'How rested',
+    pdfAvgMood: 'Morning mood',
+    pdfColDate: 'Date',
+    pdfColInBed: 'In bed → out',
+    pdfColLength: 'Asleep',
+    pdfColRested: 'Rested',
+    pdfColMood: 'Mood',
+    pdfColNotes: 'Notes',
+    pdfEmpty: 'No nights logged in this range.',
+    // Footer — verbatim on every page. LOAD-BEARING → CT4. Company name + honest
+    // provenance + educational disclaimer; no diagnosis language.
+    pdfFooter:
+      'Your own sleep record, shared from Psychage with your consent. Educational, not a diagnosis.',
   },
 
   windDown: {
