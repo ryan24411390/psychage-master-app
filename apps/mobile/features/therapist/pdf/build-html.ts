@@ -142,14 +142,16 @@ export function summarizeRange(
   return { dayCount, entryCount };
 }
 
-function pageSizeForLocale(locale?: string): 'A4' | 'letter' {
+// Exported so sibling feature PDFs (e.g. Sleep export) can CONSUME the same shell +
+// helpers rather than fork them. Pure, no behaviour change.
+export function pageSizeForLocale(locale?: string): 'A4' | 'letter' {
   if (!locale) return 'A4';
   const l = locale.toLowerCase();
   // US + Canada use Letter; everyone else A4.
   return l.startsWith('en-us') || l.startsWith('en-ca') ? 'letter' : 'A4';
 }
 
-function escapeHtml(value: string): string {
+export function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (c) => {
     switch (c) {
       case '&':
@@ -175,7 +177,7 @@ function formatDateLong(date: LocalCalendarDate): string {
   return `${WEEKDAYS[d.getDay()]} · ${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-function formatRangeLabel(from: LocalCalendarDate, to: LocalCalendarDate): string {
+export function formatRangeLabel(from: LocalCalendarDate, to: LocalCalendarDate): string {
   const a = parseDate(from);
   const b = parseDate(to);
   return `${MONTHS[a.getMonth()]} ${a.getDate()} – ${MONTHS[b.getMonth()]} ${b.getDate()}, ${b.getFullYear()}`;
@@ -318,7 +320,7 @@ const BASE_CSS = `  * { box-sizing: border-box; }
     color: ${INK_HINT};
   }`;
 
-function renderDocument(opts: {
+export function renderDocument(opts: {
   pageSize: 'A4' | 'letter';
   extraCss: string;
   name: string;
