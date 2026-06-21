@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn() } }));
 
-import { CareAndLearning } from '@/components/home/CareAndLearning';
+import { CareAndLearning } from '@/components/home/rails/CareAndLearning';
 
 import { renderWithProviders } from './_helpers';
 

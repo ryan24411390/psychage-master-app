@@ -1,3 +1,7 @@
+// FOUNDATION-FROZEN SHELL (0e). Arranges the home children but is owned by neither
+// group A nor D — do not edit during parallel work. A owns `home/rails/*`, D owns
+// `home/record/*`. See components/home/OWNERSHIP.md.
+
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated, {
@@ -10,13 +14,13 @@ import Animated, {
 
 import { HomeCardSlot } from '@/components/home/HomeCardSlot';
 import { Mascot } from '@/components/home/Mascot';
-import { ReflectionRow } from '@/components/home/ReflectionRow';
-import { RecordChart } from '@/components/home/RecordChart';
+import { ReflectionRow } from '@/components/home/record/ReflectionRow';
+import { RecordChart } from '@/components/home/record/RecordChart';
 import { PrimaryAction } from '@/components/home/PrimaryAction';
-import { PickUpRail } from '@/components/home/PickUpRail';
+import { PickUpRail } from '@/components/home/rails/PickUpRail';
 import { ToolsBento } from '@/components/home/ToolsBento';
-import { MostRead } from '@/components/home/MostRead';
-import { CareAndLearning } from '@/components/home/CareAndLearning';
+import { MostRead } from '@/components/home/rails/MostRead';
+import { CareAndLearning } from '@/components/home/rails/CareAndLearning';
 import { Text } from '@/components/ui/Text';
 import { ToolSummaryCard } from '@/features/insights/ToolSummaryCard';
 import { ctaLabel, type HomeViewModel } from '@/lib/home-model';
