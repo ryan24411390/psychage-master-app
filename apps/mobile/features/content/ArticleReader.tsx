@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft } from 'lucide-react-native';
+import { useMemo } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
   useAnimatedScrollHandler,
@@ -15,6 +16,8 @@ import { Text } from '@/components/ui/Text';
 import { BookmarkSaveSlot } from '@/features/bookmarks/BookmarkSaveSlot';
 import { ArticleBody } from '@/features/content/blocks/ArticleBody';
 import { ArticleNextSteps } from '@/features/content/ArticleNextSteps';
+import { ListenButton } from '@/features/content/ListenButton';
+import { buildReadAloudSegments } from '@/features/content/read-aloud';
 import { ArtPanel } from '@/features/learn/ArtPanel';
 import { Citations } from '@/features/content/Citations';
 import { CT4_CONTENT } from '@/features/content/copy';
@@ -52,6 +55,19 @@ export function ArticleReader({ slug }: { slug: string }) {
     title: article?.title,
     readTime: article?.readTime ?? undefined,
   });
+
+  // P21 — ordered read-aloud segments (title → subtitle → every body block).
+  const listenSegments = useMemo(
+    () =>
+      article
+        ? buildReadAloudSegments({
+            title: article.title,
+            subtitle: article.subtitle,
+            contentHtml: article.contentHtml,
+          })
+        : [],
+    [article],
+  );
 
   const scrollProgressVal = useSharedValue(0);
 
@@ -184,6 +200,8 @@ export function ArticleReader({ slug }: { slug: string }) {
               </View>
 
               <MedicalDisclaimer />
+
+              <ListenButton segments={listenSegments} />
 
               <ArticleBody html={article.contentHtml} />
 

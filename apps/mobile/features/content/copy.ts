@@ -15,4 +15,11 @@ export const CT4_CONTENT = {
   // H1 content-loop forward actions (audit) — non-diagnostic, calm. CT4.
   relatedTitle: 'Related reading',
   nextStepTitle: 'Where to go next',
+  // P21 read-aloud (accessibility) — listen to the whole article start to finish.
+  readAloud: {
+    listen: 'Listen to this article',
+    pause: 'Pause',
+    resume: 'Resume',
+    stop: 'Stop',
+  },
 };
