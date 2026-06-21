@@ -78,4 +78,12 @@ describe('SignInScreen routing (P14)', () => {
     expect(mockPush).not.toHaveBeenCalled();
     expect(mockReplace).not.toHaveBeenCalled();
   });
+
+  it('the sign-up link routes to /sign-up (P15)', () => {
+    mockSignIn.mockResolvedValue({ ok: true, session: { email: 'me@x.co', verified: true, name: null } });
+    render(<SignInScreen />);
+
+    fireEvent.press(screen.getByTestId('to-signup'));
+    expect(mockPush).toHaveBeenCalledWith('/sign-up');
+  });
 });

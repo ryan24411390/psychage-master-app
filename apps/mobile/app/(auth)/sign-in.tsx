@@ -42,6 +42,7 @@ export default function SignInScreen() {
       onSubmit={handleSubmit}
       onProvider={onProvider}
       onForgotPassword={() => router.push('/forgot-password')}
+      onSignUp={() => router.push('/sign-up')}
     />
   );
 }

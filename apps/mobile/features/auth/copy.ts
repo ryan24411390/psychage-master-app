@@ -23,6 +23,8 @@ export const AUTH_COPY = {
   passwordHint: 'At least 8 characters', // CT4
   signUpPrimary: 'Create account', // CT4
   signInPrimary: 'Sign in', // CT4
+  // P15 — make signup reachable from the standalone sign-in screen.
+  signUpLink: "Don't have an account? Sign up", // CT4
   emailEmptyLine: 'Enter your email', // CT4
   emailInvalidLine: 'That email does not look right', // CT4
   passwordEmptyLine: 'Enter a password', // CT4
