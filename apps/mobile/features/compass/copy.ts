@@ -16,6 +16,5 @@ export const CT4_COMPASS = {
   clarity: { title: 'See how things have felt lately', sub: 'Clarity Score' },
   moodJournal: { title: 'Notice what comes up', sub: 'Mood Journal' },
   sleep: { title: 'Understand your sleep', sub: 'Sleep Architect' },
-  toolkits: { title: 'Explore self-help toolkits', sub: 'Toolkits Library' },
   insights: { title: 'See your patterns over time', sub: 'Insights' },
 } as const;
