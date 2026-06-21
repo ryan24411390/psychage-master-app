@@ -91,7 +91,10 @@ export function MindMateView({
         {crisisActive ? <CrisisCard onGetSupport={onRequestCrisis} hotline={hotline} /> : null}
 
         {!crisisActive && !needsSignIn && !consentDismissed ? (
-          <ConsentBanner onDismiss={() => setConsentDismissed(true)} />
+          <ConsentBanner
+            onDismiss={() => setConsentDismissed(true)}
+            onRequireSignIn={onSignIn}
+          />
         ) : null}
 
         {needsSignIn ? (
