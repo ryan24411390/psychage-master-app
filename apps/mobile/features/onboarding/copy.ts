@@ -15,11 +15,22 @@
 // features/moments/copy.ts flags itself. The capture step (S3) reuses MOMENTS_COPY from
 // features/moments — its copy is NOT duplicated here.
 export const ONBOARDING_COPY = {
-  // S1 — Welcome / host (Merged with S2)
-  welcomeTitle: 'This is Psychage.',
-  welcomeBody: 'Name your first feeling.',
-  begin: 'I am feeling...',
+  // S1 — Welcome / host. A warm welcome leads (P16): greet first, no task. The mood
+  // Moment is no longer the second screen — interests come next, capture happens later
+  // from home.
+  welcomeTitle: 'Welcome to Psychage.',
+  welcomeBody:
+    'A calm place to understand what you are feeling and learn about what is on your mind — at your own pace.',
+  begin: 'Get started',
   signIn: 'Already have a record? Sign in',
+
+  // Interests (P18) — first-run topic picker. Drives Learn + home recommendations.
+  // Educational framing only; choosing is optional (anonymous-first, never walls).
+  interestsTitle: 'What would you like to explore?',
+  interestsBody:
+    'Pick a few topics that feel relevant. We use them to suggest guides — you can change this anytime.',
+  interestsContinue: 'Continue',
+  interestsSkip: 'Skip for now',
 
   // S2 — What naming does
   namingBody:

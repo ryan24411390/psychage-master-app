@@ -16,7 +16,7 @@ describe('CareAndLearning', () => {
   it('routes the two rows to Find Care and the Library', () => {
     renderWithProviders(<CareAndLearning />);
 
-    expect(screen.getByText('400,000+ verified providers')).toBeTruthy();
+    expect(screen.getByText('400,000+ providers from the NPI registry')).toBeTruthy();
     expect(screen.getByText('Plain answers, reviewed by clinicians')).toBeTruthy();
 
     fireEvent.press(screen.getByTestId('care-find'));

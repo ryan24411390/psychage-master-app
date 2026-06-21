@@ -11,8 +11,9 @@ const FIXTURE = 'FIXTURE — not final copy (pending Dr. Dobson review)' as cons
 export const CONDITIONS_COPY = {
   _fixture: 'CT' as const,
   _marker: FIXTURE,
-  // List screen.
-  title: 'Conditions',
+  // List screen. Titled "Categories" (P17 rename from "Conditions"): reached from
+  // Learn's "Browse categories" entry — the label and the screen title now match.
+  title: 'Categories',
   intro:
     'Plain-language topics about mental health, drawn from our reviewed library. This is educational — it is not a diagnosis.',
   // Detail screen (generic — shown under every topic name; no per-condition claim).
