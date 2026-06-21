@@ -382,6 +382,9 @@ export function ProviderDetailView({ id }: { id: string }) {
           >
             {t.useAsTherapist}
           </Button>
+          <Text variant="caption" className="pt-1.5 text-text-tertiary dark:text-text-tertiary-dark">
+            {t.shareClarifier}
+          </Text>
         </View>
 
         <Text variant="caption" className="pt-1 text-text-tertiary dark:text-text-tertiary-dark">

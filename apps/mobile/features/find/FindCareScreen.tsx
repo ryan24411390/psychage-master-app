@@ -736,8 +736,9 @@ const ProfileStep = React.memo(function ProfileStep({ id, onBack, saved, onToggl
           </Tap>
         ) : null}
         <Tap activeScale={0.97} onPress={() => router.push({ pathname: '/add-provider', params: { name, ...(p.phone ? { contact: p.phone } : {}) } })}>
-          <View className="rounded-[16px] py-4 items-center bg-surface-active dark:bg-surface-active-dark"><Text className="font-sans-bold text-[17px] text-text-primary dark:text-text-primary-dark">Use in my therapist record</Text></View>
+          <View className="rounded-[16px] py-4 items-center bg-surface-active dark:bg-surface-active-dark"><Text className="font-sans-bold text-[17px] text-text-primary dark:text-text-primary-dark">Share my check-ins with this provider</Text></View>
         </Tap>
+        <Text className="font-sans text-text-tertiary dark:text-text-tertiary-dark text-xs text-center leading-4">Puts together a summary of your recent check-ins to share. Psychage never contacts them for you.</Text>
       </View>
     </Shell>
   );

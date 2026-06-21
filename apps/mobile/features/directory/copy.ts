@@ -84,7 +84,12 @@ export const DIRECTORY_COPY = {
   directions: 'Directions',
   email: 'Email',
   booking: 'Booking page',
-  useAsTherapist: 'Use in my therapist record',
+  // Action that opens the share-with-a-provider flow. Worded to say plainly what it
+  // does (the old "Use in my therapist record" read as "am I the therapist / did I
+  // sign up?"). Final copy is Dr. Dobson-reviewed.
+  useAsTherapist: 'Share my check-ins with this provider',
+  shareClarifier:
+    'Puts together a summary of your recent check-ins that you can share with them. Psychage never contacts them for you.',
   notFoundTitle: 'Provider unavailable',
   notFoundBody: 'This listing could not be loaded. It may have been removed.',
 } as const;
