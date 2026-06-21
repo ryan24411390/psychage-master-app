@@ -63,6 +63,13 @@ export function ChatInput({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           multiline
+          // Enter sends. `submitBehavior="submit"` keeps focus and fires
+          // onSubmitEditing on Return for a multiline field (instead of the default
+          // newline), so the keyboard's Return/"send" key submits on both soft and
+          // hardware keyboards. Long text still wraps and the field auto-grows.
+          returnKeyType="send"
+          submitBehavior="submit"
+          onSubmitEditing={submit}
           editable={!disabled}
           accessibilityLabel={MINDMATE_COPY.inputPlaceholder}
           testID="mindmate-input"

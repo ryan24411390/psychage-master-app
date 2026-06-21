@@ -22,6 +22,7 @@ export type ChatStatus = 'idle' | 'sending' | 'error';
 
 type SendFn = typeof defaultSendMessage;
 type PersistFn = typeof defaultPersistExchange;
+type ApiMessage = { role: 'user' | 'assistant'; content: string };
 
 export interface UseMindMateChatOptions {
   /** Region code forwarded to the backend so crisis resources match locale. */
@@ -47,9 +48,15 @@ export interface UseMindMateChat {
   /** True when the last attempt failed because no session exists → show sign-in. */
   needsSignIn: boolean;
   send: (text: string) => Promise<void>;
+  /**
+   * Re-run the last turn after a transient backend failure (P9). Re-streams the
+   * still-present trailing user message without appending a duplicate. No-op when
+   * there's nothing to retry or a turn is already streaming.
+   */
+  retry: () => Promise<void>;
 }
 
-function toApi(messages: ChatMessage[]): { role: 'user' | 'assistant'; content: string }[] {
+function toApi(messages: ChatMessage[]): ApiMessage[] {
   return messages
     .filter((m) => m.content.trim().length > 0)
     .map((m) => ({ role: m.role, content: m.content }));
@@ -69,42 +76,30 @@ export function useMindMateChat(options: UseMindMateChatOptions = {}): UseMindMa
   const [crisisActive, setCrisisActive] = useState(false);
   const [needsSignIn, setNeedsSignIn] = useState(false);
 
+  // Latest messages mirrored to a ref so send/retry can compute the API payload from
+  // the current conversation without taking `messages` as a callback dependency
+  // (avoids a stale closure double-appending on retry).
+  const messagesRef = useRef<ChatMessage[]>(messages);
+  messagesRef.current = messages;
+
   const sessionId = useRef<string | undefined>(undefined);
   // The persisted ai_conversations row id, reused across turns once created. Lives
   // only for the session; consent OFF means it's never populated (no write happens).
   const conversationId = useRef<string | null>(null);
+  // Text of the last backend turn — what retry() re-sends. Crisis turns never set it
+  // (they don't hit the backend), so retry can't replay a crisis message.
+  const lastUserText = useRef<string | null>(null);
 
   const triggerCrisis = useCallback(() => {
     setCrisisActive(true);
     onCrisis?.();
   }, [onCrisis]);
 
-  const send = useCallback(
-    async (raw: string) => {
-      const text = raw.trim();
-      if (!text || status === 'sending') return;
-      setError(null);
-      setNeedsSignIn(false);
-
-      const userMsg: ChatMessage = { id: nextId(), role: 'user', content: text };
-
-      // Client crisis pre-check (SR-2) — instant, offline, takes priority over the
-      // AI reply: we surface crisis and do NOT call the backend for this turn.
-      // Statically imported so this safety path can never depend on a runtime
-      // module fetch resolving.
-      if (precheckCrisis(text)) {
-        setMessages((prev) => [...prev, userMsg]);
-        triggerCrisis();
-        return;
-      }
-
-      const apiMessages = [...toApi(messages), { role: 'user' as const, content: text }];
-      const assistantId = nextId();
-      setMessages((prev) => [
-        ...prev,
-        userMsg,
-        { id: assistantId, role: 'assistant', content: '', isStreaming: true },
-      ]);
+  // Streams one assistant turn into the placeholder identified by `assistantId`.
+  // Shared by send (fresh turn) and retry (replay) so the streaming, persistence and
+  // calm-error handling stay identical between the two paths.
+  const runTurn = useCallback(
+    async (apiMessages: ApiMessage[], assistantId: string, userContent: string) => {
       setStatus('sending');
 
       // Captured for the post-turn persist (kept out of React state — needed
@@ -135,9 +130,7 @@ export function useMindMateChat(options: UseMindMateChatOptions = {}): UseMindMa
         )) {
           assistantText += chunk;
           setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId ? { ...m, content: m.content + chunk } : m,
-            ),
+            prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + chunk } : m)),
           );
         }
         setMessages((prev) =>
@@ -153,7 +146,7 @@ export function useMindMateChat(options: UseMindMateChatOptions = {}): UseMindMa
           void persistImpl({
             sessionId: turnMeta?.sessionId ?? sessionId.current ?? '',
             conversationId: conversationId.current,
-            userContent: text,
+            userContent,
             assistantContent: assistantText,
             safetyLevel: turnMeta?.safetyLevel,
             citations: turnMeta?.citations,
@@ -173,7 +166,8 @@ export function useMindMateChat(options: UseMindMateChatOptions = {}): UseMindMa
           return;
         }
 
-        // Drop the empty assistant placeholder; show calm error copy.
+        // Drop the empty assistant placeholder; show calm error copy. The trailing
+        // user message stays so retry() can replay it.
         setMessages((prev) => prev.filter((m) => m.id !== assistantId));
         setStatus('error');
         if (err instanceof MindMateUnavailableError && err.code === 'NO_SESSION') {
@@ -186,8 +180,59 @@ export function useMindMateChat(options: UseMindMateChatOptions = {}): UseMindMa
         );
       }
     },
-    [messages, region, status, sendImpl, persistImpl, triggerCrisis],
+    [region, sendImpl, persistImpl, triggerCrisis],
   );
 
-  return { messages, status, error, crisisActive, needsSignIn, send };
+  const send = useCallback(
+    async (raw: string) => {
+      const text = raw.trim();
+      if (!text || status === 'sending') return;
+      setError(null);
+      setNeedsSignIn(false);
+
+      const userMsg: ChatMessage = { id: nextId(), role: 'user', content: text };
+
+      // Client crisis pre-check (SR-2) — instant, offline, takes priority over the
+      // AI reply: we surface crisis and do NOT call the backend for this turn.
+      // Statically imported so this safety path can never depend on a runtime
+      // module fetch resolving.
+      if (precheckCrisis(text)) {
+        setMessages((prev) => [...prev, userMsg]);
+        triggerCrisis();
+        return;
+      }
+
+      lastUserText.current = text;
+      const apiMessages = [...toApi(messagesRef.current), { role: 'user' as const, content: text }];
+      const assistantId = nextId();
+      setMessages((prev) => [
+        ...prev,
+        userMsg,
+        { id: assistantId, role: 'assistant', content: '', isStreaming: true },
+      ]);
+      await runTurn(apiMessages, assistantId, text);
+    },
+    [status, runTurn, triggerCrisis],
+  );
+
+  const retry = useCallback(async () => {
+    if (status === 'sending') return;
+    const text = lastUserText.current;
+    if (!text) return;
+    setError(null);
+    setNeedsSignIn(false);
+
+    // The failed turn's user message is still the last entry (its assistant placeholder
+    // was dropped on error) — re-stream that conversation with a fresh placeholder and
+    // no new user message, so the backend sees the same turn, not a duplicate.
+    const apiMessages = toApi(messagesRef.current);
+    const assistantId = nextId();
+    setMessages((prev) => [
+      ...prev,
+      { id: assistantId, role: 'assistant', content: '', isStreaming: true },
+    ]);
+    await runTurn(apiMessages, assistantId, text);
+  }, [status, runTurn]);
+
+  return { messages, status, error, crisisActive, needsSignIn, send, retry };
 }

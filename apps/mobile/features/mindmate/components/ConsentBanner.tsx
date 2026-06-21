@@ -3,6 +3,7 @@ import { Pressable, View } from 'react-native';
 
 import { SettingsToggleRow } from '@/components/settings/SettingsToggleRow';
 import { Text } from '@/components/ui/Text';
+import { useAuth } from '@/features/auth';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
 import { MINDMATE_COPY } from '../copy';
@@ -14,12 +15,33 @@ import { useChatConsent } from '../persistence/use-chat-consent';
 // (SR-3): no diagnosis, explains what's saved and that it's optional. With the toggle
 // OFF the conversation stays ephemeral, exactly as before this banner existed.
 //
+// P57: saving requires an account (chat-store self-no-ops when signed out). Turning
+// the toggle ON while signed out gates to sign-in first via `onRequireSignIn` and
+// does NOT set consent — once signed in (the user returns to MindMate) they can opt
+// in. Turning it OFF is always allowed, with or without a session.
+//
 // `onDismiss` hides the banner for the session (the consent state persists either way
 // — dismissing is not consenting). Toggling on/off does NOT auto-dismiss, so the user
 // can flip it back without re-opening anything.
-export function ConsentBanner({ onDismiss }: { onDismiss?: () => void }) {
+export function ConsentBanner({
+  onDismiss,
+  onRequireSignIn,
+}: {
+  onDismiss?: () => void;
+  onRequireSignIn?: () => void;
+}) {
   const { chatPersistConsent, setChatPersistConsent } = useChatConsent();
+  const { session } = useAuth();
   const tc = useThemeColors();
+
+  // Gate the ON transition behind a session; OFF is always permitted.
+  const handleToggle = (next: boolean) => {
+    if (next && !session) {
+      onRequireSignIn?.();
+      return;
+    }
+    setChatPersistConsent(next);
+  };
 
   return (
     <View
@@ -51,7 +73,7 @@ export function ConsentBanner({ onDismiss }: { onDismiss?: () => void }) {
       <SettingsToggleRow
         label={MINDMATE_COPY.consentToggleLabel}
         value={chatPersistConsent}
-        onValueChange={setChatPersistConsent}
+        onValueChange={handleToggle}
         testID="mindmate-consent-toggle"
       />
     </View>
