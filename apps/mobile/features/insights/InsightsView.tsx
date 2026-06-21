@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus } from 'lucide-react-native';
+import { ChevronRight, TrendingUp, TrendingDown, Minus } from 'lucide-react-native';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { Mascot } from '@/components/home/Mascot';
 import { DomainRadar, MetricBars, ScoreGauge, TrendLine } from '@/components/ui/charts';
 import { Text } from '@/components/ui/Text';
+import { ToolScreen } from '@/components/ui/ToolScreen';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
 import { buildToolSummaries, type InsightsInput, type ToolKey, type ToolSummary } from './aggregate';
@@ -204,23 +205,7 @@ export function InsightsView({ input, onBack, onOpenTool }: InsightsViewProps) {
   };
 
   return (
-    <View className="flex-1 bg-background dark:bg-background-dark">
-      <View className="flex-row items-center px-2 pt-1 pb-2">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          onPress={onBack}
-          hitSlop={8}
-          testID="insights-back"
-          className="min-h-[44px] flex-row items-center gap-1 px-2"
-        >
-          <ChevronLeft size={22} color={tc.inkSecondary} strokeWidth={2.5} />
-          <Text variant="bodyLarge" className="font-medium text-text-secondary dark:text-text-secondary-dark">
-            Back
-          </Text>
-        </Pressable>
-      </View>
-
+    <ToolScreen onBack={onBack} scroll="none">
       <ScrollView contentContainerClassName="px-5 pb-12 pt-2 gap-6" showsVerticalScrollIndicator={false}>
         <View className="gap-2">
           <Text variant="h1" className="font-display text-[32px] tracking-tight text-text-primary dark:text-text-primary-dark">
@@ -271,6 +256,6 @@ export function InsightsView({ input, onBack, onOpenTool }: InsightsViewProps) {
           })
         )}
       </ScrollView>
-    </View>
+    </ToolScreen>
   );
 }

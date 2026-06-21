@@ -1,9 +1,9 @@
 import { Stack } from 'expo-router';
-import { View } from 'react-native';
 
-import { GlobalHeader } from '@/components/GlobalHeader';
+import { ToolScreen } from '@/components/ui/ToolScreen';
 import { MoodJournalView } from '@/features/mood-journal/MoodJournalView';
 import { useReducedMotion } from '@/lib/motion';
+import { goBackOr } from '@/lib/nav';
 import { getMoodJournalStore } from '@/lib/mood-journal-store';
 
 // Mood Journal tool route — the "patterns & triggers" surface. Pushed full-screen
@@ -16,7 +16,7 @@ import { getMoodJournalStore } from '@/lib/mood-journal-store';
 export default function MoodJournalRoute() {
   const reduced = useReducedMotion();
   return (
-    <View className="flex-1 bg-background dark:bg-background-dark">
+    <>
       <Stack.Screen
         options={{
           headerShown: false,
@@ -24,8 +24,9 @@ export default function MoodJournalRoute() {
           gestureEnabled: true,
         }}
       />
-      <GlobalHeader />
-      <MoodJournalView momentStore={getMoodJournalStore()} />
-    </View>
+      <ToolScreen scroll="none" onBack={() => goBackOr('/compass')}>
+        <MoodJournalView momentStore={getMoodJournalStore()} />
+      </ToolScreen>
+    </>
   );
 }

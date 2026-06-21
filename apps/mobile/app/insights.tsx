@@ -1,7 +1,5 @@
 import { router, Stack } from 'expo-router';
-import { View } from 'react-native';
 
-import { GlobalHeader } from '@/components/GlobalHeader';
 import { InsightsView } from '@/features/insights/InsightsView';
 import { readInsightsInput } from '@/features/insights/read-stores';
 import { useReducedMotion } from '@/lib/motion';
@@ -14,7 +12,7 @@ import { goBackOr } from '@/lib/nav';
 export default function InsightsRoute() {
   const reduced = useReducedMotion();
   return (
-    <View className="flex-1 bg-background dark:bg-background-dark">
+    <>
       <Stack.Screen
         options={{
           headerShown: false,
@@ -22,12 +20,11 @@ export default function InsightsRoute() {
           gestureEnabled: true,
         }}
       />
-      <GlobalHeader />
       <InsightsView
         input={readInsightsInput()}
         onBack={() => goBackOr('/')}
         onOpenTool={(route) => router.push(route as never)}
       />
-    </View>
+    </>
   );
 }
