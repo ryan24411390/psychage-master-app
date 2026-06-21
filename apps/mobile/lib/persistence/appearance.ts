@@ -37,7 +37,10 @@ export interface AppearanceState {
 }
 
 function seed(): AppearanceState {
-  return { version: SCHEMA_VERSION, mode: 'system', reducedMotion: false };
+  // No-stored-preference default is LIGHT (foundation unit 0b). Dark stays fully
+  // available via the 'night' mode the S45 toggle sets; only the first-run default
+  // changed, not the toggle. Pairs with app.json `userInterfaceStyle: "light"`.
+  return { version: SCHEMA_VERSION, mode: 'light', reducedMotion: false };
 }
 
 function normalizeMode(value: unknown): AppearanceMode {

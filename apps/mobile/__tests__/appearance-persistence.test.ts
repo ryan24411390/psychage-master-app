@@ -17,8 +17,8 @@ function memStorage(): Storage {
 }
 
 describe('appearance migrate', () => {
-  it('seeds to system + motion-on when no data', () => {
-    expect(migrate(null)).toEqual({ version: 1, mode: 'system', reducedMotion: false });
+  it('seeds to light + motion-on when no data', () => {
+    expect(migrate(null)).toEqual({ version: 1, mode: 'light', reducedMotion: false });
   });
 
   it('reseeds on corrupt JSON / non-object / missing version', () => {
