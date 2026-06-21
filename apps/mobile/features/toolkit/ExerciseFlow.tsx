@@ -4,11 +4,11 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
+import { ToolScreen } from '@/components/ui/ToolScreen';
 import { useReducedMotion, DURATION, easingFn } from '@/lib/motion';
 
 import { BodyScanGlyph } from './components/BodyScanGlyph';
 import { BreathingForm } from './components/BreathingForm';
-import { ExerciseChrome } from './components/ExerciseChrome';
 import { ExercisePrompt } from './components/ExercisePrompt';
 import { type Exercise, nextPromptIndex, type PromptExercise } from './exercises';
 
@@ -20,10 +20,9 @@ import { type Exercise, nextPromptIndex, type PromptExercise } from './exercises
 export interface ExerciseFlowProps {
   readonly exercise: Exercise;
   readonly onExit: () => void;
-  readonly onHelp: () => void;
 }
 
-export function ExerciseFlow({ exercise, onExit, onHelp }: ExerciseFlowProps) {
+export function ExerciseFlow({ exercise, onExit }: ExerciseFlowProps) {
   const [step, setStep] = useState<'intro' | 'exercise' | 'end'>('intro');
   const reduced = useReducedMotion();
 
@@ -33,7 +32,7 @@ export function ExerciseFlow({ exercise, onExit, onHelp }: ExerciseFlowProps) {
 
   if (step === 'intro') {
     return (
-      <ExerciseChrome onHelp={onHelp} onClose={onExit}>
+      <ToolScreen scroll="none" onBack={onExit}>
         <Animated.View {...transitionProps} className="flex-1 justify-between">
           <View className="flex-1 justify-center gap-2 px-6">
             <Text
@@ -50,13 +49,13 @@ export function ExerciseFlow({ exercise, onExit, onHelp }: ExerciseFlowProps) {
             </Button>
           </View>
         </Animated.View>
-      </ExerciseChrome>
+      </ToolScreen>
     );
   }
 
   if (step === 'end') {
     return (
-      <ExerciseChrome onHelp={onHelp}>
+      <ToolScreen scroll="none">
         <Animated.View
           {...transitionProps}
           className="flex-1 items-center justify-center gap-6 px-6"
@@ -66,12 +65,12 @@ export function ExerciseFlow({ exercise, onExit, onHelp }: ExerciseFlowProps) {
             Close
           </Button>
         </Animated.View>
-      </ExerciseChrome>
+      </ToolScreen>
     );
   }
 
   return (
-    <ExerciseChrome onHelp={onHelp} onClose={() => setStep('end')}>
+    <ToolScreen scroll="none" onBack={() => setStep('end')}>
       <Animated.View {...transitionProps} className="flex-1">
         {exercise.kind === 'breathing' ? (
           <BreathingForm exercise={exercise} reduced={reduced} />
@@ -79,7 +78,7 @@ export function ExerciseFlow({ exercise, onExit, onHelp }: ExerciseFlowProps) {
           <PromptSequence exercise={exercise} onDone={() => setStep('end')} />
         )}
       </Animated.View>
-    </ExerciseChrome>
+    </ToolScreen>
   );
 }
 
