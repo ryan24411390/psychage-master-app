@@ -13,21 +13,32 @@ import { getMoodJournalStore } from '@/lib/mood-journal-store';
 import { getNavigatorStore } from '@/lib/navigator-store';
 import { getRelationshipStore } from '@/lib/relationship-store';
 import { getSleepStore } from '@/lib/sleep-store';
+import type {
+  CheckinReader,
+  ClarityReader,
+  EnergyJournalReader,
+  MoodReader,
+  NavigatorReader,
+  RelationshipReader,
+  SleepReader,
+} from '@/lib/stores/insights-contract';
 
 import { buildToolSummaries, type InsightsInput, type ToolSummary } from './aggregate';
 
 /** Read every tool's local history into one structure (generous caps — all local). */
 export function readInsightsInput(): InsightsInput {
+  // Each singleton is asserted (`satisfies`) against its reader interface in
+  // @/lib/stores/insights-contract — a removed/renamed reader method fails here.
   return {
-    checkins: dailyRollupReader(getMomentStore()).getRecent(400),
-    clarity: getClarityStore().getRecent(100),
-    navigator: getNavigatorStore().getRecent(50),
-    relationship: getRelationshipStore().loadHistory(),
-    mood: getMoodJournalStore().getRecent(400),
-    sleep: getSleepStore().getRecent(400),
+    checkins: (dailyRollupReader(getMomentStore()) satisfies CheckinReader).getRecent(400),
+    clarity: (getClarityStore() satisfies ClarityReader).getRecent(100),
+    navigator: (getNavigatorStore() satisfies NavigatorReader).getRecent(50),
+    relationship: (getRelationshipStore() satisfies RelationshipReader).loadHistory(),
+    mood: (getMoodJournalStore() satisfies MoodReader).getRecent(400),
+    sleep: (getSleepStore() satisfies SleepReader).getRecent(400),
     // Energy lives in the Clarity Journal (1–10, one per day) — the only store that has it.
     // No mobile capture writes it yet, so this is usually empty until that screen lands.
-    energy: getClarityJournalStore()
+    energy: (getClarityJournalStore() satisfies EnergyJournalReader)
       .getRecentDailyCheckIns(400)
       .map((c) => ({ date: c.date as string, energy: c.energy })),
   };
