@@ -42,7 +42,7 @@ import { colors } from '@/lib/colors';
 
 import { telUrl } from '@/features/directory/contact';
 import { useCityCounts, useProviderSearch, useProviderTypes, useStateCounts, useTypeCounts } from '@/features/directory/hooks';
-import { DEFAULT_RADIUS_MILES, requestAndGetCoords, type Coords } from '@/features/directory/location';
+import { requestAndGetCoords } from '@/features/directory/location';
 import { cleanDisplayName } from '@/features/directory/mapping';
 import { getProviderById } from '@/features/directory/queries';
 import { ABBR, STATES } from '@/features/directory/states';
@@ -72,6 +72,18 @@ const TYPE_ICON: Record<string, typeof Users> = {
   'marriage-family-therapist': Users,
 };
 const iconForType = (slug: string) => TYPE_ICON[slug] ?? Users;
+
+// Resolve a reverse-geocoded region (full name "California" OR 2-letter "CA") to the
+// canonical state name the directory filters on. Providers carry no coordinates, so
+// "Use my location" searches by STATE — this maps the device region onto one.
+function resolveStateName(region: string | null): string | null {
+  if (!region) return null;
+  const direct = STATES.find((s) => s.toLowerCase() === region.trim().toLowerCase());
+  if (direct) return direct;
+  const up = region.trim().toUpperCase();
+  if (up.length === 2) return STATES.find((s) => ABBR[s] === up) ?? null;
+  return null;
+}
 
 function formatVerified(iso: string | null): string | null {
   if (!iso) return null;
@@ -178,7 +190,6 @@ export default function FindCareScreen() {
   const [city, setCity] = useState<string | null>(dl.city);
   const [typeSel, setTypeSel] = useState<{ id: string; label: string } | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [coords, setCoords] = useState<Coords | null>(null);
   const [stateQ, setStateQ] = useState('');
   const [cityQ, setCityQ] = useState('');
   const [query, setQuery] = useState('');
@@ -198,21 +209,21 @@ export default function FindCareScreen() {
   }, [query]);
 
   const stateAbbr = loc ? ABBR[loc] : undefined;
+  // No lat/lng/radius: provider_locations carry no coordinates, so a geo-radius search
+  // returns nothing. The directory searches by state (resolved from device location
+  // for "Use my location"); distance sort is likewise unbacked and not offered.
   const params = useMemo<ProviderSearchParams>(
     () => ({
       query: debounced || undefined,
       state: stateAbbr,
       city: city && city !== 'all' ? city : undefined,
       provider_type_ids: typeSel ? [typeSel.id] : undefined,
-      latitude: coords?.latitude,
-      longitude: coords?.longitude,
-      radius_miles: coords ? DEFAULT_RADIUS_MILES : undefined,
       sort_by: sort,
       per_page: 20,
     }),
-    [debounced, stateAbbr, city, typeSel, coords, sort],
+    [debounced, stateAbbr, city, typeSel, sort],
   );
-  const searchEnabled = step === 'results' && (!!stateAbbr || !!coords);
+  const searchEnabled = step === 'results' && !!stateAbbr;
   const search = useProviderSearch(params, searchEnabled);
   const headerCount = search.total;
   const countShown = useCountUp(headerCount, reduce);
@@ -243,10 +254,23 @@ export default function FindCareScreen() {
 
   const onUseLocation = async () => {
     const res = await requestAndGetCoords();
-    if (res.status === 'granted') {
-      setCoords(res.coords);
-      setSort('distance');
-      setStep('results');
+    if (res.status !== 'granted') {
+      setStep('manual');
+      return;
+    }
+    // Non-US device → the out-of-US state (the directory is US-only).
+    if (res.countryCode && res.countryCode !== 'US') {
+      setStep('outside');
+      return;
+    }
+    // US: resolve the region to a state and search by it (no provider coordinates exist
+    // for a radius search). Unresolvable region → fall back to manual state selection.
+    const stateName = resolveStateName(res.region);
+    if (stateName) {
+      setLoc(stateName);
+      setCity('all');
+      persist(stateName, 'all');
+      setStep('type');
     } else {
       setStep('manual');
     }
@@ -551,6 +575,19 @@ export default function FindCareScreen() {
     </Animated.View>
   );
 
+  // Distinct from Empty: the search couldn't REACH the directory (RPC/connection
+  // failure, now surfaced instead of silently showing "0 results"). Offers a retry.
+  const ErrorState = (
+    <Animated.View entering={FadeIn.duration(400)} className="items-center px-6 pt-12">
+      <View className="w-16 h-16 rounded-full bg-surface-active dark:bg-surface-active-dark border border-border/50 dark:border-border-dark/50 items-center justify-center mb-5"><Info size={28} color={soft} /></View>
+      <Text className="font-display text-2xl text-text-primary dark:text-text-primary-dark mb-2.5 text-center">Couldn't load providers</Text>
+      <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-[15px] leading-6 text-center mb-6">The directory didn't respond. This is usually a connection hiccup — please try again.</Text>
+      <View className="w-full gap-3">
+        <Primary label="Try again" onPress={() => void search.refetch()} />
+      </View>
+    </Animated.View>
+  );
+
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
       <Header back={() => setStep('type')} />
@@ -558,7 +595,9 @@ export default function FindCareScreen() {
           box does not lose focus on every keystroke as the list re-renders. */}
       <View className="px-5">{ListHeader}</View>
       <View className="px-5 flex-1">
-        {loading ? (
+        {search.isError ? (
+          ErrorState
+        ) : loading ? (
           <View className="pt-3">{[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} />)}</View>
         ) : (
           <FlashList
@@ -587,7 +626,7 @@ export default function FindCareScreen() {
         </Animated.View>
       ) : null}
 
-      <SortSheet visible={sheet === 'sort'} value={sort} geo={!!coords} onSelect={(v) => { setSort(v); setSheet(null); }} onClose={() => setSheet(null)} />
+      <SortSheet visible={sheet === 'sort'} value={sort} geo={false} onSelect={(v) => { setSort(v); setSheet(null); }} onClose={() => setSheet(null)} />
       <CrisisSheet visible={sheet === 'crisis'} onClose={() => setSheet(null)} />
     </SafeAreaView>
   );

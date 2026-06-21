@@ -47,15 +47,22 @@ describe('searchProviders — fidelity + cascade', () => {
     expect(res.has_more).toBe(true); // 0 + 20 < 40
   });
 
-  it('falls through RPC → direct query → EMPTY (NO mock data) when both paths fail', async () => {
+  it('throws (so the query retries + surfaces isError) when both paths fail — never a silent empty', async () => {
     clientMock.mockReturnValue({
       rpc: vi.fn().mockResolvedValue({ data: null, error: { message: 'timeout' } }),
       // no state/city → skips the location pre-scope; the providers query errors too
       from: vi.fn(() => builder({ data: null, error: { message: 'boom' } })),
     });
 
-    const res = await searchProviders({ query: 'swanson' });
-    expect(res.providers).toEqual([]); // empty, not the web's hand-curated mock set
+    // A transient failure must NOT look like "0 results" — it rejects so TanStack
+    // Query can retry it and the UI can show a recoverable error (NO mock fabrication).
+    await expect(searchProviders({ query: 'swanson' })).rejects.toThrow();
+  });
+
+  it('returns a genuine empty (no throw) when the RPC succeeds with zero rows', async () => {
+    clientMock.mockReturnValue({ rpc: vi.fn().mockResolvedValue({ data: [], error: null }) });
+    const res = await searchProviders({ state: 'CA' });
+    expect(res.providers).toEqual([]);
     expect(res.total_count).toBe(0);
   });
 });
@@ -64,6 +71,14 @@ describe('getProviderById', () => {
   it('returns null (not a stub provider) when the client is absent', async () => {
     clientMock.mockReturnValue(null);
     expect(await getProviderById('p1')).toBeNull();
+  });
+
+  it('returns null on a genuine not-found, but throws on a query error', async () => {
+    clientMock.mockReturnValue({ from: vi.fn(() => builder({ data: null, error: null })) });
+    expect(await getProviderById('missing')).toBeNull();
+
+    clientMock.mockReturnValue({ from: vi.fn(() => builder({ data: null, error: { message: 'boom' } })) });
+    await expect(getProviderById('p1')).rejects.toThrow();
   });
 
   it('maps a found row into the detail shape', async () => {

@@ -39,6 +39,10 @@ export function useProviderSearch(params: ProviderSearchParams, enabled: boolean
     queryFn: ({ pageParam }) => searchProviders({ ...params, page: pageParam as number }),
     getNextPageParam: (last) => (last.has_more ? last.page + 1 : undefined),
     staleTime: 60_000,
+    // searchProviders now throws when the backend is unreachable (vs a silent empty),
+    // so a transient RPC timeout is retried instead of being cached as "0 results".
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 4000),
   });
 
   const providers: ProviderCardData[] = query.data?.pages.flatMap((p) => p.providers) ?? [];
@@ -53,6 +57,8 @@ export function useFeaturedProviders(enabled: boolean) {
     enabled,
     queryFn: () => getFeaturedProviders(12),
     staleTime: 5 * 60_000,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 4000),
   });
 }
 

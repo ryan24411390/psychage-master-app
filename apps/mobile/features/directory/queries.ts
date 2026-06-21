@@ -238,10 +238,13 @@ async function runSearchCascade(client: Client, params: ProviderSearchParams): P
     const direct = await searchViaDirectQuery(client, params, page, perPage);
     if (direct) return direct;
   } catch {
-    // fall through to empty
+    // fall through to throw
   }
-  // No mock fallback (fidelity rule): nothing reachable → empty, never fabricated.
-  return EMPTY(page, perPage);
+  // Both paths failed to REACH the data (RPC errored AND direct errored). Throw so
+  // TanStack Query retries the transient failure and surfaces `isError` instead of a
+  // silent empty list — a genuine zero-result returns EMPTY above (no throw), so an
+  // empty UI never masks an unreachable backend. Still no mock fallback (fidelity).
+  throw new Error('Provider search is unavailable. Check your connection and try again.');
 }
 
 /**
@@ -271,7 +274,10 @@ export async function getProviderById(id: string): Promise<ProviderWithDetails |
   const client = getSupabaseClient();
   if (!client) return null;
   const { data, error } = await client.from('providers').select(PROVIDER_SELECT).eq('id', id).maybeSingle();
-  if (error || !data) return null;
+  // Distinguish a transient failure (throw → TanStack Query retries + shows a load
+  // error with retry) from a genuine not-found (null → "this listing is unavailable").
+  if (error) throw error;
+  if (!data) return null;
   return mapProviderRow(data as Record<string, unknown>);
 }
 
