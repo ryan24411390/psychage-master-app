@@ -646,14 +646,36 @@ const ProfileStep = React.memo(function ProfileStep({ id, onBack, saved, onToggl
   const ink = isDark ? colors.text.primary.dark : colors.text.primary.light;
   const faint = isDark ? colors.text.tertiary.dark : colors.text.tertiary.light;
   const teal = isDark ? colors.teal[400] : colors.teal[600];
-  const { data, isLoading } = useQuery({ queryKey: ['providers', 'detail', id], queryFn: () => getProviderById(id), enabled: !!id });
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ['providers', 'detail', id],
+    queryFn: () => getProviderById(id),
+    enabled: !!id,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 4000),
+  });
   const Shell = ({ children }: { children: React.ReactNode }) => (
     <Animated.View entering={FadeIn.duration(300)} layout={LinearTransition} className="flex-1 bg-background dark:bg-background-dark pt-14">
       <View className="flex-row items-center px-5 pt-1 pb-2"><Tap activeScale={0.8} onPress={onBack}><View className="p-2 bg-surface-active dark:bg-surface-active-dark rounded-full"><ChevronLeft size={24} color={ink} /></View></Tap></View>
       {children}
     </Animated.View>
   );
-  if (isLoading || !data) return <Shell><View className="flex-1 items-center justify-center"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark">{isLoading ? 'Loading…' : 'This listing could not be loaded.'}</Text></View></Shell>;
+  if (isLoading)
+    return <Shell><View className="flex-1 items-center justify-center"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark">Loading…</Text></View></Shell>;
+  // Load failure (connection/RPC) is recoverable — offer a retry, distinct from a
+  // genuine not-found (listing removed) which is not.
+  if (isError)
+    return (
+      <Shell>
+        <View className="flex-1 items-center justify-center gap-4 px-8">
+          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-center">This listing didn't load. Check your connection and try again.</Text>
+          <Tap activeScale={0.97} onPress={() => void refetch()}>
+            <View style={{ backgroundColor: teal }} className="rounded-[16px] px-6 py-3.5"><Text className="font-sans-bold text-white text-base">Try again</Text></View>
+          </Tap>
+        </View>
+      </Shell>
+    );
+  if (!data)
+    return <Shell><View className="flex-1 items-center justify-center px-8"><Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-center">This listing is unavailable. It may have been removed.</Text></View></Shell>;
 
   const p: ProviderWithDetails = data;
   const name = cleanDisplayName(p.display_name) || p.display_name;

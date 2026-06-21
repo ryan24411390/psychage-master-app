@@ -133,10 +133,12 @@ function TagRow({ items }: { items: string[] }) {
 }
 
 export function ProviderDetailView({ id }: { id: string }) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['providers', 'detail', id],
     queryFn: () => getProviderById(id),
     enabled: !!id,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 4000),
   });
 
   // Record this view for the directory's "recently viewed" rail (local, capped).
@@ -155,6 +157,24 @@ export function ProviderDetailView({ id }: { id: string }) {
       <Chrome>
         <View className="flex-1 items-center justify-center" testID="provider-loading">
           <AppLoader />
+        </View>
+      </Chrome>
+    );
+  }
+
+  // Load failure (connection/RPC) is recoverable — offer a retry, kept distinct from a
+  // genuine not-found (listing removed), which is not.
+  if (isError) {
+    return (
+      <Chrome>
+        <View className="flex-1 items-center justify-center gap-4 px-6" testID="provider-error">
+          <Text variant="h2" className="text-center">
+            This listing didn't load
+          </Text>
+          <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
+            Check your connection and try again.
+          </Text>
+          <Button onPress={() => void refetch()}>Try again</Button>
         </View>
       </Chrome>
     );
