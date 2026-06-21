@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Pressable, ActivityIndicator } from 'react-native';
 import { Text } from '@/components/ui/Text';
-import { Link } from 'expo-router';
+import { openArticle } from '@/lib/nav';
 import { type ArticleListItem, listRecentArticles } from '@/lib/articles';
 
 // "Most read this month" — backed by the live Supabase `articles` table. No
@@ -49,20 +49,22 @@ export function MostRead() {
       ) : (
         articles.map((a, i) => (
           <React.Fragment key={a.slug}>
-            <Link href={{ pathname: '/article/[slug]', params: { slug: a.slug } }} asChild>
-              <Pressable className="flex-row items-start gap-3 py-3 active:opacity-70">
-                <Text variant="body" className="w-7 text-text-tertiary dark:text-text-tertiary-dark">
-                  {String(i + 1).padStart(2, '0')}
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => openArticle(a.slug)}
+              className="flex-row items-start gap-3 py-3 active:opacity-70"
+            >
+              <Text variant="body" className="w-7 text-text-tertiary dark:text-text-tertiary-dark">
+                {String(i + 1).padStart(2, '0')}
+              </Text>
+              <View className="flex-1">
+                <Text variant="label" className="text-text-primary dark:text-text-primary-dark">{a.title}</Text>
+                <Text variant="caption" className="mt-0.5 text-text-secondary dark:text-text-secondary-dark">
+                  {a.categoryName}
+                  {a.readTime ? ` · ${a.readTime} min` : ''}
                 </Text>
-                <View className="flex-1">
-                  <Text variant="label" className="text-text-primary dark:text-text-primary-dark">{a.title}</Text>
-                  <Text variant="caption" className="mt-0.5 text-text-secondary dark:text-text-secondary-dark">
-                    {a.categoryName}
-                    {a.readTime ? ` · ${a.readTime} min` : ''}
-                  </Text>
-                </View>
-              </Pressable>
-            </Link>
+              </View>
+            </Pressable>
             {i < articles.length - 1 && (
               <View className="ml-10 h-[1px] bg-border/40 dark:bg-border-dark/40" />
             )}
