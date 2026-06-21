@@ -1,9 +1,10 @@
 import { useCallback, useMemo, useState } from 'react';
 
+import { ToolScreen } from '@/components/ui/ToolScreen';
+
 import { CT4_RELATIONSHIP } from './copy';
 import { LandingView } from './components/LandingView';
 import { HistoryView } from './components/HistoryView';
-import { RelationshipChrome } from './components/RelationshipChrome';
 import { ResultsView } from './components/ResultsView';
 import { WizardView } from './components/WizardView';
 import { getActiveQuestions } from './questions';
@@ -132,7 +133,7 @@ export function RelationshipFlow({ store, onExit, onCrisis, initialView = 'landi
   const backLabel = view === 'landing' ? CT4_RELATIONSHIP.title : CT4_RELATIONSHIP.back;
 
   return (
-    <RelationshipChrome onBack={handleBack} onHelp={onCrisis} backLabel={backLabel}>
+    <ToolScreen scroll="none" onBack={handleBack} backLabel={backLabel}>
       {view === 'landing' ? (
         <LandingView onStart={handleStart} onViewHistory={handleViewHistory} historyCount={history.length} />
       ) : null}
@@ -168,6 +169,6 @@ export function RelationshipFlow({ store, onExit, onCrisis, initialView = 'landi
           onStartNew={handleRetake}
         />
       ) : null}
-    </RelationshipChrome>
+    </ToolScreen>
   );
 }
