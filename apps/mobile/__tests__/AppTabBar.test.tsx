@@ -2,8 +2,14 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { fireEvent, screen } from '@testing-library/react-native';
 
 import { AppTabBar } from '@/components/AppTabBar';
+import { fireHaptic } from '@/lib/haptics';
 
 import { renderWithProviders } from './_helpers';
+
+// Mock the low-level dispatcher so we can assert the tab haptic without touching
+// expo-haptics. HapticProvider's fire() calls this module's fireHaptic.
+jest.mock('@/lib/haptics', () => ({ fireHaptic: jest.fn() }));
+const mockFireHaptic = fireHaptic as unknown as jest.Mock;
 
 // C0.2 — the custom tab bar (active-pill redesign). Builds a minimal
 // BottomTabBarProps fixture (the shape react-navigation hands a custom `tabBar`)
@@ -39,6 +45,10 @@ function makeProps(
 }
 
 describe('AppTabBar', () => {
+  beforeEach(() => {
+    mockFireHaptic.mockClear();
+  });
+
   it('renders four tabs, each reachable by its accessibility label', () => {
     renderWithProviders(<AppTabBar {...makeProps(0, () => {})} />, { haptics: true });
     for (const title of TITLES) {
@@ -77,5 +87,11 @@ describe('AppTabBar', () => {
     expect(navigate).not.toHaveBeenCalled();
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(dispatch.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ type: 'POP_TO_TOP' }));
+  });
+
+  it("fires the light 'tab' haptic on tab press (P3)", () => {
+    renderWithProviders(<AppTabBar {...makeProps(0, () => {})} />, { haptics: true });
+    fireEvent.press(screen.getByLabelText('Learn'));
+    expect(mockFireHaptic).toHaveBeenCalledWith('tab', expect.any(Function));
   });
 });
