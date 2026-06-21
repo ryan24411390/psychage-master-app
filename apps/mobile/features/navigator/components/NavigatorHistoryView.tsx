@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ChevronRight } from 'lucide-react-native';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
@@ -27,31 +27,13 @@ export interface NavigatorHistoryViewProps {
   readonly snapshots: readonly NavigatorSnapshot[];
   readonly onSelect: (id: string) => void;
   readonly onStartNew: () => void;
-  readonly onBack: () => void;
 }
 
-export function NavigatorHistoryView({ snapshots, onSelect, onStartNew, onBack }: NavigatorHistoryViewProps) {
+export function NavigatorHistoryView({ snapshots, onSelect, onStartNew }: NavigatorHistoryViewProps) {
   const tc = useThemeColors();
 
   return (
-    <View className="flex-1 bg-background dark:bg-background-dark">
-      <View className="flex-row items-center px-2 pt-1">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          onPress={onBack}
-          hitSlop={8}
-          testID="navigator-history-back"
-          className="min-h-[44px] flex-row items-center gap-1 px-2"
-        >
-          <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
-          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
-            Back
-          </Text>
-        </Pressable>
-      </View>
-
-      <ScrollView contentContainerClassName="px-5 pb-10 pt-2 gap-4" showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerClassName="px-5 pb-10 pt-2 gap-4" showsVerticalScrollIndicator={false}>
         <View className="gap-1">
           <Text variant="h1" className="text-text-primary dark:text-text-primary-dark">
             Past explorations
@@ -100,7 +82,6 @@ export function NavigatorHistoryView({ snapshots, onSelect, onStartNew, onBack }
             Start a new exploration
           </Text>
         </Pressable>
-      </ScrollView>
-    </View>
+    </ScrollView>
   );
 }

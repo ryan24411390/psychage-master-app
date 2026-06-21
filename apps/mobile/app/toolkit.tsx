@@ -1,4 +1,4 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 
 import { ExerciseFlow } from '@/features/toolkit/ExerciseFlow';
 import { resolveExercise } from '@/features/toolkit/exercises';
@@ -25,7 +25,6 @@ export default function ToolkitScreen() {
       <ExerciseFlow
         exercise={resolveExercise(exercise)}
         onExit={() => goBackOr('/compass')}
-        onHelp={() => router.push('/crisis')}
       />
     </>
   );

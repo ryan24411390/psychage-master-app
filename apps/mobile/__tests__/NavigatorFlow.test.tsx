@@ -117,6 +117,16 @@ describe('NavigatorFlow (web-parity flow)', () => {
     expect(screen.getByText('Where are you noticing things?')).toBeTruthy();
   });
 
+  it('SR-2: the Help-now crisis pill is present from the first step (ToolScreen chrome)', () => {
+    renderFlow(() => OK_RESULT);
+    // welcome step — Navigator previously had NO always-visible crisis affordance;
+    // ToolScreen now guarantees one. Exactly one, no double-chrome.
+    expect(screen.getByLabelText('Help now')).toBeTruthy();
+    expect(screen.getAllByLabelText('Help now')).toHaveLength(1);
+    press('Start the Navigator');
+    expect(screen.getByLabelText('Help now')).toBeTruthy(); // domains step
+  });
+
   it('runs the full flow to the report with an animated confidence bar + % (signed-off parity)', () => {
     jest.useFakeTimers();
     try {

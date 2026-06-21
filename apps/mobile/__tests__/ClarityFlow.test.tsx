@@ -23,7 +23,6 @@ function renderFlow() {
   const saveResult = jest.fn<number | null, [ClarityResult]>(() => null);
   const handlers = {
     onExit: jest.fn(),
-    onHelp: jest.fn(),
     onCrisisResources: jest.fn(),
     onRecommend: jest.fn(),
     onViewHistory: jest.fn(),

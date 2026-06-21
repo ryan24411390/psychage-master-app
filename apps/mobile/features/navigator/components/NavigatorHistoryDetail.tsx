@@ -1,8 +1,6 @@
-import { ChevronLeft } from 'lucide-react-native';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
-import { useThemeColors } from '@/lib/use-theme-colors';
 
 import type { NavigatorSnapshot } from '../result-store';
 
@@ -20,32 +18,13 @@ function formatDate(date: string): string {
 
 export interface NavigatorHistoryDetailProps {
   readonly snapshot: NavigatorSnapshot;
-  readonly onBack: () => void;
 }
 
-export function NavigatorHistoryDetail({ snapshot, onBack }: NavigatorHistoryDetailProps) {
-  const tc = useThemeColors();
+export function NavigatorHistoryDetail({ snapshot }: NavigatorHistoryDetailProps) {
   const { results } = snapshot.results;
 
   return (
-    <View className="flex-1 bg-background dark:bg-background-dark">
-      <View className="flex-row items-center px-2 pt-1">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Back to past explorations"
-          onPress={onBack}
-          hitSlop={8}
-          testID="navigator-detail-back"
-          className="min-h-[44px] flex-row items-center gap-1 px-2"
-        >
-          <ChevronLeft size={20} color={tc.inkSecondary} strokeWidth={2} />
-          <Text variant="caption" className="text-text-secondary dark:text-text-secondary-dark">
-            Back
-          </Text>
-        </Pressable>
-      </View>
-
-      <ScrollView contentContainerClassName="px-5 pb-10 pt-2 gap-4" showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerClassName="px-5 pb-10 pt-2 gap-4" showsVerticalScrollIndicator={false}>
         <View className="gap-1">
           <Text variant="h1" className="text-text-primary dark:text-text-primary-dark">
             {formatDate(snapshot.date)}
@@ -90,7 +69,6 @@ export function NavigatorHistoryDetail({ snapshot, onBack }: NavigatorHistoryDet
             {snapshot.results.disclaimer}
           </Text>
         ) : null}
-      </ScrollView>
-    </View>
+    </ScrollView>
   );
 }

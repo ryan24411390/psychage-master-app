@@ -1,8 +1,6 @@
-import { ArrowLeft } from 'lucide-react-native';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type {
   KnowledgeBase,
@@ -11,9 +9,9 @@ import type {
 } from '@psychage/shared/navigator';
 
 import { Text } from '@/components/ui/Text';
+import { ToolScreen } from '@/components/ui/ToolScreen';
 import type { HelplineRow } from '@/features/crisis/helpline-schema';
 import { useReducedMotion } from '@/lib/motion';
-import { useThemeColors } from '@/lib/use-theme-colors';
 
 import { stepEnter } from './animations';
 import { ChipXL } from './components/ChipXL';
@@ -75,21 +73,6 @@ export interface NavigatorFlowProps {
    * dev harnesses can omit it.
    */
   readonly onResults?: (inputs: UserSymptomInput[], results: NavigatorResults) => void;
-}
-
-function BackButton({ onPress }: { onPress: () => void }) {
-  const tc = useThemeColors();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={NAVIGATOR_COPY.back}
-      onPress={onPress}
-      hitSlop={8}
-      className="min-h-[44px] w-11 justify-center"
-    >
-      <ArrowLeft size={24} color={tc.ink} strokeWidth={2} />
-    </Pressable>
-  );
 }
 
 export function NavigatorFlow({
@@ -172,9 +155,9 @@ export function NavigatorFlow({
   // ── Processing (engine did not halt) ───────────────────────────────────────────
   if (state.step === 'processing') {
     return (
-      <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
+      <ToolScreen scroll="none">
         <ProcessingScreen onDone={() => dispatch({ type: 'SHOW_RESULTS' })} />
-      </SafeAreaView>
+      </ToolScreen>
     );
   }
 
@@ -193,10 +176,7 @@ export function NavigatorFlow({
     const questions = getProviderQuestions(engineResult, buildUserInputs(state));
 
     return (
-      <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
-        <View className="px-4 pt-1">
-          <BackButton onPress={handleBack} />
-        </View>
+      <ToolScreen scroll="none" onBack={handleBack}>
         <ResultsScreen
           results={engineResult}
           symptomDetails={symptomDetails}
@@ -208,7 +188,7 @@ export function NavigatorFlow({
           onLearn={onLearn}
           onStartOver={() => dispatch({ type: 'RESET' })}
         />
-      </SafeAreaView>
+      </ToolScreen>
     );
   }
 
@@ -216,11 +196,7 @@ export function NavigatorFlow({
   const current = orderedSelected[state.detailIndex];
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background dark:bg-background-dark">
-      <View className="px-4 pt-1">
-        {state.step === 'welcome' ? null : <BackButton onPress={handleBack} />}
-      </View>
-
+    <ToolScreen scroll="none" onBack={state.step === 'welcome' ? undefined : handleBack}>
       <Animated.View
         key={`${state.step}:${state.detailIndex}`}
         entering={stepEnter(direction, reduced)}
@@ -276,6 +252,6 @@ export function NavigatorFlow({
           </ScrollView>
         ) : null}
       </Animated.View>
-    </SafeAreaView>
+    </ToolScreen>
   );
 }

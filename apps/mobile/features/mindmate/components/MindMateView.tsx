@@ -1,12 +1,10 @@
 import { router } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { View } from 'react-native';
 
-import { GlobalHeader } from '@/components/GlobalHeader';
 import { Button } from '@/components/ui/Button';
-import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
+import { ToolScreen } from '@/components/ui/ToolScreen';
 import { CRISIS_DATASET } from '@/features/crisis/helplines.fixtures';
 import {
   defaultDeviceRegionHint,
@@ -16,7 +14,6 @@ import {
 } from '@/features/crisis/region';
 import { AUTH_SIGN_IN_ROUTE } from '@/features/webview/auth-handshake';
 import { storage } from '@/lib/adapters/storage';
-import { colors } from '@/lib/colors';
 
 import { MINDMATE_COPY } from '../copy';
 import type { sendMessage } from '../mindmate-service';
@@ -80,39 +77,16 @@ export function MindMateView({
   });
 
   return (
-    <View className="flex-1 bg-background dark:bg-background-dark">
-      <GlobalHeader />
-      <View className="flex-row items-center justify-between border-b border-border-hairline px-2 py-2 pb-3 dark:border-border-dark/30">
-        <AnimatedPressable
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          onPress={onBack}
-          hitSlop={8}
-          testID="mindmate-back"
-          className="min-h-[44px] w-16 flex-row items-center gap-1 px-2"
-          haptic="tab"
-        >
-          <ChevronLeft size={24} color={colors.charcoal[600]} strokeWidth={2} />
-        </AnimatedPressable>
-        <View className="flex-1 items-center justify-center gap-0.5">
-          <Text variant="label" className="text-base text-text-primary dark:text-text-primary-dark">
-            MindMate
-          </Text>
-          <View className="flex-row items-center gap-1.5">
-            <View className="h-1.5 w-1.5 rounded-full bg-primary dark:bg-primary-dark" />
-            <Text variant="caption" className="text-xs text-text-secondary dark:text-text-secondary-dark">
-              Online
-            </Text>
-          </View>
-        </View>
-        <View className="w-16" />
+    <ToolScreen scroll="none" keyboardAvoiding title="MindMate" onBack={onBack} edges={['top']}>
+      {/* Live status — relocated out of the header into a thin strip atop the chat. */}
+      <View className="flex-row items-center justify-center gap-1.5 pb-2">
+        <View className="h-1.5 w-1.5 rounded-full bg-primary dark:bg-primary-dark" />
+        <Text variant="caption" className="text-xs text-text-secondary dark:text-text-secondary-dark">
+          Online
+        </Text>
       </View>
 
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <MessageList messages={messages} />
+      <MessageList messages={messages} />
 
         {crisisActive ? <CrisisCard onGetSupport={onRequestCrisis} hotline={hotline} /> : null}
 
@@ -146,7 +120,6 @@ export function MindMateView({
         ) : null}
 
         <ChatInput onSend={send} disabled={status === 'sending'} />
-      </KeyboardAvoidingView>
-    </View>
+    </ToolScreen>
   );
 }

@@ -44,7 +44,6 @@ export default function ClarityRoute() {
       />
       <ClarityFlow
         onExit={() => goBackOr('/compass')}
-        onHelp={() => router.push('/crisis')}
         onCrisisResources={() => router.push('/crisis')}
         onRecommend={(route) => router.push(route as never)}
         onViewHistory={() => router.push('/tools/clarity-history')}

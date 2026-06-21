@@ -1,8 +1,7 @@
 import { router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
 
-import { GlobalHeader } from '@/components/GlobalHeader';
+import { ToolScreen } from '@/components/ui/ToolScreen';
 import { NavigatorHistoryDetail } from '@/features/navigator/components/NavigatorHistoryDetail';
 import { NavigatorHistoryView } from '@/features/navigator/components/NavigatorHistoryView';
 import { getNavigatorStore } from '@/lib/navigator-store';
@@ -17,19 +16,22 @@ export default function NavigatorHistoryRoute() {
   const selected = selectedId ? snapshots.find((s) => s.id === selectedId) : undefined;
 
   return (
-    <View className="flex-1 bg-background dark:bg-background-dark">
+    <>
       <Stack.Screen options={{ headerShown: false, animation: 'fade' }} />
-      <GlobalHeader />
-      {selected ? (
-        <NavigatorHistoryDetail snapshot={selected} onBack={() => setSelectedId(null)} />
-      ) : (
-        <NavigatorHistoryView
-          snapshots={snapshots}
-          onSelect={setSelectedId}
-          onStartNew={() => router.replace('/navigator')}
-          onBack={() => goBackOr('/compass')}
-        />
-      )}
-    </View>
+      <ToolScreen
+        scroll="none"
+        onBack={selected ? () => setSelectedId(null) : () => goBackOr('/compass')}
+      >
+        {selected ? (
+          <NavigatorHistoryDetail snapshot={selected} />
+        ) : (
+          <NavigatorHistoryView
+            snapshots={snapshots}
+            onSelect={setSelectedId}
+            onStartNew={() => router.replace('/navigator')}
+          />
+        )}
+      </ToolScreen>
+    </>
   );
 }

@@ -8,7 +8,7 @@ import { renderWithProviders } from './_helpers';
 describe('ExerciseFlow (S19–S21)', () => {
   it('grounding: intro → tap-advance through prompts → "Done." (no meter)', () => {
     renderWithProviders(
-      <ExerciseFlow exercise={GROUNDING} onExit={() => {}} onHelp={() => {}} />,
+      <ExerciseFlow exercise={GROUNDING} onExit={() => {}} />,
       { haptics: true },
     );
     // S19 intro: the need leads, the name is the secondary label.
@@ -28,7 +28,7 @@ describe('ExerciseFlow (S19–S21)', () => {
 
   it('keeps the Help-now pill reachable on the exercise surface', () => {
     renderWithProviders(
-      <ExerciseFlow exercise={GROUNDING} onExit={() => {}} onHelp={() => {}} />,
+      <ExerciseFlow exercise={GROUNDING} onExit={() => {}} />,
       { haptics: true },
     );
     expect(screen.getByLabelText('Help now')).toBeTruthy();
@@ -36,7 +36,7 @@ describe('ExerciseFlow (S19–S21)', () => {
 
   it('breathing: Begin reveals the breathing form (full motion default)', () => {
     renderWithProviders(
-      <ExerciseFlow exercise={BREATHING} onExit={() => {}} onHelp={() => {}} />,
+      <ExerciseFlow exercise={BREATHING} onExit={() => {}} />,
       { haptics: true },
     );
     fireEvent.press(screen.getByRole('button', { name: 'Begin' }));
