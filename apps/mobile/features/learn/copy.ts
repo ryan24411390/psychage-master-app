@@ -25,7 +25,7 @@ export const CT4_LEARN = {
 
   // Existing entries
   intro: 'Plain-language guides on what you might be experiencing.',
-  conditionsLabel: 'Browse conditions',
+  conditionsLabel: 'Browse categories',
   libraryLabel: 'Browse the full library',
   browseAll: 'Browse all topics',
 
