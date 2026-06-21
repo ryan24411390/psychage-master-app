@@ -176,8 +176,16 @@ export function createSupabaseAuthService(deps: SupabaseAuthServiceDeps = {}): A
       try {
         const { data, error } = await client.auth.signInWithPassword({ email, password });
         if (error) {
+          if (isNetworkError(error)) return { ok: false, error: 'offline' };
+          // Correct password but the email was never confirmed: surface a distinct code so
+          // the screen can route to /verify (resend) instead of a dead-end "wrong details".
+          // Only reachable after the right password — not a blind existence leak (P14).
+          const code = (error as { code?: string }).code;
+          if (code === 'email_not_confirmed' || /email not confirmed/i.test(error.message)) {
+            return { ok: false, error: 'email-not-confirmed' };
+          }
           // Same generic code for wrong-password and unknown-email.
-          return { ok: false, error: isNetworkError(error) ? 'offline' : 'invalid-credentials' };
+          return { ok: false, error: 'invalid-credentials' };
         }
         await recordEvent('sign_in', true);
         return {

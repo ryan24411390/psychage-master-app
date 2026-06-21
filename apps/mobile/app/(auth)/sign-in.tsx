@@ -26,6 +26,12 @@ export default function SignInScreen() {
       router.replace('/');
       return;
     }
+    // Right password, unconfirmed account: send them to the resend/confirm screen so the
+    // confirm-email round-trip is recoverable (P14) — not a dead-end credential error.
+    if (result.error === 'email-not-confirmed') {
+      router.push({ pathname: '/verify', params: { email } });
+      return;
+    }
     setFormError(result.error === 'offline' ? AUTH_COPY.offlineLine : AUTH_COPY.credentialsLine);
   };
 

@@ -16,6 +16,11 @@ export type AuthErrorCode =
   // Surfaced only where it's not an existence leak (e.g. updatePassword): the server
   // rejected a too-weak/too-short password. Sign-in/sign-up never use this code.
   | 'weak-password'
+  // Sign-in with a CORRECT password against an unconfirmed account (confirm-email ON).
+  // The screen routes to /verify so the confirm round-trip is recoverable (P14). This is
+  // a deliberate, scoped exception to the generic-error rule: it only appears AFTER the
+  // right password, so it is not a blind existence-enumeration vector.
+  | 'email-not-confirmed'
   // The OS-level social flow was dismissed by the user (Apple/Google sheet cancelled).
   | 'cancelled'
   | 'unknown';

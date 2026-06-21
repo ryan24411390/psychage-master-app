@@ -147,6 +147,27 @@ describe('supabase auth service — generic errors (checklist #3, no existence l
 
     expect(result.error).toBe('offline');
   });
+
+  it('an unconfirmed account (correct password) maps to email-not-confirmed by code (P14)', async () => {
+    const { client } = makeFakeClient({
+      signIn: { data: { session: null, user: null }, error: { code: 'email_not_confirmed', message: 'Email not confirmed' } },
+    });
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    const result = await svc.signIn('a@b.co', 'password123');
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('email-not-confirmed');
+  });
+
+  it('falls back to the message when no error code is present', async () => {
+    const { client } = makeFakeClient({
+      signIn: { data: { session: null, user: null }, error: { message: 'Email not confirmed' } },
+    });
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    expect((await svc.signIn('a@b.co', 'password123')).error).toBe('email-not-confirmed');
+  });
 });
 
 describe('supabase auth service — getSession (boot hydration)', () => {
