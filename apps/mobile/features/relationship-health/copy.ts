@@ -31,11 +31,11 @@ export const CT4_RELATIONSHIP = {
         body: 'Around 5–10 minutes. You receive an overall score, area breakdowns, patterns, and evidence-based next steps.',
       },
     ],
-    domainsHeading: 'Four relationship areas',
-    chooseHeading: 'Choose where to start',
-    chooseSub: 'This sets which relationship areas you reflect on.',
+    chooseHeading: 'Start here: are you with a partner?',
+    chooseSub: 'Your answer sets which relationship areas you reflect on.',
     withPartner: { title: 'I have a partner', sub: '34 statements · 4 areas' },
     withoutPartner: { title: 'Not currently', sub: '24 statements · 3 areas' },
+    timeNote: 'Takes about 5 minutes. Your answers stay on this device.',
     viewHistory: 'View past reflections',
     disclaimerHeading: 'Before you begin',
     disclaimer: [
@@ -63,16 +63,31 @@ export const CT4_RELATIONSHIP = {
 
   results: {
     overallHeading: 'Overall connection',
-    outOf: '/ 100',
     areasHeading: 'By area',
-    blueprintHeading: 'Your reflection',
-    patternsHeading: 'Patterns to notice',
-    stepsHeading: 'Evidence-based next steps',
+    whatThisMeansHeading: 'What this means',
+    howAffectsHeading: 'How it affects you',
+    howToImproveHeading: 'How to improve',
+    relatedHeading: 'Related reading',
+    // Plain-language, educational read of the composite tier (SR-3: reflects
+    // responses, never asserts a condition). Shown above the generated narrative.
+    meaning: {
+      thriving:
+        'Your responses point to strong, supportive connections across the areas you reflected on. Connections like these are a common foundation for resilience — worth tending so they stay strong.',
+      healthy:
+        'Your responses suggest a solid base of connection, with one or two areas that could use more care. Small, steady investment in those areas is a common way people deepen the relationships that matter.',
+      mixed:
+        'Your responses show a mixed picture — some connections feel steady while others feel less certain. This is common, and it often points to a specific area worth a little focused attention.',
+      strained:
+        'Your responses suggest several connections feel strained right now. Many people move through stretches like this; the breakdown below points to where small changes tend to help most.',
+      isolated:
+        'Your responses suggest connection feels thin across most areas at the moment. Feeling this way is more common than it seems, and reaching out — even in a small way — is often where people start.',
+    },
+    noPatterns:
+      'No specific patterns stood out in your responses. The area breakdown above is a good place to notice what shapes how connected things feel day to day.',
     save: 'Save reflection',
     saved: 'Saved',
     retake: 'Start over',
     viewHistory: 'Past reflections',
-    scienceNote: 'The science behind this',
   },
 
   safety: {
