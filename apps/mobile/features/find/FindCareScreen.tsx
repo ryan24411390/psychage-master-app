@@ -31,8 +31,10 @@ import { useColorScheme } from 'nativewind';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HeaderAvatar } from '@/components/HeaderAvatar';
+import { Mascot } from '@/components/home/Mascot';
 import { PsychageLogo } from '@/components/PsychageLogo';
 import { Text } from '@/components/ui/Text';
+import { MASCOT_CONTEXTUAL } from '@/features/mascot/mascot.surfaces';
 import { useBookmarkedIds, useCurrentUserId, useToggleBookmark } from '@/features/bookmarks/hooks';
 import { dial } from '@/features/crisis/dialer';
 import { useHaptics } from '@/lib/haptic-context';
@@ -478,20 +480,27 @@ export default function FindCareScreen() {
   }
 
   /* ============================ OUTSIDE US ============================ */
+  // Reached when "Use my location" reverse-geocodes to a non-US country, or via the
+  // manual "I'm outside the United States" option. A designed, warm state (mascot is
+  // allowed here — this is a directory-coverage surface, not a crisis surface) that
+  // still offers the full US directory and keeps crisis help one tap away.
   if (step === 'outside')
     return (
       <SafeAreaView edges={['top']} className="flex-1 bg-background dark:bg-background-dark">
         <Header back={() => setStep('manual')} />
-        <View className="px-5 pt-2">
-          <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark mb-2.5">The directory is U.S.-only for now</Text>
-          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 mb-2">We currently list NPI-registered providers in the United States. We're working on more regions.</Text>
-          <View className="bg-crisis/10 dark:bg-crisis-dark/20 rounded-2xl p-4 my-2">
-            <View className="flex-row items-center gap-2 mb-1.5"><LifeBuoy size={18} color={red} /><Text className="font-sans-bold text-text-primary dark:text-text-primary-dark text-base">In crisis right now?</Text></View>
-            <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-sm leading-5">You can still reach help. If you're in immediate danger, contact your local emergency number.</Text>
-            <View className="mt-3"><Primary label="See crisis resources" color={red} onPress={() => setSheet('crisis')} /></View>
-          </View>
-          <Tap onPress={() => setStep('manual')}><View className="py-4 items-center"><Text className="font-sans-bold text-base text-primary dark:text-primary-dark">I'm actually in the U.S.</Text></View></Tap>
-        </View>
+        <ScrollView className="px-5" contentContainerStyle={{ paddingBottom: insets.bottom + 24 }} showsVerticalScrollIndicator={false}>
+          <View className="items-center pt-3 pb-1"><Mascot state={MASCOT_CONTEXTUAL.findCareCta} size={132} /></View>
+          <Text className="font-display text-3xl text-text-primary dark:text-text-primary-dark text-center mb-2.5">You're not in the U.S. right now</Text>
+          <Text className="font-sans text-text-secondary dark:text-text-secondary-dark text-base leading-6 text-center mb-6">Our provider directory lists NPI-registered providers in the United States only, for now. You can still browse every U.S. provider — and we're working to reach your country soon.</Text>
+          <Primary label="Browse U.S. providers" onPress={() => setStep('manual')} />
+          <Tap onPress={() => setStep('manual')}><View className="py-3.5 items-center"><Text className="font-sans-bold text-base text-primary dark:text-primary-dark">I'm actually in the U.S.</Text></View></Tap>
+          <Tap onPress={() => setSheet('crisis')}>
+            <View className="flex-row items-center justify-center gap-1.5 mt-1 py-2">
+              <LifeBuoy size={15} color={red} />
+              <Text className="font-sans-medium text-sm text-error dark:text-error-dark">In crisis? See help options</Text>
+            </View>
+          </Tap>
+        </ScrollView>
       </SafeAreaView>
     );
 
