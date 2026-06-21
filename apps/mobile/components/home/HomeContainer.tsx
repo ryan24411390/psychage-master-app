@@ -1,3 +1,6 @@
+// FOUNDATION-FROZEN SHELL (0e). Owned by neither group A nor D — do not edit during
+// parallel work. A owns `home/rails/*`, D owns `home/record/*`. See OWNERSHIP.md.
+
 import type { EngagementStore, MomentDraft } from '@psychage/shared/engagement';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
