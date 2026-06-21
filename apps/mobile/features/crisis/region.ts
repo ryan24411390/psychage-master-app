@@ -5,12 +5,12 @@
 // The override persists locally and survives relaunch. NONE of this is symptom data
 // (SR-4) — only a country code is stored.
 //
-// DEVICE-REGION DETECTION IS A SEAM (flagged). `expo-localization` is NOT installed
-// (adding it mid-wave would touch the shared lockfile while B1/B2 run concurrently —
-// exactly the cross-wave collision the order guards against). `defaultDeviceRegionHint`
-// is a best-effort `Intl` parse that returns null when unavailable; the real
-// device-region detection (expo-localization `getLocales().regionCode`) is deferred
-// infra. The S12 picker is the always-available, reliable path.
+// DEVICE-REGION DETECTION IS A SEAM. The real, locale-backed detection lives in
+// `device-region.ts` (`localeDeviceRegionHint`, expo-localization `getLocales()`) —
+// kept out of this file so `region.ts` stays native-module-free and unit-tests under
+// Vitest. `defaultDeviceRegionHint` here is the best-effort `Intl` parse used only as
+// a secondary fallback (returns null when the runtime exposes no region subtag). The
+// S12 picker is the always-available, reliable override.
 
 import type { Storage } from '@/lib/adapters/storage';
 
