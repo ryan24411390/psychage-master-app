@@ -23,6 +23,7 @@ export function TopicTile({ label, count, artKey, onPress, className }: TopicTil
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={count ? `${label}, ${count}` : label}
+      accessibilityHint="Opens category details"
       onPress={() => {
         fireHaptic('tab');
         onPress();

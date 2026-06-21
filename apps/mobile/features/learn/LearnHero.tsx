@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import React from 'react';
 import { Search, Sparkles } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 
@@ -11,7 +12,7 @@ import { useThemeColors } from '@/lib/use-theme-colors';
 // dedicated search screen — a real input lives there, not here), and the
 // "find your path" trigger that opens the picker sheet.
 
-export function LearnHero({ onFindPath }: { onFindPath: () => void }) {
+export const LearnHero = React.memo(function LearnHero({ onFindPath }: { onFindPath: () => void }) {
   const t = CT4_LEARN;
   const tc = useThemeColors();
   const { fireHaptic } = useHaptics();
@@ -58,4 +59,4 @@ export function LearnHero({ onFindPath }: { onFindPath: () => void }) {
       </Pressable>
     </View>
   );
-}
+});

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/Text';
 import { FeaturedCard } from '@/features/learn/FeaturedCard';
@@ -31,7 +31,9 @@ export function LearnView() {
   const [pickerOpen, setPickerOpen] = useState(false);
   // Two-column tile width. NativeWind drops arbitrary % widths in this setup, so
   // the grid columns are sized from the viewport: (width − px-4 gutters − gap)/2.
+  // the grid columns are sized from the viewport: (width − px-4 gutters − gap)/2.
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const colW = Math.floor((width - 32 - 12) / 2);
 
   const { data } = useQuery({
@@ -53,9 +55,9 @@ export function LearnView() {
   };
 
   return (
-    <SafeAreaView edges={['bottom']} className="flex-1 bg-background dark:bg-background-dark">
+    <View className="flex-1 bg-background dark:bg-background-dark">
       <ReadingTextSizeProvider>
-        <ScrollView contentContainerClassName="pb-8" showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ paddingBottom: Math.max(32, insets.bottom + 16) }} showsVerticalScrollIndicator={false}>
           <LearnHero onFindPath={() => setPickerOpen(true)} />
 
           {featured ? (
@@ -147,6 +149,6 @@ export function LearnView() {
       </ReadingTextSizeProvider>
 
       <PathPickerSheet visible={pickerOpen} onClose={() => setPickerOpen(false)} onPick={onPick} />
-    </SafeAreaView>
+    </View>
   );
 }

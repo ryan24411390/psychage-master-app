@@ -58,5 +58,5 @@ export function Text({ variant = 'body', className, ...props }: TextProps) {
     ? `${base} ${readingBodySizeClass(variant, scale)}`
     : base;
   const classes = className ? `${sized} ${className}` : sized;
-  return <RNText className={classes} {...props} />;
+  return <RNText maxFontSizeMultiplier={2} className={classes} {...props} />;
 }

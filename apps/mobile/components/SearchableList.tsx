@@ -120,7 +120,7 @@ export function SearchableList<T>({
       <FlashList
         data={filtered}
         // @ts-expect-error - FlashList JSX children typing mismatch under React 19
-        estimatedItemSize={44}
+        estimatedItemSize={48}
         keyExtractor={getKey}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}

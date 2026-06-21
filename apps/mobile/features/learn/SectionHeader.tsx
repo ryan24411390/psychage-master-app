@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react-native';
+import React from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
@@ -20,7 +21,7 @@ type SectionHeaderProps = {
   seeAllLabel?: string;
 };
 
-export function SectionHeader({
+export const SectionHeader = React.memo(function SectionHeader({
   title,
   count,
   onSeeAll,
@@ -75,4 +76,4 @@ export function SectionHeader({
       ) : null}
     </View>
   );
-}
+});

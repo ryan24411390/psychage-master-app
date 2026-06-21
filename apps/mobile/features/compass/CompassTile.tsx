@@ -51,7 +51,8 @@ export function HeroTile({ title, feature, icon: Icon, onPress, testID }: TilePr
   return (
     <AnimatedPressable
       accessibilityRole="button"
-      accessibilityLabel={title}
+      accessibilityLabel={`${title}, ${feature}`}
+      accessibilityHint="Opens details"
       onPress={onPress}
       onPressIn={press.onPressIn}
       onPressOut={press.onPressOut}
@@ -91,7 +92,8 @@ export function SmallTile({ title, feature, icon: Icon, onPress, testID }: TileP
   return (
     <AnimatedPressable
       accessibilityRole="button"
-      accessibilityLabel={title}
+      accessibilityLabel={`${title}, ${feature}`}
+      accessibilityHint="Opens details"
       onPress={onPress}
       onPressIn={press.onPressIn}
       onPressOut={press.onPressOut}
@@ -122,7 +124,8 @@ export function ClarityTile({ title, feature, icon: Icon, onPress, testID }: Til
   return (
     <AnimatedPressable
       accessibilityRole="button"
-      accessibilityLabel={title}
+      accessibilityLabel={`${title}, ${feature}`}
+      accessibilityHint="Opens details"
       onPress={onPress}
       onPressIn={press.onPressIn}
       onPressOut={press.onPressOut}
@@ -148,7 +151,8 @@ export function DeepDiveCard({ title, feature, icon: Icon, onPress, testID }: Ti
   return (
     <AnimatedPressable
       accessibilityRole="button"
-      accessibilityLabel={title}
+      accessibilityLabel={`${title}, ${feature}`}
+      accessibilityHint="Opens details"
       onPress={onPress}
       onPressIn={press.onPressIn}
       onPressOut={press.onPressOut}

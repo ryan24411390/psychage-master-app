@@ -96,6 +96,7 @@ export function AnimatedPressable({
 
   return (
     <AnimatedPressableBase
+      accessibilityRole={props.accessibilityRole || 'button'}
       {...props}
       onLayout={handleLayout}
       onPressIn={handlePressIn}

@@ -1,7 +1,7 @@
 import { FlashList } from '@shopify/flash-list';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 
 import { ArticleCard } from '@/features/learn/ArticleCard';
 import { SectionHeader } from '@/features/learn/SectionHeader';
@@ -15,6 +15,9 @@ import type { ArticleListItem } from '@/lib/articles';
 // saved set instead of a fabricated %-complete. Hidden when signed out or empty.
 
 export function SavedRail() {
+  const { width } = useWindowDimensions();
+  const cardWidth = Math.min(290, width * 0.85);
+
   const { data: userId } = useCurrentUserId();
   const { data: bookmarks } = useBookmarks();
 
@@ -53,7 +56,9 @@ export function SavedRail() {
         contentContainerClassName="px-4"
         ItemSeparatorComponent={() => <View className="w-3.5" />}
         renderItem={({ item }: { item: ArticleListItem }) => (
-          <ArticleCard article={item} className="w-[290px]" />
+          <View style={{ width: cardWidth }}>
+            <ArticleCard article={item} />
+          </View>
         )}
       />
     </View>

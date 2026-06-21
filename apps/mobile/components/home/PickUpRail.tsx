@@ -15,7 +15,7 @@ export function PickUpRail({ reads }: PickUpRailProps) {
       <Text variant="h2" className="ml-1 mb-3">
         Pick up where you left off
       </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-5 px-5" contentContainerClassName="gap-3">
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-5" contentContainerClassName="px-5 gap-3">
         {reads.map((r) => (
           <Link key={r.id} href={{ pathname: '/article/[slug]', params: { slug: r.id } }} asChild>
             <Pressable className="w-56 h-32 rounded-xl overflow-hidden bg-surface dark:bg-surface-dark shadow-sm border border-border/40 dark:border-border-dark/40 active:scale-[0.98]">

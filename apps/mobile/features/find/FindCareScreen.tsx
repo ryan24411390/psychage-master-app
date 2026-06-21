@@ -582,7 +582,7 @@ export default function FindCareScreen() {
       </View>
 
       {savedIds.length >= 2 && !loading ? (
-        <Animated.View entering={enter()} className="absolute left-[18px] right-[18px] bottom-[24px]">
+        <Animated.View entering={enter()} style={{ bottom: Math.max(24, insets.bottom + 12) }} className="absolute left-[18px] right-[18px]">
           <Tap onPress={() => setStep('compare')}><View className="bg-primary rounded-[13px] py-4 flex-row items-center justify-center gap-1.5"><Text className="font-sans-bold text-white text-base">Compare {Math.min(savedIds.length, 3)} selected</Text><ChevronRight size={18} color="#fff" /></View></Tap>
         </Animated.View>
       ) : null}
@@ -594,14 +594,14 @@ export default function FindCareScreen() {
 }
 
 /* ----------------------------- profile step ----------------------------- */
-function Row({ icon: Icon, label, value }: { icon: typeof Hash; label: string; value: string }) {
+const Row = React.memo(function Row({ icon: Icon, label, value }: { icon: typeof Hash; label: string; value: string }) {
   const { colorScheme } = useColorScheme();
   const soft = colorScheme === 'dark' ? colors.text.secondary.dark : colors.text.secondary.light;
   return (
-    <View className="flex-row items-center gap-3"><Icon size={17} color={soft} /><Text className="font-sans text-sm text-text-secondary dark:text-text-secondary-dark w-[104px]">{label}</Text><Text className="font-sans-medium text-sm text-text-primary dark:text-text-primary-dark flex-1">{value}</Text></View>
+    <View className="flex-row items-start gap-3"><View className="mt-1"><Icon size={17} color={soft} /></View><Text className="font-sans text-sm text-text-secondary dark:text-text-secondary-dark w-1/3 min-w-[90px] pr-2">{label}</Text><Text className="font-sans-medium text-sm text-text-primary dark:text-text-primary-dark flex-1 leading-5">{value}</Text></View>
   );
-}
-function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: string; onBack: () => void; saved: boolean; onToggleSave: () => void; fireHaptic: (e: 'affirm') => void }) {
+});
+const ProfileStep = React.memo(function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: string; onBack: () => void; saved: boolean; onToggleSave: () => void; fireHaptic: (e: 'affirm') => void }) {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
   const ink = isDark ? colors.text.primary.dark : colors.text.primary.light;
@@ -680,10 +680,10 @@ function ProfileStep({ id, onBack, saved, onToggleSave, fireHaptic }: { id: stri
       </View>
     </Shell>
   );
-}
+});
 
 /* ----------------------------- compare step ----------------------------- */
-function CompareStep({ ids, onBack, onRemove }: { ids: string[]; onBack: () => void; onRemove: (id: string) => void }) {
+const CompareStep = React.memo(function CompareStep({ ids, onBack, onRemove }: { ids: string[]; onBack: () => void; onRemove: (id: string) => void }) {
   const { colorScheme } = useColorScheme();
   const ink = colorScheme === 'dark' ? colors.text.primary.dark : colors.text.primary.light;
   const { data } = useQuery({
@@ -716,7 +716,7 @@ function CompareStep({ ids, onBack, onRemove }: { ids: string[]; onBack: () => v
       </ScrollView>
     </SafeAreaView>
   );
-}
+});
 
 /* ----------------------------- sheets ----------------------------- */
 function SortSheet({ visible, value, geo, onSelect, onClose }: { visible: boolean; value: string; geo: boolean; onSelect: (v: 'relevance' | 'name' | 'distance') => void; onClose: () => void }) {

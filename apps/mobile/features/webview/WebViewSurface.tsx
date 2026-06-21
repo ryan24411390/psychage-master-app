@@ -3,6 +3,7 @@ import { ChevronLeft } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useCallback, useEffect, useReducer, useState } from 'react';
 import { Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
 import { GlobalHeader } from '@/components/GlobalHeader';
@@ -47,6 +48,7 @@ export function WebViewSurface({ surface, params, issuer = stubWvtIssuer }: WebV
   // the user sees paper/night and never a white flash. Resolved via a1-tokens (the
   // documented dynamic-style exception — a native backgroundColor, not a class).
   const baseBg = colorForScheme(resolveColorRef('color.background'), colorScheme);
+  const insets = useSafeAreaInsets();
 
   const online = useIsOnline();
   const [state, dispatch] = useReducer(wvLoadReducer, INITIAL_WV_LOAD_STATE);
@@ -137,7 +139,7 @@ export function WebViewSurface({ surface, params, issuer = stubWvtIssuer }: WebV
             </View>
           ) : null}
           {state.phase === 'stillLoading' ? (
-            <View className="absolute bottom-6 left-0 right-0 items-center" pointerEvents="none">
+            <View style={{ bottom: Math.max(24, insets.bottom + 12) }} className="absolute left-0 right-0 items-center" pointerEvents="none">
               <Text
                 variant="caption"
                 className="text-text-tertiary dark:text-text-tertiary-dark"

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { Text } from '@/components/ui/Text';
@@ -24,6 +24,11 @@ export interface BreathingFormProps {
 }
 
 export function BreathingForm({ exercise, reduced }: BreathingFormProps) {
+  const { width } = useWindowDimensions();
+  // Ensure the circle fits comfortably on smaller screens (max 208px, min depending on screen)
+  const baseSize = Math.min(208, width * 0.55);
+  const coreSize = baseSize * (108 / 208); // Maintain proportion
+  
   const { cues, pacing } = exercise;
   const [phase, setPhase] = useState<Phase>('inhale');
   const scale = useSharedValue(1);
@@ -105,19 +110,19 @@ export function BreathingForm({ exercise, reduced }: BreathingFormProps) {
 
   return (
     <View className="flex-1 items-center justify-center gap-8">
-      <View className="h-[208px] w-[208px] items-center justify-center">
+      <View style={{ width: baseSize, height: baseSize }} className="items-center justify-center">
         {/* static boundary ring (r104) */}
-        <View className="absolute h-[208px] w-[208px] rounded-full border border-border dark:border-border-dark" />
+        <View style={{ width: baseSize, height: baseSize }} className="absolute rounded-full border border-border dark:border-border-dark" />
         {/* dispersing pulse ring */}
         <Animated.View
-          className="absolute h-[108px] w-[108px] rounded-full bg-primary/20 dark:bg-primary-dark/20"
-          style={pulseStyle}
+          style={[{ width: coreSize, height: coreSize }, pulseStyle]}
+          className="absolute rounded-full bg-primary/20 dark:bg-primary-dark/20"
         />
         {/* filled clay circle, breathing r54↔r104 (night clay = dark border token) */}
         <Animated.View
           testID="breath-circle"
-          className="h-[108px] w-[108px] rounded-full bg-border dark:bg-border-dark"
-          style={animatedStyle}
+          style={[{ width: coreSize, height: coreSize }, animatedStyle]}
+          className="rounded-full bg-border dark:bg-border-dark"
         />
         {/* teal dot — the still point */}
         <View className="absolute h-2 w-2 rounded-full bg-primary dark:bg-primary-dark" />
