@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
+import { storage } from '@/lib/adapters/storage';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 
 import { createStubAuthService, type AuthService, type AuthSession } from './auth-service';
 import { createSupabaseAuthService } from './supabase-auth-service';
+import { syncAccountName } from './sync-account-name';
 
 // useAuth() — the React context wrapper rules/auth.md §10 requires for all auth calls.
 //
@@ -57,11 +59,16 @@ export function AuthProvider({
     let active = true;
     void service.getSession().then((restored) => {
       if (!active) return;
+      // P63: a verified account's name becomes the local display name (covers boot,
+      // email sign-in, social, and the deep-link email-confirm — all flow through here).
+      syncAccountName(restored, storage);
       setSession(restored);
       setHydrated(true);
     });
     const unsubscribe = service.onAuthChange((next) => {
-      if (active) setSession(next);
+      if (!active) return;
+      syncAccountName(next, storage);
+      setSession(next);
     });
     return () => {
       active = false;

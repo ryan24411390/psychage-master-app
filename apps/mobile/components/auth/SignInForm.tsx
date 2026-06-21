@@ -37,6 +37,12 @@ type SignInFormProps = {
   onSubmit: (email: string, password: string) => void;
   onProvider: (provider: SocialProvider) => void;
   onForgotPassword: () => void;
+  /**
+   * When provided, render a "Don't have an account? Sign up" link (P15). Only the
+   * standalone /sign-in screen passes this; the welcome bottom-sheet keeps its own
+   * mode toggle, so it omits this and shows no second link.
+   */
+  onSignUp?: () => void;
 };
 
 export function SignInForm({
@@ -45,6 +51,7 @@ export function SignInForm({
   onSubmit,
   onProvider,
   onForgotPassword,
+  onSignUp,
 }: SignInFormProps) {
   const reduced = useReducedMotion();
   const [email, setEmail] = useState('');
@@ -126,6 +133,19 @@ export function SignInForm({
             </View>
 
             <SocialAuthButtons onProvider={onProvider} disabled={submitting} />
+
+            {onSignUp ? (
+              <Pressable
+                accessibilityRole="button"
+                hitSlop={6}
+                onPress={onSignUp}
+                className="self-center px-1 py-1"
+              >
+                <Text variant="caption" className="text-primary dark:text-primary-dark">
+                  {AUTH_COPY.signUpLink}
+                </Text>
+              </Pressable>
+            ) : null}
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>

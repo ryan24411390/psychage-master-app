@@ -147,6 +147,27 @@ describe('supabase auth service — generic errors (checklist #3, no existence l
 
     expect(result.error).toBe('offline');
   });
+
+  it('an unconfirmed account (correct password) maps to email-not-confirmed by code (P14)', async () => {
+    const { client } = makeFakeClient({
+      signIn: { data: { session: null, user: null }, error: { code: 'email_not_confirmed', message: 'Email not confirmed' } },
+    });
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    const result = await svc.signIn('a@b.co', 'password123');
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('email-not-confirmed');
+  });
+
+  it('falls back to the message when no error code is present', async () => {
+    const { client } = makeFakeClient({
+      signIn: { data: { session: null, user: null }, error: { message: 'Email not confirmed' } },
+    });
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    expect((await svc.signIn('a@b.co', 'password123')).error).toBe('email-not-confirmed');
+  });
 });
 
 describe('supabase auth service — getSession (boot hydration)', () => {
@@ -159,7 +180,43 @@ describe('supabase auth service — getSession (boot hydration)', () => {
     });
     const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
 
-    expect(await svc.getSession()).toEqual({ email: 'a@b.co', verified: true });
+    expect(await svc.getSession()).toEqual({ email: 'a@b.co', verified: true, name: null });
+  });
+
+  it('derives the display name from a verified session metadata (P63)', async () => {
+    const { client } = makeFakeClient({
+      getSession: {
+        data: {
+          session: {
+            user: {
+              email: 'a@b.co',
+              email_confirmed_at: '2026-01-01T00:00:00Z',
+              user_metadata: { full_name: '  Mara Vane ' },
+            },
+          },
+        },
+        error: null,
+      },
+    });
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    expect(await svc.getSession()).toEqual({ email: 'a@b.co', verified: true, name: 'Mara Vane' });
+  });
+
+  it('does not expose a name while unverified, even if metadata carries one', async () => {
+    const { client } = makeFakeClient({
+      getSession: {
+        data: {
+          session: {
+            user: { email: 'a@b.co', email_confirmed_at: null, user_metadata: { full_name: 'Mara' } },
+          },
+        },
+        error: null,
+      },
+    });
+    const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
+
+    expect(await svc.getSession()).toEqual({ email: 'a@b.co', verified: false, name: null });
   });
 
   it('maps an unconfirmed session to verified:false', async () => {
@@ -171,7 +228,7 @@ describe('supabase auth service — getSession (boot hydration)', () => {
     });
     const svc = createSupabaseAuthService({ client, deviceId: 'dev-1' });
 
-    expect(await svc.getSession()).toEqual({ email: 'a@b.co', verified: false });
+    expect(await svc.getSession()).toEqual({ email: 'a@b.co', verified: false, name: null });
   });
 
   it('returns null when there is no persisted session', async () => {
@@ -196,7 +253,7 @@ describe('supabase auth service — onAuthChange (runtime state updater)', () =>
     });
     authStateListeners[0]?.('SIGNED_OUT', null);
 
-    expect(seen).toEqual([{ email: 'a@b.co', verified: true }, null]);
+    expect(seen).toEqual([{ email: 'a@b.co', verified: true, name: null }, null]);
 
     stop();
     expect(unsubscribe).toHaveBeenCalledTimes(1);
@@ -248,7 +305,7 @@ describe('supabase auth service — updatePassword (recovery session)', () => {
     const result = await svc.updatePassword('a-new-strong-password');
 
     expect(result.ok).toBe(true);
-    expect(result.session).toEqual({ email: 'a@b.co', verified: true });
+    expect(result.session).toEqual({ email: 'a@b.co', verified: true, name: null });
   });
 
   it('maps a length/strength rejection to weak-password (not an existence leak)', async () => {

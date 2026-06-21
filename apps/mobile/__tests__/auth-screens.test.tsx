@@ -1,6 +1,7 @@
 import { act, fireEvent, screen } from '@testing-library/react-native';
 
 import { ConfirmSheet } from '@/components/auth/ConfirmSheet';
+import { SignInForm } from '@/components/auth/SignInForm';
 import { SignUpForm } from '@/components/auth/SignUpForm';
 import { VerifyPanel } from '@/components/auth/VerifyPanel';
 import { WhyAccount } from '@/components/auth/WhyAccount';
@@ -73,6 +74,33 @@ describe('SignUpForm (S34)', () => {
     fireEvent.press(screen.getByRole('button', { name: AUTH_COPY.signUpPrimary }));
 
     expect(onSubmit).toHaveBeenCalledWith('person@example.com', 'a-good-password', 'John Doe');
+  });
+});
+
+describe('SignInForm (S32) — signup discoverability (P15)', () => {
+  it('renders the sign-up link and fires onSignUp when it is provided', () => {
+    const onSignUp = jest.fn();
+    renderWithProviders(
+      <SignInForm
+        onSubmit={jest.fn()}
+        onProvider={jest.fn()}
+        onForgotPassword={jest.fn()}
+        onSignUp={onSignUp}
+      />,
+      { haptics: true },
+    );
+
+    fireEvent.press(screen.getByRole('button', { name: AUTH_COPY.signUpLink }));
+    expect(onSignUp).toHaveBeenCalledTimes(1);
+  });
+
+  it('omits the sign-up link when onSignUp is not provided (bottom-sheet keeps its own toggle)', () => {
+    renderWithProviders(
+      <SignInForm onSubmit={jest.fn()} onProvider={jest.fn()} onForgotPassword={jest.fn()} />,
+      { haptics: true },
+    );
+
+    expect(screen.queryByText(AUTH_COPY.signUpLink)).toBeNull();
   });
 });
 

@@ -51,6 +51,9 @@ export const CT4_SETTINGS = {
     title: 'Make it yours',
     nameLabel: 'What should we call you?',
     namePlaceholder: 'Your name (optional)',
+    // P63 — the name comes from the verified login method (read-only), not free text.
+    nameFromAccount: 'Set by your Google or email account',
+    nameSignInHint: 'Sign in to set your name',
     leadLabel: 'What leads your home screen',
     leadOptions: {
       'check-in': 'Daily check-in',
