@@ -152,13 +152,6 @@ export default function CompassScreen() {
             onPress={() => router.push(COMPASS_ROUTES.sleep)}
             testID="compass-tile-sleep"
           />
-          <DeepDiveCard
-            title={t.toolkits.title}
-            feature={t.toolkits.sub}
-            icon={Backpack}
-            onPress={() => router.push(COMPASS_ROUTES.toolkits)}
-            testID="compass-tile-toolkits"
-          />
         </View>
       </ScrollView>
     </ScreenShell>

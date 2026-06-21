@@ -13,7 +13,6 @@ export const COMPASS_ROUTES = {
   relationshipHistory: '/tools/relationship-history', // past Relationship results (local-only)
   moodJournal: '/tools/mood-journal', // Mood Journal — patterns & triggers
   sleep: '/tools/sleep', // S29 Sleep Architect (native)
-  toolkits: '/toolkits', // Toolkits Library (PLURAL — published toolkit list)
   insights: '/insights', // cross-tool patterns dashboard (root full-screen). Was an
   // orphan — only the Home "Your tools" card linked here; this is its second door.
 } as const;
