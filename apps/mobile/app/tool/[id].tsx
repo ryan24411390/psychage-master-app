@@ -1,11 +1,15 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { View } from 'react-native';
+
 import { Text } from '@/components/ui/Text';
-import { Button } from '@/components/ui/Button';
+import { ToolScreen } from '@/components/ui/ToolScreen';
 import { toolUsageStore, type ToolId, TOOLS } from '@/lib/tool-usage-store';
 
-export default function ToolScreen() {
+// Placeholder tool route, wrapped in ToolScreen for the standard chrome (logo +
+// Help-now + profile + back). Renamed from `ToolScreen` to avoid shadowing the
+// imported component of the same name.
+export default function ToolPlaceholderRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
@@ -18,15 +22,14 @@ export default function ToolScreen() {
   const tool = TOOLS[id as ToolId];
 
   return (
-    <View className="flex-1 items-center justify-center bg-background dark:bg-background-dark p-6 gap-6">
-      <Text variant="h1">{tool ? tool.name : 'Tool Not Found'}</Text>
-      <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
-        This is a placeholder for {tool?.name}. In the full app, the tool itself opens here. Opening
-        it is noted on your device, so Today can gently bring it back if it has been a while.
-      </Text>
-      <Button variant="secondary" onPress={() => router.back()}>
-        Back to Today
-      </Button>
-    </View>
+    <ToolScreen scroll="none" onBack={() => router.back()}>
+      <View className="flex-1 items-center justify-center gap-6 p-6">
+        <Text variant="h1">{tool ? tool.name : 'Tool Not Found'}</Text>
+        <Text variant="body" className="text-center text-text-secondary dark:text-text-secondary-dark">
+          This is a placeholder for {tool?.name}. In the full app, the tool itself opens here. Opening
+          it is noted on your device, so Today can gently bring it back if it has been a while.
+        </Text>
+      </View>
+    </ToolScreen>
   );
 }
