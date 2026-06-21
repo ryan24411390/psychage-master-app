@@ -11,7 +11,7 @@ import type { ClaritySnapshot } from './result-store';
 // S-history — past Clarity snapshots, newest first. Web-parity override: each snapshot
 // shows its raw composite (0–100) and tier badge, matching the dashboard's History tab
 // list. Read-only, local-only. Crisis stays reachable via the chrome's Help-now pill
-// (this view is composed inside ClarityChrome).
+// (this view is composed inside ToolScreen).
 
 const TITLE = 'Your snapshots';
 const EMPTY = "No snapshots yet. When you finish a Clarity assessment, it'll show up here.";
