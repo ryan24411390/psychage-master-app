@@ -51,4 +51,39 @@ describe('MindMateView', () => {
 
     await waitFor(() => expect(screen.getByTestId('mindmate-signin')).toBeTruthy());
   });
+
+  it('P9: a transient failure shows a calm retry; Try again replays the turn without duplicating it', async () => {
+    // First turn fails (transient backend error), the retry streams a reply. The throw
+    // lives in the generator body so it surfaces during iteration — exactly like a
+    // dropped stream — and is caught by the hook.
+    let calls = 0;
+    const flaky = (async function* () {
+      calls += 1;
+      if (calls === 1) throw new Error('network down');
+      yield 'Anxiety is a common experience.';
+    }) as unknown as typeof sendMessage;
+
+    renderWithProviders(
+      <MindMateView region="US" sendImpl={flaky} persistImpl={async () => null} />,
+      { haptics: true },
+    );
+
+    fireEvent.changeText(screen.getByTestId('mindmate-input'), 'what is anxiety');
+    fireEvent.press(screen.getByTestId('mindmate-send'));
+
+    // Calm error with a retry affordance — not a dead screen, not the sign-in card.
+    await waitFor(() => expect(screen.getByTestId('mindmate-retry')).toBeTruthy());
+    expect(screen.queryByTestId('mindmate-signin')).toBeNull();
+
+    fireEvent.press(screen.getByTestId('mindmate-retry'));
+
+    // The reply streams in on retry and the error/retry clears.
+    await waitFor(() =>
+      expect(screen.getByText('Anxiety is a common experience.')).toBeTruthy(),
+    );
+    expect(screen.queryByTestId('mindmate-retry')).toBeNull();
+
+    // Exactly one user message — retry replayed the same turn, it didn't append a new one.
+    expect(screen.getAllByText('what is anxiety')).toHaveLength(1);
+  });
 });

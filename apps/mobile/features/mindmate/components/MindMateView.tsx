@@ -69,7 +69,7 @@ export function MindMateView({
   const hotline = resolvePrimaryHotline(activeRegion);
   const [consentDismissed, setConsentDismissed] = useState(false);
 
-  const { messages, status, error, crisisActive, needsSignIn, send } = useMindMateChat({
+  const { messages, status, error, crisisActive, needsSignIn, send, retry } = useMindMateChat({
     region: activeRegion,
     onCrisis: onRequestCrisis,
     sendImpl,
@@ -113,13 +113,17 @@ export function MindMateView({
             </Button>
           </View>
         ) : error && !needsSignIn ? (
-          <Text
-            variant="caption"
-            className="px-4 py-2 text-center text-text-secondary dark:text-text-secondary-dark"
-            testID="mindmate-error"
-          >
-            {error}
-          </Text>
+          <View className="mx-4 my-2 items-center gap-2" testID="mindmate-error">
+            <Text
+              variant="caption"
+              className="text-center text-text-secondary dark:text-text-secondary-dark"
+            >
+              {error}
+            </Text>
+            <Button variant="secondary" size="sm" onPress={retry} testID="mindmate-retry">
+              {MINDMATE_COPY.errorRetry}
+            </Button>
+          </View>
         ) : null}
 
         <ChatInput onSend={send} disabled={status === 'sending'} />
