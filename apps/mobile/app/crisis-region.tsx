@@ -1,5 +1,6 @@
 import { router, Stack } from 'expo-router';
 
+import { localeDeviceRegionHint } from '@/features/crisis/device-region';
 import type { RegionCode } from '@/features/crisis/helpline-schema';
 import { CRISIS_DATASET } from '@/features/crisis/helplines.fixtures';
 import {
@@ -20,7 +21,7 @@ export default function CrisisRegionScreen() {
   const reduced = useReducedMotion();
   const current = resolveRegion({
     storedOverride: loadRegionOverride(storage),
-    deviceHint: defaultDeviceRegionHint(),
+    deviceHint: localeDeviceRegionHint() ?? defaultDeviceRegionHint(),
   });
 
   const handleSelect = (code: RegionCode) => {

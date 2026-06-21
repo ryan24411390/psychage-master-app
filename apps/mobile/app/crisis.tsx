@@ -2,6 +2,7 @@ import { router, Stack, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 
 import { CrisisView } from '@/features/crisis/CrisisView';
+import { localeDeviceRegionHint } from '@/features/crisis/device-region';
 import { CRISIS_DATASET } from '@/features/crisis/helplines.fixtures';
 import {
   defaultDeviceRegionHint,
@@ -23,7 +24,7 @@ import { useReducedMotion } from '@/lib/motion';
 function resolveActiveRegion() {
   return resolveRegion({
     storedOverride: loadRegionOverride(storage),
-    deviceHint: defaultDeviceRegionHint(),
+    deviceHint: localeDeviceRegionHint() ?? defaultDeviceRegionHint(),
   });
 }
 
