@@ -31,8 +31,12 @@ describe('appearance migrate', () => {
     expect(migrate(JSON.stringify({ version: 5, mode: 'light' }))).toEqual(migrate(null));
   });
 
-  it('normalizes an unknown mode to system', () => {
-    expect(migrate(JSON.stringify({ version: 1, mode: 'sepia' })).mode).toBe('system');
+  it('normalizes an unknown mode to light', () => {
+    expect(migrate(JSON.stringify({ version: 1, mode: 'sepia' })).mode).toBe('light');
+  });
+
+  it('coerces a legacy stored system mode to light (not offered under forced-light)', () => {
+    expect(migrate(JSON.stringify({ version: 1, mode: 'system' })).mode).toBe('light');
   });
 });
 

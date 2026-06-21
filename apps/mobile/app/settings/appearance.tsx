@@ -12,12 +12,14 @@ import { ReadingTextSizeProvider } from '@/lib/reading-text-size-context';
 import { useAppearance } from '@/lib/use-appearance';
 import { useReadingTextSize } from '@/lib/use-reading-text-size';
 
-// S45 Accessibility & appearance. Light / night / system via C-RADIO (charcoal
-// marks, never teal). Reduce-motion toggle drives lib/motion.ts useReducedMotion
-// app-wide. Reading text size scales article/Learn body copy (wrapped in
-// ReadingTextSizeProvider) — the live preview below sits inside one provider so the
+// S45 Accessibility & appearance. Light / night via C-RADIO (charcoal marks, never
+// teal). 'system' is intentionally NOT offered: app.json `userInterfaceStyle: "light"`
+// forces the OS to report light, so a follow-OS option would silently never reach dark
+// (see lib/persistence/appearance.ts header). Reduce-motion toggle drives lib/motion.ts
+// useReducedMotion app-wide. Reading text size scales article/Learn body copy (wrapped
+// in ReadingTextSizeProvider) — the live preview below sits inside one provider so the
 // choice is observable here. Dynamic Type is honored by RN's native font scaling.
-const MODE_ORDER: readonly AppearanceMode[] = ['light', 'night', 'system'];
+const MODE_ORDER: readonly AppearanceMode[] = ['light', 'night'];
 const SIZE_ORDER: readonly ReadingTextSize[] = ['small', 'default', 'large'];
 
 export default function AppearanceScreen() {
