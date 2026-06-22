@@ -17,6 +17,7 @@ import { storage } from '@/lib/adapters/storage';
 import { getOrCreateDeviceId } from '@/lib/device-id';
 import { generateId } from '@/lib/id';
 import { mapMomentToInput, mapRecordToMoment } from '@/lib/moment-sync-map';
+import { migrateMoodJournalIntoMoments } from '@/lib/moments-migration';
 import { getMomentSyncConsent } from '@/lib/persistence/sync-consent';
 import { getSupabaseAuthClient, isSupabaseConfigured } from '@/lib/supabase/client';
 
@@ -139,6 +140,14 @@ export function getMomentStore(): MomentStore {
       now: () => new Date(),
       generateId,
     });
+    // One-time, idempotent, local-only fold of the retired Mood Journal into Moments
+    // (P42–P44). Runs on first construction; the done-flag short-circuits later launches.
+    // Best-effort: a failed fold must never block the local store.
+    try {
+      migrateMoodJournalIntoMoments(storage, store);
+    } catch {
+      // Swallowed by design — the store is the source of truth and must still return.
+    }
   }
   return store;
 }

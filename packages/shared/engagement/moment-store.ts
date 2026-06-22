@@ -28,6 +28,7 @@ import {
   MAX_LABELS,
   type Moment,
   type MomentDraft,
+  type MomentSource,
   type MomentStoreDeps,
   type MomentValence,
   MomentValidationError,
@@ -182,6 +183,7 @@ export class MomentStore implements EngagementStore {
       context,
       draft.note,
       draft.routedToSupport ?? false,
+      draft.source ?? 'today',
     );
     this.byId.set(moment.id, moment);
     this.persist();
@@ -272,7 +274,11 @@ export class MomentStore implements EngagementStore {
   }
 }
 
-/** Build a canonical moment; omit `note` when absent (overwrite-not-merge semantics). */
+/**
+ * Build a canonical moment; omit `note` when absent (overwrite-not-merge semantics).
+ * Key order MUST match `canonicalMoment` in migrate.ts so a fresh write reloads
+ * without a redundant restamp. A fresh capture never carries `legacyValence10`.
+ */
 function makeMoment(
   id: string,
   timestamp: string,
@@ -281,6 +287,7 @@ function makeMoment(
   context: readonly string[],
   note: string | undefined,
   routedToSupport: boolean,
+  source: MomentSource,
 ): Moment {
   const base = {
     id,
@@ -289,6 +296,7 @@ function makeMoment(
     labels: [...labels],
     context: [...context],
     routedToSupport,
+    source,
   };
   return note === undefined ? base : { ...base, note };
 }

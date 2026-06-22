@@ -15,6 +15,7 @@ function moment(id: string, ts: string, valence: number, over?: Partial<Moment>)
     labels: [],
     context: [],
     routedToSupport: false,
+    source: 'today',
     ...over,
   };
 }
@@ -32,6 +33,16 @@ describe('migrate', () => {
     const out = migrate(serialize(env as never));
     expect(out.status).toBe('clean');
     expect(out.value.moments).toHaveLength(1);
+  });
+
+  it('v1→v2 backfills a missing source to `today` (no data lost)', () => {
+    // A genuine v1 moment predates `source`; the migrator must add it, not drop it.
+    const v1Moment = { id: 'a', timestamp: '2026-06-17T09:00:00.000Z', valence: 3, labels: [], context: [], routedToSupport: false };
+    const out = migrate(JSON.stringify({ version: 1, moments: [v1Moment] }));
+    expect(out.status).toBe('clean');
+    expect(out.value.version).toBe(SCHEMA_VERSION);
+    expect(out.value.moments).toHaveLength(1);
+    expect(out.value.moments[0]?.source).toBe('today');
   });
 
   it('corrupt JSON → anomaly preserving the raw blob', () => {
@@ -75,8 +86,18 @@ describe('normalizeMoments', () => {
     expect(res.dropped).toBe(true);
   });
 
-  it('drops over-cap labels', () => {
-    const res = normalizeMoments([moment('x', '2026-06-17T09:00:00.000Z', 3, { labels: ['a', 'b', 'c', 'd'] })]);
+  it('keeps labels up to the stored ceiling (folded-in Mood Journal entries)', () => {
+    // 12 labels — the closed emotion-tag count a folded-in journal entry may carry —
+    // are kept; the capture cap (MAX_LABELS) only bounds fresh writes via `append`.
+    const twelve = Array.from({ length: 12 }, (_, i) => `e${i}`);
+    const res = normalizeMoments([moment('x', '2026-06-17T09:00:00.000Z', 3, { labels: twelve })]);
+    expect(res.moments).toHaveLength(1);
+    expect(res.dropped).toBe(false);
+  });
+
+  it('drops over-ceiling labels (more than STORED_MAX_LABELS)', () => {
+    const thirteen = Array.from({ length: 13 }, (_, i) => `e${i}`);
+    const res = normalizeMoments([moment('x', '2026-06-17T09:00:00.000Z', 3, { labels: thirteen })]);
     expect(res.moments).toEqual([]);
     expect(res.dropped).toBe(true);
   });

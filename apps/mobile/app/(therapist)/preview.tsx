@@ -16,8 +16,8 @@ import { expoPdfPrinter } from '@/features/therapist/pdf/expo-printer';
 import type { LocalCalendarDate } from '@psychage/shared/engagement';
 import { dailyRollupReader } from '@/lib/daily-rollup';
 import { getMomentStore } from '@/lib/moment-store';
+import { moodReaderFromMoments } from '@/lib/mood-reader';
 import { getClarityStore } from '@/lib/clarity-store';
-import { getMoodJournalStore } from '@/lib/mood-journal-store';
 import { getNavigatorStore } from '@/lib/navigator-store';
 import { getRelationshipStore } from '@/lib/relationship-store';
 import { getSleepStore } from '@/lib/sleep-store';
@@ -78,7 +78,7 @@ function buildToolSummaries(from: LocalCalendarDate, to: LocalCalendarDate): The
     };
   }
 
-  const moments = getMoodJournalStore().getRange(from, to);
+  const moments = moodReaderFromMoments(getMomentStore()).getRange(from, to);
   if (moments.length > 0) {
     const counts = new Map<string, number>();
     for (const m of moments) for (const e of m.emotions) counts.set(e, (counts.get(e) ?? 0) + 1);
