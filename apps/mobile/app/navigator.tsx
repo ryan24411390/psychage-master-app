@@ -15,13 +15,30 @@ import {
   loadRegionOverride,
   resolveRegion,
 } from '@/features/crisis/region';
+import { NAVIGATOR_COPY } from '@/features/navigator/copy';
 import { NAVIGATOR_KB } from '@/features/navigator/knowledge-base';
 import { NavigatorFlow } from '@/features/navigator/NavigatorFlow';
+import {
+  buildNavigatorSummaryHtml,
+  type NavigatorSummaryArea,
+} from '@/features/navigator/pdf/build-navigator-html';
+import { generateAndShare } from '@/features/therapist';
+import { expoPdfPrinter } from '@/features/therapist/pdf/expo-printer';
 import { isTierEnabled } from '@/lib/adapters';
 import { storage } from '@/lib/adapters/storage';
 import { useReducedMotion } from '@/lib/motion';
 import { goBackOr } from '@/lib/nav';
 import { getNavigatorStore } from '@/lib/navigator-store';
+import { loadPersonalization } from '@/lib/persistence/personalization';
+
+/** Device-local calendar day (YYYY-MM-DD) for the summary PDF — the run just completed. */
+function localToday(): string {
+  const d = new Date();
+  const y = String(d.getFullYear()).padStart(4, '0');
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
 
 // S — Symptom Navigator route. The ONLY place the shared navigator engine +
 // provider-question generator are imported as VALUES — both are injected into
@@ -65,6 +82,22 @@ export default function NavigatorScreen() {
         onTrack={() => router.push('/tools/mood-journal')}
         onFindCare={() => router.push('/find')}
         onLearn={() => router.push('/learn')}
+        onDownloadSummary={(areas: NavigatorSummaryArea[]) => {
+          // Build LOCALLY (offline) + hand to the platform share sheet (SR-4: Psychage
+          // never transmits). Summary-only — LABELS, no raw answers, no confidence number.
+          const html = buildNavigatorSummaryHtml({
+            fullName: loadPersonalization(storage).name ?? NAVIGATOR_COPY.summaryDocTitle,
+            date: localToday(),
+            areas,
+          });
+          void generateAndShare(html, expoPdfPrinter);
+        }}
+        onHome={() => router.replace('/')}
+        onViewHistory={() => router.push('/tools/navigator-history')}
+        onRemoveLast={() => {
+          const last = getNavigatorStore().getRecent(1)[0];
+          if (last) getNavigatorStore().delete(last.id);
+        }}
       />
     </>
   );

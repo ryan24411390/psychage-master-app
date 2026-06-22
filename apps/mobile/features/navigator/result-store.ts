@@ -151,6 +151,23 @@ export class NavigatorResultStore {
     return this.entries.find((e) => e.id === id);
   }
 
+  /** Forget one run (P41 — user-initiated "remove this exploration"). Returns true when
+   *  a run was removed. Local-only delete; nothing leaves the device. */
+  delete(id: string): boolean {
+    const next = this.entries.filter((e) => e.id !== id);
+    if (next.length === this.entries.length) return false;
+    this.entries = next;
+    this.persist();
+    return true;
+  }
+
+  /** Forget every stored run (P41 — clear local history). */
+  clear(): void {
+    if (this.entries.length === 0) return;
+    this.entries = [];
+    this.persist();
+  }
+
   /** Total stored runs. */
   get count(): number {
     return this.entries.length;
