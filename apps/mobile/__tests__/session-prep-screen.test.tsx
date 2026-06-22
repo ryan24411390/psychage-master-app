@@ -13,10 +13,11 @@ jest.mock('@react-native-community/datetimepicker', () => ({
 }));
 
 const c = THERAPIST_COPY.sessionPrep;
+const c2 = THERAPIST_COPY.unifiedExport;
 
 describe('SessionPrepView', () => {
   it('shows the intro, the window options, and an honest count for the live window', () => {
-    const countForWindow = jest.fn(() => ({ dayCount: 30, momentCount: 5 }));
+    const countForWindow = jest.fn(() => ({ dayCount: 30, momentCount: 5, includes: [] }));
     renderWithProviders(
       <SessionPrepView countForWindow={countForWindow} onGenerate={jest.fn()} />,
       { haptics: true },
@@ -33,7 +34,7 @@ describe('SessionPrepView', () => {
   it('generates for the chosen window with the trimmed name', () => {
     const onGenerate = jest.fn();
     renderWithProviders(
-      <SessionPrepView countForWindow={() => ({ dayCount: 30, momentCount: 5 })} onGenerate={onGenerate} />,
+      <SessionPrepView countForWindow={() => ({ dayCount: 30, momentCount: 5, includes: [] })} onGenerate={onGenerate} />,
       { haptics: true },
     );
 
@@ -49,7 +50,7 @@ describe('SessionPrepView', () => {
   it('defaults to the 2-week window so generate works without changing the selection', () => {
     const onGenerate = jest.fn();
     renderWithProviders(
-      <SessionPrepView countForWindow={() => ({ dayCount: 14, momentCount: 2 })} onGenerate={onGenerate} />,
+      <SessionPrepView countForWindow={() => ({ dayCount: 14, momentCount: 2, includes: [] })} onGenerate={onGenerate} />,
       { haptics: true },
     );
 
@@ -61,12 +62,36 @@ describe('SessionPrepView', () => {
 
   it('reveals the date-picker affordance only for "since a date"', () => {
     renderWithProviders(
-      <SessionPrepView countForWindow={() => ({ dayCount: 0, momentCount: 0 })} onGenerate={jest.fn()} />,
+      <SessionPrepView countForWindow={() => ({ dayCount: 0, momentCount: 0, includes: [] })} onGenerate={jest.fn()} />,
       { haptics: true },
     );
 
     expect(screen.queryByTestId('session-prep-since-date')).toBeNull();
     fireEvent.press(screen.getByLabelText(c.windowSince));
     expect(screen.getByTestId('session-prep-since-date')).toBeTruthy();
+  });
+
+  it('lists the other tools that ride along, when present in the window', () => {
+    renderWithProviders(
+      <SessionPrepView
+        countForWindow={() => ({ dayCount: 30, momentCount: 3, includes: [c2.sleepTitle, c2.navigatorTitle] })}
+        onGenerate={jest.fn()}
+      />,
+      { haptics: true },
+    );
+
+    expect(screen.getByText(`Also includes: ${c2.sleepTitle} · ${c2.navigatorTitle}`)).toBeTruthy();
+  });
+
+  it('disables generate when nothing in the window has data', () => {
+    const onGenerate = jest.fn();
+    renderWithProviders(
+      <SessionPrepView countForWindow={() => ({ dayCount: 30, momentCount: 0, includes: [] })} onGenerate={onGenerate} />,
+      { haptics: true },
+    );
+
+    expect(screen.getByText(c.nothingToExport)).toBeTruthy();
+    fireEvent.press(screen.getByTestId('session-prep-generate'));
+    expect(onGenerate).not.toHaveBeenCalled();
   });
 });
