@@ -30,6 +30,18 @@ describe('MomentCaptureSheet', () => {
     expect(draft?.valence).toBe(3);
     expect(draft?.labels).toEqual([]);
     expect(draft?.routedToSupport).toBe(false);
+    expect(draft?.source).toBe('today'); // default provenance
+  });
+
+  it('stamps the provenance source from the prop (one sheet, many entry points)', () => {
+    const onSave = jest.fn<void, [MomentDraft]>();
+    renderWithProviders(
+      <MomentCaptureSheet source="compass" onSave={onSave} onClose={() => {}} />,
+      { haptics: true },
+    );
+    fireEvent.press(screen.getByLabelText('Level 4 of 5'));
+    fireEvent.press(screen.getByRole('button', { name: 'Save this moment' }));
+    expect(onSave.mock.calls[0]?.[0]?.source).toBe('compass');
   });
 
   it('save is disabled until a valence is chosen', () => {

@@ -14,7 +14,7 @@ export const CT4_COMPASS = {
   relationship: { title: 'Take stock of your connections', sub: 'Relationship Health' },
   mindmate: { title: 'Talk something through', sub: 'MindMate' },
   clarity: { title: 'See how things have felt lately', sub: 'Clarity Score' },
-  moodJournal: { title: 'Notice what comes up', sub: 'Mood Journal' },
+  moments: { title: 'Capture how you’re feeling', sub: 'Moments' },
   sleep: { title: 'Understand your sleep', sub: 'Sleep Architect' },
   insights: { title: 'See your patterns over time', sub: 'Insights' },
 } as const;

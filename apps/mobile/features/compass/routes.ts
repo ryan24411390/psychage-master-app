@@ -11,7 +11,6 @@ export const COMPASS_ROUTES = {
   clarity: '/tools/clarity', // S32 — Clarity Score (native flow)
   clarityHistory: '/tools/clarity-history', // past Clarity snapshots (local-only)
   relationshipHistory: '/tools/relationship-history', // past Relationship results (local-only)
-  moodJournal: '/tools/mood-journal', // Mood Journal — patterns & triggers
   sleep: '/tools/sleep', // S29 Sleep Architect (native)
   insights: '/insights', // cross-tool patterns dashboard (root full-screen). Was an
   // orphan — only the Home "Your tools" card linked here; this is its second door.
