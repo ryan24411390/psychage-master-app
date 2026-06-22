@@ -16,6 +16,7 @@ import { resolveColorRef } from '@/lib/a1-tokens';
 import {
   escapeHtml,
   pageSizeForLocale,
+  type PdfSection,
   renderDocument,
 } from '@/features/therapist/pdf/build-html';
 
@@ -69,7 +70,7 @@ const NAVIGATOR_PDF_CSS = `  .lead { font-size: 11pt; margin: 0 0 14px; }
  * the ONLY data rendered is the run date, the surfaced area names, and their relevance
  * LABELS — there is no path here for raw answers or numeric confidence to reach the page.
  */
-export function buildNavigatorSummaryHtml(input: NavigatorSummaryInput): string {
+export function buildNavigatorSection(input: NavigatorSummaryInput): PdfSection {
   const areas =
     input.areas.length > 0
       ? input.areas
@@ -88,9 +89,15 @@ export function buildNavigatorSummaryHtml(input: NavigatorSummaryInput): string 
   <ul class="areas">${areas}</ul>
   <section class="things"><h2>${escapeHtml(NAVIGATOR_COPY.thingsToKnowTitle)}</h2><ul>${things}</ul></section>`;
 
+  return { extraCss: NAVIGATOR_PDF_CSS, body };
+}
+
+export function buildNavigatorSummaryHtml(input: NavigatorSummaryInput): string {
+  const { extraCss, body } = buildNavigatorSection(input);
+
   return renderDocument({
     pageSize: pageSizeForLocale(input.locale),
-    extraCss: NAVIGATOR_PDF_CSS,
+    extraCss,
     name: input.fullName.trim(),
     rangeLine: formatDate(input.date),
     body,

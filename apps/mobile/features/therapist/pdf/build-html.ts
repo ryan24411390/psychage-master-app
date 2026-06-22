@@ -320,6 +320,17 @@ const BASE_CSS = `  * { box-sizing: border-box; }
     color: ${INK_HINT};
   }`;
 
+/**
+ * A composable document section: the per-tool `extraCss` + `body` that sits between the
+ * shell header and footer. Each feature builder exposes one so the unified export can
+ * COMPOSE several tools through a single {@link renderDocument} call without forking any
+ * layout. The standalone `buildXxxHtml()` wrappers keep emitting byte-identical output.
+ */
+export interface PdfSection {
+  readonly extraCss: string;
+  readonly body: string;
+}
+
 export function renderDocument(opts: {
   pageSize: 'A4' | 'letter';
   extraCss: string;
@@ -543,11 +554,14 @@ const SESSION_PREP_EXTRA_CSS = `  .block { margin: 0 0 18px; page-break-inside: 
   .note-when { font-size: 9pt; color: ${INK_SECONDARY}; }
   .note-text { font-size: 10.5pt; color: ${INK_TEXT}; font-style: italic; }`;
 
-export function buildSessionPrepHtml(input: SessionPrepPdfInput): string {
+/**
+ * The session-prep (Moments) section as { extraCss, body } — the same content the
+ * standalone PDF renders between the header and footer. Exposed so the unified export can
+ * COMPOSE it through the shared shell alongside other tools, without forking the layout.
+ * Non-diagnostic by construction (counts + the app's own affect words, never severity).
+ */
+export function buildSessionPrepSection(input: SessionPrepPdfInput): PdfSection {
   const { summary } = input;
-  const from = asLocalCalendarDate(summary.window.from);
-  const to = asLocalCalendarDate(summary.window.to);
-  const dayCount = enumerateDays(from, to).length;
   const c = THERAPIST_COPY.sessionPrep;
 
   let body: string;
@@ -567,9 +581,20 @@ export function buildSessionPrepHtml(input: SessionPrepPdfInput): string {
     body = sections.join('\n');
   }
 
+  return { extraCss: SESSION_PREP_EXTRA_CSS, body };
+}
+
+export function buildSessionPrepHtml(input: SessionPrepPdfInput): string {
+  const { summary } = input;
+  const from = asLocalCalendarDate(summary.window.from);
+  const to = asLocalCalendarDate(summary.window.to);
+  const dayCount = enumerateDays(from, to).length;
+  const c = THERAPIST_COPY.sessionPrep;
+  const { extraCss, body } = buildSessionPrepSection(input);
+
   return renderDocument({
     pageSize: pageSizeForLocale(input.locale),
-    extraCss: SESSION_PREP_EXTRA_CSS,
+    extraCss,
     name: input.fullName.trim(),
     rangeLine: `${formatRangeLabel(from, to)} · ${c.countLine(dayCount, summary.totalCount)}`,
     body,

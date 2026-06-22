@@ -18,6 +18,11 @@ export {
   type TherapistPdfInput,
 } from './pdf/build-html';
 export {
+  buildUnifiedExportHtml,
+  UNIFIED_EXPORT_VERSION,
+  type UnifiedExportInput,
+} from './pdf/build-unified-html';
+export {
   buildSessionPrepSummary,
   type SessionPrepSummary,
 } from './session-prep/summary';
