@@ -136,7 +136,7 @@ describe('NavigatorFlow (web-parity flow)', () => {
       act(() => {
         jest.advanceTimersByTime(2400); // processing pacing
       });
-      expect(screen.getByText('Your Results')).toBeTruthy();
+      expect(screen.getByText('Your results')).toBeTruthy();
       expect(screen.getByText('Depression')).toBeTruthy();
       expect(screen.getByText('50%')).toBeTruthy(); // confidence percentage shown
     } finally {
@@ -151,7 +151,7 @@ describe('NavigatorFlow (web-parity flow)', () => {
     expect(
       screen.getByText("Then let's pause this. What you're feeling deserves real support right now."),
     ).toBeTruthy();
-    expect(screen.queryByText('Your Results')).toBeNull();
+    expect(screen.queryByText('Your results')).toBeNull();
   });
 
   it('engine should_halt also routes to the crisis surface, not results', () => {
@@ -166,7 +166,7 @@ describe('NavigatorFlow (web-parity flow)', () => {
       expect(
         screen.getByText("Then let's pause this. What you're feeling deserves real support right now."),
       ).toBeTruthy();
-      expect(screen.queryByText('Your Results')).toBeNull();
+      expect(screen.queryByText('Your results')).toBeNull();
     } finally {
       jest.useRealTimers();
     }
@@ -197,5 +197,99 @@ describe('NavigatorFlow (web-parity flow)', () => {
     press('Continue');
     press('Something else');
     expect(screen.getByLabelText('Search symptoms')).toBeTruthy();
+  });
+});
+
+// ── P35 — paged symptom selection (one category per page) ─────────────────────────
+function symInCategory(id: string, name: string, category: Symptom['category']): Symptom {
+  return { ...sym(id, name), category };
+}
+
+const TWO_CATEGORY_KB = {
+  symptoms: [
+    symInCategory('MOD_001', 'Low mood', 'mood'),
+    symInCategory('ANX_001', 'Constant worry', 'anxiety_fear'),
+  ],
+} as unknown as KnowledgeBase;
+
+describe('P35 — symptom selection paginates by category', () => {
+  function renderTwoCategoryFlow() {
+    renderWithProviders(
+      <NavigatorFlow
+        kb={TWO_CATEGORY_KB}
+        runNavigator={() => OK_RESULT}
+        getProviderQuestions={() => ['What might be going on?']}
+        emergencyNumber="911"
+        helplines={HELPLINES}
+        onExit={jest.fn()}
+        onTrack={jest.fn()}
+        onFindCare={jest.fn()}
+        onLearn={jest.fn()}
+      />,
+      { haptics: true },
+    );
+    press('Start the Navigator');
+    fireEvent.press(screen.getByText('Emotional & Mood'));
+    press('Continue'); // domains → symptoms (page 0)
+  }
+
+  it('shows one category per page with a position indicator and a Next control', () => {
+    renderTwoCategoryFlow();
+    // Page 1 of 2 — only the first category's chip is on screen.
+    expect(screen.getByText('Area 1 of 2')).toBeTruthy();
+    expect(screen.getByText('Low mood')).toBeTruthy();
+    expect(screen.queryByText('Constant worry')).toBeNull();
+    // The primary advances the page (not the final continue) on a non-last page.
+    expect(screen.queryByRole('button', { name: 'Continue' })).toBeNull();
+    press('Next');
+    expect(screen.getByText('Area 2 of 2')).toBeTruthy();
+    expect(screen.getByText('Constant worry')).toBeTruthy();
+    expect(screen.queryByText('Low mood')).toBeNull();
+  });
+
+  it('the global back affordance walks back through the pages', () => {
+    renderTwoCategoryFlow();
+    press('Next');
+    expect(screen.getByText('Area 2 of 2')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Back'));
+    expect(screen.getByText('Area 1 of 2')).toBeTruthy();
+  });
+
+  it('the last page is the final gate → details (needs ≥1 symptom overall)', () => {
+    renderTwoCategoryFlow();
+    press('Next'); // → last page
+    fireEvent.press(screen.getByText('Constant worry')); // select on the last page
+    press('Continue'); // last page → details
+    expect(screen.getByText('How intense does this feel?')).toBeTruthy();
+  });
+});
+
+// ── P37/P38 — enlarged, contrast-safe detail question prompts ─────────────────────
+// ── P36 — the intensity selector registers and reflects the choice ────────────────
+describe('Detail step — question prompts (P37/P38) and intensity (P36)', () => {
+  function driveToFirstDetail() {
+    renderFlow(() => OK_RESULT);
+    press('Start the Navigator');
+    fireEvent.press(screen.getByText('Emotional & Mood'));
+    press('Continue');
+    fireEvent.press(screen.getByText('Low mood'));
+    press('Continue'); // single category → details
+  }
+
+  it('renders all three question prompts (enlarged headers, primary ink)', () => {
+    driveToFirstDetail();
+    expect(screen.getByText('How intense does this feel?')).toBeTruthy();
+    expect(screen.getByText('How long has this been going on?')).toBeTruthy();
+    expect(screen.getByText('How often does it happen?')).toBeTruthy();
+  });
+
+  it('P36: tapping an intensity segment registers and updates the live tier label', () => {
+    driveToFirstDetail();
+    // Default severity 5 → "Moderate"; "Significant" not yet shown.
+    expect(screen.getByText('Moderate')).toBeTruthy();
+    expect(screen.queryByText('Significant')).toBeNull();
+    fireEvent.press(screen.getByRole('radio', { name: '8 — Significant' }));
+    // The choice registered: the live tier label now reads "Significant".
+    expect(screen.getByText('Significant')).toBeTruthy();
   });
 });

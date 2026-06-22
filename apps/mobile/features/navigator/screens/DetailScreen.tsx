@@ -51,7 +51,7 @@ export function DetailScreen({ symptom, index, total, detail, onSet, onNext }: D
 
       {symptom.ask_severity ? (
         <View className="gap-3">
-          <Text variant="label">{NAVIGATOR_COPY.detailSeverityLabel}</Text>
+          <Text variant="h3">{NAVIGATOR_COPY.detailSeverityLabel}</Text>
           <SeveritySlider
             value={detail?.severity ?? 5}
             onChange={(severity) => onSet({ severity })}
@@ -61,14 +61,15 @@ export function DetailScreen({ symptom, index, total, detail, onSet, onNext }: D
 
       {symptom.ask_duration ? (
         <View className="gap-3">
-          <Text variant="label">{NAVIGATOR_COPY.detailDurationLabel}</Text>
+          <Text variant="h3">{NAVIGATOR_COPY.detailDurationLabel}</Text>
           <DurationPicker value={detail?.duration} onChange={(duration) => onSet({ duration })} />
         </View>
       ) : null}
 
       {symptom.ask_frequency ? (
         <View className="gap-3">
-          <Text variant="label">{NAVIGATOR_COPY.detailFrequencyLabel}</Text>
+          {/* P37/P38 — display-size header in primary ink (explicit, contrast-safe). */}
+          <Text variant="h3">{NAVIGATOR_COPY.detailFrequencyLabel}</Text>
           <FrequencyPicker value={detail?.frequency} onChange={(frequency) => onSet({ frequency })} />
         </View>
       ) : null}
