@@ -20,6 +20,7 @@ export { MomentStore, type MomentAnomaly, mergeMoments } from './moment-store';
 export {
   type Moment,
   type MomentDraft,
+  type MomentSource,
   type MomentValence,
   type DayRollup,
   type EngagementStore,

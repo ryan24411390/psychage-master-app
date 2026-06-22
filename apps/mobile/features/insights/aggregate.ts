@@ -6,7 +6,6 @@
 // Educational framing only (SR-2/SR-3): no diagnostic language, no condition claims.
 // Navigator confidence is never surfaced here (SR-1 lives in the Navigator views).
 
-import type { MomentEntry } from '@psychage/shared/mood-journal';
 import type { SleepEntry } from '@psychage/shared/sleep';
 
 import type { DailyEntry } from '@/lib/daily-rollup';
@@ -17,6 +16,17 @@ import type { RelationshipHealthResult } from '@/features/relationship-health/ty
 import type { EnergyPoint } from './daily-recap';
 
 export type ToolKey = 'checkin' | 'clarity' | 'navigator' | 'relationship' | 'mood' | 'sleep';
+
+/**
+ * The minimal "feeling words over time" projection the aggregator reads. Produced by
+ * `moodReaderFromMoments` (@/lib/mood-reader) over the unified Moments store: the Mood
+ * Journal's separate record was folded into Moments (P42–P44), so this is now a view
+ * of a moment's instant + its feeling words rather than a distinct journal entry.
+ */
+export interface MoodMomentView {
+  readonly createdAt: string;
+  readonly emotions: readonly string[];
+}
 
 /** A compact, presentational summary of one tool's local history. */
 export interface ToolSummary {
@@ -38,7 +48,7 @@ export interface InsightsInput {
   readonly clarity: readonly ClaritySnapshot[];
   readonly navigator: readonly NavigatorSnapshot[];
   readonly relationship: readonly RelationshipHealthResult[];
-  readonly mood: readonly MomentEntry[];
+  readonly mood: readonly MoodMomentView[];
   readonly sleep: readonly SleepEntry[];
   /** Self-reported energy readings (1–10) from the Clarity Journal — feeds the recap trend. */
   readonly energy: readonly EnergyPoint[];
@@ -58,7 +68,10 @@ const TOOL_ROUTES: Record<ToolKey, string> = {
   clarity: '/tools/clarity-history',
   navigator: '/tools/navigator-history',
   relationship: '/tools/relationship-history',
-  mood: '/tools/mood-journal',
+  // Folded into Moments (P42–P44): the standalone Mood Journal surface is gone, so this
+  // links to the shared Moments history. The duplicate 'mood' row itself is left for the
+  // deferred Insights pass (P45/P46) to reconcile against 'checkin'.
+  mood: '/history',
   sleep: '/tools/sleep',
 };
 
@@ -74,8 +87,8 @@ function isoToMs(iso: string): number {
   return Number.isFinite(t) ? t : 0;
 }
 
-/** Most frequent emotion tag across moments, or null. */
-export function topEmotion(moments: readonly MomentEntry[]): string | null {
+/** Most frequent feeling word across moments, or null. */
+export function topEmotion(moments: readonly MoodMomentView[]): string | null {
   const counts = new Map<string, number>();
   for (const m of moments) {
     for (const e of m.emotions) counts.set(e, (counts.get(e) ?? 0) + 1);

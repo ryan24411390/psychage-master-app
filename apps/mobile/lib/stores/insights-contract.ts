@@ -23,8 +23,8 @@ import type { ClaritySnapshot } from '@/features/clarity/result-store';
 import type { NavigatorSnapshot } from '@/features/navigator/result-store';
 import type { RelationshipHealthResult } from '@/features/relationship-health/types';
 import type { DailyEntry } from '@/lib/daily-rollup';
+import type { MoodMomentView } from '@/features/insights/aggregate';
 import type { DailyJournalCheckIn } from '@psychage/shared/clarity-journal';
-import type { MomentEntry } from '@psychage/shared/mood-journal';
 import type { SleepEntry } from '@psychage/shared/sleep';
 
 // ---------------------------------------------------------------------------
@@ -49,7 +49,7 @@ export interface RelationshipReader {
 }
 
 export interface MoodReader {
-  getRecent(n: number): readonly MomentEntry[];
+  getRecent(n: number): readonly MoodMomentView[];
 }
 
 export interface SleepReader {
@@ -79,7 +79,7 @@ type _RelationshipFields = Assert<
   Extends<RelationshipHealthResult, { readonly compositeScore: number; readonly createdAt: string }>
 >;
 type _MoodFields = Assert<
-  Extends<MomentEntry, { readonly createdAt: string; readonly emotions: readonly string[] }>
+  Extends<MoodMomentView, { readonly createdAt: string; readonly emotions: readonly string[] }>
 >;
 type _SleepFields = Assert<Extends<SleepEntry, { readonly created_at: string }>>;
 type _EnergyFields = Assert<
