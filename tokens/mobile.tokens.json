@@ -104,6 +104,15 @@
       "5": { "light": "#15B8A6", "dark": "#15B8A6" },
       "_source": { "_note": "Values verbatim from tokens/web.tokens.json color.mood.*. 5-step ordinal mood palette shared cross-platform for mood-feature consistency. Labels (consumer-side, not token): 1=Awful, 2=Low, 3=Okay, 4=Good, 5=Great." },
       "_scope": "mood-feature-only — not for general use."
+    },
+    "valence": {
+      "1": { "light": "#22304A", "dark": "#22304A" },
+      "2": { "light": "#42505E", "dark": "#42505E" },
+      "3": { "light": "#A8A29E", "dark": "#A8A29E" },
+      "4": { "light": "#2DBFAE", "dark": "#2DBFAE" },
+      "5": { "light": "#1A9B8C", "dark": "#1A9B8C" },
+      "_source": { "_note": "5-anchor valence ramp for the Moments feeling visualization (navy -> warm-neutral -> brand teal). Interpolated continuously at runtime as the scrub shape morphs. Paired L/D encoded identical: the shape colour is intentional and does not flip with mode (navy and warm-neutral read on the true-black dark canvas). Labels (consumer-side, not token): 1=Very unpleasant ... 5=Very pleasant." },
+      "_scope": "feeling-visualization-mobile-only — named design-doctrine exception #2 (animated valence-colour shape, scoped to the one Moments capture surface; see DESIGN.mobile.md). Not for general use."
     }
   },
 

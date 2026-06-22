@@ -6,7 +6,7 @@ import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 import { ChipGroup } from '@/components/moments/ChipGroup';
-import { ValenceSlider } from '@/components/moments/ValenceSlider';
+import { FeelingVisualization } from '@/components/moments/FeelingVisualization';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { shouldRouteToSupport } from '@/features/moments/acute';
@@ -108,7 +108,7 @@ export function MomentCaptureSheet({ onSave, onClose }: MomentCaptureSheetProps)
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false} className="mt-3">
-          <ValenceSlider
+          <FeelingVisualization
             value={valence}
             onChange={(v) => {
               setValence(v);

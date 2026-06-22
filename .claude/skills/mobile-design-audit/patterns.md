@@ -49,7 +49,7 @@ import { color } from '@/design/tokens';
 </LinearGradient>
 ```
 
-**Exception:** None. Psychage brand is teal/charcoal. Purple/cyan gradients are not part of the contract.
+**Exception:** Named visual exception #2 (`DESIGN.mobile.md §3.5`) — the valence feeling shape in `apps/mobile/components/moments/FeelingVisualization.tsx` is the ONE sanctioned gradient + multi-hue ramp. It uses a Skia `<RadialGradient>` over token-sourced `color.valence.{1..5}` (navy → warm-neutral → brand teal; no purple/cyan, no `expo-linear-gradient`), scoped to that single Moments capture surface and carrying the `@design-purpose` annotation. Any gradient outside that file is still drift — Psychage brand is teal/charcoal.
 
 ---
 

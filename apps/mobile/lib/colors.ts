@@ -61,3 +61,36 @@ export const colors = {
   },
   crisis: { light: c.crisis.red, dark: c.crisis.redDark },
 } as const;
+
+// Valence ramp (color.valence.1..5) — the 5 anchor colours of the Moments
+// feeling visualization, navy -> warm-neutral -> brand teal. Single value per
+// step (does not flip by scheme; see token _note). Ordered 1..5 so index 0 is
+// "very unpleasant" and index 4 is "very pleasant".
+//
+// Scoped to the feeling-visualization surface (named design-doctrine exception
+// #2). Do NOT consume elsewhere — it is the one sanctioned multi-hue ramp.
+export const VALENCE_HEX = [
+  c.valence['1'].light,
+  c.valence['2'].light,
+  c.valence['3'].light,
+  c.valence['4'].light,
+  c.valence['5'].light,
+] as const;
+
+// Continuous valence -> hex for a position t in [1, 5] (linear RGB lerp between
+// the two bracketing anchors). The Skia shape morphs continuously while scrubbed,
+// so the fill colour is sampled between the discrete anchors. The component reads
+// the same VALENCE_HEX through Reanimated's interpolateColor on the UI thread;
+// this JS twin exists for non-worklet call sites and unit tests.
+export function valenceColorAt(t: number): string {
+  const clamped = Math.min(5, Math.max(1, t));
+  const lower = Math.floor(clamped);
+  const upper = Math.min(5, lower + 1);
+  const frac = clamped - lower;
+  const a = VALENCE_HEX[lower - 1] as string;
+  const b = VALENCE_HEX[upper - 1] as string;
+  const channel = (hex: string, i: number) => Number.parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+  const lerp = (i: number) => Math.round(channel(a, i) + (channel(b, i) - channel(a, i)) * frac);
+  const hex2 = (n: number) => n.toString(16).padStart(2, '0');
+  return `#${hex2(lerp(0))}${hex2(lerp(1))}${hex2(lerp(2))}`;
+}
