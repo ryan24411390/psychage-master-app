@@ -21,7 +21,7 @@ export const TOOLS: Record<ToolId, Tool> = {
 
 const STORAGE_KEY = 'psychage:tool_usage';
 
-interface ToolUsageData {
+export interface ToolUsageData {
   installedAt: number;
   usage: Partial<Record<ToolId, number>>;
 }

@@ -22,7 +22,11 @@ export interface MoodReaderView {
   getRange(from: LocalCalendarDate, to: LocalCalendarDate): MoodMomentView[];
 }
 
-/** Wrap a Moments store in the mood projection. Each read derives fresh from the store. */
+/**
+ * Wrap a Moments store in the mood projection. Each read derives fresh from the store.
+ * KEPT FOR THE THERAPIST EXPORT — the Insights screen reads the raw `Moment` records
+ * directly (see features/insights/read-stores.ts).
+ */
 export function moodReaderFromMoments(store: EngagementStore): MoodReaderView {
   return {
     getRecent: (n) => store.getRecent(n).map(toView),

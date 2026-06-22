@@ -8,40 +8,26 @@
 // direction words ("improving"/"declining") — those would read as interpretation. The
 // clarity-journal `moodDirection`/`moodTrend` helpers are deliberately NOT used here.
 
-import type { TrendPoint } from '@/components/ui/charts';
 import type { DailyEntry } from '@/lib/daily-rollup';
-
-/** One self-reported energy reading (1–10) on a local calendar day. */
-export interface EnergyPoint {
-  readonly date: string; // YYYY-MM-DD
-  readonly energy: number; // 1–10, as the user logged it
-}
 
 /** Already-read records the recap is built from. Caller reads the singletons. */
 export interface DailyRecapInput {
   readonly checkins: readonly DailyEntry[];
-  readonly energy: readonly EnergyPoint[];
 }
 
-/** One cell of the presence calendar — whether a check-in exists that day. */
+/** One cell of the presence calendar — whether a moment was recorded that day. */
 export interface PresenceDay {
   readonly date: string; // YYYY-MM-DD
   readonly label: string; // short weekday, e.g. "Mo"
-  readonly present: boolean; // a check-in was recorded that day
+  readonly present: boolean; // a moment was recorded that day
   readonly isToday: boolean;
 }
 
 export interface DailyRecap {
-  /** Last `windowDays` days, oldest → newest, flagged present where a check-in exists. */
+  /** Last `windowDays` days, oldest → newest, flagged present where a moment was recorded. */
   readonly presence: readonly PresenceDay[];
-  /** Factual weekly line, e.g. "You checked in 5 of 7 days this week." */
+  /** Factual weekly line, e.g. "You recorded on 5 of 7 days this week." */
   readonly weeklyRecap: string;
-  /** Energy readings oldest → newest, ready for <TrendLine>. Empty when none logged. */
-  readonly energySeries: readonly TrendPoint[];
-  /** The single descriptive note that sits beside the energy trend. Factual, no claims. */
-  readonly energyInsight: string;
-  /** True when there is any check-in OR any energy reading to show. */
-  readonly hasAnyData: boolean;
 }
 
 const WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as const;
@@ -65,8 +51,8 @@ function weekdayLabel(date: string): string {
 
 /**
  * The last `windowDays` calendar days ending today (oldest → newest), each flagged
- * present iff a check-in exists for that day. Presence only — NOT a mood-intensity
- * heatmap: the day's mood/state is never read here.
+ * present iff a moment was recorded that day. Presence only — NOT a mood-intensity
+ * heatmap: the day's feeling level is never read here.
  */
 export function presenceWindow(
   checkins: readonly DailyEntry[],
@@ -98,36 +84,14 @@ export function weeklyCheckInCount(checkins: readonly DailyEntry[], today: Date)
 /** Factual weekly recap line. Descriptive only — no encouragement, no judgement. */
 export function weeklyRecapLine(checkins: readonly DailyEntry[], today: Date): string {
   const n = weeklyCheckInCount(checkins, today);
-  if (n === 0) return 'No check-ins recorded this week yet.';
-  return `You checked in ${n} of ${WEEK_DAYS} days this week.`;
+  if (n === 0) return 'No moments recorded this week yet.';
+  return `You recorded on ${n} of ${WEEK_DAYS} days this week.`;
 }
 
-/** Energy readings as oldest → newest trend points for <TrendLine>. */
-export function energySeries(energy: readonly EnergyPoint[]): TrendPoint[] {
-  return [...energy]
-    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
-    .map((e) => ({ x: e.date, y: e.energy }));
-}
-
-/**
- * The one descriptive note beside the energy trend — a plain count, never a score.
- * Clarity-journal check-ins are one-per-day (upsert by date), so the reading count is
- * also the day count.
- */
-export function energyInsightLine(energy: readonly EnergyPoint[]): string {
-  const n = energy.length;
-  if (n === 0) return 'No energy logged yet — it appears here once you add it.';
-  const days = n === 1 ? 'day' : 'days';
-  return `Energy logged on ${n} ${days} so far.`;
-}
-
-/** Assemble the full recap view-model from already-read records. */
+/** Assemble the recap view-model from already-read records. */
 export function buildDailyRecap(input: DailyRecapInput, today: Date): DailyRecap {
   return {
     presence: presenceWindow(input.checkins, today),
     weeklyRecap: weeklyRecapLine(input.checkins, today),
-    energySeries: energySeries(input.energy),
-    energyInsight: energyInsightLine(input.energy),
-    hasAnyData: input.checkins.length > 0 || input.energy.length > 0,
   };
 }

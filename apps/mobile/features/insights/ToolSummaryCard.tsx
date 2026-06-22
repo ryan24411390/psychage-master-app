@@ -5,7 +5,6 @@ import {
   HeartHandshake,
   HeartPulse,
   Moon,
-  Notebook,
 } from 'lucide-react-native';
 import type { ComponentType } from 'react';
 import { Pressable, View } from 'react-native';
@@ -17,15 +16,15 @@ import type { ToolKey, ToolSummary } from './aggregate';
 
 // Home "Your tools" surface: a compact, tappable summary of every tool the user has
 // data in, newest-used first. Replaces the old single-tool fixation — tapping opens
-// the full Insights screen (per-tool charts, one by one). Renders nothing when the
-// user has no tool data yet (the caller omits it from the layout).
+// the full Insights screen. Renders nothing when the user has no tool data yet (the
+// caller omits it from the layout). The Mood Journal row was folded into Moments
+// (P42–P44) and the duplicate collapsed (P45) — there is one 'checkin'/Moments row now.
 
 const ICONS: Record<ToolKey, ComponentType<{ size?: number; color?: string; strokeWidth?: number }>> = {
   checkin: HeartPulse,
   clarity: Activity,
   navigator: Compass,
   relationship: HeartHandshake,
-  mood: Notebook,
   sleep: Moon,
 };
 

@@ -7,17 +7,15 @@
 
 import { dailyRollupReader } from '@/lib/daily-rollup';
 import { getMomentStore } from '@/lib/moment-store';
-import { moodReaderFromMoments } from '@/lib/mood-reader';
 import { getClarityStore } from '@/lib/clarity-store';
-import { getClarityJournalStore } from '@/lib/clarity-journal-store';
 import { getNavigatorStore } from '@/lib/navigator-store';
 import { getRelationshipStore } from '@/lib/relationship-store';
 import { getSleepStore } from '@/lib/sleep-store';
+import { toolUsageStore } from '@/lib/tool-usage-store';
 import type {
   CheckinReader,
   ClarityReader,
-  EnergyJournalReader,
-  MoodReader,
+  MomentsReader,
   NavigatorReader,
   RelationshipReader,
   SleepReader,
@@ -34,15 +32,13 @@ export function readInsightsInput(): InsightsInput {
     clarity: (getClarityStore() satisfies ClarityReader).getRecent(100),
     navigator: (getNavigatorStore() satisfies NavigatorReader).getRecent(50),
     relationship: (getRelationshipStore() satisfies RelationshipReader).loadHistory(),
-    // The Mood Journal was folded into Moments (P42–P44): "most noted feeling" now
-    // projects feeling words off the one Moments store via moodReaderFromMoments.
-    mood: (moodReaderFromMoments(getMomentStore()) satisfies MoodReader).getRecent(400),
+    // The single Moments projection (P45–P48): the Insights spine reads the raw moments
+    // off the one store. The home "Your tools" card still derives its Moments row from
+    // `checkins` above (same store, day-rollup view) — one store, two read shapes.
+    moments: (getMomentStore() satisfies MomentsReader).getRecent(400),
     sleep: (getSleepStore() satisfies SleepReader).getRecent(400),
-    // Energy lives in the Clarity Journal (1–10, one per day) — the only store that has it.
-    // No mobile capture writes it yet, so this is usually empty until that screen lands.
-    energy: (getClarityJournalStore() satisfies EnergyJournalReader)
-      .getRecentDailyCheckIns(400)
-      .map((c) => ({ date: c.date as string, energy: c.energy })),
+    // Which tools were opened, and when — drives the "Your Tools" recency rail. Local MMKV.
+    toolUsage: toolUsageStore.getUsage(),
   };
 }
 
