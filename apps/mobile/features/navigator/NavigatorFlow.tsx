@@ -198,7 +198,7 @@ export function NavigatorFlow({
   return (
     <ToolScreen scroll="none" onBack={state.step === 'welcome' ? undefined : handleBack}>
       <Animated.View
-        key={`${state.step}:${state.detailIndex}`}
+        key={`${state.step}:${state.detailIndex}:${state.symptomPage}`}
         entering={stepEnter(direction, reduced)}
         className="flex-1"
       >
@@ -218,9 +218,11 @@ export function NavigatorFlow({
             symptoms={domainSymptoms}
             selectedIds={state.selectedSymptomIds}
             emergencyNumber={emergencyNumber}
+            page={state.symptomPage}
             onToggle={(id) => dispatch({ type: 'TOGGLE_SYMPTOM', id })}
             onAddMany={(ids) => dispatch({ type: 'ADD_SYMPTOMS', ids })}
             onRemoveMany={(ids) => dispatch({ type: 'REMOVE_SYMPTOMS', ids })}
+            onPageNext={() => dispatch({ type: 'SYMPTOMS_PAGE_NEXT' })}
             onContinue={() => dispatch({ type: 'SYMPTOMS_NEXT' })}
           />
         ) : null}

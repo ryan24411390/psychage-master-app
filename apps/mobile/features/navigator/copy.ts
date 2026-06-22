@@ -73,4 +73,41 @@ export const NAVIGATOR_COPY = {
 
   // Results
   startOver: 'Start over',
+
+  // ── CT4 FIXTURE — pending Dr. Dobson review (P35/P39/P40/P41 remediation) ────────
+  // NOT shippable until clinically reviewed. Educational, person-first, non-diagnostic.
+  // No forbidden words (streak/score/trend/best/great/normal/congrats/badge/level/reward).
+
+  // P35 — paged symptom selection
+  symptomsPageProgress: (n: number, total: number) => `Area ${n} of ${total}`,
+  symptomsNextArea: 'Next',
+
+  // P39 — results sections
+  areasChartTitle: 'Areas your experience touches',
+  areasChartCaption:
+    'A picture of where what you reported clusters — based on what you told us, not a diagnosis.',
+  plainLanguageTitle: 'What this means',
+  plainLanguageBody:
+    'These are patterns that often go with the experiences you described. They are starting points for a conversation, not a conclusion about you.',
+  thingsToKnowTitle: 'Things to know',
+  thingsToKnow: [
+    'This is educational information, not a diagnosis or treatment.',
+    'No online tool can be certain. A clinician can.',
+    'Only you live your experience — bring what feels true to a professional.',
+  ] as readonly string[],
+  downloadSummary: 'Download summary (PDF)',
+
+  // P40 — conversation starters
+  conversationWhyPrefix: 'Why this helps: ',
+  talkToProfessional: 'Talk to a professional',
+  resultsTitle: 'Your results',
+
+  // P41 — results actions + on-device history
+  goHome: 'Home',
+  savedOnDevice: 'Saved on this device',
+  viewPastExplorations: 'View past explorations',
+  removeThisExploration: 'Remove this exploration',
+  overTimeTitle: 'Your explorations over time',
+  overTimeCaption:
+    'How many areas each exploration touched. A record of what you looked at — never a measure of getting better or worse.',
 } as const;

@@ -13,19 +13,26 @@ import { SafetyBanner } from '../components/SafetyBanner';
 import { SymptomCategory as SymptomCategorySection } from '../components/SymptomCategory';
 import { SymptomChip } from '../components/SymptomChip';
 
-// S — Symptom selection (mobile port of web SymptomSelectionScreen). Symptoms are
-// grouped into collapsible category sections (each with Select-all / Clear), with a
-// search escape hatch and an inline SafetyBanner when a CRISIS-flagged symptom is
-// selected. ≥1 symptom required to continue.
+// S — Symptom selection (mobile port of web SymptomSelectionScreen). P35 PAGINATES the
+// symptoms ONE CATEGORY PER PAGE (next-page navigation, not one long scroll) with a
+// position indicator that mirrors the Detail step's progress header. A search escape
+// hatch and an inline SafetyBanner (CRISIS-flagged symptom selected) stay visible on every
+// page. ≥1 symptom overall is required to continue; the global ToolScreen back affordance
+// walks back through the pages (see flow.ts BACK on `symptoms`).
 
 export interface SymptomSelectionScreenProps {
   /** KB symptoms already filtered to the selected domains (active only). */
   readonly symptoms: readonly Symptom[];
   readonly selectedIds: readonly string[];
   readonly emergencyNumber: string;
+  /** Current category page (P35). Clamped here against the live page count. */
+  readonly page: number;
   readonly onToggle: (id: string) => void;
   readonly onAddMany: (ids: readonly string[]) => void;
   readonly onRemoveMany: (ids: readonly string[]) => void;
+  /** Advance one category page (dispatched only when NOT on the last page). */
+  readonly onPageNext: () => void;
+  /** Final primary → details (last page only). */
   readonly onContinue: () => void;
 }
 
@@ -50,9 +57,11 @@ export function SymptomSelectionScreen({
   symptoms,
   selectedIds,
   emergencyNumber,
+  page,
   onToggle,
   onAddMany,
   onRemoveMany,
+  onPageNext,
   onContinue,
 }: SymptomSelectionScreenProps) {
   const [searching, setSearching] = useState(false);
@@ -67,6 +76,13 @@ export function SymptomSelectionScreen({
     }
     return [...byCategory.entries()];
   }, [symptoms]);
+
+  // P35 — one category per page. Clamp the incoming index against the live page count
+  // (the domain set, and so the group count, can shrink between renders).
+  const pageCount = groups.length;
+  const safePage = pageCount > 0 ? Math.min(Math.max(0, page), pageCount - 1) : 0;
+  const currentGroup = groups[safePage];
+  const isLastPage = safePage >= pageCount - 1;
 
   const crisisSelected = useMemo(
     () =>
@@ -109,29 +125,47 @@ export function SymptomSelectionScreen({
 
       {crisisSelected ? <SafetyBanner emergencyNumber={emergencyNumber} /> : null}
 
-      {groups.map(([category, list]) => {
-        const ids = list.map((s) => s.id);
-        const selectedCount = ids.filter((id) => selectedIds.includes(id)).length;
-        return (
-          <SymptomCategorySection
-            key={category}
-            title={CATEGORY_LABELS[category]}
-            total={list.length}
-            selectedCount={selectedCount}
-            onSelectAll={() => onAddMany(ids)}
-            onClear={() => onRemoveMany(ids)}
-          >
-            {list.map((s) => (
-              <SymptomChip
-                key={s.id}
-                label={s.name}
-                selected={selectedIds.includes(s.id)}
-                onToggle={() => onToggle(s.id)}
-              />
-            ))}
-          </SymptomCategorySection>
-        );
-      })}
+      {/* Page position indicator (mirrors the Detail step's progress header). */}
+      {pageCount > 1 ? (
+        <View className="gap-2">
+          <Text variant="caption" className="uppercase tracking-wider text-text-tertiary dark:text-text-tertiary-dark">
+            {NAVIGATOR_COPY.symptomsPageProgress(safePage + 1, pageCount)}
+          </Text>
+          <View className="h-1 overflow-hidden rounded-full bg-border/60 dark:bg-border-dark/60">
+            <View
+              className="h-full rounded-full bg-primary dark:bg-primary-dark"
+              style={{ width: `${((safePage + 1) / pageCount) * 100}%` }}
+            />
+          </View>
+        </View>
+      ) : null}
+
+      {currentGroup
+        ? (() => {
+            const [category, list] = currentGroup;
+            const ids = list.map((s) => s.id);
+            const selectedCount = ids.filter((id) => selectedIds.includes(id)).length;
+            return (
+              <SymptomCategorySection
+                key={category}
+                title={CATEGORY_LABELS[category]}
+                total={list.length}
+                selectedCount={selectedCount}
+                onSelectAll={() => onAddMany(ids)}
+                onClear={() => onRemoveMany(ids)}
+              >
+                {list.map((s) => (
+                  <SymptomChip
+                    key={s.id}
+                    label={s.name}
+                    selected={selectedIds.includes(s.id)}
+                    onToggle={() => onToggle(s.id)}
+                  />
+                ))}
+              </SymptomCategorySection>
+            );
+          })()
+        : null}
 
       <Pressable
         accessibilityRole="button"
@@ -145,13 +179,15 @@ export function SymptomSelectionScreen({
         </Text>
       </Pressable>
 
+      {/* Intermediate pages advance the page (always enabled — a category may be skipped);
+          the last page is the final gate → details, needing ≥1 symptom overall. */}
       <Button
         variant="primary"
-        disabled={selectedIds.length === 0}
-        onPress={onContinue}
+        disabled={isLastPage && selectedIds.length === 0}
+        onPress={isLastPage ? onContinue : onPageNext}
         className="mt-1"
       >
-        {NAVIGATOR_COPY.continue}
+        {isLastPage ? NAVIGATOR_COPY.continue : NAVIGATOR_COPY.symptomsNextArea}
       </Button>
     </ScrollView>
   );

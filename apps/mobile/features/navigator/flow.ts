@@ -46,6 +46,10 @@ export interface NavigatorState {
   readonly selectedSymptomIds: readonly string[];
   readonly details: Readonly<Record<string, SymptomDetail>>;
   readonly detailIndex: number;
+  /** Current page within the paged symptom-selection step (P35: one category per page).
+   *  The page COUNT lives in the container (it needs the KB-derived category groups); the
+   *  reducer only carries the index and clamps it via BACK / reset-on-domain-change. */
+  readonly symptomPage: number;
   readonly severityAnswer: SeverityAnswer | null;
 }
 
@@ -55,6 +59,7 @@ export const initialNavigatorState: NavigatorState = {
   selectedSymptomIds: [],
   details: {},
   detailIndex: 0,
+  symptomPage: 0,
   severityAnswer: null,
 };
 
@@ -66,6 +71,7 @@ export type NavigatorAction =
   | { type: 'TOGGLE_SYMPTOM'; id: string }
   | { type: 'ADD_SYMPTOMS'; ids: readonly string[] }
   | { type: 'REMOVE_SYMPTOMS'; ids: readonly string[] }
+  | { type: 'SYMPTOMS_PAGE_NEXT' }
   | { type: 'SYMPTOMS_NEXT' }
   | { type: 'SET_DETAIL'; id: string; patch: SymptomDetail }
   | { type: 'DETAIL_NEXT' }
@@ -91,7 +97,10 @@ function back(state: NavigatorState): NavigatorState {
     case 'domains':
       return { ...state, step: 'welcome' };
     case 'symptoms':
-      return { ...state, step: 'domains' };
+      // P35: paged symptom selection — BACK walks the pages first, then exits to domains.
+      return state.symptomPage > 0
+        ? { ...state, symptomPage: state.symptomPage - 1 }
+        : { ...state, step: 'domains' };
     case 'details':
       return state.detailIndex > 0
         ? { ...state, detailIndex: state.detailIndex - 1 }
@@ -131,11 +140,12 @@ export function navigatorReducer(
 
     case 'SELECT_ALL_DOMAINS':
       // Web "Select All" picks every domain and advances straight to symptoms.
-      return { ...state, selectedDomains: [...action.domains], step: 'symptoms' };
+      return { ...state, selectedDomains: [...action.domains], step: 'symptoms', symptomPage: 0 };
 
     case 'DOMAINS_NEXT':
       if (state.selectedDomains.length === 0) return state; // need ≥1 domain
-      return { ...state, step: 'symptoms' };
+      // Reset to the first page — the category groups change with the domain set.
+      return { ...state, step: 'symptoms', symptomPage: 0 };
 
     case 'TOGGLE_SYMPTOM': {
       const has = state.selectedSymptomIds.includes(action.id);
@@ -159,6 +169,11 @@ export function navigatorReducer(
         selectedSymptomIds: state.selectedSymptomIds.filter((id) => !drop.has(id)),
       };
     }
+
+    case 'SYMPTOMS_PAGE_NEXT':
+      // Advance one category page. The container only dispatches this when NOT on the last
+      // page (it owns the KB-derived page count); the reducer just increments the index.
+      return { ...state, symptomPage: state.symptomPage + 1 };
 
     case 'SYMPTOMS_NEXT':
       if (state.selectedSymptomIds.length === 0) return state; // need ≥1 symptom
