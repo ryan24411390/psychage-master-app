@@ -6,7 +6,7 @@ import { MILESTONES_COPY } from '@/features/milestones/copy';
 import { storage } from '@/lib/adapters/storage';
 import { STORAGE_KEY as MILESTONES_KEY } from '@/lib/persistence/milestones';
 
-import { renderWithProviders } from './_helpers';
+import { renderWithProviders, selectMomentValence } from './_helpers';
 
 // Celebration fires on the capture that CROSSES a celebrated rung, exactly once, and
 // never over a crisis route. The milestone math + fire-once persistence are proven in
@@ -58,9 +58,9 @@ function priorMoments(count: number): Moment[] {
 // Suppress the reflection-ready row so it can't collide with celebration assertions.
 const noReflection = { isOpened: () => true, markOpened: () => {} };
 
-function captureOnce(valenceLevel: number, crisisLabel?: string) {
+function captureOnce(valenceLevel: 1 | 2 | 3 | 4 | 5, crisisLabel?: string) {
   fireEvent.press(screen.getByRole('button', { name: 'Check in — 30 seconds' }));
-  fireEvent.press(screen.getByLabelText(`Level ${valenceLevel} of 5`));
+  selectMomentValence(valenceLevel);
   if (crisisLabel) fireEvent.press(screen.getByRole('button', { name: crisisLabel }));
   fireEvent.press(screen.getByRole('button', { name: 'Save this moment' }));
 }
