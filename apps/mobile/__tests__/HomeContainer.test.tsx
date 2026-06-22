@@ -4,7 +4,7 @@ import { fireEvent, screen } from '@testing-library/react-native';
 import { HomeContainer } from '@/components/home/HomeContainer';
 import { priorWeekBounds } from '@/lib/home-model';
 
-import { renderWithProviders } from './_helpers';
+import { renderWithProviders, selectMomentValence } from './_helpers';
 
 // End-to-end live flow with an in-memory EngagementStore double — the real store
 // imports the shared package at runtime, which Jest doesn't transform, so we inject a
@@ -69,7 +69,7 @@ describe('HomeContainer (S3 live flow)', () => {
     // open capture, pick valence 2 (→ DailyState 1 = Low), save
     fireEvent.press(screen.getByRole('button', { name: 'Check in — 30 seconds' }));
     expect(screen.getByText('How are you right now?')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('Level 2 of 5'));
+    selectMomentValence(2);
     fireEvent.press(screen.getByRole('button', { name: 'Save this moment' }));
 
     // checked-in + the bridge (Low triggers it)
@@ -90,7 +90,7 @@ describe('HomeContainer (S3 live flow)', () => {
     });
 
     fireEvent.press(screen.getByRole('button', { name: 'Check in — 30 seconds' }));
-    fireEvent.press(screen.getByLabelText('Level 1 of 5'));
+    selectMomentValence(1);
     fireEvent.press(screen.getByRole('button', { name: 'Hopeless' }));
     fireEvent.press(screen.getByRole('button', { name: 'Save this moment' }));
 
@@ -115,7 +115,7 @@ describe('HomeContainer (S3 live flow)', () => {
     );
 
     fireEvent.press(screen.getByRole('button', { name: 'Check in — 30 seconds' }));
-    fireEvent.press(screen.getByLabelText('Level 2 of 5'));
+    selectMomentValence(2);
     fireEvent.press(screen.getByRole('button', { name: 'Save this moment' }));
     expect(screen.getByText('Would something steadying help right now?')).toBeTruthy();
 

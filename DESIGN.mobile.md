@@ -226,6 +226,18 @@ Sequenced patterns are implemented via chained `setTimeout(() => Haptics.impactA
 
 Equivalent rule applies to `haptic.complete` + `motion.duration.calm` + the celebration clay-figure illustration on tool/series completion. Signature moments are cross-modal by definition; partial sensorial expressions (haptic only, no motion) are an anti-slop signal.
 
+### 3.5 Named visual exceptions
+
+The brand is teal + charcoal with restrained motion. Two surfaces are deliberately, narrowly carved out. Each is **scoped to one feature**, does not change the palette or motion budget anywhere else, and is listed here so the audit reads it as approved rather than as drift.
+
+- **Exception #1 — breathing glow (motion).** The continuously breathing clay figure / ambient glow on the breathing-exercise and Mascot surfaces. The one sanctioned continuous idle loop, on `motion.duration.breath` (4000ms), fully disabled under reduce-motion per §3.2. (Precedent, recorded here for the first time.)
+
+- **Exception #2 — valence feeling gradient (colour + motion).** The animated, valence-mapped feeling shape in the **Moments capture** surface (`components/moments/FeelingVisualization.tsx`), rendered in Skia and driven by the Reanimated breath clock. It is the **only** place a multi-hue colour ramp and a continuous gradient are sanctioned.
+  - **Tokens:** `color.valence.{1..5}` (navy `#22304A` → warm-neutral `#A8A29E` → brand teal `#1A9B8C`), interpolated continuously as the user scrubs. Token-sourced, scoped `feeling-visualization-mobile-only`, mirrored into `tokens/web.tokens.json` for cross-platform parity (web builds nothing on it), exactly as `color.mood.*` is mirrored.
+  - **Scope:** maps the feeling **being logged** — it must NOT recolour any other surface (no mood-mirroring of the app chrome). No gradient, multicolour, or `expo-linear-gradient` is introduced anywhere else by this exception.
+  - **Reduced motion:** the breathing morph is dropped (static shape); the valence colour mapping is kept. Selection still works via drag and via the `adjustable` VoiceOver control.
+  - **Clinical:** the band words (`Very unpleasant … Very pleasant`) and the selection haptic are provisional pending Dr. Dobson review.
+
 ---
 
 ## 4. Clay figures — Tier 3 Sensorial-complete
@@ -277,6 +289,7 @@ Web and mobile maintain **fully independent** design systems per `.claude/worksp
 
 - **Color tokens** — every value in `color.background`, `color.surface.*`, `color.primary.*`, `color.text.*`, `color.border.*`, `color.semantic.*`, `color.crisis.red`, `color.relevance.*`, `color.teal.*`, `color.charcoal.*`, `color.mood.{1..5}`. Copied verbatim from `tokens/web.tokens.json` at this contract's authoring. Any future amendment is applied to both files in the same commit.
 - **Mood palette** — `color.mood.{1..5}` values identical across platforms (mood-feature-scoped, but the hex set is shared identity).
+- **Valence ramp** — `color.valence.{1..5}` mirrored into both token files (named visual exception #2, §3.5). Mobile-only consumer; the web copy is token parity, not a built surface — kept in sync exactly as the mood palette is.
 - **Clay figures** — see §4. Single library, same set of figures consumed by both platforms.
 - **Type families** — IBM Plex Sans (body/UI) + Fraunces (display), per the DD-001 lock (§1.2). All mobile-specific; none shared with web. Web's families (Inter / Plus Jakarta Sans / IBM Plex Mono) are independent. The mobile `mono` token was dropped (no production use) — mobile carries no monospace family. The divergence is intentional, not drift.
 

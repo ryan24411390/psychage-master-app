@@ -173,6 +173,15 @@
       "_dark_origin": "Source defines no separate dark hex — same base hex used in both modes; only surface alpha varies in usage (bg-[#HEX]/10 light vs dark:bg-[#HEX]/15 in QuickMoodCheckIn.tsx). Paired L/D encoded with identical hex to honor Option B schema convention; alpha-shift behavior remains at consumer site.",
       "_note": "5-step ordinal mood palette. Labels (consumer-side, not token): 1=Awful, 2=Low, 3=Okay, 4=Good, 5=Great. mood.4 (#1A9B8C) intentionally equals primary.default.light (brand teal). mood.5 (#15B8A6) is historically close to but not equal to teal.500 (#20B8A6); accepted as canonical here per Q10 (no value change from source)."
     },
+    "valence": {
+      "1": { "light": "#22304A", "dark": "#22304A" },
+      "2": { "light": "#42505E", "dark": "#42505E" },
+      "3": { "light": "#A8A29E", "dark": "#A8A29E" },
+      "4": { "light": "#2DBFAE", "dark": "#2DBFAE" },
+      "5": { "light": "#1A9B8C", "dark": "#1A9B8C" },
+      "_scope": "feeling-visualization-mobile-only — named design-doctrine exception #2 (mobile Moments feeling-visualization shape). Mirrored here per cross-platform colour-sync convention #1 (token parity only; web builds nothing on it, as with the mood promotion).",
+      "_note": "5-anchor valence ramp (navy -> warm-neutral -> brand teal). Paired L/D encoded identical; the shape colour is intentional and does not flip with mode. Labels (consumer-side, not token): 1=Very unpleasant ... 5=Very pleasant."
+    },
     "_excluded": {
       "_note": "Dead tokens excluded per audit §4.1: urgent.amber (tailwind.config.js:69-71), watch.blue (tailwind.config.js:72-74), safe.green (tailwind.config.js:75-77), --color-background-warm (tokens.css:98), --color-primary-bg (tokens.css:99). Drift artifacts excluded: 'Wrong-teal' rgba(13,148,136,*) (=Tailwind default #0D9488, mislabeled as primary at globals.css:63-65) — Slice 4 input."
     }

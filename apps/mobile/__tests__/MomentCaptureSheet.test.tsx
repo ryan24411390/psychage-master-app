@@ -3,11 +3,13 @@ import { fireEvent, screen } from '@testing-library/react-native';
 
 import { MomentCaptureSheet } from '@/components/moments/MomentCaptureSheet';
 
-import { renderWithProviders } from './_helpers';
+import { renderWithProviders, selectMomentValence } from './_helpers';
 
-// The Moments capture sheet. Pins: 2-tap minimal capture, the expanded path, the
+// The Moments capture sheet. Pins: minimal capture, the expanded path, the
 // acute-handoff stamp (lowest valence + a crisis word), the accurate privacy copy
 // ("Private to your account" — NOT "Stays on your phone"), and momentary copy.
+// The feeling input is the pure-scrub FeelingVisualization — selection runs
+// through its `adjustable` control (see selectMomentValence).
 
 describe('MomentCaptureSheet', () => {
   it('momentary copy + accurate privacy line (no day framing, no "stays on your phone")', () => {
@@ -18,11 +20,11 @@ describe('MomentCaptureSheet', () => {
     expect(screen.queryByText(/stays on your phone/i)).toBeNull();
   });
 
-  it('2-tap minimal capture: pick a valence, save — no labels required', () => {
+  it('minimal capture: pick a valence, save — no labels required', () => {
     const onSave = jest.fn<void, [MomentDraft]>();
     renderWithProviders(<MomentCaptureSheet onSave={onSave} onClose={() => {}} />, { haptics: true });
 
-    fireEvent.press(screen.getByLabelText('Level 3 of 5'));
+    selectMomentValence(3);
     fireEvent.press(screen.getByRole('button', { name: 'Save this moment' }));
 
     expect(onSave).toHaveBeenCalledTimes(1);
@@ -39,7 +41,7 @@ describe('MomentCaptureSheet', () => {
       <MomentCaptureSheet source="compass" onSave={onSave} onClose={() => {}} />,
       { haptics: true },
     );
-    fireEvent.press(screen.getByLabelText('Level 4 of 5'));
+    selectMomentValence(4);
     fireEvent.press(screen.getByRole('button', { name: 'Save this moment' }));
     expect(onSave.mock.calls[0]?.[0]?.source).toBe('compass');
   });
@@ -57,7 +59,7 @@ describe('MomentCaptureSheet', () => {
     const onSave = jest.fn<void, [MomentDraft]>();
     renderWithProviders(<MomentCaptureSheet onSave={onSave} onClose={() => {}} />, { haptics: true });
 
-    fireEvent.press(screen.getByLabelText('Level 1 of 5'));
+    selectMomentValence(1);
     fireEvent.press(screen.getByRole('button', { name: 'Hopeless' })); // crisis-adjacent word
     fireEvent.press(screen.getByRole('button', { name: 'Work' }));
     fireEvent.press(screen.getByRole('button', { name: 'Save this moment' }));

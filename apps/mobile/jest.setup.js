@@ -21,4 +21,11 @@ jest.mock('@shopify/flash-list');
 // wiring is assertable. No test mounts a real LottieView.
 jest.mock('lottie-react-native');
 
+// @shopify/react-native-skia's Canvas mounts a native Skia view with no
+// react-test-renderer implementation. The manual mock in
+// __mocks__/@shopify/react-native-skia.js renders the shape nodes as plain Views
+// so the FeelingVisualization wrapper (its adjustable a11y control + band label)
+// stays assertable. No test mounts a real Skia Canvas.
+jest.mock('@shopify/react-native-skia');
+
 
