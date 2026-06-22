@@ -136,7 +136,7 @@ describe('NavigatorFlow (web-parity flow)', () => {
       act(() => {
         jest.advanceTimersByTime(2400); // processing pacing
       });
-      expect(screen.getByText('Your Results')).toBeTruthy();
+      expect(screen.getByText('Your results')).toBeTruthy();
       expect(screen.getByText('Depression')).toBeTruthy();
       expect(screen.getByText('50%')).toBeTruthy(); // confidence percentage shown
     } finally {
@@ -151,7 +151,7 @@ describe('NavigatorFlow (web-parity flow)', () => {
     expect(
       screen.getByText("Then let's pause this. What you're feeling deserves real support right now."),
     ).toBeTruthy();
-    expect(screen.queryByText('Your Results')).toBeNull();
+    expect(screen.queryByText('Your results')).toBeNull();
   });
 
   it('engine should_halt also routes to the crisis surface, not results', () => {
@@ -166,7 +166,7 @@ describe('NavigatorFlow (web-parity flow)', () => {
       expect(
         screen.getByText("Then let's pause this. What you're feeling deserves real support right now."),
       ).toBeTruthy();
-      expect(screen.queryByText('Your Results')).toBeNull();
+      expect(screen.queryByText('Your results')).toBeNull();
     } finally {
       jest.useRealTimers();
     }

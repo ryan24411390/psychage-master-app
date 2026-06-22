@@ -97,8 +97,20 @@ export const NAVIGATOR_COPY = {
   ] as readonly string[],
   downloadSummary: 'Download summary (PDF)',
 
-  // P40 — conversation starters
+  // P39 — summary PDF (summary-only; relevance LABEL, never a number — SR-1/SR-4)
+  summaryDocTitle: 'Symptom Navigator summary',
+  summaryLead: 'Areas explored — for discussion, not a diagnosis.',
+  summaryFooter: 'Self-tracked with Psychage — educational information, not a diagnosis.',
+  summaryEmptyAreas: 'No specific areas surfaced.',
+
+  // P40 — conversation starters (generic, process-oriented "why this helps" lines —
+  // cycled per item; NOT condition-specific clinical claims)
   conversationWhyPrefix: 'Why this helps: ',
+  conversationWhyLines: [
+    'Specifics help a professional see the fuller picture.',
+    'Concrete examples make the conversation more useful.',
+    'Sharing this early can guide what you explore together.',
+  ] as readonly string[],
   talkToProfessional: 'Talk to a professional',
   resultsTitle: 'Your results',
 
@@ -107,7 +119,10 @@ export const NAVIGATOR_COPY = {
   savedOnDevice: 'Saved on this device',
   viewPastExplorations: 'View past explorations',
   removeThisExploration: 'Remove this exploration',
+  removedFromDevice: 'Removed from this device',
   overTimeTitle: 'Your explorations over time',
   overTimeCaption:
     'How many areas each exploration touched. A record of what you looked at — never a measure of getting better or worse.',
+  overTimeNotEnough: 'A line takes a couple of explorations. Yours will appear here as you go.',
+  viewOverTime: 'View over time',
 } as const;

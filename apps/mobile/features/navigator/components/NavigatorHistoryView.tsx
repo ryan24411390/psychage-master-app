@@ -1,9 +1,10 @@
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronRight, LineChart } from 'lucide-react-native';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
+import { NAVIGATOR_COPY } from '../copy';
 import type { NavigatorSnapshot } from '../result-store';
 
 // Past Symptom Navigator explorations — a local-only (SR-4) list of completed runs.
@@ -27,9 +28,16 @@ export interface NavigatorHistoryViewProps {
   readonly snapshots: readonly NavigatorSnapshot[];
   readonly onSelect: (id: string) => void;
   readonly onStartNew: () => void;
+  /** P41 — open the "over time" view (offered once ≥2 runs exist). */
+  readonly onViewOverTime?: () => void;
 }
 
-export function NavigatorHistoryView({ snapshots, onSelect, onStartNew }: NavigatorHistoryViewProps) {
+export function NavigatorHistoryView({
+  snapshots,
+  onSelect,
+  onStartNew,
+  onViewOverTime,
+}: NavigatorHistoryViewProps) {
   const tc = useThemeColors();
 
   return (
@@ -71,6 +79,20 @@ export function NavigatorHistoryView({ snapshots, onSelect, onStartNew }: Naviga
             </Pressable>
           ))
         )}
+
+        {onViewOverTime && snapshots.length >= 2 ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={NAVIGATOR_COPY.viewOverTime}
+            onPress={onViewOverTime}
+            className="min-h-[44px] flex-row items-center justify-center gap-2"
+          >
+            <LineChart size={16} color={tc.primary} strokeWidth={2} />
+            <Text variant="bodyLarge" className="text-primary dark:text-primary-dark">
+              {NAVIGATOR_COPY.viewOverTime}
+            </Text>
+          </Pressable>
+        ) : null}
 
         <Pressable
           accessibilityRole="button"
