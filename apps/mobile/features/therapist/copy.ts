@@ -52,7 +52,13 @@ export const THERAPIST_COPY = {
     navLabel: 'Prepare for your session', // CT4
     screenTitle: 'Prepare for your session', // CT4
     screenIntro:
-      'A summary of the moments you noticed, to take to an appointment. You pick the time period and share it yourself — Psychage never sends it anywhere.', // CT4
+      'A summary of what you tracked — your moments, plus sleep and anything you explored — to take to an appointment. You pick the time period and share it yourself; Psychage never sends it anywhere.', // CT4
+    // Preview line naming the other tools that will ride along, when present in the
+    // window. e.g. "Also includes: Sleep · Symptom Navigator".
+    alsoIncludes: (tools: string) => `Also includes: ${tools}`, // CT4
+    // Shown under the count when the window holds nothing to export — the button is
+    // disabled in this state.
+    nothingToExport: 'Nothing tracked in this time period yet.', // CT4
     windowLabel: 'Time period', // CT4
     window14: 'Last 2 weeks', // CT4
     window30: 'Last 30 days', // CT4
@@ -90,5 +96,31 @@ export const THERAPIST_COPY = {
     // Document footer — verbatim on every page. LOAD-BEARING → CT4. Person-first,
     // honest about provenance; no diagnosis/assessment language.
     footer: 'Your own record of the moments you noticed, shared from Psychage.', // CT4
+  },
+
+  // ── Unified export document ───────────────────────────────────────────────
+  // ONE print document that bundles every tool with data in the window (Moments,
+  // Sleep, Symptom Navigator — summary-only). Header/footer name the COMPANY and the
+  // generation time; NO clinician is named (no private-practice implication). All CT4,
+  // load-bearing copy flagged for Dr. Dobson before ship. Person-first, non-diagnostic.
+  unifiedExport: {
+    companyName: 'Psychage', // CT4
+    // Header generation stamp. e.g. "Generated Jun 22, 2026 · 3:45 PM".
+    generated: (stamp: string) => `Generated ${stamp}`, // CT4
+    // Document footer — verbatim on every page. LOAD-BEARING → CT4.
+    footer: 'Your own record, shared from Psychage with your consent.', // CT4
+    // Defensive body when no tool has data in the window (the route disables export
+    // in this state, so it should not normally render).
+    emptyAll: 'Nothing tracked in this time period yet.', // CT4
+    // Document name fallback when the person leaves the name field blank.
+    nameFallback: 'Personal summary', // CT4
+    // Per-tool section titles.
+    momentsTitle: 'Moments', // CT4
+    sleepTitle: 'Sleep', // CT4
+    navigatorTitle: 'Symptom Navigator', // CT4
+    // Per-tool sub-title lines (counts / run date — never assessment or severity).
+    momentsMeta: (n: number) => `${n} ${n === 1 ? 'moment' : 'moments'} noted`, // CT4
+    sleepMeta: (n: number) => `${n} ${n === 1 ? 'night' : 'nights'} logged`, // CT4
+    navigatorMeta: (dateLabel: string) => `Explored ${dateLabel}`, // CT4
   },
 } as const;

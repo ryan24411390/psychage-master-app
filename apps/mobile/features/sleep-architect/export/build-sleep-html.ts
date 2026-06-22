@@ -11,6 +11,7 @@ import {
   escapeHtml,
   formatRangeLabel,
   pageSizeForLocale,
+  type PdfSection,
   renderDocument,
 } from '@/features/therapist/pdf/build-html';
 
@@ -142,13 +143,21 @@ const SLEEP_EXTRA_CSS = `  .block { margin: 0 0 20px; page-break-inside: avoid; 
   td.note { font-style: italic; }
   .empty { font-size: 10.5pt; color: ${INK_MUTED}; margin: 0; }`;
 
-export function buildSleepPdfHtml(input: SleepPdfInput): string {
+/**
+ * The Sleep section as { extraCss, body } (plus the in-range night count, which the
+ * standalone wrapper needs for its range line). The same content the standalone PDF
+ * renders between the header and footer — exposed so the unified export can COMPOSE it
+ * through the shared shell without forking the table layout. SR-1: never the composite
+ * sleep score; self-ratings stay words.
+ */
+export function buildSleepSection(
+  input: SleepPdfInput,
+): PdfSection & { readonly nights: number } {
   const { from, to } = input;
   const inRange = input.entries
     .filter((e) => e.date >= from && e.date <= to)
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
   const nights = inRange.length;
-  const stamp = formatStamp(input.generatedAt);
 
   let body: string;
   if (nights === 0) {
@@ -163,9 +172,17 @@ export function buildSleepPdfHtml(input: SleepPdfInput): string {
       `<table class="nights"><thead>${header}</thead><tbody>${buildNightRows(inRange)}</tbody></table></section>`;
   }
 
+  return { extraCss: SLEEP_EXTRA_CSS, body, nights };
+}
+
+export function buildSleepPdfHtml(input: SleepPdfInput): string {
+  const { from, to } = input;
+  const { extraCss, body, nights } = buildSleepSection(input);
+  const stamp = formatStamp(input.generatedAt);
+
   return renderDocument({
     pageSize: pageSizeForLocale(input.locale),
-    extraCss: SLEEP_EXTRA_CSS,
+    extraCss,
     name: input.fullName.trim(),
     rangeLine: `${c.pdfTitle} · ${formatRangeLabel(from, to)} · ${c.pdfNightsLine(nights)} · ${c.pdfGenerated(stamp)}`,
     body,

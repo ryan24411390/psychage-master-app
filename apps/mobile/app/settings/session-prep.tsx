@@ -2,32 +2,78 @@ import { Stack } from 'expo-router';
 
 import { SessionPrepView, type SessionPrepWindow } from '@/components/therapist/SessionPrepView';
 import {
-  buildSessionPrepHtml,
   buildSessionPrepSummary,
+  buildUnifiedExportHtml,
   enumerateDays,
   generateAndShare,
   THERAPIST_COPY,
 } from '@/features/therapist';
 import { expoPdfPrinter } from '@/features/therapist/pdf/expo-printer';
+import { storage } from '@/lib/adapters/storage';
 import { getMomentStore } from '@/lib/moment-store';
+import { getNavigatorStore } from '@/lib/navigator-store';
+import { loadPersonalization } from '@/lib/persistence/personalization';
+import { getSleepStore } from '@/lib/sleep-store';
 
-// "Prepare for your session" — a session-prep summary the person generates on demand
-// before an appointment and shares THEMSELVES (system share sheet; Psychage never
-// transmits — SR-4). Lives under the settings stack so it inherits the native header +
-// back chevron. Thin route: reads the LOCAL moment store, aggregates, builds the PDF
-// locally (expo-print), hands it to the platform sheet. No provider gate — the person's
-// own record. `expoPdfPrinter` is imported directly (the barrel excludes the native
-// printer so Vitest never pulls expo-print/expo-sharing).
+// "Prepare for your session" — ONE summary the person generates on demand before an
+// appointment and shares THEMSELVES (system share sheet; Psychage never transmits — SR-4).
+// The document bundles every tool with data in the window: Moments, Sleep, and the latest
+// Symptom Navigator run (SUMMARY-ONLY — labels, never raw answers — SR-1/SR-4). A tool with
+// nothing in the window is omitted. Lives under the settings stack so it inherits the
+// native header + back chevron. Thin route: reads the LOCAL stores, builds the PDF locally
+// (expo-print), hands it to the platform sheet. No provider gate — the person's own record.
+// `expoPdfPrinter` is imported directly (the barrel excludes the native printer so Vitest
+// never pulls expo-print/expo-sharing).
+const uc = THERAPIST_COPY.unifiedExport;
+
+// Window-scoped reads from the local-only tool stores. Navigator/Sleep are point-in-time
+// records, so each is included only when it falls inside the chosen window.
+function gather(window: SessionPrepWindow) {
+  const moments = getMomentStore().getRange(window.from, window.to);
+  const sleep = getSleepStore()
+    .getRecent(400)
+    .filter((e) => e.date >= window.from && e.date <= window.to);
+  const latestRun = getNavigatorStore().getRecent(1)[0];
+  const navigatorRun =
+    latestRun && latestRun.date >= window.from && latestRun.date <= window.to
+      ? latestRun
+      : undefined;
+  return { moments, sleep, navigatorRun };
+}
+
 export default function SessionPrepScreen() {
   const countForWindow = (window: SessionPrepWindow) => {
-    const moments = getMomentStore().getRange(window.from, window.to);
-    return { dayCount: enumerateDays(window.from, window.to).length, momentCount: moments.length };
+    const { moments, sleep, navigatorRun } = gather(window);
+    const includes: string[] = [];
+    if (sleep.length > 0) includes.push(uc.sleepTitle);
+    if (navigatorRun && navigatorRun.results.results.length > 0) includes.push(uc.navigatorTitle);
+    return {
+      dayCount: enumerateDays(window.from, window.to).length,
+      momentCount: moments.length,
+      includes,
+    };
   };
 
   const onGenerate = (fullName: string, window: SessionPrepWindow) => {
-    const moments = getMomentStore().getRange(window.from, window.to);
-    const summary = buildSessionPrepSummary(moments, window);
-    const html = buildSessionPrepHtml({ fullName, summary });
+    const { moments, sleep, navigatorRun } = gather(window);
+    const name = fullName || loadPersonalization(storage).name || uc.nameFallback;
+    const navigatorSummary = navigatorRun
+      ? {
+          date: navigatorRun.date,
+          areas: navigatorRun.results.results
+            .slice(0, 5)
+            .map((r) => ({ name: r.name, relevance: r.relevance_label })),
+        }
+      : undefined;
+    const html = buildUnifiedExportHtml({
+      fullName: name,
+      from: window.from,
+      to: window.to,
+      generatedAt: new Date(),
+      moments: moments.length > 0 ? buildSessionPrepSummary(moments, window) : undefined,
+      sleep: sleep.length > 0 ? sleep : undefined,
+      navigator: navigatorSummary,
+    });
     void generateAndShare(html, expoPdfPrinter);
   };
 

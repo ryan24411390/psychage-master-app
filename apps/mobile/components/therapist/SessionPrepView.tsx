@@ -23,8 +23,16 @@ import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
 export type SessionPrepWindow = { from: LocalCalendarDate; to: LocalCalendarDate };
 
 type SessionPrepViewProps = {
-  /** Honest day + moment counts for the live window (route reads the local store). */
-  countForWindow: (window: SessionPrepWindow) => { dayCount: number; momentCount: number };
+  /**
+   * Honest counts for the live window (route reads the local stores). `includes` names the
+   * OTHER tools (Sleep, Symptom Navigator) that have data in the window — Moments is shown
+   * via `momentCount`.
+   */
+  countForWindow: (window: SessionPrepWindow) => {
+    dayCount: number;
+    momentCount: number;
+    includes: string[];
+  };
   /** Generate + share the document for the chosen name + window (route owns egress). */
   onGenerate: (fullName: string, window: SessionPrepWindow) => void;
 };
@@ -68,11 +76,14 @@ export function SessionPrepView({ countForWindow, onGenerate }: SessionPrepViewP
     [selectedKey, sinceDate],
   );
 
-  const countLine = useMemo(() => {
-    if (!window) return null;
-    const { dayCount, momentCount } = countForWindow(window);
-    return c.countLine(dayCount, momentCount);
-  }, [window, countForWindow]);
+  const summary = useMemo(
+    () => (window ? countForWindow(window) : null),
+    [window, countForWindow],
+  );
+  const countLine = summary ? c.countLine(summary.dayCount, summary.momentCount) : null;
+  const includesLine =
+    summary && summary.includes.length > 0 ? c.alsoIncludes(summary.includes.join(' · ')) : null;
+  const hasData = summary ? summary.momentCount > 0 || summary.includes.length > 0 : false;
 
   const onPickerChange = (event: DateTimePickerEvent, date?: Date) => {
     setShowPicker(false);
@@ -130,15 +141,27 @@ export function SessionPrepView({ countForWindow, onGenerate }: SessionPrepViewP
         </View>
 
         {countLine ? (
-          <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
-            {countLine}
-          </Text>
+          <View className="gap-1">
+            <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
+              {countLine}
+            </Text>
+            {includesLine ? (
+              <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
+                {includesLine}
+              </Text>
+            ) : null}
+            {!hasData ? (
+              <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
+                {c.nothingToExport}
+              </Text>
+            ) : null}
+          </View>
         ) : null}
 
         <View className="mt-auto">
           <Button
             variant="primary"
-            disabled={window === null}
+            disabled={window === null || !hasData}
             onPress={() => {
               if (window) onGenerate(name.trim(), window);
             }}
