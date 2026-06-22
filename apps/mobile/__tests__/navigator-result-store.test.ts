@@ -102,6 +102,39 @@ describe('save / getRecent', () => {
   });
 });
 
+describe('delete / clear (P41 — user-initiated, local-only)', () => {
+  it('delete(id) forgets one run, persists, and returns true', () => {
+    const { store, map } = setup();
+    const a = store.save(INPUTS, results('2026-06-10T00:00:00.000Z'));
+    const b = store.save(INPUTS, results('2026-06-12T00:00:00.000Z'));
+    expect(store.delete(a.id)).toBe(true);
+    expect(store.count).toBe(1);
+    expect(store.getById(a.id)).toBeUndefined();
+    expect(store.getById(b.id)).toBeTruthy();
+    // Persisted: the stored blob no longer carries the deleted run.
+    const raw = JSON.parse(map.get(NAVIGATOR_STORAGE_KEY) as string);
+    expect(raw.entries.map((e: { id: string }) => e.id)).toEqual([b.id]);
+  });
+
+  it('delete(unknown) is a no-op returning false', () => {
+    const { store } = setup();
+    store.save(INPUTS, results());
+    expect(store.delete('nope')).toBe(false);
+    expect(store.count).toBe(1);
+  });
+
+  it('clear() forgets every run and persists an empty set', () => {
+    const { store, map } = setup();
+    store.save(INPUTS, results('2026-06-10T00:00:00.000Z'));
+    store.save(INPUTS, results('2026-06-12T00:00:00.000Z'));
+    store.clear();
+    expect(store.count).toBe(0);
+    expect(store.getRecent(10)).toEqual([]);
+    const raw = JSON.parse(map.get(NAVIGATOR_STORAGE_KEY) as string);
+    expect(raw.entries).toEqual([]);
+  });
+});
+
 describe('corruption handling', () => {
   it('quarantines an unparseable blob and recovers empty', () => {
     const { store, map } = setup({ [NAVIGATOR_STORAGE_KEY]: '{not json' });

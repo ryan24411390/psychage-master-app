@@ -1,11 +1,13 @@
-import { Activity, AlertTriangle, Stethoscope } from 'lucide-react-native';
-import { ScrollView, View } from 'react-native';
+import { Activity, AlertTriangle, FileDown, History, Home, Stethoscope, Trash2 } from 'lucide-react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import type { NavigatorResults } from '@psychage/shared/navigator';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { DomainRadar, type RadarDatum } from '@/components/ui/charts';
 import { Text } from '@/components/ui/Text';
 import type { HelplineRow } from '@/features/crisis/helpline-schema';
 import { useReducedMotion } from '@/lib/motion';
@@ -36,12 +38,22 @@ export interface ResultsScreenProps {
   readonly results: NavigatorResults;
   readonly symptomDetails: readonly ResultSymptomVM[];
   readonly questions: readonly string[];
+  /** "Areas your experience touches" — domain coverage (descriptive breadth, NOT
+   *  confidence). Rendered as a DomainRadar only when ≥3 areas have data (P39). */
+  readonly areaPoints: readonly RadarDatum[];
   readonly emergencyNumber: string;
   readonly helplines: readonly HelplineRow[];
   readonly onTrack: () => void;
   readonly onFindCare: () => void;
   readonly onLearn: () => void;
   readonly onStartOver: () => void;
+  /** P39 — build + share the summary-only PDF. Omitted in render tests / dev harness. */
+  readonly onDownloadSummary?: () => void;
+  /** P41 — results action row. All optional so tests/dev can omit them. */
+  readonly onHome?: () => void;
+  readonly onViewHistory?: () => void;
+  /** P41 — opt out of the auto-saved run (delete it from on-device history). */
+  readonly onRemoveSaved?: () => void;
 }
 
 function severityLabel(severity?: number): string | null {
@@ -95,15 +107,22 @@ export function ResultsScreen({
   results,
   symptomDetails,
   questions,
+  areaPoints,
   emergencyNumber,
   helplines,
   onTrack,
   onFindCare,
   onLearn,
   onStartOver,
+  onDownloadSummary,
+  onHome,
+  onViewHistory,
+  onRemoveSaved,
 }: ResultsScreenProps) {
   const reduced = useReducedMotion();
   const tc = useThemeColors();
+  const [removed, setRemoved] = useState(false);
+  const showAreasChart = areaPoints.length >= 3; // a radar needs ≥3 axes
 
   const safety = results.safety;
   const matches = results.results;
@@ -148,10 +167,10 @@ export function ResultsScreen({
 
   return (
     <ScrollView contentContainerClassName="gap-10 px-4 pb-16 pt-2" keyboardShouldPersistTaps="handled">
-      {/* Header */}
+      {/* Header (P40 — enlarged display title) */}
       <View className="gap-3">
-        <Text variant="h1" accessibilityRole="header">
-          Your Results
+        <Text variant="display" accessibilityRole="header">
+          {NAVIGATOR_COPY.resultsTitle}
         </Text>
         <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
           Based on the {symptomCount} symptom{symptomCount !== 1 ? 's' : ''} you reported, here is what
@@ -161,6 +180,24 @@ export function ResultsScreen({
 
       {hasUrgent ? <CrisisBanner emergencyNumber={emergencyNumber} helplines={helplines} /> : null}
       {hasWatch && !hasUrgent ? <WatchBanner /> : null}
+
+      {/* P39 — "Areas your experience touches": domain coverage (descriptive breadth,
+          NEVER confidence). Shown only when ≥3 areas have data so the radar reads. */}
+      {showAreasChart ? (
+        <View className="items-center gap-2">
+          <Text variant="h2" accessibilityRole="header" className="self-start">
+            {NAVIGATOR_COPY.areasChartTitle}
+          </Text>
+          <Text variant="caption" className="self-start text-text-secondary dark:text-text-secondary-dark">
+            {NAVIGATOR_COPY.areasChartCaption}
+          </Text>
+          <DomainRadar
+            points={areaPoints}
+            size={260}
+            accessibilityLabel={`${NAVIGATOR_COPY.areasChartTitle}: ${areaPoints.map((p) => p.label).join(', ')}`}
+          />
+        </View>
+      ) : null}
 
       {/* Section 1 — Your Symptoms */}
       <View className="gap-4 border-b border-border pb-10 dark:border-border-dark">
@@ -279,6 +316,16 @@ export function ResultsScreen({
         ) : null}
       </View>
 
+      {/* P39 — plain-language explanation */}
+      <View className="gap-2 border-b border-border pb-10 dark:border-border-dark">
+        <Text variant="h2" accessibilityRole="header">
+          {NAVIGATOR_COPY.plainLanguageTitle}
+        </Text>
+        <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
+          {NAVIGATOR_COPY.plainLanguageBody}
+        </Text>
+      </View>
+
       {/* Section 3 — Recommended Next Steps */}
       <View className="gap-6 border-b border-border pb-10 dark:border-border-dark">
         <View>
@@ -326,12 +373,32 @@ export function ResultsScreen({
         <NextStepCards steps={nextSteps} />
       </View>
 
-      {/* Conversation Starters */}
+      {/* Conversation Starters (P40 — per-item "why this helps" + Find Care CTA) */}
       <View className="gap-4 border-b border-border pb-10 dark:border-border-dark">
         <Text variant="caption" className="uppercase tracking-wide text-text-primary dark:text-text-primary-dark">
           Conversation Starters
         </Text>
         <ProviderQuestions questions={questions} />
+        <Button variant="primary" onPress={onFindCare} className="mt-1">
+          {NAVIGATOR_COPY.talkToProfessional}
+        </Button>
+      </View>
+
+      {/* P39 — "Things to know" */}
+      <View className="gap-3 border-b border-border pb-10 dark:border-border-dark">
+        <Text variant="h2" accessibilityRole="header">
+          {NAVIGATOR_COPY.thingsToKnowTitle}
+        </Text>
+        <View className="gap-2">
+          {NAVIGATOR_COPY.thingsToKnow.map((item) => (
+            <View key={item} className="flex-row items-start gap-2.5">
+              <View className="mt-2 h-1.5 w-1.5 rounded-full bg-border dark:bg-border-dark" />
+              <Text variant="body" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
+                {item}
+              </Text>
+            </View>
+          ))}
+        </View>
       </View>
 
       {/* Disclaimer */}
@@ -350,11 +417,84 @@ export function ResultsScreen({
         </View>
       </View>
 
-      {/* Footer */}
-      <View className="items-center">
-        <Button variant="secondary" onPress={onStartOver}>
-          {NAVIGATOR_COPY.startOver}
-        </Button>
+      {/* P41 — results actions (Home / Save state / Past explorations / Download / Start over) */}
+      <View className="gap-3">
+        {onDownloadSummary ? (
+          <Button variant="secondary" onPress={onDownloadSummary}>
+            <View className="flex-row items-center gap-2">
+              <FileDown size={16} color={tc.ink} strokeWidth={2} />
+              <Text variant="bodyLarge">{NAVIGATOR_COPY.downloadSummary}</Text>
+            </View>
+          </Button>
+        ) : null}
+
+        <View className="flex-row flex-wrap items-center justify-center gap-x-6 gap-y-2">
+          {onHome ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={NAVIGATOR_COPY.goHome}
+              onPress={onHome}
+              hitSlop={6}
+              className="min-h-[44px] flex-row items-center gap-2"
+            >
+              <Home size={16} color={tc.inkSecondary} strokeWidth={2} />
+              <Text variant="bodyLarge" className="text-text-secondary dark:text-text-secondary-dark">
+                {NAVIGATOR_COPY.goHome}
+              </Text>
+            </Pressable>
+          ) : null}
+          {onViewHistory ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={NAVIGATOR_COPY.viewPastExplorations}
+              onPress={onViewHistory}
+              hitSlop={6}
+              className="min-h-[44px] flex-row items-center gap-2"
+            >
+              <History size={16} color={tc.inkSecondary} strokeWidth={2} />
+              <Text variant="bodyLarge" className="text-text-secondary dark:text-text-secondary-dark">
+                {NAVIGATOR_COPY.viewPastExplorations}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
+
+        {onRemoveSaved ? (
+          <View className="flex-row items-center justify-center gap-2">
+            {removed ? (
+              <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
+                {NAVIGATOR_COPY.removedFromDevice}
+              </Text>
+            ) : (
+              <>
+                <Text variant="caption" className="text-text-tertiary dark:text-text-tertiary-dark">
+                  {NAVIGATOR_COPY.savedOnDevice}
+                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={NAVIGATOR_COPY.removeThisExploration}
+                  onPress={() => {
+                    onRemoveSaved();
+                    setRemoved(true);
+                  }}
+                  hitSlop={6}
+                  className="min-h-[44px] flex-row items-center gap-1.5"
+                >
+                  <Trash2 size={14} color={tc.inkTertiary} strokeWidth={2} />
+                  <Text variant="caption" className="text-text-secondary underline dark:text-text-secondary-dark">
+                    {NAVIGATOR_COPY.removeThisExploration}
+                  </Text>
+                </Pressable>
+              </>
+            )}
+          </View>
+        ) : null}
+
+        <View className="items-center pt-1">
+          <Button variant="secondary" onPress={onStartOver}>
+            {NAVIGATOR_COPY.startOver}
+          </Button>
+        </View>
       </View>
     </ScrollView>
   );

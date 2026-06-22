@@ -117,6 +117,77 @@ describe('navigator flow reducer (web-parity step model)', () => {
   });
 });
 
+describe('P35 — paged symptom selection (symptomPage)', () => {
+  it('starts symptoms on page 0 from DOMAINS_NEXT', () => {
+    let s: NavigatorState = { ...initialNavigatorState, step: 'domains', selectedDomains: ['emotional'] };
+    s = reducer(s, { type: 'DOMAINS_NEXT' });
+    expect(s).toMatchObject({ step: 'symptoms', symptomPage: 0 });
+  });
+
+  it('SYMPTOMS_PAGE_NEXT advances one page without leaving the symptoms step', () => {
+    let s: NavigatorState = { ...initialNavigatorState, step: 'symptoms', symptomPage: 0 };
+    s = reducer(s, { type: 'SYMPTOMS_PAGE_NEXT' });
+    expect(s).toMatchObject({ step: 'symptoms', symptomPage: 1 });
+    s = reducer(s, { type: 'SYMPTOMS_PAGE_NEXT' });
+    expect(s.symptomPage).toBe(2);
+  });
+
+  it('BACK walks the pages, then exits to domains from page 0', () => {
+    let s: NavigatorState = { ...initialNavigatorState, step: 'symptoms', symptomPage: 2 };
+    s = reducer(s, { type: 'BACK' });
+    expect(s).toMatchObject({ step: 'symptoms', symptomPage: 1 });
+    s = reducer(s, { type: 'BACK' });
+    expect(s).toMatchObject({ step: 'symptoms', symptomPage: 0 });
+    s = reducer(s, { type: 'BACK' });
+    expect(s.step).toBe('domains');
+  });
+
+  it('resets the page to 0 when the domain set changes (SELECT_ALL_DOMAINS / DOMAINS_NEXT)', () => {
+    const onPage2: NavigatorState = { ...initialNavigatorState, step: 'symptoms', symptomPage: 2 };
+    expect(reducer(onPage2, { type: 'SELECT_ALL_DOMAINS', domains: ['emotional'] }).symptomPage).toBe(0);
+    const atDomains: NavigatorState = { ...onPage2, step: 'domains', selectedDomains: ['emotional'] };
+    expect(reducer(atDomains, { type: 'DOMAINS_NEXT' }).symptomPage).toBe(0);
+  });
+
+  it('SYMPTOMS_NEXT (the final gate) still requires ≥1 symptom and enters details', () => {
+    const empty: NavigatorState = { ...initialNavigatorState, step: 'symptoms', symptomPage: 1 };
+    expect(reducer(empty, { type: 'SYMPTOMS_NEXT' }).step).toBe('symptoms');
+    const picked: NavigatorState = { ...empty, selectedSymptomIds: ['MOD_001'] };
+    expect(reducer(picked, { type: 'SYMPTOMS_NEXT' })).toMatchObject({ step: 'details', detailIndex: 0 });
+  });
+});
+
+describe('P36 — intensity (and other detail) selections persist across navigation', () => {
+  it('a tapped severity survives paging to the next symptom and back', () => {
+    let s: NavigatorState = {
+      ...initialNavigatorState,
+      step: 'details',
+      selectedSymptomIds: ['MOD_001', 'MOD_002'],
+      detailIndex: 0,
+    };
+    s = reducer(s, { type: 'SET_DETAIL', id: 'MOD_001', patch: { severity: 8 } });
+    s = reducer(s, { type: 'DETAIL_NEXT' }); // → symptom 2
+    expect(s.detailIndex).toBe(1);
+    s = reducer(s, { type: 'SET_DETAIL', id: 'MOD_002', patch: { severity: 3 } });
+    s = reducer(s, { type: 'BACK' }); // ← back to symptom 1
+    expect(s.detailIndex).toBe(0);
+    // Both choices are retained, keyed by symptom — never clobbered by navigation.
+    expect(s.details.MOD_001).toEqual({ severity: 8 });
+    expect(s.details.MOD_002).toEqual({ severity: 3 });
+  });
+
+  it('a later patch merges onto the same symptom (severity + frequency coexist)', () => {
+    let s: NavigatorState = {
+      ...initialNavigatorState,
+      step: 'details',
+      selectedSymptomIds: ['MOD_001'],
+    };
+    s = reducer(s, { type: 'SET_DETAIL', id: 'MOD_001', patch: { severity: 6 } });
+    s = reducer(s, { type: 'SET_DETAIL', id: 'MOD_001', patch: { frequency: 'often' } });
+    expect(s.details.MOD_001).toEqual({ severity: 6, frequency: 'often' });
+  });
+});
+
 describe('buildUserInputs (the scoring-parity fix)', () => {
   it('carries severity, duration, and frequency per symptom', () => {
     const state: NavigatorState = {
