@@ -205,7 +205,7 @@ describe('dayRollup (event-based → day-based bridge)', () => {
 
 describe('mergeMoments (last-write-wins, append-only)', () => {
   function moment(id: string, ts: string, valence: MomentValence): Moment {
-    return { id, timestamp: ts, valence, labels: [], context: [], routedToSupport: false };
+    return { id, timestamp: ts, valence, labels: [], context: [], routedToSupport: false, source: 'today' };
   }
 
   it('unions by id and sorts by timestamp', () => {
@@ -227,8 +227,8 @@ describe('ingestRemote (pull/restore — survives reinstall)', () => {
     const fresh = new MomentStore(deps); // empty local cache, as after reinstall
     expect(fresh.getAll()).toHaveLength(0);
     fresh.ingestRemote([
-      { id: 'r1', timestamp: '2026-06-10T09:00:00.000Z', valence: 4, labels: ['hopeful'], context: [], routedToSupport: false },
-      { id: 'r2', timestamp: '2026-06-11T09:00:00.000Z', valence: 2, labels: [], context: ['sleep'], routedToSupport: false },
+      { id: 'r1', timestamp: '2026-06-10T09:00:00.000Z', valence: 4, labels: ['hopeful'], context: [], routedToSupport: false, source: 'today' },
+      { id: 'r2', timestamp: '2026-06-11T09:00:00.000Z', valence: 2, labels: [], context: ['sleep'], routedToSupport: false, source: 'today' },
     ]);
     expect(fresh.getAll().map((m) => m.id)).toEqual(['r1', 'r2']);
     // and it persisted — a re-open over the same storage still has them
@@ -241,7 +241,7 @@ describe('ingestRemote (pull/restore — survives reinstall)', () => {
     const store = new MomentStore(deps);
     const localMoment = store.append({ valence: 3 }); // id m1
     store.ingestRemote([
-      { id: 'remote-1', timestamp: '2026-06-01T09:00:00.000Z', valence: 5, labels: [], context: [], routedToSupport: false },
+      { id: 'remote-1', timestamp: '2026-06-01T09:00:00.000Z', valence: 5, labels: [], context: [], routedToSupport: false, source: 'today' },
     ]);
     expect(store.getAll().map((m) => m.id).sort()).toEqual(['remote-1', localMoment.id].sort());
   });

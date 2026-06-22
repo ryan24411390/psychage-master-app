@@ -8,12 +8,18 @@
 
 import {
   type Moment,
+  type MomentSource,
   type MomentValence,
-  MAX_LABELS,
+  MOMENT_SOURCES,
   NOTE_MAX_LENGTH,
+  STORED_MAX_LABELS,
 } from './types';
 
-export const SCHEMA_VERSION = 1 as const;
+// v2 (unify): adds `source` (provenance, backfilled `today` for v1 rows) + the
+// optional migration-only `legacyValence10` (the original 1–10 Mood Journal valence
+// preserved when a journal entry is folded in). Load-validation widens the labels
+// ceiling to STORED_MAX_LABELS so folded-in entries are not quarantined.
+export const SCHEMA_VERSION = 2 as const;
 export const STORAGE_KEY = 'mobile:moments';
 /** Quarantined blobs land at `${STORAGE_KEY}:quarantine:<iso>-<uuid>` (uuid keeps each anomaly distinct). */
 export const QUARANTINE_KEY_PREFIX = `${STORAGE_KEY}:quarantine:`;
@@ -44,15 +50,29 @@ export type MigrateOutcome =
       readonly reason: AnomalyReason;
     };
 
-// Forward-only transform registry, indexed by `from`. Empty: v1 is the first moments
-// schema, so there is no legacy shape to expand. A future v2 adds an entry here;
-// `migrate` already walks it.
+// Forward-only transform registry, indexed by `from`. v1→v2 is purely additive: a v1
+// moment predates `source`, so backfill it to `today` (the home capture surface that
+// minted every v1 moment). `legacyValence10` stays absent (v1 had no Mood Journal
+// data folded in). `normalizeMoments` then re-validates under the v2 `isValidMoment`.
 interface Transform {
   readonly from: number;
   readonly to: number;
   readonly transform: (raw: unknown) => unknown;
 }
-const TRANSFORMS: readonly Transform[] = [];
+const TRANSFORMS: readonly Transform[] = [
+  {
+    from: 1,
+    to: 2,
+    transform: (moments) =>
+      Array.isArray(moments)
+        ? moments.map((m) =>
+            typeof m === 'object' && m !== null && !('source' in m)
+              ? { ...(m as Record<string, unknown>), source: 'today' satisfies MomentSource }
+              : m,
+          )
+        : moments,
+  },
+];
 
 function emptyStore(): PersistedMoments {
   return { version: SCHEMA_VERSION, moments: [] };
@@ -75,16 +95,39 @@ function isValidMoment(value: unknown): value is Moment {
   ) {
     return false;
   }
-  if (!isStringArray(v.labels) || v.labels.length > MAX_LABELS) return false;
+  // Wider than the capture cap (MAX_LABELS): a folded-in Mood Journal entry may carry
+  // up to the 12 closed emotion tags. Keep them rather than quarantine the moment.
+  if (!isStringArray(v.labels) || v.labels.length > STORED_MAX_LABELS) return false;
   if (!isStringArray(v.context)) return false;
   if (v.note !== undefined && (typeof v.note !== 'string' || v.note.length > NOTE_MAX_LENGTH)) {
     return false;
   }
   if (typeof v.routedToSupport !== 'boolean') return false;
+  // Optional: present on every local capture, absent on a cloud-restored moment. When
+  // present it must be a known source.
+  if (v.source !== undefined && (typeof v.source !== 'string' || !MOMENT_SOURCES.has(v.source))) {
+    return false;
+  }
+  // Migration-only: the original 1–10 Mood Journal valence. Absent on every fresh
+  // capture; when present it must be a sane 1–10 integer.
+  if (
+    v.legacyValence10 !== undefined &&
+    (typeof v.legacyValence10 !== 'number' ||
+      !Number.isInteger(v.legacyValence10) ||
+      v.legacyValence10 < 1 ||
+      v.legacyValence10 > 10)
+  ) {
+    return false;
+  }
   return true;
 }
 
-/** Canonicalize one validated moment — drop unknown keys, omit an absent note. */
+/**
+ * Canonicalize one validated moment — drop unknown keys, omit absent optionals. Key
+ * order MUST match `makeMoment` in moment-store.ts so a fresh write and a reloaded
+ * write serialize identically (the load() restamp check). `legacyValence10` sits
+ * before `note` (it is absent on fresh captures, so append's order is unaffected).
+ */
 export function canonicalMoment(moment: Moment): Moment {
   const base = {
     id: moment.id,
@@ -94,7 +137,12 @@ export function canonicalMoment(moment: Moment): Moment {
     context: [...moment.context],
     routedToSupport: moment.routedToSupport,
   };
-  return moment.note === undefined ? base : { ...base, note: moment.note };
+  const withSource = moment.source === undefined ? base : { ...base, source: moment.source };
+  const withLegacy =
+    moment.legacyValence10 === undefined
+      ? withSource
+      : { ...withSource, legacyValence10: moment.legacyValence10 };
+  return moment.note === undefined ? withLegacy : { ...withLegacy, note: moment.note };
 }
 
 /** Ascending chronological order by capture instant (stable tiebreak on id). */

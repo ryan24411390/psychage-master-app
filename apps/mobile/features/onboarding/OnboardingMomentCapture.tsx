@@ -68,7 +68,8 @@ export function OnboardingMomentCapture({
       <View className="items-end px-5 pt-2 opacity-70">
         <Mascot testID="onboarding-moment-mascot" size={RECEDED_WIDTH} />
       </View>
-      <MomentCaptureSheet onSave={handleSave} onClose={onExit} />
+      {/* The first-open "How are you right now?" prompt → source 'prompt'. */}
+      <MomentCaptureSheet source="prompt" onSave={handleSave} onClose={onExit} />
     </View>
   );
 }

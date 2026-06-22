@@ -1,4 +1,10 @@
-import { type MomentDraft, type MomentValence, MAX_LABELS, NOTE_MAX_LENGTH } from '@psychage/shared/engagement';
+import {
+  type MomentDraft,
+  type MomentSource,
+  type MomentValence,
+  MAX_LABELS,
+  NOTE_MAX_LENGTH,
+} from '@psychage/shared/engagement';
 import { X } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useMemo, useState } from 'react';
@@ -6,7 +12,7 @@ import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 import { ChipGroup } from '@/components/moments/ChipGroup';
-import { FeelingVisualization } from '@/components/moments/FeelingVisualization';
+import { FeelingInput } from '@/components/moments/FeelingInput';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { shouldRouteToSupport } from '@/features/moments/acute';
@@ -19,9 +25,11 @@ import { DURATION, useReducedMotion } from '@/lib/motion';
 // Help-now pill stays reachable above the veil), mirroring the retired CheckInSheet's
 // chrome so it is visually indistinguishable. MOMENTARY copy throughout.
 //
-// Flow: valence slider → "one word, if you want" (valence-narrowed chips + show more)
-//   → "what's having the biggest impact?" context domains → optional one line → save.
-// Minimal capture is 2 taps: pick a valence, press save (labels/context/note optional).
+// Flow: feeling (the FeelingInput seam) → "one word, if you want" (valence-narrowed
+//   chips + show more) → "what's having the biggest impact?" context domains → optional
+//   one line → save. Minimal capture is 2 taps: pick a feeling, press save (the rest is
+//   optional). FeelingInput is a stable seam — the next prompt swaps the animated
+//   visualization in behind it without touching this sheet.
 //
 // Store-agnostic: the container owns the write + any crisis navigation. This sheet
 // runs the acute predicate (shouldRouteToSupport) BEFORE handing the draft up, and
@@ -30,9 +38,15 @@ import { DURATION, useReducedMotion } from '@/lib/motion';
 type MomentCaptureSheetProps = {
   onSave: (draft: MomentDraft) => void;
   onClose: () => void;
+  /**
+   * Which surface opened this single capture sheet (provenance, stamped on the draft).
+   * Lets Today / Compass / the first-open prompt all reuse ONE sheet while recording
+   * where the moment came from. Defaults to `today`.
+   */
+  source?: MomentSource;
 };
 
-export function MomentCaptureSheet({ onSave, onClose }: MomentCaptureSheetProps) {
+export function MomentCaptureSheet({ onSave, onClose, source = 'today' }: MomentCaptureSheetProps) {
   const reduced = useReducedMotion();
   const { colorScheme } = useColorScheme();
   const [valence, setValence] = useState<MomentValence | null>(null);
@@ -70,6 +84,7 @@ export function MomentCaptureSheet({ onSave, onClose }: MomentCaptureSheetProps)
       ...(trimmed.length > 0 ? { note: trimmed } : {}),
       // Predicate runs BEFORE persist; the flag is carried on the saved moment.
       routedToSupport: shouldRouteToSupport({ valence, labels }),
+      source,
     };
     try {
       onSave(draft);
@@ -108,7 +123,7 @@ export function MomentCaptureSheet({ onSave, onClose }: MomentCaptureSheetProps)
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false} className="mt-3">
-          <FeelingVisualization
+          <FeelingInput
             value={valence}
             onChange={(v) => {
               setValence(v);

@@ -7,9 +7,9 @@
 
 import { dailyRollupReader } from '@/lib/daily-rollup';
 import { getMomentStore } from '@/lib/moment-store';
+import { moodReaderFromMoments } from '@/lib/mood-reader';
 import { getClarityStore } from '@/lib/clarity-store';
 import { getClarityJournalStore } from '@/lib/clarity-journal-store';
-import { getMoodJournalStore } from '@/lib/mood-journal-store';
 import { getNavigatorStore } from '@/lib/navigator-store';
 import { getRelationshipStore } from '@/lib/relationship-store';
 import { getSleepStore } from '@/lib/sleep-store';
@@ -34,7 +34,9 @@ export function readInsightsInput(): InsightsInput {
     clarity: (getClarityStore() satisfies ClarityReader).getRecent(100),
     navigator: (getNavigatorStore() satisfies NavigatorReader).getRecent(50),
     relationship: (getRelationshipStore() satisfies RelationshipReader).loadHistory(),
-    mood: (getMoodJournalStore() satisfies MoodReader).getRecent(400),
+    // The Mood Journal was folded into Moments (P42–P44): "most noted feeling" now
+    // projects feeling words off the one Moments store via moodReaderFromMoments.
+    mood: (moodReaderFromMoments(getMomentStore()) satisfies MoodReader).getRecent(400),
     sleep: (getSleepStore() satisfies SleepReader).getRecent(400),
     // Energy lives in the Clarity Journal (1–10, one per day) — the only store that has it.
     // No mobile capture writes it yet, so this is usually empty until that screen lands.

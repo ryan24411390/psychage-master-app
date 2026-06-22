@@ -1,3 +1,4 @@
+import type { MomentDraft } from '@psychage/shared/engagement';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
@@ -16,11 +17,15 @@ import {
   Notebook,
 } from 'lucide-react-native';
 
+import { MomentCaptureSheet } from '@/components/moments/MomentCaptureSheet';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
 import { ClarityTile, DeepDiveCard, HeroTile, SmallTile } from '@/features/compass/CompassTile';
 import { CT4_COMPASS } from '@/features/compass/copy';
 import { COMPASS_ROUTES } from '@/features/compass/routes';
+import { storage } from '@/lib/adapters/storage';
+import { useHaptics } from '@/lib/haptic-context';
+import { recordCount } from '@/lib/persistence/milestones';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
 const HEADING = 'ml-0.5 font-display text-[16px] text-text-primary dark:text-text-primary-dark';
@@ -28,13 +33,36 @@ const HEADING = 'ml-0.5 font-display text-[16px] text-text-primary dark:text-tex
 export default function CompassScreen() {
   const t = CT4_COMPASS;
   const tcPrimary = useThemeColors().primary;
+  const { fireHaptic } = useHaptics();
   const [recent, setRecent] = useState<DailyEntry[]>([]);
+  // Compass shares the ONE Moments capture surface with Today (P42–P44): the tile opens
+  // the same sheet here, stamped `source: 'compass'`.
+  const [captureOpen, setCaptureOpen] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       const reader = dailyRollupReader(getMomentStore());
       setRecent(reader.getRecent(3));
     }, [])
+  );
+
+  const handleCaptureSave = useCallback(
+    (draft: MomentDraft) => {
+      const store = getMomentStore();
+      store.append(draft);
+      fireHaptic('confirm');
+      setCaptureOpen(false);
+      // SR-2: the sheet's acute predicate stamped the draft; route INTO the ungated
+      // crisis surface after persisting (never gates it).
+      if (draft.routedToSupport) {
+        router.push('/crisis');
+        return;
+      }
+      // Keep the cumulative milestone count consistent with the Today/onboarding hooks
+      // (no celebration overlay here — that beat belongs to Home).
+      recordCount(storage, store.getAll().length);
+    },
+    [fireHaptic]
   );
 
   const showStrugglingSuggestion = recent.length >= 2 && recent.filter(r => r.state <= 1).length >= 2;
@@ -114,11 +142,11 @@ export default function CompassScreen() {
           <View className="flex-row gap-3">
             <View className="flex-1">
               <SmallTile
-                title={t.moodJournal.title}
-                feature={t.moodJournal.sub}
+                title={t.moments.title}
+                feature={t.moments.sub}
                 icon={Notebook}
-                onPress={() => router.push(COMPASS_ROUTES.moodJournal)}
-                testID="compass-tile-mood-journal"
+                onPress={() => setCaptureOpen(true)}
+                testID="compass-tile-moments"
               />
             </View>
             <View className="flex-1">
@@ -154,6 +182,14 @@ export default function CompassScreen() {
           />
         </View>
       </ScrollView>
+
+      {captureOpen && (
+        <MomentCaptureSheet
+          source="compass"
+          onSave={handleCaptureSave}
+          onClose={() => setCaptureOpen(false)}
+        />
+      )}
     </ScreenShell>
   );
 }

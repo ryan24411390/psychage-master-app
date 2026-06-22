@@ -29,7 +29,7 @@ import { DURATION, useReducedMotion } from '@/lib/motion';
 // across the valence range. Motion runs on the Reanimated UI-thread clock (no
 // setTimeout); reduced-motion freezes the breathe but keeps the colour mapping.
 //
-// Drop-in for the prior ValenceSlider seam: same `value` / `onChange` contract.
+// Rendered behind the FeelingInput seam: same `value` / `onChange` contract.
 // The Moment record stays discrete (MomentValence 1..5) — the continuous scrub
 // snaps to the nearest integer on emit; the store is untouched.
 

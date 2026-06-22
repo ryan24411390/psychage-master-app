@@ -35,6 +35,21 @@ export type MomentValence = 1 | 2 | 3 | 4 | 5;
 export type LocalCalendarDate = string & { readonly __brand: 'LocalCalendarDate' };
 
 /**
+ * Where a moment was captured — provenance only, NEVER affect. `today` = the home
+ * surface, `compass` = the Compass tool surface (the old Mood Journal entry point,
+ * folded in by the unify migration), `prompt` = the "How are you right now?" return
+ * prompt. Local-only: the sync mapper does not read it, so it never leaves the device.
+ */
+export type MomentSource = 'today' | 'compass' | 'prompt';
+
+/** The closed set of valid sources (the load-validation surface). */
+export const MOMENT_SOURCES: ReadonlySet<string> = new Set<MomentSource>([
+  'today',
+  'compass',
+  'prompt',
+]);
+
+/**
  * One captured Moment. `id` and `timestamp` are minted AT CAPTURE and immutable —
  * moments are append-only (there is no edit path in V1). `routedToSupport` records
  * that the acute-handoff predicate fired before this moment was persisted (a
@@ -42,17 +57,35 @@ export type LocalCalendarDate = string & { readonly __brand: 'LocalCalendarDate'
  */
 export interface Moment {
   readonly id: string;
-  /** Full capture instant, ISO-8601 (`new Date().toISOString()`). */
+  /** Full capture instant, ISO-8601 (`new Date().toISOString()`). The UI calls this "createdAt". */
   readonly timestamp: string;
   readonly valence: MomentValence;
-  /** 0..MAX_LABELS curated affect-word keys. */
+  /**
+   * The "feeling words" (the UI calls these descriptors). 0..MAX_LABELS on a fresh
+   * capture; records folded in from the Mood Journal by the unify migration may carry
+   * more (up to STORED_MAX_LABELS), which is why load-validation uses the wider ceiling.
+   */
   readonly labels: readonly string[];
-  /** 0..n context-domain keys. */
+  /** The associations / "biggest impact" (the UI calls these impacts). 0..n keys. */
   readonly context: readonly string[];
-  /** Optional one-line free text, ≤ NOTE_MAX_LENGTH UTF-16 units. Absent ⇒ no note. */
+  /** Optional free text, ≤ NOTE_MAX_LENGTH UTF-16 units. Absent ⇒ no note. */
   readonly note?: string;
   /** True when the acute predicate routed this capture to crisis support. */
   readonly routedToSupport: boolean;
+  /**
+   * Which surface captured this moment (provenance; never synced). Set on every local
+   * capture (`append` defaults it to `today`) and on folded-in Mood Journal entries
+   * (`compass`). OPTIONAL because a moment restored from the cloud carries no origin —
+   * the server has no `source` column — so the pull mapper leaves it absent. Keeping it
+   * optional is what lets the ADR-001 sync mapper stay untouched.
+   */
+  readonly source?: MomentSource;
+  /**
+   * MIGRATION-ONLY. The original 1–10 Mood Journal valence, preserved verbatim when a
+   * journal entry was folded in (the unified scale is 1–5; this keeps the finer
+   * original from being lost). Never shown, never set on a fresh capture, never synced.
+   */
+  readonly legacyValence10?: number;
 }
 
 /** The caller-supplied fields on capture; the store mints `id` + `timestamp`. */
@@ -62,6 +95,8 @@ export interface MomentDraft {
   readonly context?: readonly string[];
   readonly note?: string;
   readonly routedToSupport?: boolean;
+  /** Capture surface. Optional; the store defaults to `today` when omitted. */
+  readonly source?: MomentSource;
 }
 
 /**
@@ -88,10 +123,17 @@ export interface DayRollup {
   readonly context: readonly string[];
 }
 
-/** Maximum labels per moment (the curated affect-word cap). */
+/** Maximum labels (feeling words) selectable on a FRESH capture — the append/UI cap. */
 export const MAX_LABELS = 3;
-/** Maximum note length, in UTF-16 code units (one line; matches RN TextInput `maxLength`). */
-export const NOTE_MAX_LENGTH = 80;
+/**
+ * Maximum labels a STORED moment may carry through load-validation. Wider than
+ * MAX_LABELS so Mood Journal entries folded in by the unify migration (up to the 12
+ * closed emotion tags) survive `isValidMoment` instead of being quarantined. Fresh
+ * captures are still capped at MAX_LABELS by `append`.
+ */
+export const STORED_MAX_LABELS = 12;
+/** Maximum note length, in UTF-16 code units (absorbs the Mood Journal's 280-cap notes). */
+export const NOTE_MAX_LENGTH = 280;
 
 /**
  * Key-value persistence seam. Structurally identical to
