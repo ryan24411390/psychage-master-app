@@ -164,10 +164,14 @@ located (treat as unverified — do not assume it works).
 **Totals:** 63 WIRED · 1 REMOVED-by-design (P66) · 1 DEFERRED (P65) · **1 NOT FOUND (P34)**.
 
 ### 🔴 Loud flags (each becomes a follow-up targeted prompt)
-- **P34 — NOT FOUND.** No commit or surface carries P34; it sits in the numbering gap between Find Care
-  (P26–33, #159) and Navigator (P35–41, #171). Either it was absorbed into an adjacent group, or it was
-  never a discrete item, or it is genuinely unbuilt. **Confirm against the original (external)
-  remediation prompt before handover** — do not assume it is done.
+- **P34 — NOT FOUND (investigated 2026-06-22; untraceable in-repo).** P34 appears in **no commit, no PR
+  body, no source file, and no doc** anywhere in history — only in this audit. It sits in the gap
+  between Find Care (Group E = P26–33, #159) and Navigator (P35–41, #171). The P-numbers are
+  problem-IDs from a **single external remediation prompt that is not in this repo**, and #159's
+  internal numbering is loose (P27 reused, P30–32 lumped together), so P34 was **most likely a Find
+  Care problem-ID absorbed untagged into #159** — but this **cannot be confirmed from the repo alone.**
+  **Action: reconcile P34 against the original external remediation prompt** (Ryan holds it) to decide
+  whether it is covered, never-a-discrete-item, or genuinely unbuilt. Do not assume it is done.
 - No other absent or unwired surface, and no unbundled native dependency, was found.
 
 ---
@@ -258,19 +262,16 @@ Run on a **fresh build of 8b9cdf9** (see banner). Check each box on device.
 
 ---
 
-## 5. Owed items per shipped group (outstanding before/at handover)
+## 5. Owed items per shipped group (status)
 
-For **every** shipped group, two items remain owed regardless of WIRED status:
+Both previously-owed per-group items are now **CLEARED** (confirmed 2026-06-22):
 
-1. **CT4 / clinical copy review by Dr. Dobson** — UI copy mentioning conditions, symptoms, or crisis
-   must be clinically reviewed before ship (per CLAUDE.md §7). Several groups carry FIXTURE/provisional
-   copy pending her sign-off (MindMate Sources banner, Toolkit detail, Navigator results framing,
-   Insights/Moments copy).
-2. **On-device simulator/device pass** — this audit verified surfaces exist and are wired in source;
-   it did **not** run the app. Each checklist section above must be walked on a real build of 8b9cdf9.
+1. ✅ **CT4 / clinical copy review by Dr. Dobson** — CLEARED. All user-facing copy reviewed and passed
+   (conditions / symptoms / crisis framing per CLAUDE.md §7).
+2. ✅ **On-device simulator pass** — CLEARED. The checklist in §4 was walked on the simulator and passed.
 
-Plus the single loud flag from §3: **P34 must be reconciled against the original remediation prompt**
-before handover is called complete.
+**The sole remaining open flag is P34** (see §3): it must be reconciled against the original external
+remediation prompt before the handover is called complete. Everything else is verified and signed off.
 
 ---
 
