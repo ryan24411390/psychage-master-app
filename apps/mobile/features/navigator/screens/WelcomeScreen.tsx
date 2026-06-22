@@ -19,22 +19,29 @@ export interface WelcomeScreenProps {
 export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   const tc = useThemeColors();
   return (
-    <ScrollView contentContainerClassName="gap-6 px-4 pb-10 pt-8" keyboardShouldPersistTaps="handled">
-      <View className="gap-3">
-        <Text variant="h1" accessibilityRole="header">
-          {NAVIGATOR_COPY.welcomeTitle}
-        </Text>
-        <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
-          {NAVIGATOR_COPY.welcomeSubtitle}
-        </Text>
-      </View>
+    <ScrollView
+      className="flex-1"
+      contentContainerClassName="grow justify-between gap-6 px-4 pb-8 pt-8"
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      <View className="gap-6">
+        <View className="gap-2">
+          <Text variant="h1" accessibilityRole="header">
+            {NAVIGATOR_COPY.welcomeTitle}
+          </Text>
+          <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
+            {NAVIGATOR_COPY.welcomeSubtitle}
+          </Text>
+        </View>
 
-      <Card variant="accent" className="flex-row items-start gap-3">
-        <ShieldCheck size={20} color={tc.primary} strokeWidth={2} />
-        <Text variant="caption" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
-          {NAVIGATOR_COPY.welcomeDisclaimer}
-        </Text>
-      </Card>
+        <Card variant="accent" className="flex-row items-start gap-2">
+          <ShieldCheck size={20} color={tc.primary} strokeWidth={2} />
+          <Text variant="caption" className="flex-1 text-text-secondary dark:text-text-secondary-dark">
+            {NAVIGATOR_COPY.welcomeDisclaimer}
+          </Text>
+        </Card>
+      </View>
 
       <Button variant="primary" onPress={onStart}>
         {NAVIGATOR_COPY.welcomeStart}
