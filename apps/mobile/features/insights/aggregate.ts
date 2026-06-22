@@ -6,22 +6,22 @@
 // Educational framing only (SR-2/SR-3): no diagnostic language, no condition claims.
 // Navigator confidence is never surfaced here (SR-1 lives in the Navigator views).
 
+import type { Moment } from '@psychage/shared/engagement';
 import type { SleepEntry } from '@psychage/shared/sleep';
 
 import type { DailyEntry } from '@/lib/daily-rollup';
 import type { ClaritySnapshot } from '@/features/clarity/result-store';
 import type { NavigatorSnapshot } from '@/features/navigator/result-store';
 import type { RelationshipHealthResult } from '@/features/relationship-health/types';
+import type { ToolUsageData } from '@/lib/tool-usage-store';
 
-import type { EnergyPoint } from './daily-recap';
-
-export type ToolKey = 'checkin' | 'clarity' | 'navigator' | 'relationship' | 'mood' | 'sleep';
+export type ToolKey = 'checkin' | 'clarity' | 'navigator' | 'relationship' | 'sleep';
 
 /**
- * The minimal "feeling words over time" projection the aggregator reads. Produced by
- * `moodReaderFromMoments` (@/lib/mood-reader) over the unified Moments store: the Mood
- * Journal's separate record was folded into Moments (P42–P44), so this is now a view
- * of a moment's instant + its feeling words rather than a distinct journal entry.
+ * The minimal "feeling words over time" projection. Produced by `moodReaderFromMoments`
+ * (@/lib/mood-reader) over the unified Moments store; still consumed by the therapist
+ * export. A view of a moment's instant + its feeling words. (The Insights screen reads
+ * the raw `Moment` records instead — see read-stores.ts + moment-insights.ts.)
  */
 export interface MoodMomentView {
   readonly createdAt: string;
@@ -48,10 +48,11 @@ export interface InsightsInput {
   readonly clarity: readonly ClaritySnapshot[];
   readonly navigator: readonly NavigatorSnapshot[];
   readonly relationship: readonly RelationshipHealthResult[];
-  readonly mood: readonly MoodMomentView[];
+  /** Raw moments from the one Moments store — the spine of the Insights screen. */
+  readonly moments: readonly Moment[];
   readonly sleep: readonly SleepEntry[];
-  /** Self-reported energy readings (1–10) from the Clarity Journal — feeds the recap trend. */
-  readonly energy: readonly EnergyPoint[];
+  /** Raw tool-usage recency (which tools were opened, and when) — drives "Your Tools". */
+  readonly toolUsage: ToolUsageData;
 }
 
 const TOOL_NAMES: Record<ToolKey, string> = {
@@ -59,7 +60,6 @@ const TOOL_NAMES: Record<ToolKey, string> = {
   clarity: 'Clarity Score',
   navigator: 'Symptom Navigator',
   relationship: 'Relationship Health',
-  mood: 'Mood Journal',
   sleep: 'Sleep Architect',
 };
 
@@ -68,10 +68,6 @@ const TOOL_ROUTES: Record<ToolKey, string> = {
   clarity: '/tools/clarity-history',
   navigator: '/tools/navigator-history',
   relationship: '/tools/relationship-history',
-  // Folded into Moments (P42–P44): the standalone Mood Journal surface is gone, so this
-  // links to the shared Moments history. The duplicate 'mood' row itself is left for the
-  // deferred Insights pass (P45/P46) to reconcile against 'checkin'.
-  mood: '/history',
   sleep: '/tools/sleep',
 };
 
@@ -157,19 +153,6 @@ export function buildToolSummaries(input: InsightsInput): ToolSummary[] {
       count: input.relationship.length,
       lastAt: latest ? isoToMs(latest.createdAt) : 0,
       route: TOOL_ROUTES.relationship,
-    });
-  }
-
-  if (input.mood.length > 0) {
-    const lastAt = Math.max(...input.mood.map((m) => isoToMs(m.createdAt)));
-    const top = topEmotion(input.mood);
-    out.push({
-      key: 'mood',
-      name: TOOL_NAMES.mood,
-      metric: top ? `Most noted: ${top}` : `${input.mood.length} moment${input.mood.length === 1 ? '' : 's'}`,
-      count: input.mood.length,
-      lastAt,
-      route: TOOL_ROUTES.mood,
     });
   }
 

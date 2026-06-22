@@ -23,8 +23,7 @@ import type { ClaritySnapshot } from '@/features/clarity/result-store';
 import type { NavigatorSnapshot } from '@/features/navigator/result-store';
 import type { RelationshipHealthResult } from '@/features/relationship-health/types';
 import type { DailyEntry } from '@/lib/daily-rollup';
-import type { MoodMomentView } from '@/features/insights/aggregate';
-import type { DailyJournalCheckIn } from '@psychage/shared/clarity-journal';
+import type { Moment } from '@psychage/shared/engagement';
 import type { SleepEntry } from '@psychage/shared/sleep';
 
 // ---------------------------------------------------------------------------
@@ -48,17 +47,13 @@ export interface RelationshipReader {
   loadHistory(): readonly RelationshipHealthResult[];
 }
 
-export interface MoodReader {
-  getRecent(n: number): readonly MoodMomentView[];
+/** The raw Moments read the Insights screen depends on (`getMomentStore().getRecent`). */
+export interface MomentsReader {
+  getRecent(n: number): readonly Moment[];
 }
 
 export interface SleepReader {
   getRecent(n: number): readonly SleepEntry[];
-}
-
-/** Clarity Journal — the only store carrying self-reported energy. */
-export interface EnergyJournalReader {
-  getRecentDailyCheckIns(n: number): readonly DailyJournalCheckIn[];
 }
 
 // ---------------------------------------------------------------------------
@@ -78,10 +73,15 @@ type _NavigatorFields = Assert<Extends<NavigatorSnapshot, { readonly createdAt: 
 type _RelationshipFields = Assert<
   Extends<RelationshipHealthResult, { readonly compositeScore: number; readonly createdAt: string }>
 >;
-type _MoodFields = Assert<
-  Extends<MoodMomentView, { readonly createdAt: string; readonly emotions: readonly string[] }>
+type _MomentFields = Assert<
+  Extends<
+    Moment,
+    {
+      readonly timestamp: string;
+      readonly valence: number;
+      readonly labels: readonly string[];
+      readonly context: readonly string[];
+    }
+  >
 >;
 type _SleepFields = Assert<Extends<SleepEntry, { readonly created_at: string }>>;
-type _EnergyFields = Assert<
-  Extends<DailyJournalCheckIn, { readonly date: string; readonly energy: number }>
->;

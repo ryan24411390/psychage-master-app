@@ -1,20 +1,17 @@
-import { ClarityJournalStore } from '@psychage/shared/clarity-journal';
 import { MomentStore, type Storage } from '@psychage/shared/engagement';
 import { describe, expect, it } from 'vitest';
 
 import { dailyRollupReader, type DailyEntry } from '@/lib/daily-rollup';
 import {
   buildDailyRecap,
-  type EnergyPoint,
-  energyInsightLine,
-  energySeries,
   presenceWindow,
   weeklyCheckInCount,
   weeklyRecapLine,
 } from '@/features/insights/daily-recap';
 
-// Pure recap aggregation + a round-trip of the EXISTING check-in (Moments) and energy
-// (Clarity Journal) records through this read model. Vitest only — no RN, no network.
+// Pure recap aggregation + a round-trip of the EXISTING Moments records through this read
+// model. The recap is presence + a factual weekly count only (energy was dropped from the
+// Insights path in the P45–P48 rebuild). Vitest only — no RN, no network.
 
 const TODAY = new Date(2026, 5, 17); // 2026-06-17, local
 const entry = (date: string, state: 0 | 1 | 2 | 3 | 4 = 2): DailyEntry => ({
@@ -49,7 +46,7 @@ describe('presenceWindow', () => {
     expect(out.every((d) => d.present === false)).toBe(true);
   });
 
-  it('flags only days that have a check-in (presence, not intensity)', () => {
+  it('flags only days that have a recorded moment (presence, not intensity)', () => {
     // 2026-06-10 falls outside the 7-day window (06-11..06-17) and is excluded.
     const out = presenceWindow([entry('2026-06-17'), entry('2026-06-15'), entry('2026-06-10')], TODAY);
     const present = out.filter((d) => d.present).map((d) => d.date);
@@ -64,71 +61,30 @@ describe('presenceWindow', () => {
 });
 
 describe('weeklyCheckInCount / weeklyRecapLine', () => {
-  it('counts distinct check-in days within the last 7 days inclusive of today', () => {
+  it('counts distinct recorded days within the last 7 days inclusive of today', () => {
     const checkins = [entry('2026-06-17'), entry('2026-06-15'), entry('2026-06-10')];
     expect(weeklyCheckInCount(checkins, TODAY)).toBe(2); // 06-10 falls outside the 7-day window
   });
 
-  it('phrases the recap factually', () => {
+  it('phrases the recap factually in Moments framing', () => {
     const checkins = [entry('2026-06-17'), entry('2026-06-15')];
-    expect(weeklyRecapLine(checkins, TODAY)).toBe('You checked in 2 of 7 days this week.');
+    expect(weeklyRecapLine(checkins, TODAY)).toBe('You recorded on 2 of 7 days this week.');
   });
 
   it('uses a gentle empty line when nothing was recorded this week', () => {
-    expect(weeklyRecapLine([], TODAY)).toBe('No check-ins recorded this week yet.');
-  });
-});
-
-describe('energySeries', () => {
-  it('sorts oldest→newest and maps to trend points', () => {
-    const energy: EnergyPoint[] = [
-      { date: '2026-06-16', energy: 8 },
-      { date: '2026-06-14', energy: 5 },
-    ];
-    expect(energySeries(energy)).toEqual([
-      { x: '2026-06-14', y: 5 },
-      { x: '2026-06-16', y: 8 },
-    ]);
-  });
-
-  it('is empty when no energy is logged', () => {
-    expect(energySeries([])).toEqual([]);
-  });
-});
-
-describe('energyInsightLine', () => {
-  it('invites entry when empty (no clinical claim)', () => {
-    expect(energyInsightLine([])).toBe('No energy logged yet — it appears here once you add it.');
-  });
-  it('pluralizes the day count', () => {
-    expect(energyInsightLine([{ date: '2026-06-16', energy: 6 }])).toBe('Energy logged on 1 day so far.');
-    expect(
-      energyInsightLine([
-        { date: '2026-06-16', energy: 6 },
-        { date: '2026-06-15', energy: 7 },
-      ]),
-    ).toBe('Energy logged on 2 days so far.');
+    expect(weeklyRecapLine([], TODAY)).toBe('No moments recorded this week yet.');
   });
 });
 
 describe('buildDailyRecap', () => {
-  it('assembles presence + recap + energy and reports data presence', () => {
-    const recap = buildDailyRecap(
-      { checkins: [entry('2026-06-17'), entry('2026-06-16')], energy: [{ date: '2026-06-16', energy: 7 }] },
-      TODAY,
-    );
-    expect(recap.hasAnyData).toBe(true);
-    expect(recap.weeklyRecap).toBe('You checked in 2 of 7 days this week.');
-    expect(recap.energySeries).toEqual([{ x: '2026-06-16', y: 7 }]);
+  it('assembles presence + the factual weekly recap line', () => {
+    const recap = buildDailyRecap({ checkins: [entry('2026-06-17'), entry('2026-06-16')] }, TODAY);
+    expect(recap.weeklyRecap).toBe('You recorded on 2 of 7 days this week.');
     expect(recap.presence.filter((d) => d.present).map((d) => d.date)).toEqual(['2026-06-16', '2026-06-17']);
-  });
-
-  it('hasAnyData is false for an empty model', () => {
-    expect(buildDailyRecap({ checkins: [], energy: [] }, TODAY).hasAnyData).toBe(false);
   });
 });
 
-describe('round-trip: existing check-in (Moments) → dailyRollup → recap', () => {
+describe('round-trip: existing Moments → dailyRollup → recap', () => {
   it('reads real Moment records through the unified model into presence', () => {
     let clock = new Date(2026, 5, 15, 12, 0, 0);
     let n = 0;
@@ -138,38 +94,8 @@ describe('round-trip: existing check-in (Moments) → dailyRollup → recap', ()
     store.append({ valence: 4 });
 
     const checkins = dailyRollupReader(store).getRecent(30);
-    const recap = buildDailyRecap({ checkins, energy: [] }, TODAY);
+    const recap = buildDailyRecap({ checkins }, TODAY);
     expect(recap.presence.filter((d) => d.present).map((d) => d.date)).toEqual(['2026-06-15', '2026-06-17']);
-    expect(recap.weeklyRecap).toBe('You checked in 2 of 7 days this week.');
-  });
-});
-
-describe('round-trip: clarity-journal energy persists + migrates without data loss (SR-13)', () => {
-  it('reloads a versioned envelope from storage with energy intact', () => {
-    const mem = memStorage();
-    let clock = new Date(2026, 5, 15, 12, 0, 0);
-    let n = 0;
-    const writer = new ClarityJournalStore({ storage: mem, now: () => clock, generateId: () => `c${n++}` });
-    writer.saveDailyCheckIn({ mood: 5, energy: 7, sleptLastNight: true, tags: [] });
-    clock = new Date(2026, 5, 17, 12, 0, 0);
-    writer.saveDailyCheckIn({ mood: 6, energy: 4, sleptLastNight: true, tags: [] });
-
-    // The persisted envelope is versioned (Sacred Rule 13).
-    const raw = JSON.parse(mem.get('mobile:clarity-journal') ?? '{}');
-    expect(raw.version).toBe(1);
-    expect(raw.dailyCheckIns).toHaveLength(2);
-
-    // A fresh store over the SAME storage runs the load+migrate path; energy survives.
-    const reloaded = new ClarityJournalStore({ storage: mem, now: () => clock, generateId: () => `c${n++}` });
-    const energy = reloaded.getRecentDailyCheckIns(10).map((e) => ({ date: e.date as string, energy: e.energy }));
-    expect(energy).toEqual([
-      { date: '2026-06-17', energy: 4 },
-      { date: '2026-06-15', energy: 7 },
-    ]);
-    // And it flows through the recap model as a trend (oldest→newest).
-    expect(energySeries(energy)).toEqual([
-      { x: '2026-06-15', y: 7 },
-      { x: '2026-06-17', y: 4 },
-    ]);
+    expect(recap.weeklyRecap).toBe('You recorded on 2 of 7 days this week.');
   });
 });
