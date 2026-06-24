@@ -19,6 +19,7 @@ import { RecordChart } from '@/components/home/record/RecordChart';
 import { PrimaryAction } from '@/components/home/PrimaryAction';
 import { PickUpRail } from '@/components/home/rails/PickUpRail';
 import { ToolsBento } from '@/components/home/ToolsBento';
+import { InterestRails } from '@/components/home/rails/InterestRails';
 import { MostRead } from '@/components/home/rails/MostRead';
 import { CareAndLearning } from '@/components/home/rails/CareAndLearning';
 import { Text } from '@/components/ui/Text';
@@ -175,6 +176,9 @@ export function HomeView({
 
           {/* TOOLS BENTO */}
           <ToolsBento />
+
+          {/* INTEREST CATEGORY RAILS — signal-driven (resolveInterest) */}
+          <InterestRails />
 
           {/* EDITORIAL MOST READ */}
           <MostRead />
