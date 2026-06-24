@@ -23,6 +23,9 @@ export const CT4_LEARN = {
   reads: 'Reads to start with',
   browseTopics: 'Browse by topic',
 
+  // Topic index — shown when the live taxonomy returns nothing (offline / no rows).
+  browseEmpty: 'No topics to show right now.',
+
   // Existing entries
   intro: 'Plain-language guides on what you might be experiencing.',
   conditionsLabel: 'Browse categories',
