@@ -6,9 +6,11 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Text } from '@/components/ui/Text';
 import { gradientForKey } from '@/features/learn/art';
+import { categoryPosterUrl } from '@/features/learn/category-posters';
 
 // Abstract thumbnail surface for Learn cards. Two modes, one component:
-//   • real art — when the article carries a hero_image_url, show it (uncropped).
+//   • real art — an article's hero_image_url, OR a category's pictogram poster
+//     (when `posterSlug` is set) — shown uncropped.
 //   • token panel — otherwise, a deterministic teal/charcoal gradient (art.ts).
 // Never a faux figure/blob (no-invented-art rule). The caller owns the frame
 // (aspect ratio, radius, overflow) via className; ArtPanel fills it. When
@@ -26,6 +28,12 @@ type ArtPanelProps = {
   /** Stable key for the gradient pick — pass the article slug or category id. */
   artKey: string;
   imageUrl?: string | null;
+  /**
+   * Canonical category slug. When set (and the article has no `imageUrl`), the
+   * category's pictogram poster is shown; an orphan slug with no poster resolves
+   * to nothing and the gradient renders. Article cards never set this.
+   */
+  posterSlug?: string | null;
   /** Frame classes (aspect, rounded, overflow-hidden, width). */
   className?: string;
   /** Lay a bottom-up dark scrim for legible overlay text. */
@@ -38,6 +46,7 @@ type ArtPanelProps = {
 export function ArtPanel({
   artKey,
   imageUrl,
+  posterSlug,
   className,
   scrim = false,
   readTime,
@@ -45,6 +54,9 @@ export function ArtPanel({
 }: ArtPanelProps) {
   const g = gradientForKey(artKey);
   const gradId = `g${Math.abs(hash(artKey))}`;
+  // The article hero wins; otherwise a category poster (when the slug has one).
+  // Either way the gradient is the fallback when there's no resolvable image.
+  const effectiveUrl = imageUrl ?? categoryPosterUrl(posterSlug);
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
 
@@ -52,13 +64,13 @@ export function ArtPanel({
   // component across rows, so a stale `errored`/`loaded` would force the gradient
   // (or a missing skeleton) onto a recycled card whose new URL is perfectly valid.
   // Adjusting state during render (vs an effect) avoids a stale-frame flash on recycle.
-  const [prevUrl, setPrevUrl] = useState(imageUrl);
-  if (imageUrl !== prevUrl) {
-    setPrevUrl(imageUrl);
+  const [prevUrl, setPrevUrl] = useState(effectiveUrl);
+  if (effectiveUrl !== prevUrl) {
+    setPrevUrl(effectiveUrl);
     setLoaded(false);
     setErrored(false);
   }
-  const showImage = Boolean(imageUrl) && !errored;
+  const showImage = Boolean(effectiveUrl) && !errored;
 
   return (
     <View className={['overflow-hidden bg-surface-active dark:bg-surface-active-dark', className]
@@ -68,8 +80,8 @@ export function ArtPanel({
         <>
           {/* Blurred cover copy fills the letterbox bars behind the real image. */}
           <Image
-            source={{ uri: imageUrl ?? undefined }}
-            recyclingKey={imageUrl ?? undefined}
+            source={{ uri: effectiveUrl ?? undefined }}
+            recyclingKey={effectiveUrl ?? undefined}
             accessibilityIgnoresInvertColors
             contentFit="cover"
             blurRadius={24}
@@ -79,8 +91,8 @@ export function ArtPanel({
           <View style={StyleSheet.absoluteFill} pointerEvents="none" className="bg-black/15" />
           {/* The real image, fully visible (contain) — never cropped. */}
           <Image
-            source={{ uri: imageUrl ?? undefined }}
-            recyclingKey={imageUrl ?? undefined}
+            source={{ uri: effectiveUrl ?? undefined }}
+            recyclingKey={effectiveUrl ?? undefined}
             accessibilityIgnoresInvertColors
             contentFit="contain"
             transition={250}

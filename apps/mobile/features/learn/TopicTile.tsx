@@ -2,6 +2,7 @@ import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { ArtPanel } from '@/features/learn/ArtPanel';
+import { posterSlugForTopic } from '@/features/learn/category-posters';
 import { useHaptics } from '@/lib/haptic-context';
 
 // Common-topics tile: a unified category card — a token-gradient image with an
@@ -36,7 +37,11 @@ export function TopicTile({ label, count, artKey, onPress, className }: TopicTil
         .join(' ')}
       style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
     >
-      <ArtPanel artKey={artKey} className="aspect-[4/3] w-full" />
+      <ArtPanel
+        artKey={artKey}
+        posterSlug={posterSlugForTopic(artKey)}
+        className="aspect-[4/3] w-full"
+      />
       <View className="border-t border-border bg-surface px-3 py-2.5 dark:border-border-dark dark:bg-surface-dark">
         <Text
           variant="h2"

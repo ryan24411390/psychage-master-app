@@ -10,6 +10,7 @@ import { AppLoader } from '@/components/ui/AppLoader';
 import { Text } from '@/components/ui/Text';
 import { ArticleListCard } from '@/features/content/ArticleListCard';
 import { ArtPanel } from '@/features/learn/ArtPanel';
+import { posterSlugForTopic } from '@/features/learn/category-posters';
 import { getLearnCategory, LEARN_CATEGORIES, type LearnCategory } from '@/features/learn/categories';
 import { useHaptics } from '@/lib/haptic-context';
 import { listArticlesByCategorySlugs } from '@/lib/articles';
@@ -82,7 +83,11 @@ function Tier1({ onPick }: { onPick: (id: string) => void }) {
               className="flex-row items-center gap-3 rounded-xl border border-border p-3 dark:border-border-dark"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
-              <ArtPanel artKey={cat.id} className="h-11 w-11 rounded-lg" />
+              <ArtPanel
+                artKey={cat.id}
+                posterSlug={posterSlugForTopic(cat.id)}
+                className="h-11 w-11 rounded-lg"
+              />
               <View className="flex-1">
                 <Text variant="bodyLarge">{cat.label}</Text>
               </View>
