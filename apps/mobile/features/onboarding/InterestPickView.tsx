@@ -1,4 +1,3 @@
-import { CONTENT_CATEGORIES } from '@psychage/shared/peaf';
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,19 +11,25 @@ import { Text } from '@/components/ui/Text';
 
 import { ONBOARDING_COPY } from './copy';
 
-// Interests (P18) — first-run topic picker. Multi-select chips over the 30 reviewed
-// content categories (@psychage/shared/peaf); the chosen slugs persist to
+// Interests (P18) — first-run topic picker. Multi-select chips over the SAME
+// canonical, DB-populated taxonomy Browse reads (the route feeds it
+// useLearnCategories → listBrowseCategories; never a hardcoded list, so onboarding
+// and Browse can never diverge). The chosen slugs persist to
 // personalization.interests and drive Learn + home recommendations. Choosing is
 // optional (Skip) — anonymous-first, never walls (GlobalHeader keeps the Help-now pill
 // reachable, SR-2). Mascot uses an explicit 'encouraging' pose (this route is not in
 // the surface binding, so the prop carries it; /onboarding is not a forbidden route).
 
 export interface InterestPickViewProps {
+  /** The category set to offer — the canonical DB-populated taxonomy (slug + name),
+   *  passed in by the route so it matches Browse exactly. Empty while loading/offline:
+   *  the screen still shows Continue + Skip (interests are optional). */
+  readonly categories: ReadonlyArray<{ readonly slug: string; readonly name: string }>;
   /** Called with the chosen category slugs (empty array on Skip). */
   readonly onDone: (slugs: string[]) => void;
 }
 
-export function InterestPickView({ onDone }: InterestPickViewProps) {
+export function InterestPickView({ categories, onDone }: InterestPickViewProps) {
   const t = ONBOARDING_COPY;
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
 
@@ -56,7 +61,7 @@ export function InterestPickView({ onDone }: InterestPickViewProps) {
           </Text>
 
           <View className="mt-6 flex-row flex-wrap justify-center gap-2.5">
-            {CONTENT_CATEGORIES.map((cat) => {
+            {categories.map((cat) => {
               const isOn = selected.has(cat.slug);
               return (
                 <Pressable
