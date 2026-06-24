@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { CrisisView } from '@/features/crisis/CrisisView';
 import { localeDeviceRegionHint } from '@/features/crisis/device-region';
 import { CRISIS_DATASET } from '@/features/crisis/helplines.fixtures';
+import { requestPreciseRegion, silentGrantedRegionHint } from '@/features/crisis/precise-region';
 import {
   defaultDeviceRegionHint,
   getEmergencyNumber,
@@ -31,14 +32,39 @@ function resolveActiveRegion() {
 export default function CrisisScreen() {
   const reduced = useReducedMotion();
   const [region, setRegion] = useState(resolveActiveRegion);
+  const [preciseBusy, setPreciseBusy] = useState(false);
 
   // S11 stays mounted under the pushed S12 picker; re-resolve on focus so a region
-  // change there is reflected on return.
+  // change there is reflected on return. Content renders INSTANTLY from this synchronous
+  // resolution (override → locale → fallback) — zero friction, fully offline.
+  //
+  // Then, when no explicit S12 override exists and location permission is ALREADY
+  // granted, opportunistically sharpen the country from GPS. This never prompts and never
+  // blocks (best-effort, non-blocking) — failure silently keeps the locale region (SR-2).
   useFocusEffect(
     useCallback(() => {
       setRegion(resolveActiveRegion());
+      let active = true;
+      if (loadRegionOverride(storage) === null) {
+        void silentGrantedRegionHint().then((r) => {
+          if (active && r) setRegion(r);
+        });
+      }
+      return () => {
+        active = false;
+      };
     }, []),
   );
+
+  // Opt-in only: an explicit tap requests permission on demand and rescopes resources to
+  // the precise country. Never auto-prompted; crisis content is never gated on the result.
+  const onUsePreciseLocation = useCallback(() => {
+    setPreciseBusy(true);
+    void requestPreciseRegion().then((r) => {
+      setPreciseBusy(false);
+      if (r) setRegion(r);
+    });
+  }, []);
 
   return (
     <>
@@ -51,6 +77,8 @@ export default function CrisisScreen() {
         helplines={getHelplines(CRISIS_DATASET, region)}
         onBack={() => router.back()}
         onChangeRegion={() => router.push('/crisis-region')}
+        onUsePreciseLocation={onUsePreciseLocation}
+        preciseBusy={preciseBusy}
       />
     </>
   );
