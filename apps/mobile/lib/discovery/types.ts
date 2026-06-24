@@ -15,8 +15,9 @@ export interface CategoryRef {
 }
 
 /** A condition reference to open. `id` is the Navigator KB condition id (e.g.
- * 'MDE', 'GAD'); `title` is the KB's own educational label; `href` is the KB's
- * declared destination. No diagnostic phrasing — labels are used verbatim. */
+ * 'MDE', 'GAD'); `title` is the KB's own educational label; `href` is its owning
+ * content-category page (or the `/conditions` index) — a live native route, NOT
+ * the web-shaped KB guide_path. No diagnostic phrasing — labels are used verbatim. */
 export interface ConditionRef {
   id: string;
   title: string;

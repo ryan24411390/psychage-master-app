@@ -138,8 +138,11 @@ describe('resolveNavigatorResult — conditions → categories → category-leve
 
     const out = await resolveNavigatorResult(navResult([{ condition_id: 'MDE', name: 'Depression' }]));
 
+    // Condition href = its owning content-category page (categoryHref of the first
+    // mapped category), NOT the web-shaped KB guide_path. MDE's first owning category
+    // is depression-grief (a condition-bearing category → /conditions/<slug>).
     expect(out.conditions).toEqual([
-      { id: 'MDE', title: 'Depression', href: '/learn/conditions/depression' },
+      { id: 'MDE', title: 'Depression', href: '/conditions/depression-grief' },
     ]);
     // MDE belongs to depression-grief (among others) via getCategoriesForCondition.
     expect(out.categories.map((c) => c.slug)).toContain('depression-grief');
@@ -162,7 +165,8 @@ describe('resolveNavigatorResult — conditions → categories → category-leve
     const out = await resolveNavigatorResult(navResult([{ condition_id: 'SAD', name: 'Social Anxiety' }]));
 
     expect(out.conditions.map((c) => c.id)).toEqual(['SAD']);
-    expect(out.conditions.find((c) => c.id === 'SAD')?.href).toMatch(/^\//);
+    // No owning category → the live /conditions index fallback (never /reference, never guide_path).
+    expect(out.conditions.find((c) => c.id === 'SAD')?.href).toBe('/conditions');
     expect(out.categories).toEqual([]);
     expect(out.articles).toEqual([]);
     // No category slugs → the article seam is never queried.

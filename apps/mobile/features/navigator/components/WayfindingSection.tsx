@@ -18,10 +18,10 @@ import { NAVIGATOR_COPY } from '../copy';
 // experience touches → here is what we have", NEVER "you have X" (SR-2/SR-3). The 0.75 cap
 // and on-device symptom state (SR-1/SR-4) are never read into this layer.
 //
-// KNOWN LIMITATION (user-accepted, tracked): condition rows route to the KB `guide_path`,
-// which is web-shaped (`/learn/conditions/<x>`). Several of those have no matching mobile
-// route yet and land on the styled `+not-found` screen — a dead end, not a crash. Making
-// guide_path mobile-valid is a resolver/KB follow-up, out of this surface's scope.
+// Condition rows route to a LIVE native destination — the resolver maps each condition to
+// its owning content-category page (or the `/conditions` index), never the old web-shaped
+// `guide_path` that dead-ended on `+not-found`. The fix lives in the resolver
+// (lib/discovery/signal-map.ts `conditionHref`); this surface still consumes hrefs verbatim.
 
 type RowProps = {
   readonly icon: ElementType;
