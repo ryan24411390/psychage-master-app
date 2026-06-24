@@ -62,7 +62,7 @@ describe('SearchView — dynamic resolver-backed results', () => {
   it('renders categories, conditions, and articles sections for a query', async () => {
     mockResolve.mockResolvedValue({
       categories: [{ slug: 'anxiety-stress', title: 'Anxiety, Stress & Overwhelm', href: '/conditions/anxiety-stress' }],
-      conditions: [{ id: 'GAD', title: 'Generalized Anxiety', href: '/learn/conditions/anxiety' }],
+      conditions: [{ id: 'GAD', title: 'Generalized Anxiety', href: '/conditions/anxiety-stress' }],
       articles: [],
     });
     mockSearch.mockResolvedValue([article('q1')]);
@@ -95,10 +95,11 @@ describe('SearchView — dynamic resolver-backed results', () => {
     expect(router.push).toHaveBeenCalledWith('/conditions/anxiety-stress');
   });
 
-  it('condition-only query renders only the Conditions section and routes to the KB guide', async () => {
+  it('condition-only query renders only the Conditions section and routes to the resolver href', async () => {
     mockResolve.mockResolvedValue({
       categories: [],
-      conditions: [{ id: 'SAD', title: 'Social Anxiety', href: '/learn/conditions/social-anxiety' }],
+      // SAD maps to no content category → the resolver's live /conditions fallback.
+      conditions: [{ id: 'SAD', title: 'Social Anxiety', href: '/conditions' }],
       articles: [],
     });
 
@@ -110,7 +111,7 @@ describe('SearchView — dynamic resolver-backed results', () => {
     expect(screen.queryByText('Categories')).toBeNull();
 
     fireEvent.press(screen.getByTestId('search-condition-SAD'));
-    expect(router.push).toHaveBeenCalledWith('/learn/conditions/social-anxiety');
+    expect(router.push).toHaveBeenCalledWith('/conditions');
   });
 
   it('shows live-category intent chips before typing and pre-fills a query on tap', async () => {

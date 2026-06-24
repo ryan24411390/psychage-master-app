@@ -37,10 +37,10 @@ const MAX_ARTICLE_REFS = 8;
 /** Minimum query length, mirroring repo.searchArticles (a 1-char query is noise). */
 const MIN_QUERY_LENGTH = 2;
 
-/** Last-resort condition route when the KB carries no guide_path (does not occur
- * for live Navigator ids, which always exist in this KB) — the read-only A–Z
- * conditions reference. Never a fabricated deep link. */
-const CONDITION_FALLBACK_HREF = '/reference';
+/** Last-resort condition route when a condition maps to no content category —
+ * the live /conditions index (the conditions browse landing). Never a fabricated
+ * deep link, and never the web-shaped guide_path (which dead-ends on native). */
+const CONDITION_FALLBACK_HREF = '/conditions';
 
 /** Active KB conditions keyed by id, built once from the bundled (read-only) KB.
  * Pure data construction — no side effects. */
@@ -56,8 +56,19 @@ function toArticleRef(a: ArticleListItem): ArticleRef {
   return { slug: a.slug, title: a.title, href: `/article/${a.slug}` };
 }
 
+/** A condition's native wayfinding destination: its owning content-category page
+ * (categoryHref of the first mapped category) when one maps, else the /conditions
+ * index. Replaces the KB guide_path, which is web-shaped (/learn/conditions/<x> or
+ * /learn/<x>) and dead-ends on native. Wayfinding only — points at the educational
+ * overview, asserts nothing clinical. The ONE place a condition becomes an href;
+ * both toConditionRef and resolveNavigatorResult route through it. */
+function conditionHref(conditionId: string): string {
+  const owning = getCategoriesForCondition(conditionId);
+  return owning[0] ? categoryHref(owning[0]) : CONDITION_FALLBACK_HREF;
+}
+
 function toConditionRef(c: ConditionWithMappings): ConditionRef {
-  return { id: c.id, title: c.name, href: c.guide_path };
+  return { id: c.id, title: c.name, href: conditionHref(c.id) };
 }
 
 /** A CategoryRef for a slug + display title. Routes via the shared `categoryHref`
@@ -163,10 +174,7 @@ export async function resolveNavigatorResult(result: NavigatorResults): Promise<
 
     if (!seenCondition.has(conditionId)) {
       seenCondition.add(conditionId);
-      const kb = KB_BY_ID.get(conditionId);
-      const href =
-        kb?.guide_path ?? (owning[0] ? categoryHref(owning[0]) : CONDITION_FALLBACK_HREF);
-      conditions.push({ id: conditionId, title: item.name, href });
+      conditions.push({ id: conditionId, title: item.name, href: conditionHref(conditionId) });
     }
 
     for (const cc of owning) {

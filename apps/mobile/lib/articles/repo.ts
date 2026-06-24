@@ -8,6 +8,8 @@
 // query error" as "no content available" and shows a fallback state — it never
 // throws and never blocks crisis (SR / rules/offline.md posture).
 
+import { getCategoryGroup } from '@psychage/shared/peaf';
+
 import { getSupabaseClient } from '@/lib/supabase';
 
 import {
@@ -19,7 +21,7 @@ import {
   mapListRow,
 } from './mapper';
 import { rankBySharedTags } from './ranking';
-import type { ArticleCategory, ArticleDetail, ArticleListItem } from './types';
+import type { ArticleCategory, ArticleDetail, ArticleListItem, BrowseCategory } from './types';
 
 // List view needs an INNER join so the embedded category can be filtered by slug.
 const LIST_FIELDS =
@@ -58,6 +60,17 @@ export async function listPopulatedCategories(): Promise<ArticleCategory[]> {
   } catch {
     return [];
   }
+}
+
+/**
+ * The browse taxonomy augmented with a group label for ordering/display. Wraps
+ * `listPopulatedCategories()` and maps each result through `getCategoryGroup()`
+ * — only categories that hold published articles are returned (count > 0 gate
+ * lives in `listPopulatedCategories`). Returns [] on any error.
+ */
+export async function listBrowseCategories(): Promise<BrowseCategory[]> {
+  const cats = await listPopulatedCategories();
+  return cats.map((c) => ({ ...c, group: getCategoryGroup(c.slug) }));
 }
 
 /**

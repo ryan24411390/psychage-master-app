@@ -17,7 +17,7 @@ const CONTENT: SignalToContent = {
   categories: [
     { slug: 'anxiety-stress', title: 'Anxiety & Stress', href: '/conditions/anxiety-stress' },
   ],
-  conditions: [{ id: 'GAD', title: 'Generalized Anxiety', href: '/learn/conditions/anxiety' }],
+  conditions: [{ id: 'GAD', title: 'Generalized Anxiety', href: '/conditions/anxiety-stress' }],
   articles: [
     { slug: 'understanding-anxiety', title: 'Understanding anxiety', href: '/article/understanding-anxiety' },
   ],
@@ -44,11 +44,11 @@ describe('WayfindingSection', () => {
     expect(router.push as jest.Mock).toHaveBeenCalledWith('/conditions/anxiety-stress');
   });
 
-  it('routes a condition row to its KB guide_path (consumed verbatim)', () => {
+  it('routes a condition row to its owning-category page (consumed verbatim)', () => {
     renderWithProviders(<WayfindingSection content={CONTENT} />);
 
     fireEvent.press(screen.getByTestId('wayfind-condition-GAD'));
-    expect(router.push as jest.Mock).toHaveBeenCalledWith('/learn/conditions/anxiety');
+    expect(router.push as jest.Mock).toHaveBeenCalledWith('/conditions/anxiety-stress');
   });
 
   it('routes an article row through the shared article reader', () => {

@@ -31,6 +31,9 @@ export const CT4_LEARN = {
   searchChipsIntro: 'Start with a topic',
   searchIdlePrompt: 'Search a feeling, topic, or condition to find guides.',
 
+  // Topic index — shown when the live taxonomy returns nothing (offline / no rows).
+  browseEmpty: 'No topics to show right now.',
+
   // Existing entries
   intro: 'Plain-language guides on what you might be experiencing.',
   conditionsLabel: 'Browse categories',

@@ -40,6 +40,7 @@ export {
   getCategoriesForCondition,
   GAP_CLOSER_CATEGORIES,
   FOUNDATION_CATEGORIES,
+  getCategoryGroup,
 } from './content-architecture';
 
 // Quality Gate Engine
