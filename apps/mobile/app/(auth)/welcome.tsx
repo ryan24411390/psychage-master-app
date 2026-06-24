@@ -5,6 +5,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { AuthBottomSheet } from '@/components/auth/AuthBottomSheet';
 import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
+import { PsychageLogoMark } from '@/components/brand/PsychageLogoMark';
 import { Button } from '@/components/ui/Button';
 import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
@@ -55,7 +56,7 @@ export default function WelcomeScreen() {
             entering={reduced ? undefined : FadeIn.duration(DURATION.calm).easing(easingFn('out'))}
             className="flex-1 items-center justify-center gap-4"
           >
-            <View className="h-2 w-12 rounded-full bg-primary dark:bg-primary-dark" />
+            <PsychageLogoMark testID="welcome-logo" size={72} />
             <Text variant="h1" className="text-center text-4xl">
               {AUTH_COPY.welcomeTitle}
             </Text>
