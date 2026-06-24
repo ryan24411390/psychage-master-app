@@ -9,14 +9,15 @@ import {
   type ArticleListItem,
   CATEGORY_PAGE_SIZE,
   listArticlesByCategorySlug,
-  listPopulatedCategories,
+  listBrowseCategories,
 } from '@/lib/articles';
 
-/** The browse taxonomy — populated categories, read live (never hardcoded). */
+/** The browse taxonomy — all DB-populated categories with live counts and
+ * group labels, never hardcoded to the reviewed-taxonomy constant. */
 export function useLearnCategories() {
   return useQuery({
     queryKey: ['learn', 'categories'],
-    queryFn: () => listPopulatedCategories(),
+    queryFn: () => listBrowseCategories(),
     // Taxonomy changes rarely; keep it fresh for the whole session.
     staleTime: 30 * 60_000,
   });

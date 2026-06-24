@@ -624,3 +624,33 @@ export const SPECIALIZED_CATEGORIES = CONTENT_CATEGORIES.filter(
 
 /** Get the extended domains & applied psychology categories (23–31) */
 export const EXTENDED_CATEGORIES = CONTENT_CATEGORIES.filter((c) => c.number >= 23);
+
+// ---------------------------------------------------------------------------
+// Browse presentation — group classification for the category browse gate.
+// Pure slug → group string. Reads navigatorConditions for known slugs (the
+// clinical KB stays byte-unchanged); falls back to an explicit set + keyword
+// pattern for the 18 orphan slugs that exist in the DB but not in the 30
+// reviewed-taxonomy constant.
+// ---------------------------------------------------------------------------
+
+const CLINICAL_ORPHAN_SLUGS: ReadonlySet<string> = new Set([
+  'eating-body',
+  'substance-addiction',
+  'ocd-related',
+  'neurodivergence-adhd-autism',
+  'trauma-ptsd',
+  'neurodevelopmental',
+  'children-adolescents',
+]);
+
+export function getCategoryGroup(slug: string): string {
+  const known = getCategoryBySlug(slug);
+  if (known) {
+    return known.navigatorConditions.length > 0 ? 'Conditions & Disorders' : 'Behavior & Wellness';
+  }
+  if (CLINICAL_ORPHAN_SLUGS.has(slug)) return 'Conditions & Disorders';
+  if (/disorder|syndrome|addiction|psychosis|trauma|autism|adhd|neurodiv|eating|ocd|ptsd/i.test(slug)) {
+    return 'Conditions & Disorders';
+  }
+  return 'Life & Society';
+}

@@ -24,6 +24,12 @@ export type ArticleCategory = {
   articleCount: number;
 };
 
+/** `ArticleCategory` augmented with a browse-presentation group label derived
+ * from the clinical taxonomy. One of 'Conditions & Disorders', 'Behavior &
+ * Wellness', or 'Life & Society'. Covers all DB categories, including the 18
+ * that are not in the 30-entry reviewed-taxonomy constant. */
+export type BrowseCategory = ArticleCategory & { group: string };
+
 /** One reference backing an article (from `article_citations`), shown in the
  * reader's References section. Rendered verbatim — never paraphrased. */
 export type Citation = {
