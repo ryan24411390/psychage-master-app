@@ -114,6 +114,16 @@ export const NAVIGATOR_COPY = {
   talkToProfessional: 'Talk to a professional',
   resultsTitle: 'Your results',
 
+  // Wayfinding into related content (resolveNavigatorResult) — link rows only, no
+  // claims. Framing points at content ("areas your experience touches → here's what we
+  // have"), never "you have X" (SR-2/SR-3). Group labels are plain reference nouns.
+  exploreTitle: 'Explore what we have',
+  exploreCaption:
+    "Areas your experience touches — here's what we have to read on each. Educational, not a diagnosis.",
+  exploreTopics: 'Topics',
+  exploreConditions: 'Conditions',
+  exploreReading: 'Articles',
+
   // P41 — results actions + on-device history
   goHome: 'Home',
   savedOnDevice: 'Saved on this device',

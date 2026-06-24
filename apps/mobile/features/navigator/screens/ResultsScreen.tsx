@@ -1,5 +1,5 @@
 import { Activity, AlertTriangle, FileDown, History, Home, Stethoscope, Trash2 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
@@ -10,15 +10,17 @@ import { Card } from '@/components/ui/Card';
 import { DomainRadar, type RadarDatum } from '@/components/ui/charts';
 import { Text } from '@/components/ui/Text';
 import type { HelplineRow } from '@/features/crisis/helpline-schema';
+import { resolveNavigatorResult } from '@/lib/discovery/signal-map';
+import type { SignalToContent } from '@/lib/discovery/types';
 import { useReducedMotion } from '@/lib/motion';
 import { useThemeColors } from '@/lib/use-theme-colors';
 
 import { NAVIGATOR_COPY } from '../copy';
 import { staggerItemEnter } from '../animations';
-import { NextStepCards, type NextStepItem } from '../components/NextStepCards';
 import { ProviderQuestions } from '../components/ProviderQuestions';
 import { ResultCard } from '../components/ResultCard';
 import { CrisisBanner, WatchBanner } from '../components/ResultsBanners';
+import { WayfindingSection } from '../components/WayfindingSection';
 
 // S — Results (mobile port of web ResultsScreen). Full educational report: header,
 // crisis/watch banners, Your-Symptoms, Possible-Patterns (strong vs exploratory split +
@@ -43,9 +45,7 @@ export interface ResultsScreenProps {
   readonly areaPoints: readonly RadarDatum[];
   readonly emergencyNumber: string;
   readonly helplines: readonly HelplineRow[];
-  readonly onTrack: () => void;
   readonly onFindCare: () => void;
-  readonly onLearn: () => void;
   readonly onStartOver: () => void;
   /** P39 — build + share the summary-only PDF. Omitted in render tests / dev harness. */
   readonly onDownloadSummary?: () => void;
@@ -110,9 +110,7 @@ export function ResultsScreen({
   areaPoints,
   emergencyNumber,
   helplines,
-  onTrack,
   onFindCare,
-  onLearn,
   onStartOver,
   onDownloadSummary,
   onHome,
@@ -124,6 +122,26 @@ export function ResultsScreen({
   const [removed, setRemoved] = useState(false);
   const showAreasChart = areaPoints.length >= 3; // a radar needs ≥3 axes
 
+  // Wayfinding: resolve this run into content to OPEN (categories / conditions / articles).
+  // resolveNavigatorResult is consumed verbatim — it reads only condition_id + name, no
+  // scores or symptom data, and emits nothing (SR-1/SR-4). Async (it reads the article
+  // repo); on any failure the section simply does not render — the rest of the report and
+  // the "Talk to a professional" CTA stand on their own.
+  const [wayfinding, setWayfinding] = useState<SignalToContent | null>(null);
+  useEffect(() => {
+    let alive = true;
+    resolveNavigatorResult(results)
+      .then((content) => {
+        if (alive) setWayfinding(content);
+      })
+      .catch(() => {
+        if (alive) setWayfinding(null);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [results]);
+
   const safety = results.safety;
   const matches = results.results;
   const symptomCount = symptomDetails.length;
@@ -134,36 +152,6 @@ export function ResultsScreen({
   const strong = matches.filter((r) => r.relevance_level === 'high' || r.relevance_level === 'moderate');
   const exploratory = matches.filter((r) => r.relevance_level === 'low' || r.relevance_level === 'minimal');
   const allWeak = matches.length > 0 && strong.length === 0;
-
-  const nextSteps: NextStepItem[] = [
-    {
-      id: 'ns1',
-      type: 'track',
-      title: 'Track Your Symptoms',
-      description:
-        'Keep a daily log of how you feel, noting patterns, triggers, and what helps. This is invaluable for any future clinical conversations.',
-      actionText: 'Start Tracking',
-      onPress: onTrack,
-    },
-    {
-      id: 'ns2',
-      type: 'professional',
-      title: 'Talk to a Professional',
-      description:
-        'Share these insights with a therapist, counselor, or doctor. They can provide an accurate assessment based on your full history.',
-      actionText: 'Find a Provider',
-      onPress: onFindCare,
-    },
-    {
-      id: 'ns3',
-      type: 'selfcare',
-      title: 'Explore Self-Care Resources',
-      description:
-        'Our library includes guided exercises, educational content, and coping strategies tailored to different experiences.',
-      actionText: 'Browse Library',
-      onPress: onLearn,
-    },
-  ];
 
   return (
     <ScrollView contentContainerClassName="gap-10 px-4 pb-16 pt-2" keyboardShouldPersistTaps="handled">
@@ -369,9 +357,12 @@ export function ResultsScreen({
             </ClinicianRule>
           </View>
         </Card>
-
-        <NextStepCards steps={nextSteps} />
       </View>
+
+      {/* Wayfinding — deep links into the categories / conditions / articles this run
+          touches (resolveNavigatorResult), replacing the prior generic dead-end CTAs.
+          Renders nothing when the resolver surfaces no targets. */}
+      <WayfindingSection content={wayfinding} />
 
       {/* Conversation Starters (P40 — per-item "why this helps" + Find Care CTA) */}
       <View className="gap-4 border-b border-border pb-10 dark:border-border-dark">
