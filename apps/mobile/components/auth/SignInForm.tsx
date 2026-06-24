@@ -43,6 +43,13 @@ type SignInFormProps = {
    * mode toggle, so it omits this and shows no second link.
    */
   onSignUp?: () => void;
+  /**
+   * Whether the form owns its keyboard avoidance (default true — the standalone
+   * full-screen /sign-in route). The welcome bottom-sheet sets this false and
+   * provides a single sheet-level KeyboardAvoidingView instead, so the whole
+   * sheet (form + mode-toggle link) lifts as one unit and no two KAVs nest.
+   */
+  avoidKeyboard?: boolean;
 };
 
 export function SignInForm({
@@ -52,6 +59,7 @@ export function SignInForm({
   onProvider,
   onForgotPassword,
   onSignUp,
+  avoidKeyboard = true,
 }: SignInFormProps) {
   const reduced = useReducedMotion();
   const [email, setEmail] = useState('');
@@ -70,7 +78,8 @@ export function SignInForm({
   return (
     <View className="flex-1">
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        enabled={avoidKeyboard}
         className="flex-1"
       >
         <ScrollView

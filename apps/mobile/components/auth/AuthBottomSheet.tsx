@@ -1,7 +1,7 @@
 import { X } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 import { SignInForm } from './SignInForm';
@@ -79,20 +79,28 @@ export function AuthBottomSheet({
     <Animated.View
       entering={reduced ? undefined : FadeIn.duration(DURATION.swift)}
       exiting={reduced ? undefined : FadeOut.duration(DURATION.swift)}
-      className="absolute inset-0 z-40 justify-end bg-charcoal-900/40 dark:bg-black/60"
+      className="absolute inset-0 z-40 bg-charcoal-900/40 dark:bg-black/60"
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Close"
-        className="flex-1"
-        onPress={onClose}
-      />
-      <Animated.View
-        entering={reduced ? undefined : SlideInDown.springify().damping(20).stiffness(200).mass(0.8)}
-        exiting={reduced ? undefined : SlideOutDown.springify().damping(20).stiffness(200).mass(0.8)}
-        className="max-h-[90%] min-h-[50%] rounded-t-xl bg-surface px-0 pb-6 pt-5 dark:bg-surface-dark"
+      {/* Sheet-level keyboard avoidance: the WHOLE sheet (form + mode-toggle link)
+          lifts as one unit. The forms set avoidKeyboard={false} so no two KAVs nest.
+          flex-1 + justify-end keeps the content-sized sheet pinned above the keyboard
+          when the KAV shrinks the column; the flex-1 backdrop absorbs the slack. */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1 justify-end"
       >
-        <View className="mb-1 flex-row items-start justify-between px-5">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          className="flex-1"
+          onPress={onClose}
+        />
+        <Animated.View
+          entering={reduced ? undefined : SlideInDown.springify().damping(20).stiffness(200).mass(0.8)}
+          exiting={reduced ? undefined : SlideOutDown.springify().damping(20).stiffness(200).mass(0.8)}
+          className="max-h-[90%] min-h-[50%] rounded-t-xl bg-surface px-0 pb-6 pt-5 dark:bg-surface-dark"
+        >
+          <View className="mb-1 flex-row items-start justify-between px-5">
           <View className="flex-1" />
           <Pressable accessibilityRole="button" accessibilityLabel="Close" hitSlop={8} onPress={onClose}>
             <X size={22} color={iconColor} />
@@ -106,6 +114,7 @@ export function AuthBottomSheet({
             onSubmit={handleSignIn}
             onProvider={onProvider}
             onForgotPassword={onForgotPassword}
+            avoidKeyboard={false}
           />
         ) : (
           <SignUpForm
@@ -113,6 +122,7 @@ export function AuthBottomSheet({
             submitting={isBusy}
             onSubmit={handleSignUp}
             onProvider={onProvider}
+            avoidKeyboard={false}
           />
         )}
 
@@ -123,7 +133,8 @@ export function AuthBottomSheet({
             </Text>
           </Pressable>
         </View>
-      </Animated.View>
+        </Animated.View>
+      </KeyboardAvoidingView>
     </Animated.View>
   );
 }

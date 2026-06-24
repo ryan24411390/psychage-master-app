@@ -53,9 +53,22 @@ type SignUpFormProps = {
   submitting?: boolean;
   onSubmit: (email: string, password: string, fullName: string) => void;
   onProvider: (provider: SocialProvider) => void;
+  /**
+   * Whether the form owns its keyboard avoidance (default true — the standalone
+   * full-screen /sign-up route). The welcome bottom-sheet sets this false and
+   * provides a single sheet-level KeyboardAvoidingView instead, so the whole
+   * sheet (form + mode-toggle link) lifts as one unit and no two KAVs nest.
+   */
+  avoidKeyboard?: boolean;
 };
 
-export function SignUpForm({ formError, submitting = false, onSubmit, onProvider }: SignUpFormProps) {
+export function SignUpForm({
+  formError,
+  submitting = false,
+  onSubmit,
+  onProvider,
+  avoidKeyboard = true,
+}: SignUpFormProps) {
   const reduced = useReducedMotion();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -89,7 +102,8 @@ export function SignUpForm({ formError, submitting = false, onSubmit, onProvider
   return (
     <View className="flex-1">
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        enabled={avoidKeyboard}
         className="flex-1"
       >
         <ScrollView
