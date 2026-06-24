@@ -7,6 +7,7 @@ export {
   listArticlesByCategorySlug,
   listArticlesByCategorySlugs,
   listArticlesBySlugs,
+  listBrowseCategories,
   listPopulatedCategories,
   listRecentArticles,
   searchArticles,
@@ -17,5 +18,6 @@ export {
   type ArticleCategory,
   type ArticleDetail,
   type ArticleListItem,
+  type BrowseCategory,
   type Citation,
 } from './types';

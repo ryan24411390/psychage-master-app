@@ -1,4 +1,3 @@
-import { CONTENT_CATEGORIES } from '@psychage/shared/peaf';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
@@ -7,7 +6,8 @@ import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/Text';
-import { categoryHref } from '@/features/learn/category-route';
+import { categoryHrefBySlug } from '@/features/learn/category-route';
+import { useLearnCategories } from '@/features/learn/hooks';
 import { FeaturedCard } from '@/features/learn/FeaturedCard';
 import { LearnHero } from '@/features/learn/LearnHero';
 import { LEARN_CATEGORIES } from '@/features/learn/categories';
@@ -41,6 +41,8 @@ export function LearnView() {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const colW = Math.floor((width - 32 - 12) / 2);
+
+  const { data: browseCategories } = useLearnCategories();
 
   const { data } = useQuery({
     queryKey: ['articles', 'recent', 14],
@@ -136,18 +138,19 @@ export function LearnView() {
             </View>
           </View>
 
-          {/* All categories — every reviewed content category, dynamic + reachable
-              (P19/P20). Condition-focused → /conditions/[slug]; wellness → /learn/[slug]. */}
+          {/* All categories — DB-driven live set (every category with published
+              articles). Condition-focused → /conditions/[slug]; all others →
+              /learn/[slug]. Count is live; zero-content categories excluded. */}
           <View className="px-4 pt-8">
             <SectionHeader title="All categories" />
             <View className="gap-2">
-              {CONTENT_CATEGORIES.map((cat) => (
+              {(browseCategories ?? []).map((cat) => (
                 <Pressable
                   key={cat.slug}
                   accessibilityRole="button"
                   accessibilityLabel={cat.name}
                   testID={`learn-category-${cat.slug}`}
-                  onPress={() => router.push(categoryHref(cat))}
+                  onPress={() => router.push(categoryHrefBySlug(cat.slug))}
                   className="min-h-[44px] flex-row items-center justify-between rounded-xl border border-border px-4 py-3 dark:border-border-dark"
                   style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
                 >
