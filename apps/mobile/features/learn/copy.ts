@@ -23,6 +23,14 @@ export const CT4_LEARN = {
   reads: 'Reads to start with',
   browseTopics: 'Browse by topic',
 
+  // Search results (S6 search screen) — section headers + idle launchpad. Neutral
+  // wayfinding labels, no diagnostic framing (Sacred Rule #2).
+  searchSectionCategories: 'Categories',
+  searchSectionConditions: 'Conditions',
+  searchSectionArticles: 'Guides',
+  searchChipsIntro: 'Start with a topic',
+  searchIdlePrompt: 'Search a feeling, topic, or condition to find guides.',
+
   // Existing entries
   intro: 'Plain-language guides on what you might be experiencing.',
   conditionsLabel: 'Browse categories',
