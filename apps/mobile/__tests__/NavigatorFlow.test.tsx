@@ -79,9 +79,7 @@ const HALT_RESULT = {
 function renderFlow(runNavigator: () => NavigatorResults) {
   const handlers = {
     onExit: jest.fn(),
-    onTrack: jest.fn(),
     onFindCare: jest.fn(),
-    onLearn: jest.fn(),
   };
   renderWithProviders(
     <NavigatorFlow
@@ -222,9 +220,7 @@ describe('P35 — symptom selection paginates by category', () => {
         emergencyNumber="911"
         helplines={HELPLINES}
         onExit={jest.fn()}
-        onTrack={jest.fn()}
         onFindCare={jest.fn()}
-        onLearn={jest.fn()}
       />,
       { haptics: true },
     );

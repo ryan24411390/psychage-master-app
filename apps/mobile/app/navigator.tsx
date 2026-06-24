@@ -79,9 +79,7 @@ export default function NavigatorScreen() {
         onExit={() => goBackOr('/compass')}
         emergencyNumber={getEmergencyNumber(CRISIS_DATASET, region)}
         helplines={getHelplines(CRISIS_DATASET, region)}
-        onTrack={() => router.push('/tools/mood-journal')}
         onFindCare={() => router.push('/find')}
-        onLearn={() => router.push('/learn')}
         onDownloadSummary={(areas: NavigatorSummaryArea[]) => {
           // Build LOCALLY (offline) + hand to the platform share sheet (SR-4: Psychage
           // never transmits). Summary-only — LABELS, no raw answers, no confidence number.

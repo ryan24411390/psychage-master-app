@@ -68,9 +68,7 @@ export interface NavigatorFlowProps {
   readonly onExit: () => void;
   readonly emergencyNumber: string;
   readonly helplines: readonly HelplineRow[];
-  readonly onTrack: () => void;
   readonly onFindCare: () => void;
-  readonly onLearn: () => void;
   /**
    * Fired once when a NON-crisis results screen is reached, with the inputs and
    * computed results. The route uses this to persist the run to the local-only
@@ -94,9 +92,7 @@ export function NavigatorFlow({
   onExit,
   emergencyNumber,
   helplines,
-  onTrack,
   onFindCare,
-  onLearn,
   onResults,
   onDownloadSummary,
   onHome,
@@ -223,9 +219,7 @@ export function NavigatorFlow({
           areaPoints={areaPoints}
           emergencyNumber={emergencyNumber}
           helplines={helplines}
-          onTrack={onTrack}
           onFindCare={onFindCare}
-          onLearn={onLearn}
           onStartOver={() => dispatch({ type: 'RESET' })}
           onDownloadSummary={onDownloadSummary ? () => onDownloadSummary(summaryAreas) : undefined}
           onHome={onHome}
