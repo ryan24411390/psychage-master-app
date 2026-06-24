@@ -45,11 +45,12 @@ export function InterestPickView({ categories, onDone }: InterestPickViewProps) 
   return (
     <View className="flex-1 bg-background dark:bg-background-dark">
       <GlobalHeader />
-      <ScreenEntrance>
-        <ScrollView
-          contentContainerClassName="px-5 pb-4"
-          showsVerticalScrollIndicator={false}
-        >
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-5 pb-4"
+        showsVerticalScrollIndicator={false}
+      >
+        <ScreenEntrance>
           <View className="items-center pt-1 pb-3">
             <Mascot testID="onboarding-interests-mascot" state="encouraging" size={120} />
           </View>
@@ -87,8 +88,8 @@ export function InterestPickView({ categories, onDone }: InterestPickViewProps) 
               );
             })}
           </View>
-        </ScrollView>
-      </ScreenEntrance>
+        </ScreenEntrance>
+      </ScrollView>
 
       <SafeAreaView edges={['bottom']} className="gap-3 px-5 pb-2 pt-2">
         <Button variant="primary" size="lg" className="w-full" onPress={() => onDone([...selected])}>
