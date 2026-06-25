@@ -34,7 +34,7 @@ import {
 // review. The header names the COMPANY + generation time only; no clinician is named.
 
 /** Monotonic version of the unified-export document subsystem (bump on shape changes). */
-export const UNIFIED_EXPORT_VERSION = 1;
+export const UNIFIED_EXPORT_VERSION = 2;
 
 export interface UnifiedExportInput {
   /** Editable full name — the provider files the summary by it. */
@@ -80,7 +80,9 @@ function formatRunDate(date: string): string {
 // shared shell's ink palette rather than hardcoding greys.
 const INK_TEXT = resolveColorRef('color.text.primary').light;
 const INK_SECONDARY = resolveColorRef('color.text.secondary').light;
-const INK_RULE = resolveColorRef('color.charcoal.500').light; // tool-title underline
+// Brand teal — accent-only underline beneath each tool title (matches the shared shell's
+// masthead/brand rule). Not load-bearing; the title text itself stays ink.
+const INK_RULE = resolveColorRef('color.primary.default').light;
 
 // Composition CSS — each tool starts a fresh page (except the first); the inner blocks keep
 // their own page-break-inside rules. The tool title sits OUTSIDE any `.block`, so the
@@ -159,11 +161,18 @@ export function buildUnifiedExportHtml(input: UnifiedExportInput): string {
           )
           .join('\n');
 
+  const shell = THERAPIST_COPY.shell;
+
   return renderDocument({
     pageSize: pageSizeForLocale(input.locale),
     extraCss,
-    name: input.fullName.trim(),
-    rangeLine: `${c.companyName} · ${formatRangeLabel(input.from, input.to)} · ${c.generated(formatStamp(input.generatedAt))}`,
+    title: c.docTitle,
+    kindLabel: shell.kindLabel,
+    meta: [
+      { label: shell.metaName, value: input.fullName.trim() },
+      { label: shell.metaPeriod, value: formatRangeLabel(input.from, input.to) },
+      { label: shell.metaGenerated, value: formatStamp(input.generatedAt) },
+    ],
     body,
     footer: c.footer,
     versionComment: `psychage-unified-export v${UNIFIED_EXPORT_VERSION}`,

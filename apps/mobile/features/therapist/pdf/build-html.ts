@@ -25,6 +25,7 @@ import {
 
 import { THERAPIST_COPY } from '../copy';
 import type { SessionPrepSummary } from '../session-prep/summary';
+import { PDF_FONT_FAMILY, PDF_FONTS_MARKER } from './pdf-fonts';
 
 // C-PDF — the therapist export. A PRINT artifact, NOT an app screen: white page,
 // ink-led, NO night mode. Pure string builder → Vitest-testable; the native
@@ -48,6 +49,12 @@ const INK_BASELINE = resolveColorRef('color.charcoal.300').light;
 const INK_TEXT = resolveColorRef('color.text.primary').light;
 const INK_SECONDARY = resolveColorRef('color.text.secondary').light;
 const INK_HINT = resolveColorRef('color.text.tertiary').light; // no-entry rows (hint weight)
+// Brand teal — ACCENT ONLY (masthead wordmark, brand rule, table-header underline, tool
+// divider). Never load-bearing: every structural/data element stays ink, so the page is
+// fully legible printed in black & white (grayscale-safe invariant preserved).
+const BRAND_TEAL = resolveColorRef('color.primary.default').light;
+// Very light row tint for table zebra striping — reads as a faint grey when printed B&W.
+const ZEBRA = '#F4F7F6';
 
 function moodTint(state: CheckInState): string {
   return terrainTokens.color.moodTint[state].light;
@@ -295,27 +302,40 @@ function buildToolSections(tools?: TherapistToolSummaries): string {
   );
 }
 
-// The shared print SHELL — both therapist documents emit identical design language
-// (white page, ink palette, 8.5pt floor, Fraunces name, per-page counter, fixed
-// footer). Each builder supplies its own `extraCss` + `body` between the header and the
-// footer. `name`/`footer` are escaped (the name is user input); `rangeLine` is our own
-// copy/data and matches the prior un-escaped behaviour.
-const BASE_CSS = `  * { box-sizing: border-box; }
+// The shared print SHELL — every document emits identical design language: white page,
+// ink body with a brand-teal accent (masthead wordmark + brand rule + section underlines,
+// accent-only so the page stays legible in B&W), embedded brand fonts (Fraunces display /
+// IBM Plex Sans body, injected at PDF_FONTS_MARKER by the native printer), an 8.5pt floor,
+// a per-page counter, and a fixed footer. Each builder supplies its own `extraCss` + `body`
+// between the header (masthead → brand rule → title → meta grid) and the footer. `title`,
+// `kindLabel`, every meta `label`/`value`, and `footer` are escaped (meta values + the name
+// are user input).
+const BASE_CSS = `  ${PDF_FONTS_MARKER}
+  * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
     background: #ffffff;
     color: ${INK_TEXT};
-    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-family: "${PDF_FONT_FAMILY.body}", -apple-system, "Helvetica Neue", Arial, sans-serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .name { font-family: "Fraunces", Georgia, "Times New Roman", serif; font-size: 17pt; font-weight: 600; margin: 0 0 4px; }
-  .range-line { font-size: 11pt; color: ${INK_SECONDARY}; margin: 0 0 16px; }
+  .masthead { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 8px; }
+  .wordmark { font-family: "${PDF_FONT_FAMILY.display}", Georgia, "Times New Roman", serif; font-size: 13pt; font-weight: 600; color: ${BRAND_TEAL}; letter-spacing: 0.2px; }
+  .kind { font-size: 9pt; color: ${INK_SECONDARY}; text-transform: uppercase; letter-spacing: 1.2px; }
+  .brand-rule { height: 1.5px; border: 0; background: ${BRAND_TEAL}; margin: 0 0 20px; }
+  .doc-title { font-family: "${PDF_FONT_FAMILY.display}", Georgia, "Times New Roman", serif; font-size: 20pt; font-weight: 600; color: ${INK_TEXT}; margin: 0 0 14px; }
+  .meta { margin: 0 0 24px; padding: 0; }
+  .meta-row { display: flex; gap: 14px; padding: 2px 0; }
+  .meta dt { width: 92px; flex: none; font-size: 9pt; color: ${INK_SECONDARY}; text-transform: uppercase; letter-spacing: 0.5px; }
+  .meta dd { margin: 0; font-size: 10.5pt; color: ${INK_TEXT}; font-variant-numeric: tabular-nums; }
   .footer {
     position: fixed;
     bottom: 24px;
     left: 40px;
     right: 40px;
+    padding-top: 6px;
+    border-top: 1px solid ${INK_BASELINE};
     font-size: ${TYPE_FLOOR_PT}pt;
     color: ${INK_HINT};
   }`;
@@ -331,16 +351,33 @@ export interface PdfSection {
   readonly body: string;
 }
 
+/** One labelled row in the document meta grid (Name / Period / Generated / …). */
+export interface PdfMetaRow {
+  readonly label: string;
+  readonly value: string;
+}
+
 export function renderDocument(opts: {
   pageSize: 'A4' | 'letter';
   extraCss: string;
-  name: string;
-  rangeLine: string;
+  /** Document title (Fraunces, ink) — e.g. "Check-in Summary". */
+  title: string;
+  /** Labelled meta rows under the title. Values may be user input → escaped here. */
+  meta: readonly PdfMetaRow[];
   body: string;
   footer: string;
+  /** Optional masthead tag, top-right (e.g. "Personal summary"). */
+  kindLabel?: string;
   versionComment?: string;
 }): string {
   const versionLine = opts.versionComment ? `\n  <!-- ${opts.versionComment} -->` : '';
+  const kind = opts.kindLabel ? `<span class="kind">${escapeHtml(opts.kindLabel)}</span>` : '';
+  const metaRows = opts.meta
+    .map(
+      (m) =>
+        `<div class="meta-row"><dt>${escapeHtml(m.label)}</dt><dd>${escapeHtml(m.value)}</dd></div>`,
+    )
+    .join('');
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -357,8 +394,10 @@ ${opts.extraCss}
 </style>
 </head>
 <body>${versionLine}
-  <div class="name">${escapeHtml(opts.name)}</div>
-  <div class="range-line">${opts.rangeLine}</div>
+  <header class="masthead"><span class="wordmark">Psychage</span>${kind}</header>
+  <hr class="brand-rule"/>
+  <h1 class="doc-title">${escapeHtml(opts.title)}</h1>
+  <dl class="meta">${metaRows}</dl>
 ${opts.body}
   <div class="footer">${escapeHtml(opts.footer)}</div>
 </body>
@@ -366,16 +405,19 @@ ${opts.body}
 }
 
 // Therapist check-in PDF CSS (terrain + daily table + cross-tool sections).
-const THERAPIST_EXTRA_CSS = `  .terrain { display: flex; align-items: stretch; gap: 10px; height: 120px; margin: 0 0 20px; }
+const THERAPIST_EXTRA_CSS = `  .terrain { display: flex; align-items: stretch; gap: 10px; height: 120px; margin: 0 0 12px; }
   .edge-labels { display: flex; flex-direction: column; justify-content: space-between; font-size: ${TYPE_FLOOR_PT}pt; color: ${INK_SECONDARY}; padding: 2px 0; }
   .terrain-canvas { flex: 1; }
+  .terrain-cap { font-size: 9pt; color: ${INK_SECONDARY}; font-style: italic; margin: 0 0 18px; }
   table { width: 100%; border-collapse: collapse; }
-  td { padding: 5px 8px; vertical-align: top; border-bottom: 1px solid ${INK_BASELINE}; }
-  td.date { font-size: 10pt; color: ${INK_SECONDARY}; white-space: nowrap; width: 40%; }
-  td.state { font-size: 10pt; font-weight: 600; width: 22%; }
+  thead th { text-align: left; font-size: 9pt; font-weight: 600; color: ${INK_SECONDARY}; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 8px 5px; border-bottom: 1.5px solid ${BRAND_TEAL}; }
+  td { padding: 6px 8px; vertical-align: top; border-bottom: 1px solid ${INK_BASELINE}; }
+  tbody tr:nth-child(even) td { background: ${ZEBRA}; }
+  td.date { font-size: 10pt; color: ${INK_SECONDARY}; white-space: nowrap; width: 34%; }
+  td.state { font-size: 10pt; font-weight: 600; width: 26%; }
   td.note { font-size: 10pt; font-style: italic; color: ${INK_TEXT}; }
   tr.no-entry td { color: ${INK_HINT}; font-weight: 400; font-style: normal; }
-  .tools-block { margin-top: 28px; page-break-inside: avoid; }
+  .tools-block { margin-top: 28px; padding-top: 14px; border-top: 1.5px solid ${BRAND_TEAL}; page-break-inside: avoid; }
   .note { font-size: ${TYPE_FLOOR_PT}pt; color: ${INK_SECONDARY}; border: 1px solid ${INK_BASELINE}; border-radius: 6px; padding: 6px 8px; margin-bottom: 12px; }
   section.tool { margin-bottom: 14px; page-break-inside: avoid; }
   section.tool h2 { font-size: 11pt; font-weight: 600; margin: 0 0 2px; color: ${INK_TEXT}; }
@@ -399,18 +441,28 @@ export function buildTherapistPdfHtml(input: TherapistPdfInput): string {
   const dayCount = days.length;
   const entryCount = inRange.length;
 
+  const s = THERAPIST_COPY.shell;
+  const ci = THERAPIST_COPY.checkIn;
+  const thead = `<tr><th class="h-date">${escapeHtml(ci.colDate)}</th><th class="h-state">${escapeHtml(ci.colState)}</th><th class="h-note">${escapeHtml(ci.colNotes)}</th></tr>`;
+
   const body = `  <div class="terrain">
     <div class="edge-labels"><span>Very good</span><span>Very low</span></div>
     <div class="terrain-canvas">${buildTerrainSvg(terrainDays)}</div>
   </div>
-  <table><tbody>${buildRows(days, byDate)}</tbody></table>
+  <p class="terrain-cap">${escapeHtml(ci.terrainCaption)}</p>
+  <table><thead>${thead}</thead><tbody>${buildRows(days, byDate)}</tbody></table>
   ${buildToolSections(input.tools)}`;
 
   return renderDocument({
     pageSize: pageSizeForLocale(input.locale),
     extraCss: THERAPIST_EXTRA_CSS,
-    name: input.fullName.trim(),
-    rangeLine: `${formatRangeLabel(from, to)} · ${THERAPIST_COPY.rangeCountLine(dayCount, entryCount)}`,
+    title: ci.docTitle,
+    kindLabel: s.kindLabel,
+    meta: [
+      { label: s.metaName, value: input.fullName.trim() },
+      { label: s.metaPeriod, value: formatRangeLabel(from, to) },
+      { label: s.metaLogged, value: THERAPIST_COPY.rangeCountLine(dayCount, entryCount) },
+    ],
     body,
     footer: THERAPIST_COPY.pdfFooter,
   });
@@ -590,13 +642,19 @@ export function buildSessionPrepHtml(input: SessionPrepPdfInput): string {
   const to = asLocalCalendarDate(summary.window.to);
   const dayCount = enumerateDays(from, to).length;
   const c = THERAPIST_COPY.sessionPrep;
+  const s = THERAPIST_COPY.shell;
   const { extraCss, body } = buildSessionPrepSection(input);
 
   return renderDocument({
     pageSize: pageSizeForLocale(input.locale),
     extraCss,
-    name: input.fullName.trim(),
-    rangeLine: `${formatRangeLabel(from, to)} · ${c.countLine(dayCount, summary.totalCount)}`,
+    title: c.docTitle,
+    kindLabel: s.kindLabel,
+    meta: [
+      { label: s.metaName, value: input.fullName.trim() },
+      { label: s.metaPeriod, value: formatRangeLabel(from, to) },
+      { label: s.metaLogged, value: c.countLine(dayCount, summary.totalCount) },
+    ],
     body,
     footer: c.footer,
     versionComment: `psychage-session-prep v${EXPORT_FORMAT_VERSION}`,

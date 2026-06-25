@@ -42,12 +42,39 @@ export const THERAPIST_COPY = {
   // vocabulary, no diagnosis language; honest about provenance + consent.
   pdfFooter: 'A personal check-in summary, shared from Psychage with your consent.', // CT4
 
+  // ── Shared print-shell furniture ───────────────────────────────────────────
+  // The masthead, document title, and meta-grid labels every PDF renders through
+  // the shared shell (renderDocument). The wordmark itself is the literal brand
+  // name (not copy). Labels are person-first, no clinical vocabulary. All CT4.
+  shell: {
+    kindLabel: 'Personal summary', // CT4 — masthead tag (top-right of the page)
+    metaName: 'Name', // CT4 — the provider files the summary by this
+    metaPeriod: 'Period', // CT4
+    metaLogged: 'Logged', // CT4 — honest "N days, M entries/moments/nights" line
+    metaGenerated: 'Generated', // CT4
+    metaExplored: 'Explored', // CT4 — point-in-time run date (Navigator)
+  },
+
+  // ── Check-in PDF document chrome ───────────────────────────────────────────
+  // Title + table column headers for the daily check-in export. The "How you
+  // described it" header is SR-3-safe (no diagnostic verb phrases). CT4.
+  checkIn: {
+    docTitle: 'Check-in Summary', // CT4
+    colDate: 'Date', // CT4
+    colState: 'How you described it', // CT4
+    colNotes: 'Notes', // CT4
+    // A neutral legend for the terrain chart — orients a provider to what the dots mean.
+    terrainCaption: 'Each dot is one day; its height shows how the day was described.', // CT4
+  },
+
   // ── Session-prep summary ──────────────────────────────────────────────────
   // A separate on-demand document: the person's own record of the moments they
   // noticed, generated before an appointment and shared by them. Patterns stated
   // plainly — NEVER assessment/diagnosis/severity (Sacred Rule #2/#3). All CT4,
   // load-bearing copy flagged for Dr. Dobson before ship.
   sessionPrep: {
+    // Document title on the standalone Moments PDF (the print header, not the screen).
+    docTitle: 'Moments Summary', // CT4
     // Entry surface (Settings → Prepare for your session).
     navLabel: 'Prepare for your session', // CT4
     screenTitle: 'Prepare for your session', // CT4
@@ -105,6 +132,8 @@ export const THERAPIST_COPY = {
   // load-bearing copy flagged for Dr. Dobson before ship. Person-first, non-diagnostic.
   unifiedExport: {
     companyName: 'Psychage', // CT4
+    // Document title on the bundled multi-tool export (print header).
+    docTitle: 'Personal Summary', // CT4
     // Header generation stamp. e.g. "Generated Jun 22, 2026 · 3:45 PM".
     generated: (stamp: string) => `Generated ${stamp}`, // CT4
     // Document footer — verbatim on every page. LOAD-BEARING → CT4.

@@ -12,22 +12,32 @@ exports[`buildSessionPrepHtml > renders a deterministic document 1`] = `
     margin: 48px 40px 72px;
     @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8.5pt; color: #6B7280; }
   }
+  /*__PDF_FONTS__*/
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
     background: #ffffff;
     color: #111827;
-    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-family: "IBM Plex Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .name { font-family: "Fraunces", Georgia, "Times New Roman", serif; font-size: 17pt; font-weight: 600; margin: 0 0 4px; }
-  .range-line { font-size: 11pt; color: #4B5563; margin: 0 0 16px; }
+  .masthead { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 8px; }
+  .wordmark { font-family: "Fraunces", Georgia, "Times New Roman", serif; font-size: 13pt; font-weight: 600; color: #1A9B8C; letter-spacing: 0.2px; }
+  .kind { font-size: 9pt; color: #4B5563; text-transform: uppercase; letter-spacing: 1.2px; }
+  .brand-rule { height: 1.5px; border: 0; background: #1A9B8C; margin: 0 0 20px; }
+  .doc-title { font-family: "Fraunces", Georgia, "Times New Roman", serif; font-size: 20pt; font-weight: 600; color: #111827; margin: 0 0 14px; }
+  .meta { margin: 0 0 24px; padding: 0; }
+  .meta-row { display: flex; gap: 14px; padding: 2px 0; }
+  .meta dt { width: 92px; flex: none; font-size: 9pt; color: #4B5563; text-transform: uppercase; letter-spacing: 0.5px; }
+  .meta dd { margin: 0; font-size: 10.5pt; color: #111827; font-variant-numeric: tabular-nums; }
   .footer {
     position: fixed;
     bottom: 24px;
     left: 40px;
     right: 40px;
+    padding-top: 6px;
+    border-top: 1px solid #D6D3D1;
     font-size: 8.5pt;
     color: #6B7280;
   }
@@ -51,8 +61,10 @@ exports[`buildSessionPrepHtml > renders a deterministic document 1`] = `
 </head>
 <body>
   <!-- psychage-session-prep v3 -->
-  <div class="name">Alex Rivers</div>
-  <div class="range-line">Jun 1 – Jun 14, 2026 · 14 days, 6 moments noted</div>
+  <header class="masthead"><span class="wordmark">Psychage</span><span class="kind">Personal summary</span></header>
+  <hr class="brand-rule"/>
+  <h1 class="doc-title">Moments Summary</h1>
+  <dl class="meta"><div class="meta-row"><dt>Name</dt><dd>Alex Rivers</dd></div><div class="meta-row"><dt>Period</dt><dd>Jun 1 – Jun 14, 2026</dd></div><div class="meta-row"><dt>Logged</dt><dd>14 days, 6 moments noted</dd></div></dl>
   <section class="block"><h2>Feelings you noted most</h2><ul class="freq"><li><span class="freq-label">Anxious</span><span class="freq-count">2×</span></li><li><span class="freq-label">Calm</span><span class="freq-count">1×</span></li><li><span class="freq-label">Exhausted</span><span class="freq-count">1×</span></li><li><span class="freq-label">Grateful</span><span class="freq-count">1×</span></li><li><span class="freq-label">Hopeless</span><span class="freq-count">1×</span></li><li><span class="freq-label">Steady</span><span class="freq-count">1×</span></li><li><span class="freq-label">Tense</span><span class="freq-count">1×</span></li></ul></section>
   <section class="block"><h2>What was on your mind</h2><ul class="freq"><li><span class="freq-label">Family</span><span class="freq-count">2×</span></li><li><span class="freq-label">Work</span><span class="freq-count">2×</span></li><li><span class="freq-label">Friends</span><span class="freq-count">1×</span></li><li><span class="freq-label">Health</span><span class="freq-count">1×</span></li><li><span class="freq-label">Sleep</span><span class="freq-count">1×</span></li></ul></section>
   <section class="block"><h2>How your moments spread</h2><div class="dist-row"><div class="dist-label">Very good</div><div class="dist-bar"><svg width="240" height="16" viewBox="0 0 240 16" xmlns="http://www.w3.org/2000/svg" role="img"><rect x="0.6" y="0.6" width="120" height="14.8" rx="2" fill="#15B8A6" stroke="#44403C" stroke-width="1.2"/></svg></div><div class="dist-count">1</div></div><div class="dist-row"><div class="dist-label">Good</div><div class="dist-bar"><svg width="240" height="16" viewBox="0 0 240 16" xmlns="http://www.w3.org/2000/svg" role="img"><rect x="0.6" y="0.6" width="120" height="14.8" rx="2" fill="#1A9B8C" stroke="#44403C" stroke-width="1.2"/></svg></div><div class="dist-count">1</div></div><div class="dist-row"><div class="dist-label">Mixed</div><div class="dist-bar"><svg width="240" height="16" viewBox="0 0 240 16" xmlns="http://www.w3.org/2000/svg" role="img"><rect x="0.6" y="0.6" width="120" height="14.8" rx="2" fill="#8FAE8B" stroke="#44403C" stroke-width="1.2"/></svg></div><div class="dist-count">1</div></div><div class="dist-row"><div class="dist-label">Low</div><div class="dist-bar"><svg width="240" height="16" viewBox="0 0 240 16" xmlns="http://www.w3.org/2000/svg" role="img"><rect x="0.6" y="0.6" width="240" height="14.8" rx="2" fill="#D4A060" stroke="#44403C" stroke-width="1.2"/></svg></div><div class="dist-count">2</div></div><div class="dist-row"><div class="dist-label">Very low</div><div class="dist-bar"><svg width="240" height="16" viewBox="0 0 240 16" xmlns="http://www.w3.org/2000/svg" role="img"><rect x="0.6" y="0.6" width="120" height="14.8" rx="2" fill="#8B7FA8" stroke="#44403C" stroke-width="1.2"/></svg></div><div class="dist-count">1</div></div></section>

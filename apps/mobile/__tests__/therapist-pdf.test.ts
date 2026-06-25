@@ -60,6 +60,19 @@ describe('buildTherapistPdfHtml', () => {
     expect(htmlFor()).toContain('18 days, 14 entries');
   });
 
+  it('renders the branded masthead, document title, meta grid + table headers', () => {
+    const html = htmlFor();
+    expect(html).toContain('class="wordmark">Psychage<'); // brand masthead
+    expect(html).toContain(`class="doc-title">${THERAPIST_COPY.checkIn.docTitle}<`);
+    expect(html).toContain(`<dt>${THERAPIST_COPY.shell.metaName}</dt>`); // meta grid
+    // The daily table now has labelled column headers (was a header-less wall before).
+    expect(html).toContain(`<th class="h-state">${THERAPIST_COPY.checkIn.colState}</th>`);
+  });
+
+  it('emits the font-embed marker for the native printer to fill (or strip)', () => {
+    expect(htmlFor()).toContain('/*__PDF_FONTS__*/');
+  });
+
   it('lists every day in the range — no-entry days are never omitted', () => {
     const html = htmlFor();
     // 4 no-entry days (15..18).

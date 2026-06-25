@@ -7,6 +7,7 @@ import {
 
 import { resolveColorRef } from '@/lib/a1-tokens';
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
+import { THERAPIST_COPY } from '@/features/therapist/copy';
 import {
   escapeHtml,
   formatRangeLabel,
@@ -179,12 +180,19 @@ export function buildSleepPdfHtml(input: SleepPdfInput): string {
   const { from, to } = input;
   const { extraCss, body, nights } = buildSleepSection(input);
   const stamp = formatStamp(input.generatedAt);
+  const s = THERAPIST_COPY.shell;
 
   return renderDocument({
     pageSize: pageSizeForLocale(input.locale),
     extraCss,
-    name: input.fullName.trim(),
-    rangeLine: `${c.pdfTitle} · ${formatRangeLabel(from, to)} · ${c.pdfNightsLine(nights)} · ${c.pdfGenerated(stamp)}`,
+    title: c.pdfTitle,
+    kindLabel: s.kindLabel,
+    meta: [
+      { label: s.metaName, value: input.fullName.trim() },
+      { label: s.metaPeriod, value: formatRangeLabel(from, to) },
+      { label: s.metaLogged, value: c.pdfNightsLine(nights) },
+      { label: s.metaGenerated, value: stamp },
+    ],
     body,
     footer: c.pdfFooter,
   });

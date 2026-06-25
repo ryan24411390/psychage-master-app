@@ -209,9 +209,16 @@ describe('buildUnifiedExportHtml — header / footer / framing', () => {
   it('carries the verbatim footer + the version stamp + page counter', () => {
     const html = build();
     expect(html).toContain(UC.footer);
-    expect(html).toContain('psychage-unified-export v1');
+    expect(html).toContain('psychage-unified-export v2');
     expect(html).toContain('counter(page)');
     expect(html).toContain('counter(pages)');
+  });
+
+  it('renders the branded masthead + document title (shared shell chrome)', () => {
+    const html = build();
+    expect(html).toContain('class="wordmark">Psychage<'); // brand masthead
+    expect(html).toContain(`class="doc-title">${UC.docTitle}<`); // document title
+    expect(html).toContain(`<dt>${THERAPIST_COPY.shell.metaName}</dt>`); // meta grid
   });
 
   it('breaks each tool onto a fresh page (first one stays put)', () => {

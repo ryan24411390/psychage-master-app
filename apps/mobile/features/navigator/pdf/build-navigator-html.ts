@@ -13,6 +13,7 @@
 // CT4 FIXTURE — the user-facing copy (via NAVIGATOR_COPY) is pending Dr. Dobson review.
 
 import { resolveColorRef } from '@/lib/a1-tokens';
+import { THERAPIST_COPY } from '@/features/therapist/copy';
 import {
   escapeHtml,
   pageSizeForLocale,
@@ -94,12 +95,17 @@ export function buildNavigatorSection(input: NavigatorSummaryInput): PdfSection 
 
 export function buildNavigatorSummaryHtml(input: NavigatorSummaryInput): string {
   const { extraCss, body } = buildNavigatorSection(input);
+  const s = THERAPIST_COPY.shell;
 
   return renderDocument({
     pageSize: pageSizeForLocale(input.locale),
     extraCss,
-    name: input.fullName.trim(),
-    rangeLine: formatDate(input.date),
+    title: NAVIGATOR_COPY.summaryDocTitle,
+    kindLabel: s.kindLabel,
+    meta: [
+      { label: s.metaName, value: input.fullName.trim() },
+      { label: s.metaExplored, value: formatDate(input.date) },
+    ],
     body,
     footer: NAVIGATOR_COPY.summaryFooter,
   });
