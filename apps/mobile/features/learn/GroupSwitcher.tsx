@@ -23,7 +23,7 @@ export function GroupSwitcher({ groups, value, onChange }: GroupSwitcherProps) {
       horizontal
       showsHorizontalScrollIndicator={false}
       accessibilityRole="tablist"
-      contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+      contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
     >
       {groups.map((g) => {
         const selected = g === value;
@@ -41,8 +41,8 @@ export function GroupSwitcher({ groups, value, onChange }: GroupSwitcherProps) {
             className={[
               'min-h-[40px] items-center justify-center rounded-full border px-4',
               selected
-                ? 'border-primary bg-primary dark:border-primary-dark dark:bg-primary-dark'
-                : 'border-border bg-surface dark:border-border-dark dark:bg-surface-dark',
+                ? 'border-border-hairline bg-surface shadow-sm dark:border-border-dark dark:bg-surface-dark'
+                : 'border-transparent bg-surface-active dark:bg-surface-active-dark',
             ].join(' ')}
             style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
           >
@@ -51,8 +51,8 @@ export function GroupSwitcher({ groups, value, onChange }: GroupSwitcherProps) {
               numberOfLines={1}
               className={
                 selected
-                  ? 'font-sans-medium text-white'
-                  : 'font-sans-medium text-text-primary dark:text-text-primary-dark'
+                  ? 'font-sans-medium text-text-primary dark:text-text-primary-dark'
+                  : 'font-sans-medium text-text-secondary dark:text-text-secondary-dark'
               }
             >
               {g}

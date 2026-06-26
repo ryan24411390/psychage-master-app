@@ -26,4 +26,14 @@ export const CONDITIONS_COPY = {
     'Psychage is educational and does not diagnose or treat. If you need help now, tap Help now at the top.',
   notFound: 'We could not find that topic.',
   back: 'Back',
+
+  // Condition guide (conditions_reference). Section labels are navigational chrome
+  // (no per-condition claim); the body text under each is verbatim from the
+  // verified DB row. FIXTURE pending Dr. Dobson like the rest of this surface.
+  guideInShort: 'In short',
+  guideFeelsLike: 'What it feels like',
+  guideDiffers: 'How it differs',
+  guideEveryday: "When it's more than everyday",
+  guideRelated: 'Related guides',
+  guideCrisis: 'If you need support now, tap Help now at the top — or open crisis resources.',
 } as const;

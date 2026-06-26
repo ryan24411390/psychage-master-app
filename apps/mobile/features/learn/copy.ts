@@ -12,6 +12,19 @@ export const CT4_LEARN = {
   searchPlaceholder: 'Search a feeling, topic, or condition…',
   findPath: 'Not sure where to start? Find your path',
 
+  // Browse screen (web-parity header + controls)
+  eyebrow: 'LEARN',
+  browseTitle: 'Browse',
+  browseSubtitle: 'Find any topic across mental health.',
+  notSureTitle: 'Not sure where to start?',
+  notSureSubtitle: 'Tell us what interests you.',
+  searchTopicsPlaceholder: 'Search topics…',
+  segTopics: 'Topics',
+  segConditions: 'Conditions',
+  topicsEmpty: 'No topics match your search.',
+  conditionsIntro: 'Plain-language guides to mental-health conditions, grouped by family.',
+  conditionsEmpty: 'No conditions match your search.',
+
   // Path picker (bottom sheet)
   pickerTitle: "What's pulling at you right now?",
   pickerHint: "Pick the closest one — we'll point you to the right guides. Nothing is saved.",

@@ -30,3 +30,12 @@ export function goBackOr(fallback: Href): void {
 export function openArticle(slug: string): void {
   router.push({ pathname: '/article/[slug]', params: { slug } });
 }
+
+/**
+ * Open a condition guide for a `conditions_reference` slug. Shares the
+ * `/conditions/[slug]` route with the category-overview screen; that route
+ * branches on the slug (known category → overview, else → condition guide).
+ */
+export function openConditionGuide(slug: string): void {
+  router.push({ pathname: '/conditions/[slug]', params: { slug } });
+}
