@@ -10,7 +10,7 @@ import { AnimatedPressable } from '@/components/ui/AnimatedPressable';
 import { Text } from '@/components/ui/Text';
 import { colorForScheme, tabBarTokens } from '@/lib/a1-tokens';
 import { useHaptics } from '@/lib/haptic-context';
-import { DURATION, useReducedMotion } from '@/lib/motion';
+import { useReducedMotion } from '@/lib/motion';
 
 // C0.2 — the custom bottom tab bar (Direction B: active pill). The focused tab is
 // a content-sized teal pill (icon + label); the rest are icon-only. lucide outline
@@ -68,11 +68,16 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
             if (event.defaultPrevented) return;
             if (isActive) {
               // Re-tapping the focused tab pops ITS nested stack back to the tab
-              // root (standard tab behavior). StackActions.popToTop() is scoped to
-              // the focused child Stack and is a clean no-op at root — unlike the
-              // former router.dismissAll(), which acts on dismissable frames only
-              // and silently no-ops on ordinary pushes (nav bug P6).
-              navigation.dispatch(StackActions.popToTop());
+              // root (standard tab behavior). The action is TARGETED at the focused
+              // child Stack via its navigation-state key — dispatching it bare on the
+              // tab navigator bubbles UP (TabRouter can't handle POP_TO_TOP), which
+              // both misses the child stack and logs "POP_TO_TOP was not handled by
+              // any navigator". Only dispatch when the nested stack is off-root
+              // (index > 0); at root there is nothing to pop, so we skip.
+              const nested = route.state;
+              if (nested && 'key' in nested && (nested.index ?? 0) > 0) {
+                navigation.dispatch({ ...StackActions.popToTop(), target: nested.key });
+              }
             } else {
               navigation.navigate(route.name);
             }
