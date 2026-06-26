@@ -29,9 +29,20 @@ interface AuthContextValue {
 // provider default. Env-gated (Slice 2): the real Supabase-backed service is used
 // when EXPO_PUBLIC_SUPABASE_* is configured; otherwise the in-memory stub keeps
 // screens (and tests) working with no backend.
-const defaultService: AuthService = isSupabaseConfigured()
-  ? createSupabaseAuthService()
-  : createStubAuthService();
+function selectDefaultService(): AuthService {
+  if (!isSupabaseConfigured()) return createStubAuthService();
+  try {
+    return createSupabaseAuthService();
+  } catch {
+    // Defense-in-depth: env reads as configured but client construction still threw
+    // (incomplete/typo'd EXPO_PUBLIC_SUPABASE_* in a build, secure-store init failure,
+    // etc.). Degrade to the stub (signed-out) rather than crashing the app at import —
+    // Tier-1 anonymous features keep working (rules/auth.md §5/§10: never a throw).
+    return createStubAuthService();
+  }
+}
+
+const defaultService: AuthService = selectDefaultService();
 
 const AuthContext = createContext<AuthContextValue>({
   session: null,
