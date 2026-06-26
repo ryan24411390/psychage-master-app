@@ -9,6 +9,7 @@
 
 import { type DbArticleListRow, mapListRow } from '@/lib/articles/mapper';
 import type { ArticleListItem } from '@/lib/articles';
+import { devWarnSilentFailure } from '@/lib/dev-warn';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import type { ConditionDetailRef, ConditionRef } from './types';
@@ -64,6 +65,7 @@ export async function listConditionsReference(): Promise<ConditionRef[]> {
       .select(LIST_FIELDS)
       .eq('verification_status', 'verified')
       .order('name', { ascending: true });
+    if (error) devWarnSilentFailure('conditions/listConditionsReference', error);
     if (error || !data) return [];
     return (data as DbConditionRow[]).map(mapRef);
   } catch {
@@ -83,6 +85,7 @@ export async function getConditionReference(slug: string): Promise<ConditionDeta
       .eq('slug', slug)
       .eq('verification_status', 'verified')
       .maybeSingle();
+    if (error) devWarnSilentFailure('conditions/getConditionReference', error);
     if (error || !data) return null;
     const row = data as DbConditionRow;
     const deepSections = (row.deep_sections ?? [])
@@ -126,6 +129,7 @@ export async function listArticlesForCondition(conditionId: string): Promise<Art
       .order('is_cornerstone', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(40);
+    if (error) devWarnSilentFailure('conditions/listArticlesForCondition', error);
     if (error || !data) return [];
     return (data as unknown as DbArticleListRow[]).map(mapListRow);
   } catch {
