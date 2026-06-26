@@ -1,6 +1,11 @@
 import { screen } from '@testing-library/react-native';
 
-import { asLocalCalendarDate, DEFAULT_SLEEP_SETTINGS, type SleepEntry } from '@psychage/shared/sleep';
+import {
+  asLocalCalendarDate,
+  DEFAULT_SLEEP_SETTINGS,
+  type SleepEntry,
+  toLocalCalendarDate,
+} from '@psychage/shared/sleep';
 
 import { CT4_SLEEP } from '@/features/sleep-architect/copy';
 import { SleepDashboard } from '@/features/sleep-architect/dashboard/SleepDashboard';
@@ -34,7 +39,16 @@ describe('SleepDashboard', () => {
   });
 
   it('shows a banded score and factual metrics once nights exist', () => {
-    const entries = ['2026-06-17', '2026-06-16', '2026-06-15'].map(entry); // newest-first
+    // Dates RELATIVE to today: the dashboard windows by `toLocalCalendarDate(new Date())`
+    // ± 7 days, so fixed past dates would silently fall out of range as real time advances
+    // (the prior hard-coded 2026-06-15..17 turned the test into a time-bomb). daysAgo keeps
+    // every fixture night inside the default 7-day window on any run date.
+    const daysAgo = (n: number): string => {
+      const d = new Date();
+      d.setDate(d.getDate() - n);
+      return toLocalCalendarDate(d);
+    };
+    const entries = [daysAgo(0), daysAgo(1), daysAgo(2)].map(entry); // newest-first
     renderWithProviders(<SleepDashboard entries={entries} settings={DEFAULT_SLEEP_SETTINGS} />);
     expect(screen.getByText(CT4_SLEEP.metrics.avgSleep)).toBeTruthy();
     const bandLabels = Object.values(CT4_SLEEP.bands).map((b) => b.label);
