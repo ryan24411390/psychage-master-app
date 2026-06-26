@@ -19,8 +19,16 @@ export type ConditionRef = {
   crisisFlag: boolean;
 };
 
-/** One condition with its reviewed definition sections (guide screen). All
- * definition text is verbatim from the verified DB row — never authored here. */
+/** A titled "in depth" section (signs & symptoms, causes, treatment, …). `body`
+ * may carry multiple blank-line-separated paragraphs. Verbatim from the DB. */
+export type ConditionDeepSection = { heading: string; body: string };
+
+/** A reputable reference backing the deeper content (outbound link). */
+export type ConditionSource = { label: string; url: string };
+
+/** One condition with its reviewed definition + depth layer (guide screen). All
+ * text is verbatim from the verified DB row — never authored here. Mirrors the
+ * web condition detail page (definition fields → In depth → Sources → provenance). */
 export type ConditionDetailRef = ConditionRef & {
   /** Row UUID — keys the `articles.linked_condition_ids` related-articles join. */
   id: string;
@@ -28,6 +36,12 @@ export type ConditionDetailRef = ConditionRef & {
   whatItFeelsLike: string | null;
   howItDiffers: string | null;
   whenMoreThanEveryday: string | null;
+  /** "In depth" titled sections (may be empty). */
+  deepSections: readonly ConditionDeepSection[];
+  /** Reputable references (may be empty). */
+  sources: readonly ConditionSource[];
+  /** Classification provenance line, e.g. "ICD-11 6B01 / DSM-5-TR …". */
+  provenance: string | null;
 };
 
 /** A family bucket for the accordion: the family label + its member conditions

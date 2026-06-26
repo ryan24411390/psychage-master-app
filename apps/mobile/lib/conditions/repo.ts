@@ -15,9 +15,9 @@ import type { ConditionDetailRef, ConditionRef } from './types';
 
 // List shape — name + ICD-11 code + family bucket + crisis flag.
 const LIST_FIELDS = 'slug, name, icd11_code, icd11_grouping, crisis_flag';
-// Guide shape — adds the row id (for the related-articles join) + the four
-// reviewed definition sections (verbatim from the row).
-const DETAIL_FIELDS = `id, ${LIST_FIELDS}, short_definition, what_it_feels_like, how_it_differs, when_more_than_everyday`;
+// Guide shape — adds the row id (for the related-articles join), the four reviewed
+// definition sections, the "in depth" layer, sources, and provenance (verbatim).
+const DETAIL_FIELDS = `id, ${LIST_FIELDS}, short_definition, what_it_feels_like, how_it_differs, when_more_than_everyday, deep_sections, sources, provenance`;
 
 // Article list fields WITHOUT the inner category join (we filter by condition, not
 // category) — to-one category embed kept for the card's category label.
@@ -35,6 +35,9 @@ type DbConditionRow = {
   what_it_feels_like?: string | null;
   how_it_differs?: string | null;
   when_more_than_everyday?: string | null;
+  deep_sections?: { heading?: string | null; body?: string | null }[] | null;
+  sources?: { label?: string | null; url?: string | null }[] | null;
+  provenance?: string | null;
 };
 
 function mapRef(row: DbConditionRow): ConditionRef {
@@ -82,6 +85,12 @@ export async function getConditionReference(slug: string): Promise<ConditionDeta
       .maybeSingle();
     if (error || !data) return null;
     const row = data as DbConditionRow;
+    const deepSections = (row.deep_sections ?? [])
+      .map((s) => ({ heading: s.heading ?? '', body: s.body ?? '' }))
+      .filter((s) => s.heading && s.body);
+    const sources = (row.sources ?? [])
+      .map((s) => ({ label: s.label ?? '', url: s.url ?? '' }))
+      .filter((s) => s.label && s.url);
     return {
       ...mapRef(row),
       id: row.id ?? '',
@@ -89,6 +98,9 @@ export async function getConditionReference(slug: string): Promise<ConditionDeta
       whatItFeelsLike: row.what_it_feels_like ?? null,
       howItDiffers: row.how_it_differs ?? null,
       whenMoreThanEveryday: row.when_more_than_everyday ?? null,
+      deepSections,
+      sources,
+      provenance: row.provenance ?? null,
     };
   } catch {
     return null;

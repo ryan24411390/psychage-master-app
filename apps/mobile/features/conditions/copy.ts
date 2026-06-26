@@ -34,6 +34,17 @@ export const CONDITIONS_COPY = {
   guideFeelsLike: 'What it feels like',
   guideDiffers: 'How it differs',
   guideEveryday: "When it's more than everyday",
-  guideRelated: 'Related guides',
+  guideRelated: 'Related articles',
+  guideRelatedEmpty: 'No related articles yet.',
   guideCrisis: 'If you need support now, tap Help now at the top — or open crisis resources.',
+  // In-depth + sources parity with the web condition detail page.
+  guideInReview: 'This part of the definition is in review.',
+  guideDepthOverline: 'In depth',
+  guideDepthHeading: 'Understanding', // "Understanding {name}"
+  guideSources: 'Sources',
+  guideClassification: 'Classification', // "Classification: {provenance}"
+  guideSeeAll: 'See all', // "See all {n} articles"
+  // Condition-articles subpage ("See all" target).
+  articlesIntro: 'Reviewed, plain-language articles linked to this condition.',
+  articlesEmpty: 'No articles for this condition yet.',
 } as const;
