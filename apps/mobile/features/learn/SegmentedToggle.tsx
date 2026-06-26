@@ -1,5 +1,4 @@
-import { View } from 'react-native';
-import { Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { useHaptics } from '@/lib/haptic-context';
@@ -41,7 +40,7 @@ export function SegmentedToggle<T extends string>({
             }}
             className={[
               'min-h-[40px] flex-1 items-center justify-center rounded-full',
-              selected ? 'bg-surface shadow-sm dark:bg-surface-dark' : '',
+              selected ? 'bg-surface shadow-sm dark:bg-surface-dark' : 'bg-transparent',
             ].join(' ')}
             style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
           >
