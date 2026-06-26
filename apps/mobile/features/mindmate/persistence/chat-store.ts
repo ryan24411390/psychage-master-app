@@ -20,6 +20,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+import { devWarnSilentFailure } from '@/lib/dev-warn';
 import { getSupabaseAuthClient, isSupabaseConfigured } from '@/lib/supabase/client';
 
 import type { Citation, SafetyLevel } from '../types';
@@ -96,6 +97,7 @@ export async function persistExchange(
         .insert({ session_id: ex.sessionId, user_id: userId, language: 'en' })
         .select('id')
         .single();
+      if (error) devWarnSilentFailure('mindmate/ai_conversations.insert', error);
       if (error || !data) return null;
       conversationId = (data as { id: string }).id;
     }
@@ -118,7 +120,7 @@ export async function persistExchange(
     ]);
     // Even if the message insert failed, the conversation exists — hand the id back so
     // the next turn reuses it rather than orphaning a second empty conversation.
-    if (error) return conversationId;
+    if (error) devWarnSilentFailure('mindmate/ai_messages.insert', error);
     return conversationId;
   } catch {
     // Swallowed by design: best-effort, push-only backup. No analytics (blocked scope),

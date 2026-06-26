@@ -29,7 +29,7 @@ describe('FeelingVisualization', () => {
   it('shows the prompt + the drag hint, and no band word, before a value is set', () => {
     renderWithProviders(<FeelingVisualization value={null} onChange={() => {}} />);
     expect(screen.getByText('How does right now feel?')).toBeTruthy();
-    expect(screen.getByText('Drag the shape to set how it feels.')).toBeTruthy();
+    expect(screen.getByText('Drag the shape or slider to set how it feels.')).toBeTruthy();
     expect(screen.queryByText('Neutral')).toBeNull();
   });
 

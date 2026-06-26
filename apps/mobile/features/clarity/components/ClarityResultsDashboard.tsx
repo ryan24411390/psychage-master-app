@@ -1,6 +1,6 @@
 import { RefreshCw } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { type LayoutChangeEvent, View, ScrollView } from 'react-native';
+import { type LayoutChangeEvent, View } from 'react-native';
 import Animated, {
   FadeIn,
   useAnimatedStyle,

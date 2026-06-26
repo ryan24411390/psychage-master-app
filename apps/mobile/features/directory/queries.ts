@@ -248,16 +248,45 @@ async function runSearchCascade(client: Client, params: ProviderSearchParams): P
 }
 
 /**
+ * True when at least one narrowing param is set (text / location / geo / service
+ * flag / lookup id / verification). The `search_providers_v3` RPC times out on a
+ * wholly-unscoped scan of the 423k-row table, so an all-empty scope must never
+ * reach the backend. Intentionally BROAD (counts every narrowing field) — it only
+ * blocks the truly-empty case and never a legitimately scoped search. Distinct from
+ * hooks.hasActiveSearch (a UI toggle), which deliberately ignores the lookup arrays.
+ */
+export function hasSearchScope(p: ProviderSearchParams): boolean {
+  return Boolean(
+    (p.query && p.query.trim().length > 0) ||
+      p.state ||
+      p.city ||
+      p.verification_status ||
+      p.telehealth ||
+      p.in_person ||
+      p.accepting_patients ||
+      p.latitude != null ||
+      p.provider_type_ids?.length ||
+      p.specialty_slugs?.length ||
+      p.language_ids?.length ||
+      p.competency_ids?.length ||
+      p.insurance_plan_ids?.length,
+  );
+}
+
+/**
  * Main search entry. Always resolves (never throws). Returns an empty result when
- * the client is unconfigured or both query paths fail — NEVER a placeholder entry.
- * If a city+state combo yields zero, drops state and retries city-only (surfaces
- * dropped_filters), mirroring the web's recovery.
+ * the client is unconfigured, the scope is empty, or both query paths fail — NEVER a
+ * placeholder entry. If a city+state combo yields zero, drops state and retries
+ * city-only (surfaces dropped_filters), mirroring the web's recovery.
  */
 export async function searchProviders(params: ProviderSearchParams): Promise<ProviderCardSearchResult> {
   const page = params.page || 1;
   const perPage = params.per_page || PAGE_SIZE;
   const client = getSupabaseClient();
   if (!client) return EMPTY(page, perPage);
+  // Defensive: never issue an unscoped RPC (would time out scanning 423k rows). The
+  // UI already gates on a state, but a future caller could reach here unscoped.
+  if (!hasSearchScope(params)) return EMPTY(page, perPage);
 
   const result = await runSearchCascade(client, params);
 

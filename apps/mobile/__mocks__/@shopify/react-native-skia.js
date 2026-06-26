@@ -21,6 +21,7 @@ function leaf(name) {
 const Canvas = container('Canvas');
 const Group = container('Group');
 const Path = container('Path');
+const Circle = container('Circle');
 const RadialGradient = leaf('RadialGradient');
 const Shadow = leaf('Shadow');
 
@@ -35,4 +36,4 @@ const Skia = {
   },
 };
 
-module.exports = { Canvas, Group, Path, RadialGradient, Shadow, vec, Skia };
+module.exports = { Canvas, Group, Path, Circle, RadialGradient, Shadow, vec, Skia };

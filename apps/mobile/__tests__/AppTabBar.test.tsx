@@ -29,12 +29,31 @@ function makeProps(
   activeIndex: number,
   navigate: (name: string) => void,
   dispatch: (action: unknown) => void = () => {},
+  // Nested stack depth for the active tab. 0 = at root (re-press is a no-op),
+  // >0 = off-root (re-press pops the focused child stack to its root). The
+  // active route gets a real nested navigation-state `key` so the dispatch can
+  // TARGET that stack instead of bubbling up the tab navigator.
+  activeStackDepth = 1,
 ): BottomTabBarProps {
   const descriptors = Object.fromEntries(
     ROUTES.map((route, i) => [route.key, { options: { title: TITLES[i] } }]),
   );
+  const routes = ROUTES.map((route, i) =>
+    i === activeIndex
+      ? {
+          ...route,
+          state: {
+            key: `${route.name}-stack`,
+            index: activeStackDepth,
+            routes: Array.from({ length: activeStackDepth + 1 }, (_, n) => ({
+              key: `${route.name}-screen-${n}`,
+            })),
+          },
+        }
+      : route,
+  );
   return {
-    state: { key: 'tabs-1', index: activeIndex, routes: ROUTES },
+    state: { key: 'tabs-1', index: activeIndex, routes },
     descriptors,
     navigation: {
       emit: () => ({ defaultPrevented: false }),
@@ -78,15 +97,31 @@ describe('AppTabBar', () => {
     expect(navigate).toHaveBeenCalledWith('(learn)');
   });
 
-  it('pops the focused tab stack to root (not navigate) when the active tab is re-pressed', () => {
+  it('pops the focused tab stack to root (not navigate) when the active tab is re-pressed off-root', () => {
     const navigate = jest.fn();
     const dispatch = jest.fn();
-    // Learn (index 1) is the active tab; pressing it again should reset its stack.
-    renderWithProviders(<AppTabBar {...makeProps(1, navigate, dispatch)} />, { haptics: true });
+    // Learn (index 1) is the active tab, with a 2-deep nested stack; pressing it
+    // again pops that stack — dispatched at the child stack via its `target` key,
+    // not bubbled up the tab navigator (which would log "POP_TO_TOP not handled").
+    renderWithProviders(<AppTabBar {...makeProps(1, navigate, dispatch, 1)} />, { haptics: true });
     fireEvent.press(screen.getByLabelText('Learn'));
     expect(navigate).not.toHaveBeenCalled();
     expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(dispatch.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ type: 'POP_TO_TOP' }));
+    expect(dispatch.mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({ type: 'POP_TO_TOP', target: '(learn)-stack' }),
+    );
+  });
+
+  it('does NOT dispatch when the active tab is re-pressed already at its stack root', () => {
+    const navigate = jest.fn();
+    const dispatch = jest.fn();
+    // Active tab's nested stack is at root (depth 0): nothing to pop, so we skip
+    // the dispatch entirely — a bare POP_TO_TOP at root is what produced the
+    // "Is there any screen to go back to?" warning.
+    renderWithProviders(<AppTabBar {...makeProps(1, navigate, dispatch, 0)} />, { haptics: true });
+    fireEvent.press(screen.getByLabelText('Learn'));
+    expect(navigate).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
   });
 
   it("fires the light 'tab' haptic on tab press (P3)", () => {

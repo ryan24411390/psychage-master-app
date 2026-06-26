@@ -3,7 +3,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CrisisPill } from '@/components/CrisisPill';
 import { HeaderAvatar } from '@/components/HeaderAvatar';
-import { Text } from '@/components/ui/Text';
 
 import { PsychageLogo } from '@/components/PsychageLogo';
 

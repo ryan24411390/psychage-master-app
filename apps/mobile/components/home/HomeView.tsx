@@ -25,7 +25,7 @@ import { CareAndLearning } from '@/components/home/rails/CareAndLearning';
 import { Text } from '@/components/ui/Text';
 import { ToolSummaryCard } from '@/features/insights/ToolSummaryCard';
 import { ctaLabel, type HomeViewModel } from '@/lib/home-model';
-import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
+import { easingFn, useReducedMotion } from '@/lib/motion';
 
 // S3 presentational view (sub-slice D structure). Takes a derived HomeViewModel +
 // handlers; the stateful wiring (state selection, clock, RecordStore) lives in the

@@ -5,7 +5,6 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
 import { Button } from '@/components/ui/Button';
-import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
 import { AUTH_COPY } from '@/features/auth/copy';
 import type { SocialProvider } from '@/features/auth';
