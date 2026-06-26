@@ -3,10 +3,15 @@ import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui/Text';
 import { useHaptics } from '@/lib/haptic-context';
 
-// Two-segment control on a gray track: the active segment is a white pill with a
-// soft shadow, the inactive one is muted text on the track. Controlled by the
-// parent (UI state, not server data). Used for the Browse "Topics / Conditions"
-// switch. Equal-width segments — both labels are short, so no horizontal scroll.
+// Two-segment control on a gray track: the active segment is a white pill, the
+// inactive one is muted text on the track. Controlled by the parent (UI state, not
+// server data). Used for the Browse "Topics / Conditions" switch. Equal-width
+// segments — both labels are short, so no horizontal scroll.
+//
+// Selection toggles COLOR only (bg/text) — never a shape-affecting class (shadow/
+// animation/transition/active:). Toggling such a class on re-render trips NativeWind's
+// css-interop "upgrade" warning, whose stringify walks a child element's owner fiber
+// into React Navigation's context getter and redboxes under the JS debugger.
 
 export type SegmentedToggleProps<T extends string> = {
   options: readonly { value: T; label: string }[];
@@ -40,7 +45,7 @@ export function SegmentedToggle<T extends string>({
             }}
             className={[
               'min-h-[40px] flex-1 items-center justify-center rounded-full',
-              selected ? 'bg-surface shadow-sm dark:bg-surface-dark' : 'bg-transparent',
+              selected ? 'bg-surface dark:bg-surface-dark' : 'bg-transparent',
             ].join(' ')}
             style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
           >

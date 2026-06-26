@@ -41,7 +41,7 @@ export function GroupSwitcher({ groups, value, onChange }: GroupSwitcherProps) {
             className={[
               'min-h-[40px] items-center justify-center rounded-full border px-4',
               selected
-                ? 'border-border-hairline bg-surface shadow-sm dark:border-border-dark dark:bg-surface-dark'
+                ? 'border-border-hairline bg-surface dark:border-border-dark dark:bg-surface-dark'
                 : 'border-transparent bg-surface-active dark:bg-surface-active-dark',
             ].join(' ')}
             style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
