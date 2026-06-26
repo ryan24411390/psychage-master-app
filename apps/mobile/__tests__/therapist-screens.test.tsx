@@ -1,6 +1,5 @@
 import { fireEvent, screen } from '@testing-library/react-native';
 
-import { ConsentIntro } from '@/components/therapist/ConsentIntro';
 import { PdfPreview } from '@/components/therapist/PdfPreview';
 import { ProviderForm } from '@/components/therapist/ProviderForm';
 import { RangePicker } from '@/components/therapist/RangePicker';
@@ -15,18 +14,16 @@ const OPTIONS: readonly RangeOption[] = [
   { key: '30', label: THERAPIST_COPY.rangeOption30, days: 30 },
 ];
 
-describe('ConsentIntro (S38)', () => {
-  it('renders consent framing and fires the primary', () => {
-    const onPrimary = jest.fn();
-    renderWithProviders(<ConsentIntro onPrimary={onPrimary} />, { haptics: true });
-
-    expect(screen.getByText(THERAPIST_COPY.consentTitle)).toBeTruthy();
-    fireEvent.press(screen.getByRole('button', { name: THERAPIST_COPY.consentPrimary }));
-    expect(onPrimary).toHaveBeenCalledTimes(1);
-  });
-});
-
 describe('ProviderForm (S39)', () => {
+  it('shows the consent disclosure (what the provider sees) before the fields', () => {
+    // The S38 consent body was folded into this step when the standalone ConsentIntro
+    // screen (which collided with the auth /why route) was retired — the disclosure must
+    // still appear before the person enters provider details.
+    renderWithProviders(<ProviderForm onSubmit={jest.fn()} />, { haptics: true });
+    expect(screen.getByText(THERAPIST_COPY.consentTitle)).toBeTruthy();
+    expect(screen.getByText(THERAPIST_COPY.consentBody)).toBeTruthy();
+  });
+
   it('requires a name; submits name + optional contact (trimmed)', () => {
     const onSubmit = jest.fn();
     renderWithProviders(<ProviderForm onSubmit={onSubmit} />, { haptics: true });

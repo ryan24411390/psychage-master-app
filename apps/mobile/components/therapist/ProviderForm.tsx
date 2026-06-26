@@ -44,7 +44,15 @@ export function ProviderForm({ onSubmit, initialName = '', initialContact = '' }
         entering={reduced ? undefined : FadeIn.duration(DURATION.base).easing(easingFn('out'))}
         className="flex-1 justify-center gap-6"
       >
-        <Text variant="h1">{THERAPIST_COPY.consentTitle}</Text>
+        <View className="gap-3">
+          <Text variant="h1">{THERAPIST_COPY.consentTitle}</Text>
+          {/* What sharing does / what the provider sees — the consent disclosure that
+              previously lived only in the standalone S38 ConsentIntro screen. Surfaced
+              here so the person sees it before entering provider details. */}
+          <Text variant="body" className="text-text-secondary dark:text-text-secondary-dark">
+            {THERAPIST_COPY.consentBody}
+          </Text>
+        </View>
         <View className="gap-4">
           <AuthTextField
             label={THERAPIST_COPY.providerNameLabel}
