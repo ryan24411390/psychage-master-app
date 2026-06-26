@@ -8,7 +8,6 @@ import { AuthTextField } from '@/components/auth/AuthTextField';
 import { PasswordStrengthMeter } from '@/components/auth/PasswordStrengthMeter';
 import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
 import { Button } from '@/components/ui/Button';
-import { ScreenShell } from '@/components/ui/ScreenShell';
 import { Text } from '@/components/ui/Text';
 import { AUTH_COPY } from '@/features/auth/copy';
 import type { SocialProvider } from '@/features/auth';

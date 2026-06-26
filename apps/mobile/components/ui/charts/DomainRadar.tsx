@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeIn, useAnimatedProps, useSharedValue, withTiming, withRepeat, withSequence, useAnimatedStyle, withSpring, type SharedValue } from 'react-native-reanimated';
-import Svg, { Circle, G, Line, Polygon, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, G, Line, Polygon, Text as SvgText } from 'react-native-svg';
 
 import { Text } from '@/components/ui/Text';
 import { DURATION, easingFn, useReducedMotion } from '@/lib/motion';
