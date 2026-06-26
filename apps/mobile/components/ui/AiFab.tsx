@@ -1,33 +1,33 @@
 import { router } from 'expo-router';
 import { Sparkles } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHaptics } from '@/lib/haptic-context';
 
 // Floating AI launcher — a teal circle with a white sparkle and a soft teal glow
-// halo, pinned bottom-right and floating above the screen content and the tab bar.
+// halo, pinned bottom-right of the screen content, just above the bottom tab bar.
 // Opens the MindMate AI companion. Per-screen (no app-wide FAB exists). The glow is
 // built from stacked translucent teal discs (NativeWind only — no blur dep); the
-// drop shadow adds lift. Sits above the bottom tab bar via the safe-area inset.
+// drop shadow adds lift. The tab navigator lays the scene ABOVE the tab bar (which
+// owns its own safe-area inset), so this offset is measured from the content's
+// bottom edge (the tab bar's top) — no safe-area inset to add here.
 
 type AiFabProps = {
   /** Defaults to opening MindMate. */
   onPress?: () => void;
-  /** Pixels to lift the FAB above the bottom edge for the tab bar. */
+  /** Gap in px between the FAB and the bottom of the screen content (tab bar top). */
   bottomOffset?: number;
 };
 
-const TAB_BAR_CLEARANCE = 68;
+const TAB_BAR_GAP = 20;
 
-export function AiFab({ onPress, bottomOffset = TAB_BAR_CLEARANCE }: AiFabProps) {
-  const insets = useSafeAreaInsets();
+export function AiFab({ onPress, bottomOffset = TAB_BAR_GAP }: AiFabProps) {
   const { fireHaptic } = useHaptics();
   return (
     <View
       pointerEvents="box-none"
       className="absolute right-5"
-      style={{ bottom: insets.bottom + bottomOffset }}
+      style={{ bottom: bottomOffset }}
     >
       {/* Glow halo — stacked translucent teal discs behind the button. */}
       <View
