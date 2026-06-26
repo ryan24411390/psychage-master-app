@@ -33,6 +33,15 @@ describe('searchProviders — fidelity + cascade', () => {
     expect(res.has_more).toBe(false);
   });
 
+  it('refuses a wholly-unscoped call: returns EMPTY without hitting the RPC (no 423k-row scan)', async () => {
+    const rpc = vi.fn();
+    clientMock.mockReturnValue({ rpc });
+    const res = await searchProviders({ page: 1, per_page: 20 });
+    expect(res.providers).toEqual([]);
+    expect(res.total_count).toBe(0);
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
   it('maps RPC rows and computes has_more from total_count', async () => {
     const rows = [
       { id: 'p1', display_name: 'BRIAN SWANSON', status: 'seeded', tier: 'free', specialty_tags: [], total_count: 40 },
