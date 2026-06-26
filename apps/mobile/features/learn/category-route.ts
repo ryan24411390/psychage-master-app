@@ -1,4 +1,3 @@
-import { getCategoryBySlug } from '@psychage/shared/peaf';
 import type { ContentCategory } from '@psychage/shared/peaf';
 
 // Where a content category (from @psychage/shared/peaf) opens when browsed from the
@@ -12,13 +11,12 @@ export function categoryHref(cat: ContentCategory): string {
   return cat.navigatorConditions.length > 0 ? `/conditions/${cat.slug}` : `/learn/${cat.slug}`;
 }
 
-// Slug-keyed routing for the DB-driven browse list — accepts any slug, including
-// the 18 orphans absent from CONTENT_CATEGORIES. Orphan slugs are not in the
-// Navigator KB so they always route to /learn/[slug] (article list, not condition
-// overview). Known condition-focused slugs still go to /conditions/[slug].
+// Slug-keyed routing for a Browse topic card. Every topic opens its article list
+// at /learn/[slug] (CategoryArticlesView), matching web — a topic tap lands
+// directly on the category's articles with no intermediate overview. The "What
+// this covers" overview still lives at /conditions/[slug] (ConditionDetailView),
+// reached from Navigator results wayfinding (categoryHref) and the Conditions
+// library — just not from a topic card.
 export function categoryHrefBySlug(slug: string): string {
-  const known = getCategoryBySlug(slug);
-  return known && known.navigatorConditions.length > 0
-    ? `/conditions/${slug}`
-    : `/learn/${slug}`;
+  return `/learn/${slug}`;
 }

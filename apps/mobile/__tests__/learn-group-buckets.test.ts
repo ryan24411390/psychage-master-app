@@ -56,11 +56,13 @@ describe('groupCategories — Learn topic-index partition', () => {
 });
 
 describe('categoryHrefBySlug — card routing', () => {
-  it('condition-focused slug → /conditions/[slug]', () => {
-    expect(categoryHrefBySlug('anxiety-stress')).toBe('/conditions/anxiety-stress');
+  // Every topic card opens its article list directly (web parity) — no detour
+  // through the /conditions/[slug] overview, regardless of Navigator conditions.
+  it('condition-focused slug → /learn/[slug] (direct to article list)', () => {
+    expect(categoryHrefBySlug('anxiety-stress')).toBe('/learn/anxiety-stress');
   });
 
-  it('wellness slug (no Navigator conditions) → /learn/[slug]', () => {
+  it('wellness slug → /learn/[slug]', () => {
     expect(categoryHrefBySlug('emotional-regulation')).toBe('/learn/emotional-regulation');
   });
 
