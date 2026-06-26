@@ -9,9 +9,11 @@ import { CT4_LEARN } from '@/features/learn/copy';
 
 import { renderWithProviders } from './_helpers';
 
-// The redesigned Learn feed runs live TanStack Query (recent-articles + saved),
-// so every render needs a QueryClient. Retries off so a queryFn that resolves to
-// [] (no Supabase env in tests) settles synchronously without backoff noise.
+// The Browse rebuild (web parity) is a topic index: editorial header, a "not sure
+// where to start?" prompt, an INLINE live search box (no pushed search screen), and
+// a Topics / Conditions segmented control. ConditionsAccordion runs live TanStack
+// Query, so every render needs a QueryClient; retries off so a queryFn resolving to
+// [] (no Supabase env in tests) settles synchronously.
 function renderLearn() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return renderWithProviders(
@@ -22,34 +24,35 @@ function renderLearn() {
   );
 }
 
-describe('S6 Learn', () => {
+describe('S6 Learn (Browse)', () => {
   beforeEach(() => {
     (router.push as jest.Mock).mockClear();
   });
 
-  it('renders the search-first hero (title + search + find-your-path)', () => {
+  it('renders the editorial header, find-path prompt, inline search, and the segmented control', () => {
     renderLearn();
-    expect(screen.getByText(CT4_LEARN.heroTitle)).toBeTruthy();
-    expect(screen.getByTestId('learn-search-trigger')).toBeTruthy();
-    expect(screen.getByTestId('learn-find-path')).toBeTruthy();
+    expect(screen.getByText(CT4_LEARN.browseTitle)).toBeTruthy();
+    expect(screen.getByTestId('browse-find-path')).toBeTruthy();
+    expect(screen.getByTestId('browse-search-input')).toBeTruthy();
+    expect(screen.getByText(CT4_LEARN.segTopics)).toBeTruthy();
+    expect(screen.getByText(CT4_LEARN.segConditions)).toBeTruthy();
   });
 
-  it('routes the search trigger to the pushed search screen', () => {
+  it('filters topics inline: a no-match query shows the empty-topics line (search is local, not a route)', () => {
     renderLearn();
-    fireEvent.press(screen.getByTestId('learn-search-trigger'));
-    expect(router.push as jest.Mock).toHaveBeenCalledWith('/learn/search');
+    fireEvent.changeText(screen.getByTestId('browse-search-input'), 'zzzzzzzz');
+    expect(screen.getByText(CT4_LEARN.topicsEmpty)).toBeTruthy();
+    // Inline search must never navigate.
+    expect(router.push as jest.Mock).not.toHaveBeenCalled();
   });
 
-  it('opens the full library (S23 WebView) from the library entry', () => {
+  it('switches to Conditions mode via the segmented control (placeholder flips to the all-content one)', () => {
     renderLearn();
-    fireEvent.press(screen.getByTestId('learn-library-entry'));
-    expect(router.push as jest.Mock).toHaveBeenCalledWith('/library');
-  });
-
-  it('opens the conditions library from the conditions entry', () => {
-    renderLearn();
-    fireEvent.press(screen.getByTestId('learn-conditions-entry'));
-    expect(router.push as jest.Mock).toHaveBeenCalledWith('/conditions');
+    // Topics mode shows the topics-scoped placeholder…
+    expect(screen.getByPlaceholderText(CT4_LEARN.searchTopicsPlaceholder)).toBeTruthy();
+    fireEvent.press(screen.getByText(CT4_LEARN.segConditions));
+    // …Conditions mode swaps it for the broad placeholder (mode state is wired).
+    expect(screen.getByPlaceholderText(CT4_LEARN.searchPlaceholder)).toBeTruthy();
   });
 
   it('uses the token background, never a hardcoded bg-white / text-black', () => {
