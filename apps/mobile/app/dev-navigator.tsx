@@ -90,6 +90,17 @@ const userInputs: UserSymptomInput[] = SYMPTOM_IDS.map((sid) => ({
 export default function DevNavigatorScreen() {
   const [tierFlags, setTierFlags] = useState(() => loadTierFlags(storage));
 
+  if (!__DEV__) {
+    return (
+      <ScreenShell>
+        <Stack.Screen options={{ headerShown: true, title: 'Dev — Verify' }} />
+        <Text variant="body" className="py-8">
+          Dev-only surface.
+        </Text>
+      </ScreenShell>
+    );
+  }
+
   const result = runSymptomNavigator(userInputs, kb, undefined, isTierEnabled);
   const capHolds = result.results.every((r) => r.relevance_score <= 0.75);
 

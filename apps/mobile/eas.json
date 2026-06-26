@@ -28,6 +28,7 @@
     "preview": {
       "distribution": "internal",
       "channel": "preview",
+      "environment": "preview",
       "node": "22.22.3",
       "android": {
         "buildType": "apk"
@@ -36,6 +37,7 @@
     "production": {
       "distribution": "store",
       "channel": "production",
+      "environment": "production",
       "node": "22.22.3",
       "autoIncrement": true
     }
